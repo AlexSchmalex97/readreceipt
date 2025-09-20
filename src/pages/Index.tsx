@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { AddBookDialog } from "@/components/AddBookDialog";
 import { BookCard } from "@/components/BookCard";
-import { BookOpen, TrendingUp, Target } from "lucide-react";
+import { TrendingUp, Target } from "lucide-react";
 
 interface Book {
   id: string;
@@ -37,14 +37,20 @@ const Index = () => {
   };
 
   const handleUpdateProgress = (id: string, currentPage: number) => {
-    setBooks(books.map(book => 
-      book.id === id ? { ...book, currentPage } : book
-    ));
+    setBooks(
+      books.map((book) =>
+        book.id === id ? { ...book, currentPage } : book
+      )
+    );
   };
 
   const totalBooks = books.length;
-  const booksInProgress = books.filter(book => book.currentPage > 0 && book.currentPage < book.totalPages).length;
-  const completedBooks = books.filter(book => book.currentPage === book.totalPages).length;
+  const booksInProgress = books.filter(
+    (book) => book.currentPage > 0 && book.currentPage < book.totalPages
+  ).length;
+  const completedBooks = books.filter(
+    (book) => book.currentPage === book.totalPages
+  ).length;
 
   return (
     <div className="min-h-screen bg-gradient-soft">
@@ -53,14 +59,19 @@ const Index = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-primary-foreground" />
-              </div>
+              {/* Logo instead of BookOpen */}
+              <img
+                src="/assets/readreceipt-logo.png"
+                alt="ReadReceipt logo"
+                className="w-10 h-10"
+              />
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                  Reading Tracker
+                  ReadReceipt
                 </h1>
-                <p className="text-sm text-muted-foreground">Track your reading progress and stay motivated</p>
+                <p className="text-sm text-muted-foreground">
+                  Track your reading progress and stay motivated
+                </p>
               </div>
             </div>
             <AddBookDialog onAddBook={handleAddBook} />
@@ -75,34 +86,44 @@ const Index = () => {
             <div className="bg-card rounded-lg p-4 shadow-soft border border-border">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
-                  <BookOpen className="w-5 h-5 text-accent-foreground" />
+                  <img
+                    src="/assets/readreceipt-logo.png"
+                    alt="ReadReceipt logo"
+                    className="w-5 h-5"
+                  />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{totalBooks}</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {totalBooks}
+                  </p>
                   <p className="text-sm text-muted-foreground">Total Books</p>
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-card rounded-lg p-4 shadow-soft border border-border">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
                   <TrendingUp className="w-5 h-5 text-accent-foreground" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{booksInProgress}</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {booksInProgress}
+                  </p>
                   <p className="text-sm text-muted-foreground">In Progress</p>
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-card rounded-lg p-4 shadow-soft border border-border">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
                   <Target className="w-5 h-5 text-accent-foreground" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{completedBooks}</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {completedBooks}
+                  </p>
                   <p className="text-sm text-muted-foreground">Completed</p>
                 </div>
               </div>
@@ -110,15 +131,23 @@ const Index = () => {
           </div>
         )}
 
-        {/* Books Grid */}
+        {/* Books Grid or Empty State */}
         {books.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-24 h-24 bg-accent rounded-full flex items-center justify-center mx-auto mb-6">
-              <BookOpen className="w-12 h-12 text-accent-foreground" />
+            {/* Empty state logo */}
+            <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+              <img
+                src="/assets/readreceipt-logo.png"
+                alt="ReadReceipt logo"
+                className="w-16 h-16"
+              />
             </div>
-            <h2 className="text-2xl font-semibold text-foreground mb-2">Start Your Reading Journey</h2>
+            <h2 className="text-2xl font-semibold text-foreground mb-2">
+              Start Your Reading Journey
+            </h2>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Add your first book to begin tracking your reading progress and stay motivated with encouraging messages.
+              Add your first book to begin tracking your reading progress and
+              stay motivated with encouraging messages.
             </p>
             <AddBookDialog onAddBook={handleAddBook} />
           </div>
