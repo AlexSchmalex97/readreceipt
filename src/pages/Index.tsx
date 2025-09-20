@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { AddBookDialog } from "@/components/AddBookDialog";
 import { BookCard } from "@/components/BookCard";
-import { BookOpen, TrendingUp, Target } from "lucide-react";
+import { TrendingUp, Target } from "lucide-react";
 
 interface Book {
   id: string;
@@ -53,16 +53,21 @@ const Index = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                  Reading Tracker
-                </h1>
-                <p className="text-sm text-muted-foreground">Track your reading progress and stay motivated</p>
-              </div>
-            </div>
+  <img
+    src="/assets/readreceipt-logo.png"
+    alt="ReadReceipt logo"
+    className="w-10 h-10"
+  />
+  <div>
+    <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+      ReadReceipt
+    </h1>
+    <p className="text-sm text-muted-foreground">
+      Track your reading progress and stay motivated
+    </p>
+  </div>
+</div>
+
             <AddBookDialog onAddBook={handleAddBook} />
           </div>
         </div>
