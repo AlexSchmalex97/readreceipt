@@ -37,15 +37,18 @@ export default function Reviews() {
       }
       setLoading(true);
 
-      // Finished books (current_page >= total_pages)  
-      const { data: finishedBooks, error: finishedError } = await supabase
+      // Load all books for user and filter completed client-side
+      const { data: allBooks, error: booksError } = await supabase
         .from("books")
         .select("id,title,author,total_pages,current_page,created_at")
         .eq("user_id", userId)
-        .gte("current_page", "total_pages")
         .order("created_at", { ascending: false });
 
-      console.log("Finished books query:", { finishedBooks, finishedError });
+      console.log("Reviews - books query:", { allBooks, booksError });
+
+      const finishedBooks = (allBooks ?? []).filter(
+        (b: any) => (b.current_page ?? 0) >= (b.total_pages ?? Number.MAX_SAFE_INTEGER)
+      );
 
       // Your reviews (joined with books for title/author)
       const { data: myReviews, error: reviewsError } = await supabase

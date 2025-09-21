@@ -33,17 +33,16 @@ export default function CompletedBooks() {
       }
       setLoading(true);
 
-      // Get completed books (current_page >= total_pages) with reviews
+      // Get all books for user and filter completed client-side (current_page >= total_pages)
       const { data: books, error: booksError } = await supabase
         .from("books")
         .select(`
           id, title, author, total_pages, current_page, created_at, user_id
         `)
         .eq("user_id", userId)
-        .gte("current_page", "total_pages")
         .order("created_at", { ascending: false });
 
-      console.log("Completed books query:", { books, booksError });
+      console.log("CompletedBooks - books query:", { books, booksError });
 
       // Get reviews for these books
       const bookIds = (books ?? []).map(book => book.id);
@@ -57,13 +56,15 @@ export default function CompletedBooks() {
         reviewsData = reviews ?? [];
       }
 
-      const completed = (books ?? []).map(book => {
-        const review = reviewsData.find(r => r.book_id === book.id);
-        return {
-          ...book,
-          review
-        };
-      });
+      const completed = (books ?? [])
+        .filter((b: any) => (b.current_page ?? 0) >= (b.total_pages ?? Number.MAX_SAFE_INTEGER))
+        .map((book: any) => {
+          const review = reviewsData.find((r: any) => r.book_id === book.id);
+          return {
+            ...book,
+            review,
+          } as CompletedBook;
+        });
 
       setCompletedBooks(completed);
       setLoading(false);
