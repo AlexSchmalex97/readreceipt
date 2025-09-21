@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { AddBookDialog } from "@/components/AddBookDialog";
 import { BookCard } from "@/components/BookCard";
-import { TrendingUp, Target } from "lucide-react";
+import { TrendingUp, Target } from "lucide-react"; // ✅ no BookOpen here
+
 
 interface Book {
   id: string;
