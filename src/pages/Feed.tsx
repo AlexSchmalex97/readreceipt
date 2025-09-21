@@ -37,18 +37,20 @@ export default function Feed() {
       
 
       // who am I
-      const { data: me } = await supabase.auth.getUser();
+      const { data: me, error: userError } = await supabase.auth.getUser();
       const myId = me?.user?.id;
+      console.log("Feed user check:", { myId, userError });
       if (!myId) { setItems([]); setLoading(false); return; }
 
       // ids I follow
-      const { data: followRows } = await supabase
+      const { data: followRows, error: followError } = await supabase
         .from("follows").select("following_id").eq("follower_id", myId);
       const followingIds = (followRows ?? []).map(r => r.following_id);
+      console.log("Following check:", { followingIds, followError });
       if (followingIds.length === 0) { setItems([]); setLoading(false); return; }
 
       // PROGRESS events - using join with profiles which should work since RLS allows reading profiles for followed users
-      const { data: progress } = await supabase
+      const { data: progress, error: progressError } = await supabase
         .from("reading_progress")
         .select(`
           id, created_at, user_id, from_page, to_page, book_id,
@@ -58,11 +60,15 @@ export default function Feed() {
         .order("created_at", { ascending: false })
         .limit(100);
 
+      console.log("Progress query:", { progress, progressError });
+
       // Get profile data separately using secure function
-      const { data: profilesData } = await supabase
+      const { data: profilesData, error: profilesError } = await supabase
         .rpc('get_public_profiles_by_ids', {
           ids: followingIds
         });
+
+      console.log("Profiles query:", { profilesData, profilesError });
 
       // Create a lookup map for profiles
       const profilesMap = new Map();
@@ -83,7 +89,7 @@ export default function Feed() {
       }));
 
       // REVIEWS - similar approach for consistency
-      const { data: reviews } = await supabase
+      const { data: reviews, error: reviewsError } = await supabase
         .from("reviews")
         .select(`
           id, created_at, user_id, rating, review, book_id,
@@ -92,6 +98,8 @@ export default function Feed() {
         .in("user_id", followingIds)
         .order("created_at", { ascending: false })
         .limit(100);
+
+      console.log("Reviews query:", { reviews, reviewsError });
 
       const rItems: ReviewItem[] = (reviews ?? []).map((r: any) => ({
         kind: "review",
@@ -109,6 +117,8 @@ export default function Feed() {
       const merged = [...pItems, ...rItems].sort(
         (a, b) => +new Date(b.created_at) - +new Date(a.created_at)
       );
+
+      console.log("Final merged feed items:", merged);
 
       setItems(merged);
       setLoading(false);
