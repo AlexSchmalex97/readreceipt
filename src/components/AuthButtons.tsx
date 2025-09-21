@@ -30,17 +30,22 @@ export function AuthButtons() {
     }
   }
 
-  async function signInWithEmail() {
-    try {
-      if (!email) return alert("Enter your email address first.");
-      const { error } = await supabase.auth.signInWithOtp({ email });
-      if (error) throw error;
-      alert("Check your email for a login link.");
-      setChooserOpen(false);
-    } catch (e: any) {
-      alert(e?.message ?? "Email sign-in failed.");
-    }
+// in AuthButtons.tsx
+async function signInWithEmail() {
+  try {
+    if (!email) return alert("Enter your email address first.");
+    const { error } = await supabase!.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.origin }, // 👈 key line
+    });
+    if (error) throw error;
+    alert("Check your email for a login link.");
+    setChooserOpen(false);
+  } catch (e: any) {
+    alert(e?.message ?? "Email sign-in failed.");
   }
+}
+
 
   const signOut = async () => { await supabase.auth.signOut(); };
 
