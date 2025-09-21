@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Navigation } from "@/components/Navigation";
 
 type ProgressItem = {
   kind: "progress";
@@ -104,10 +105,17 @@ export default function Feed() {
     })();
   }, []);
 
-  if (loading) return <div className="p-6 text-muted-foreground">Loading…</div>;
+  if (loading) return (
+    <div className="min-h-screen bg-gradient-soft">
+      <Navigation />
+      <div className="p-6 text-muted-foreground">Loading…</div>
+    </div>
+  );
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-3">
+    <div className="min-h-screen bg-gradient-soft">
+      <Navigation />
+      <div className="container mx-auto px-4 py-6 space-y-3">
       <h1 className="text-2xl font-bold mb-2">Your Feed</h1>
       {items.length === 0 && (
         <div className="text-muted-foreground">
@@ -141,6 +149,7 @@ export default function Feed() {
           </div>
         )
       )}
+      </div>
     </div>
   );
 }

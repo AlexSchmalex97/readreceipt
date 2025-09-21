@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Navigation } from "@/components/Navigation";
 
 type FinishedBook = {
   id: string;
@@ -64,11 +65,24 @@ export default function Reviews() {
     })();
   }, [userId]);
 
-  if (loading) return <div className="p-8 text-muted-foreground">Loading…</div>;
-  if (!userId) return <div className="p-8">Sign in to view your finished books and reviews.</div>;
+  if (loading) return (
+    <div className="min-h-screen bg-gradient-soft">
+      <Navigation />
+      <div className="p-8 text-muted-foreground">Loading…</div>
+    </div>
+  );
+  
+  if (!userId) return (
+    <div className="min-h-screen bg-gradient-soft">
+      <Navigation />
+      <div className="p-8">Sign in to view your finished books and reviews.</div>
+    </div>
+  );
 
   return (
-    <div className="container mx-auto px-4 py-8 grid gap-10">
+    <div className="min-h-screen bg-gradient-soft">
+      <Navigation />
+      <div className="container mx-auto px-4 py-8 grid gap-10">
       <section>
         <h1 className="text-2xl font-bold mb-4">Finished Books</h1>
         {finished.length === 0 ? (
@@ -108,6 +122,7 @@ export default function Reviews() {
           </div>
         )}
       </section>
+      </div>
     </div>
   );
 }

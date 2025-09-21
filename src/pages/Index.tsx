@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
 import { AddBookDialog } from "@/components/AddBookDialog";
 import { BookCard } from "@/components/BookCard";
 import { TrendingUp, Target } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import AuthButtons from "@/components/AuthButtons";
 import { ReviewDialog } from "@/components/ReviewDialog";
+import { Navigation } from "@/components/Navigation";
 
 interface Book {
   id: string;
@@ -20,8 +19,6 @@ const Index = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [reviewFor, setReviewFor] = useState<{ bookId: string } | null>(null);
-
-  const { pathname } = useLocation();
 
   // Watch auth state
   useEffect(() => {
@@ -199,97 +196,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-soft">
-      {/* Header */}
-      <header className="bg-card shadow-soft border-b border-border">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            {/* Left: Logo + Title + Nav */}
-            <div className="flex items-center gap-3">
-              <img
-                src="/assets/readreceipt-logo.png"
-                alt="ReadReceipt logo"
-                className="w-14 h-14"
-              />
-              <div>
-                <h1 className="text-2xl font-bold text-primary">ReadReceipt</h1>
-                <p className="text-sm text-muted-foreground">
-                  Track your reading progress and stay motivated
-                </p>
-              </div>
-
-              <nav className="hidden sm:flex gap-6 ml-8">
-                <Link
-                  to="/people"
-                  className={`text-sm ${
-                    pathname === "/people"
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  People
-                </Link>
-                <Link
-                  to="/feed"
-                  className={`text-sm ${
-                    pathname === "/feed"
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  Feed
-                </Link>
-                <Link
-                  to="/reviews"
-                  className={`text-sm ${
-                    pathname === "/reviews"
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  Reviews
-                </Link>
-              </nav>
-            </div>
-
-            {/* Right: Auth */}
-            <AuthButtons />
-          </div>
-
-          {/* Mobile nav */}
-          <nav className="sm:hidden mt-4 flex gap-6">
-            <Link
-              to="/people"
-              className={`text-sm ${
-                pathname === "/people"
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              People
-            </Link>
-            <Link
-              to="/feed"
-              className={`text-sm ${
-                pathname === "/feed"
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Feed
-            </Link>
-            <Link
-              to="/reviews"
-              className={`text-sm ${
-                pathname === "/reviews"
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Reviews
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Navigation />
 
       <main className="container mx-auto px-4 py-8">
         {/* Stats */}

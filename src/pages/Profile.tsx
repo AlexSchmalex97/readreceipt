@@ -1,6 +1,6 @@
-// src/pages/Profile.tsx
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Navigation } from "@/components/Navigation";
 
 function normalizeUsername(raw: string) {
   return raw
@@ -186,7 +186,9 @@ export default function Profile() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
+    <div className="min-h-screen bg-gradient-soft">
+      <Navigation />
+      <div className="container mx-auto px-4 py-8 max-w-2xl">
       <h1 className="text-2xl font-bold mb-6">Your Profile</h1>
 
       <section className="bg-card border rounded p-4 mb-6">
@@ -303,6 +305,7 @@ export default function Profile() {
           )}
         </div>
       </section>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FollowButton } from "@/components/FollowButton";
+import { Navigation } from "@/components/Navigation";
 
 export default function People() {
   const [q, setQ] = useState("");
@@ -41,7 +42,9 @@ export default function People() {
   }, [debounced]);
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-4">
+    <div className="min-h-screen bg-gradient-soft">
+      <Navigation />
+      <div className="container mx-auto px-4 py-6 space-y-4">
       <h1 className="text-2xl font-bold">Find readers</h1>
 
       <input
@@ -79,6 +82,7 @@ export default function People() {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }
