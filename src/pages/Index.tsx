@@ -68,9 +68,9 @@ const Index = () => {
                 className="w-14 h-14"
               />
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                  ReadReceipt
-                </h1>
+                <h1 className="text-2xl font-bold text-primary">
+  ReadReceipt
+</h1>
                 <p className="text-sm text-muted-foreground">
                   Track your reading progress and stay motivated
                 </p>
