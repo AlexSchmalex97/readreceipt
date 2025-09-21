@@ -4,6 +4,7 @@ import { BookCard } from "@/components/BookCard";
 import { TrendingUp, Target } from "lucide-react";
 import { hasSupabase, supabase } from "@/lib/supabase";
 import { AuthButtons } from "@/components/AuthButtons";
+import { ReviewDialog } from "@/components/ReviewDialog";
 
 interface Book {
   id: string;
@@ -17,6 +18,7 @@ const Index = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reviewFor, setReviewFor] = useState<{ bookId: string } | null>(null);
 
   // Watch auth state (only if Supabase is configured)
   useEffect(() => {
@@ -54,8 +56,12 @@ const Index = () => {
           // Optional migration: if cloud is empty but local has data, push it up once
           const saved = localStorage.getItem("reading-tracker-books");
           if ((!data || data.length === 0) && saved) {
-            const parsed: Array<{ title: string; author: string; totalPages: number; currentPage: number }> =
-              JSON.parse(saved);
+            const parsed: Array<{
+              title: string;
+              author: string;
+              totalPages: number;
+              currentPage: number;
+            }> = JSON.parse(saved);
 
             if (parsed?.length) {
               const rows = parsed.map((b) => ({
@@ -157,12 +163,21 @@ const Index = () => {
 
   const handleUpdateProgress = async (id: string, currentPage: number) => {
     if (hasSupabase && supabase && userId) {
-      const { error } = await supabase
-        .from("books")
-        .update({ current_page: currentPage })
-        .eq("id", id);
-      if (!error) {
-        setBooks((prev) => prev.map((b) => (b.id === id ? { ...b, currentPage } : b)));
+      const prev = books.find((b) => b.id === id)?.currentPage ?? 0;
+
+      const [{ error: e1 }, { error: e2 }] = await Promise.all([
+        supabase.from("books").update({ current_page: currentPage }).eq("id", id),
+        supabase.from("reading_progress").insert([
+          { user_id: userId, book_id: id, from_page: prev, to_page: currentPage },
+        ]),
+      ]);
+
+      if (!e1 && !e2) {
+        setBooks((prevBooks) =>
+          prevBooks.map((b) => (b.id === id ? { ...b, currentPage } : b))
+        );
+        const total = books.find((b) => b.id === id)?.totalPages ?? -1;
+        if (currentPage === total) setReviewFor({ bookId: id });
       }
     } else {
       setBooks((prev) => prev.map((b) => (b.id === id ? { ...b, currentPage } : b)));
@@ -190,8 +205,11 @@ const Index = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <img src="/assets/readreceipt-logo.png" alt="ReadReceipt logo" className="w-14 h-14" />
-
+              <img
+                src="/assets/readreceipt-logo.png"
+                alt="ReadReceipt logo"
+                className="w-14 h-14"
+              />
               <div>
                 <h1 className="text-2xl font-bold text-primary">ReadReceipt</h1>
                 <p className="text-sm text-muted-foreground">
@@ -212,7 +230,9 @@ const Index = () => {
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
                   <img
-                    src="/assets/readreceipt-logo.png" alt="ReadReceipt logo" className="w-5 h-5"
+                    src="/assets/readreceipt-logo.png"
+                    alt="ReadReceipt logo"
+                    className="w-5 h-5"
                   />
                 </div>
                 <div>
@@ -253,7 +273,9 @@ const Index = () => {
           <div className="text-center py-16">
             <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
               <img
-                src="/assets/readreceipt-logo.png" alt="ReadReceipt logo" className="w-24 h-24"
+                src="/assets/readreceipt-logo.png"
+                alt="ReadReceipt logo"
+                className="w-24 h-24"
               />
             </div>
             <h2 className="text-2xl font-semibold text-foreground mb-2">
@@ -277,6 +299,16 @@ const Index = () => {
           </div>
         )}
       </main>
+
+      {/* Review modal when a book is completed */}
+      {reviewFor && userId && (
+        <ReviewDialog
+          open={true}
+          onClose={() => setReviewFor(null)}
+          userId={userId}
+          bookId={reviewFor.bookId}
+        />
+      )}
     </div>
   );
 };
