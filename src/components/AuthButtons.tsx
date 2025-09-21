@@ -48,8 +48,24 @@ export default function AuthButtons() {
     };
   }, []);
 
-  async function fetchProfile(userId: string) {
+  // Add an effect to listen for profile updates using the browser's storage events or custom events
+  useEffect(() => {
+    const handleProfileUpdate = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session?.user) {
+        await fetchProfile(data.session.user.id);
+      }
+    };
+
+    // Listen for profile update events
+    window.addEventListener('profile-updated', handleProfileUpdate);
     
+    return () => {
+      window.removeEventListener('profile-updated', handleProfileUpdate);
+    };
+  }, []);
+
+  async function fetchProfile(userId: string) {
     try {
       const { data } = await supabase
         .from("profiles")

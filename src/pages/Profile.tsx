@@ -120,7 +120,11 @@ export default function Profile() {
         .eq("id", uid);
 
       if (error) throw error;
-      alert("Profile updated!");
+      
+      // Dispatch a custom event to notify other components about the profile update
+      window.dispatchEvent(new CustomEvent('profile-updated'));
+      
+      alert("Profile updated! Your display name will now appear in greetings and social features.");
     } catch (e: any) {
       alert(e?.message ?? "Failed to update profile.");
     }
@@ -193,6 +197,11 @@ export default function Profile() {
 
       <section className="bg-card border rounded p-4 mb-6">
         <h2 className="font-semibold mb-3">Public Profile</h2>
+        <div className="text-sm text-muted-foreground mb-4 p-3 bg-accent/30 rounded">
+          <strong>Note:</strong> Your display name and username are for social features and will appear in greetings, feeds, and when other users find you. 
+          <br />
+          <strong>Authentication:</strong> For login, use the same method you signed up with (Google OAuth or email/password).
+        </div>
         <div className="grid gap-3">
           <label className="grid gap-1">
             <span className="text-sm text-muted-foreground">Display name</span>
@@ -200,7 +209,7 @@ export default function Profile() {
               className="border rounded px-3 py-2 bg-background"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="Your name"
+              placeholder="Your name (appears in greetings)"
             />
           </label>
 
@@ -210,7 +219,7 @@ export default function Profile() {
               className="border rounded px-3 py-2 bg-background"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="username"
+              placeholder="username (for social features)"
               autoComplete="username"
             />
             {username && (
