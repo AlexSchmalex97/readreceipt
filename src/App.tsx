@@ -9,7 +9,8 @@ import NotFound from "./pages/NotFound";
 import Feed from "./pages/Feed";
 import People from "./pages/People";
 import Reviews from "./pages/Reviews";
-import Profile from "./pages/Profile"; // 👈 add this
+import Profile from "./pages/Profile";
+import CompletedBooks from "./pages/CompletedBooks";
 
 const queryClient = new QueryClient();
 
@@ -24,7 +25,8 @@ const App = () => (
           <Route path="/feed" element={<Feed />} />
           <Route path="/people" element={<People />} />
           <Route path="/reviews" element={<Reviews />} />
-          <Route path="/profile" element={<Profile />} /> {/* 👈 new profile route */}
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/completed" element={<CompletedBooks />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

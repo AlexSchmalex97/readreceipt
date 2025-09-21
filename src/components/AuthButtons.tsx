@@ -74,12 +74,17 @@ export default function AuthButtons() {
         let loginEmail = email;
         if (!email.includes("@")) {
           // looks like a username → look it up
-          const { data: userByUsername } = await supabase
+          const { data: userByUsername, error: usernameError } = await supabase
             .from("profiles")
             .select("id, email")
             .eq("username", email.toLowerCase())
-            .single();
-          if (!userByUsername) throw new Error("No account with that username.");
+            .maybeSingle();
+          
+          console.log("Username lookup:", { userByUsername, usernameError, searchUsername: email.toLowerCase() });
+          
+          if (!userByUsername || !userByUsername.email) {
+            throw new Error("No account found with that username.");
+          }
           loginEmail = userByUsername.email;
         }
 

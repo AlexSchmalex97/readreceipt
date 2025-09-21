@@ -38,29 +38,57 @@ export default function Reviews() {
       }
       setLoading(true);
 
-      // Finished books (current_page === total_pages)
+      // Finished books (current_page === total_pages)  
       const { data: finishedBooks } = await supabase
         .from("books")
         .select("id,title,author,total_pages,current_page,created_at")
         .eq("user_id", userId)
-        .filter("current_page", "eq", "total_pages" as any) // fallback if needed
-        .or(`current_page.eq.total_pages`) // some PostgREST versions
+        .filter("current_page", "eq", "total_pages")
         .order("created_at", { ascending: false });
 
       // Your reviews (joined with books for title/author)
-      const { data: myReviews } = await supabase
+      const { data: myReviews, error: reviewsError } = await supabase
         .from("reviews")
-        .select("id,rating,review,created_at,books:book_id(title,author)")
+        .select(`
+          id, rating, review, created_at,
+          book_id,
+          books:book_id(title, author)
+        `)
         .eq("user_id", userId)
         .order("created_at", { ascending: false });
 
+      console.log("Reviews query result:", { myReviews, reviewsError });
+
       setFinished((finishedBooks ?? []) as FinishedBook[]);
-      setReviews((myReviews ?? []).map(review => ({
-        ...review,
-        books: Array.isArray(review.books) && review.books.length > 0 
-          ? { title: review.books[0].title || 'Unknown', author: review.books[0].author || 'Unknown' }
-          : { title: 'Unknown', author: 'Unknown' }
-      })) as MyReview[]);
+      
+      // Process reviews data more carefully
+      const processedReviews = (myReviews ?? []).map(review => {
+        // Handle the books relationship data
+        let bookData = { title: 'Unknown', author: 'Unknown' };
+        if (review.books) {
+          if (Array.isArray(review.books) && review.books.length > 0) {
+            bookData = { 
+              title: review.books[0].title || 'Unknown', 
+              author: review.books[0].author || 'Unknown' 
+            };
+          } else if (typeof review.books === 'object' && review.books !== null) {
+            bookData = { 
+              title: (review.books as any).title || 'Unknown', 
+              author: (review.books as any).author || 'Unknown' 
+            };
+          }
+        }
+        
+        return {
+          id: review.id,
+          rating: review.rating,
+          review: review.review,
+          created_at: review.created_at,
+          books: bookData
+        };
+      });
+      
+      setReviews(processedReviews);
       setLoading(false);
     })();
   }, [userId]);
