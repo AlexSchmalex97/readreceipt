@@ -47,7 +47,9 @@ export default function Feed() {
         .from("follows").select("following_id").eq("follower_id", myId);
       const followingIds = (followRows ?? []).map(r => r.following_id);
       console.log("Following check:", { followingIds, followError });
-      if (followingIds.length === 0) { setItems([]); setLoading(false); return; }
+
+      // Always include my own id so I see my activity too
+      const targetIds = [myId, ...followingIds.filter((id: string) => id !== myId)];
 
       // PROGRESS events - back to using joins but only selecting safe profile fields
       const { data: progress, error: progressError } = await supabase
@@ -57,7 +59,7 @@ export default function Feed() {
           books:book_id ( title, author ),
           profiles:user_id ( display_name )
         `)
-        .in("user_id", followingIds)
+        .in("user_id", targetIds)
         .order("created_at", { ascending: false })
         .limit(100);
 
@@ -83,7 +85,7 @@ export default function Feed() {
           books:book_id ( title, author ),
           profiles:user_id ( display_name )
         `)
-        .in("user_id", followingIds)
+        .in("user_id", targetIds)
         .order("created_at", { ascending: false })
         .limit(100);
 
