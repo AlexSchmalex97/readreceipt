@@ -86,14 +86,16 @@ export default function UserProfile() {
             .from("reading_progress")
             .select(`
               id, created_at, user_id, from_page, to_page, book_id,
-              books:book_id ( title, author ),
-              profiles:user_id ( display_name )
+              books:book_id ( title, author )
             `)
             .eq("user_id", userId)
             .order("created_at", { ascending: false })
             .limit(50);
           progress = data ?? [];
-          if (progressError) console.warn("UserProfile progress error", progressError);
+          if (progressError) {
+            console.warn("UserProfile progress error", progressError);
+            progress = [];
+          }
         }
 
         // Get user's reviews (public)
@@ -101,12 +103,15 @@ export default function UserProfile() {
           .from("reviews")
           .select(`
             id, created_at, user_id, rating, review, book_id,
-            books:book_id ( title, author ),
-            profiles:user_id ( display_name )
+            books:book_id ( title, author )
           `)
           .eq("user_id", userId)
           .order("created_at", { ascending: false })
           .limit(50);
+
+        if (reviewsError) {
+          console.warn("UserProfile reviews error", reviewsError);
+        }
 
         // Transform progress items
         const pItems: ProgressItem[] = (progress ?? []).map((r: any) => ({
@@ -114,7 +119,7 @@ export default function UserProfile() {
           id: r.id,
           created_at: r.created_at,
           user_id: r.user_id,
-          display_name: r.profiles?.display_name ?? null,
+          display_name: profileData?.display_name ?? null,
           book_title: r.books?.title ?? null,
           book_author: r.books?.author ?? null,
           from_page: r.from_page ?? null,
@@ -127,7 +132,7 @@ export default function UserProfile() {
           id: r.id,
           created_at: r.created_at,
           user_id: r.user_id,
-          display_name: r.profiles?.display_name ?? null,
+          display_name: profileData?.display_name ?? null,
           book_title: r.books?.title ?? null,
           book_author: r.books?.author ?? null,
           rating: r.rating,

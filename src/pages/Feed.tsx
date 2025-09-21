@@ -51,13 +51,12 @@ export default function Feed() {
       // Always include my own id so I see my activity too
       const targetIds = [myId, ...followingIds.filter((id: string) => id !== myId)];
 
-      // PROGRESS events - back to using joins but only selecting safe profile fields
+      // PROGRESS events - simplified without profile joins
       const { data: progress, error: progressError } = await supabase
         .from("reading_progress")
         .select(`
           id, created_at, user_id, from_page, to_page, book_id,
-          books:book_id ( title, author ),
-          profiles:user_id ( display_name )
+          books:book_id ( title, author )
         `)
         .in("user_id", targetIds)
         .order("created_at", { ascending: false })
@@ -65,25 +64,32 @@ export default function Feed() {
 
       console.log("Progress query:", { progress, progressError, targetIds });
 
+      // Get profile information separately
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, display_name")
+        .in("id", targetIds);
+
+      const profileMap = new Map(profiles?.map(p => [p.id, p.display_name]) || []);
+
       const pItems: ProgressItem[] = (progress ?? []).map((r: any) => ({
         kind: "progress",
         id: r.id,
         created_at: r.created_at,
         user_id: r.user_id,
-        display_name: r.profiles?.display_name ?? null,
+        display_name: profileMap.get(r.user_id) ?? null,
         book_title: r.books?.title ?? null,
         book_author: r.books?.author ?? null,
         from_page: r.from_page ?? null,
         to_page: r.to_page,
       }));
 
-      // REVIEWS - back to using joins
+      // REVIEWS - simplified without profile joins
       const { data: reviews, error: reviewsError } = await supabase
         .from("reviews")
         .select(`
           id, created_at, user_id, rating, review, book_id,
-          books:book_id ( title, author ),
-          profiles:user_id ( display_name )
+          books:book_id ( title, author )
         `)
         .in("user_id", targetIds)
         .order("created_at", { ascending: false })
@@ -96,7 +102,7 @@ export default function Feed() {
         id: r.id,
         created_at: r.created_at,
         user_id: r.user_id,
-        display_name: r.profiles?.display_name ?? null,
+        display_name: profileMap.get(r.user_id) ?? null,
         book_title: r.books?.title ?? null,
         book_author: r.books?.author ?? null,
         rating: r.rating,
