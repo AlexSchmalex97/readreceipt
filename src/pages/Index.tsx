@@ -4,7 +4,7 @@ import { AddBookDialog } from "@/components/AddBookDialog";
 import { BookCard } from "@/components/BookCard";
 import { TrendingUp, Target } from "lucide-react";
 import { hasSupabase, supabase } from "@/lib/supabase";
-import { AuthButtons } from "@/components/AuthButtons";
+import AuthButtons from "@/components/AuthButtons";
 import { ReviewDialog } from "@/components/ReviewDialog";
 
 interface Book {

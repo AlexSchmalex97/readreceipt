@@ -15,7 +15,7 @@ type MyReview = {
   rating: number;
   review: string | null;
   created_at: string;
-  books: { title: string | null; author: string | null } | null;
+  books: { title: string; author: string } | null;
 };
 
 export default function Reviews() {
@@ -54,7 +54,12 @@ export default function Reviews() {
         .order("created_at", { ascending: false });
 
       setFinished((finishedBooks ?? []) as FinishedBook[]);
-      setReviews((myReviews ?? []) as MyReview[]);
+      setReviews((myReviews ?? []).map(review => ({
+        ...review,
+        books: Array.isArray(review.books) && review.books.length > 0 
+          ? { title: review.books[0].title || 'Unknown', author: review.books[0].author || 'Unknown' }
+          : { title: 'Unknown', author: 'Unknown' }
+      })) as MyReview[]);
       setLoading(false);
     })();
   }, [userId]);
