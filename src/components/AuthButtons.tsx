@@ -1,17 +1,31 @@
 import { hasSupabase, supabase } from "@/lib/supabase";
+import { useEffect, useState } from "react";
 
 export function AuthButtons() {
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    if (!hasSupabase || !supabase) return;
+    supabase.auth.getSession().then(({ data }) => {
+      setLoggedIn(!!data.session?.user);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
+      setLoggedIn(!!sess?.user);
+    });
+    return () => {
+      try {
+        sub?.subscription?.unsubscribe();
+      } catch {}
+    };
+  }, []);
+
   if (!hasSupabase || !supabase) {
-    // Show a placeholder if Supabase isn’t set up yet
-    return <div className="text-xs text-muted-foreground">Cloud sync not configured</div>;
+    return null; // hide buttons if Supabase isn’t configured
   }
 
-  const signInWithGitHub = async () => {
+  const signIn = async () => {
+    // use GitHub as default provider, can swap to "google" if you prefer
     await supabase.auth.signInWithOAuth({ provider: "github" });
-  };
-
-  const signInWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({ provider: "google" });
   };
 
   const signOut = async () => {
@@ -19,25 +33,22 @@ export function AuthButtons() {
   };
 
   return (
-    <div className="flex gap-2">
-      <button
-        onClick={signInWithGitHub}
-        className="px-3 py-2 rounded bg-primary text-primary-foreground"
-      >
-        Sign in with GitHub
-      </button>
-      <button
-        onClick={signInWithGoogle}
-        className="px-3 py-2 rounded bg-secondary text-secondary-foreground"
-      >
-        Google
-      </button>
-      <button
-        onClick={signOut}
-        className="px-3 py-2 rounded border"
-      >
-        Sign out
-      </button>
+    <div>
+      {loggedIn ? (
+        <button
+          onClick={signOut}
+          className="px-3 py-2 rounded bg-secondary text-secondary-foreground"
+        >
+          Sign out
+        </button>
+      ) : (
+        <button
+          onClick={signIn}
+          className="px-3 py-2 rounded bg-primary text-primary-foreground"
+        >
+          Sign in / Create account
+        </button>
+      )}
     </div>
   );
 }
