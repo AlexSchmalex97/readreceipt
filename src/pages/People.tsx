@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { FollowButton } from "@/components/FollowButton";
 import { Navigation } from "@/components/Navigation";
@@ -72,12 +73,16 @@ export default function People() {
           {results.map((p) => (
             <div
               key={p.id}
-              className="flex items-center justify-between bg-card p-3 rounded border"
+              className="flex items-center justify-between bg-card p-3 rounded border hover:shadow-md transition-shadow"
             >
-              <div className="flex items-center gap-3">
+              <Link
+                to={`/user/${p.id}`}
+                className="flex items-center gap-3 flex-1 hover:text-primary transition-colors"
+              >
                 <img
                   src={p.avatar_url || "/assets/readreceipt-logo.png"}
                   className="w-9 h-9 rounded-full"
+                  alt="Profile"
                 />
                 <div>
                   <div className="font-medium">{p.display_name || "Reader"}</div>
@@ -85,7 +90,7 @@ export default function People() {
                     @{p.username || p.id.slice(0, 6)}
                   </div>
                 </div>
-              </div>
+              </Link>
               <FollowButton targetUserId={p.id} />
             </div>
           ))}

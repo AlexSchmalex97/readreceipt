@@ -11,6 +11,7 @@ import People from "./pages/People";
 import Reviews from "./pages/Reviews";
 import Profile from "./pages/Profile";
 import CompletedBooks from "./pages/CompletedBooks";
+import UserProfile from "./pages/UserProfile";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/feed" element={<Feed />} />
           <Route path="/people" element={<People />} />
+          <Route path="/user/:userId" element={<UserProfile />} />
           <Route path="/reviews" element={<Reviews />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/completed" element={<CompletedBooks />} />
