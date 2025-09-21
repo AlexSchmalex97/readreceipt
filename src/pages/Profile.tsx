@@ -114,18 +114,45 @@ export default function Profile() {
       if (!normUsername) return alert("Please enter a username.");
       if (usernameAvailable === false) return alert("That username is taken.");
 
-      const { error } = await supabase
+      console.log("Saving profile:", { uid, displayName: displayName.trim(), username: normUsername });
+
+      // First try to update existing profile
+      const { data: updateData, error: updateError } = await supabase
         .from("profiles")
         .update({ display_name: displayName.trim(), username: normUsername })
-        .eq("id", uid);
+        .eq("id", uid)
+        .select();
 
-      if (error) throw error;
+      console.log("Update result:", { updateData, updateError });
+
+      // If no rows were updated, the profile might not exist, so try to insert
+      if (!updateError && (!updateData || updateData.length === 0)) {
+        console.log("No profile found, creating new one...");
+        const { data: insertData, error: insertError } = await supabase
+          .from("profiles")
+          .insert([
+            {
+              id: uid,
+              display_name: displayName.trim(),
+              username: normUsername,
+              email: email // Include email from the current state
+            }
+          ])
+          .select();
+
+        console.log("Insert result:", { insertData, insertError });
+        
+        if (insertError) throw insertError;
+      } else if (updateError) {
+        throw updateError;
+      }
       
       // Dispatch a custom event to notify other components about the profile update
       window.dispatchEvent(new CustomEvent('profile-updated'));
       
       alert("Profile updated! Your display name will now appear in greetings and social features.");
     } catch (e: any) {
+      console.error("Profile save error:", e);
       alert(e?.message ?? "Failed to update profile.");
     }
   };
