@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { AddBookDialog } from "@/components/AddBookDialog";
 import { BookCard } from "@/components/BookCard";
 import { TrendingUp, Target } from "lucide-react";
-import { hasSupabase, supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import AuthButtons from "@/components/AuthButtons";
 import { ReviewDialog } from "@/components/ReviewDialog";
 
@@ -25,7 +25,7 @@ const Index = () => {
 
   // Watch auth state
   useEffect(() => {
-    if (!hasSupabase || !supabase) return;
+    
 
     supabase.auth.getSession().then(({ data }) => {
       setUserId(data.session?.user?.id ?? null);
@@ -47,7 +47,7 @@ const Index = () => {
     (async () => {
       setLoading(true);
       try {
-        if (hasSupabase && supabase && userId) {
+        if (userId) {
           const { data, error } = await supabase
             .from("books")
             .select("id,title,author,total_pages,current_page,created_at")
@@ -117,13 +117,13 @@ const Index = () => {
 
   // Persist to localStorage when logged out
   useEffect(() => {
-    if (!(hasSupabase && supabase && userId)) {
+    if (!userId) {
       localStorage.setItem("reading-tracker-books", JSON.stringify(books));
     }
   }, [books, userId]);
 
   const handleAddBook = async (bookData: Omit<Book, "id" | "currentPage">) => {
-    if (hasSupabase && supabase && userId) {
+    if (userId) {
       const { data, error } = await supabase
         .from("books")
         .insert([
@@ -161,7 +161,7 @@ const Index = () => {
   };
 
   const handleUpdateProgress = async (id: string, currentPage: number) => {
-    if (hasSupabase && supabase && userId) {
+    if (userId) {
       const prev = books.find((b) => b.id === id)?.currentPage ?? 0;
 
       const [{ error: e1 }, { error: e2 }] = await Promise.all([

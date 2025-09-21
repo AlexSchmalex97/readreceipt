@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { hasSupabase, supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { FollowButton } from "@/components/FollowButton";
 
 export default function People() {
@@ -10,7 +10,7 @@ export default function People() {
   const debounced = useDebounce(q, 250);
 
   useEffect(() => {
-    if (!hasSupabase || !supabase) return;
+    
 
     (async () => {
       setLoading(true);

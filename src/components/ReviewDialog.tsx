@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { hasSupabase, supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 export function ReviewDialog({
   open,
@@ -18,7 +18,7 @@ export function ReviewDialog({
   if (!open) return null;
 
   const save = async () => {
-    if (!hasSupabase || !supabase || !userId) return;
+    if (!userId) return;
     const { error } = await supabase
       .from("reviews")
       .upsert(

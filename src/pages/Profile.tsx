@@ -1,6 +1,6 @@
 // src/pages/Profile.tsx
 import { useEffect, useMemo, useState } from "react";
-import { hasSupabase, supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 function normalizeUsername(raw: string) {
   return raw
@@ -37,7 +37,7 @@ export default function Profile() {
   const googleLinked = identities.some((i) => i.provider === "google");
 
   useEffect(() => {
-    if (!hasSupabase || !supabase) return;
+    
 
     (async () => {
       setLoading(true);
@@ -69,7 +69,7 @@ export default function Profile() {
   // live username availability (skip if unchanged)
   useEffect(() => {
     (async () => {
-      if (!hasSupabase || !supabase || !uid) return;
+      if (!uid) return;
       if (!normUsername) {
         setUsernameAvailable(null);
         return;
@@ -89,9 +89,6 @@ export default function Profile() {
     })();
   }, [normUsername, uid]);
 
-  if (!hasSupabase || !supabase) {
-    return <div className="p-6">Profiles require Supabase to be configured.</div>;
-  }
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-muted-foreground">

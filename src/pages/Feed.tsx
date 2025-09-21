@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { hasSupabase, supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 type ProgressItem = {
   kind: "progress";
@@ -33,7 +33,7 @@ export default function Feed() {
 
   useEffect(() => {
     (async () => {
-      if (!hasSupabase || !supabase) { setLoading(false); return; }
+      
 
       // who am I
       const { data: me } = await supabase.auth.getUser();

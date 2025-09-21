@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { hasSupabase, supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 type FinishedBook = {
   id: string;
@@ -25,13 +25,13 @@ export default function Reviews() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!hasSupabase || !supabase) return;
+    
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
   }, []);
 
   useEffect(() => {
     (async () => {
-      if (!hasSupabase || !supabase || !userId) {
+      if (!userId) {
         setLoading(false);
         return;
       }
