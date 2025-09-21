@@ -1,346 +1,76 @@
-import { hasSupabase, supabase } from "@/lib/supabase";
-import { useEffect, useMemo, useState } from "react";
+async function handleEmailPassword() {
+  try {
+    if (!password) return alert("Enter your password.");
 
-function normalizeUsername(raw: string) {
-  return raw
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9_]/g, "_")
-    .replace(/_+/g, "_")
-    .replace(/^_+|_+$/g, "");
-}
+    if (mode === "signin") {
+      if (!identifier.trim()) return alert("Enter your email or username.");
 
-export function AuthButtons() {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [displayName, setDisplayName] = useState<string | null>(null);
+      let emailToUse = "";
 
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+      if (identifier.includes("@")) {
+        // Looks like an email
+        emailToUse = identifier.trim();
+      } else {
+        // Treat as username: normalize + case-insensitive lookup
+        const uname = normalizeUsername(identifier);
+        if (!uname) return alert("Enter a valid username.");
 
-  // Signup fields
-  const [name, setName] = useState("");
-  const [username, setUsername] = useState("");
-  const normUsername = useMemo(() => normalizeUsername(username), [username]);
-  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
-  const [checking, setChecking] = useState(false);
-
-  // Auth fields
-  const [identifier, setIdentifier] = useState(""); // email OR username for sign-in
-  const [email, setEmail] = useState("");           // email for signup
-  const [password, setPassword] = useState("");
-
-  useEffect(() => {
-    if (!hasSupabase || !supabase) return;
-
-    const load = async () => {
-      const { data } = await supabase.auth.getSession();
-      const uid = data.session?.user?.id ?? null;
-      setUserId(uid);
-
-      if (uid) {
-        const { data: prof } = await supabase
+        const { data, error, status } = await supabase
           .from("profiles")
-          .select("display_name")
-          .eq("id", uid)
+          .select("email")
+          .ilike("username", uname)   // case-insensitive
           .maybeSingle();
 
-        setDisplayName(
-          prof?.display_name ??
-            data.session?.user?.user_metadata?.name ??
-            data.session?.user?.email ??
-            "Reader"
-        );
-      } else {
-        setDisplayName(null);
-      }
-    };
-    load();
-
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, sess) => {
-      const uid = sess?.user?.id ?? null;
-      setUserId(uid);
-      if (uid) {
-        supabase
-          .from("profiles")
-          .select("display_name")
-          .eq("id", uid)
-          .maybeSingle()
-          .then(({ data }) => {
-            setDisplayName(
-              data?.display_name ??
-                sess?.user?.user_metadata?.name ??
-                sess?.user?.email ??
-                "Reader"
-            );
-          });
-      } else {
-        setDisplayName(null);
-      }
-    });
-
-    return () => {
-      try {
-        sub?.subscription?.unsubscribe();
-      } catch {}
-    };
-  }, []);
-
-  // Username availability check (signup)
-  useEffect(() => {
-    (async () => {
-      if (!hasSupabase || !supabase) return;
-      if (mode !== "signup" || !normUsername) {
-        setUsernameAvailable(null);
-        return;
-      }
-      setChecking(true);
-      const { data } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("username", normUsername)
-        .limit(1);
-      setUsernameAvailable(!(data && data.length));
-      setChecking(false);
-    })();
-  }, [mode, normUsername]);
-
-  if (!hasSupabase || !supabase) return null;
-
-  const togglePanel = () => setPanelOpen((v) => !v);
-
-  async function handleEmailPassword() {
-    try {
-      if (!password) return alert("Enter your password.");
-
-      if (mode === "signin") {
-        if (!identifier.trim()) return alert("Enter your email or username.");
-
-        // If identifier looks like an email, sign in directly.
-        let emailToUse = "";
-        const looksLikeEmail = identifier.includes("@");
-
-        if (looksLikeEmail) {
-          emailToUse = identifier.trim();
-        } else {
-          // Treat as username: look up the email for this username.
-          const uname = normalizeUsername(identifier);
-          if (!uname) return alert("Enter a valid username.");
-
-          const { data, error } = await supabase
-            .from("profiles")
-            .select("email")
-            .eq("username", uname)
-            .maybeSingle();
-
-          if (error) throw error;
-          if (!data?.email) {
-            return alert("No account found for that username.");
-          }
-          emailToUse = data.email;
+        if (error) {
+          console.error("Username lookup error:", error, "status:", status);
+          return alert("Could not look up username. If this persists, sign in with email.");
         }
-
-        const { error } = await supabase.auth.signInWithPassword({
-          email: emailToUse,
-          password,
-        });
-        if (error) throw error;
-      } else {
-        // SIGN UP
-        if (!name.trim()) return alert("Please enter your name.");
-        if (!normUsername) return alert("Please choose a username.");
-        if (usernameAvailable === false) return alert("Username is taken.");
-        if (!email.trim()) return alert("Enter your email.");
-        if (!password.trim()) return alert("Create a password.");
-
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: { name },
-          },
-        });
-        if (error) throw error;
-
-        // If session is already active (verification off), update profile row immediately
-        const { data: u } = await supabase.auth.getUser();
-        if (u?.user?.id) {
-          await supabase
-            .from("profiles")
-            .update({ display_name: name, username: normUsername, email })
-            .eq("id", u.user.id);
+        if (!data?.email) {
+          return alert("No account found for that username. Try your email instead.");
         }
-
-        alert("Account created. If email verification is enabled, check your inbox.");
+        emailToUse = data.email;
       }
 
-      // reset panel inputs
-      setPanelOpen(false);
-      setName("");
-      setUsername("");
-      setIdentifier("");
-      setEmail("");
-      setPassword("");
-    } catch (e: any) {
-      alert(e?.message ?? "Authentication failed.");
-    }
-  }
-
-  async function signInWithGoogle() {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: window.location.origin },
+      const { error } = await supabase.auth.signInWithPassword({
+        email: emailToUse,
+        password,
       });
       if (error) throw error;
-    } catch (e: any) {
-      alert(e?.message ?? "Google sign-in failed.");
+    } else {
+      // SIGN UP (unchanged)
+      if (!name.trim()) return alert("Please enter your name.");
+      const norm = normalizeUsername(username);
+      if (!norm) return alert("Please choose a username.");
+      if (usernameAvailable === false) return alert("Username is taken.");
+      if (!email.trim()) return alert("Enter your email.");
+      if (!password.trim()) return alert("Create a password.");
+
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: { name },
+        },
+      });
+      if (error) throw error;
+
+      // If session exists immediately (no email confirm), fill profile now
+      const { data: u } = await supabase.auth.getUser();
+      if (u?.user?.id) {
+        await supabase
+          .from("profiles")
+          .update({ display_name: name, username: norm, email })
+          .eq("id", u.user.id);
+      }
+
+      alert("Account created. If email verification is enabled, check your inbox.");
     }
+
+    // reset panel inputs
+    setPanelOpen(false);
+    setName(""); setUsername(""); setIdentifier(""); setEmail(""); setPassword("");
+  } catch (e: any) {
+    alert(e?.message ?? "Authentication failed.");
   }
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
-  };
-
-  // Logged-in view
-  if (userId) {
-    return (
-      <div className="flex items-center gap-3">
-        <span className="text-sm">
-          Happy reading, <span className="font-medium">{displayName ?? "Reader"}</span>!
-        </span>
-        <a href="/profile" className="px-3 py-2 rounded border hover:bg-muted text-sm">
-          Profile
-        </a>
-        <button
-          onClick={signOut}
-          className="px-3 py-2 rounded bg-secondary text-secondary-foreground"
-        >
-          Sign out
-        </button>
-      </div>
-    );
-  }
-
-  // Logged-out view
-  return (
-    <div className="relative">
-      <button
-        onClick={togglePanel}
-        className="px-3 py-2 rounded bg-primary text-primary-foreground"
-      >
-        Sign in / Create account
-      </button>
-
-      {panelOpen && (
-        <div className="absolute right-0 mt-2 w-80 rounded border border-border bg-card p-4 shadow-card z-10">
-          <div className="flex items-center justify-between mb-3">
-            <div className="text-sm font-medium">
-              {mode === "signin" ? "Sign in" : "Create an Account"}
-            </div>
-            <button
-              onClick={() => setMode((m) => (m === "signin" ? "signup" : "signin"))}
-              className="text-xs underline"
-            >
-              {mode === "signin" ? "Need an account?" : "Have an account?"}
-            </button>
-          </div>
-
-          {mode === "signup" ? (
-            <>
-              <input
-                type="text"
-                placeholder="Your name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full mb-2 px-3 py-2 rounded border bg-background"
-                autoComplete="name"
-              />
-              <div className="mb-2">
-                <input
-                  type="text"
-                  placeholder="Choose a username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-3 py-2 rounded border bg-background"
-                  autoComplete="username"
-                />
-                {username && (
-                  <div className="text-xs mt-1">
-                    @{normUsername}{" "}
-                    {checking
-                      ? "• checking…"
-                      : usernameAvailable == null
-                      ? ""
-                      : usernameAvailable
-                      ? "• available"
-                      : "• taken"}
-                  </div>
-                )}
-              </div>
-              <div className="space-y-2 mb-3">
-                <input
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 rounded border bg-background"
-                  autoComplete="email"
-                />
-                <input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 rounded border bg-background"
-                  autoComplete="new-password"
-                />
-              </div>
-              <button
-                onClick={handleEmailPassword}
-                className="w-full px-3 py-2 rounded bg-secondary text-secondary-foreground"
-              >
-                Create account
-              </button>
-            </>
-          ) : (
-            <>
-              <div className="space-y-2 mb-3">
-                <input
-                  type="text"
-                  placeholder="Email or username"
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  className="w-full px-3 py-2 rounded border bg-background"
-                  autoComplete="username email"
-                />
-                <input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 rounded border bg-background"
-                  autoComplete="current-password"
-                />
-              </div>
-              <button
-                onClick={handleEmailPassword}
-                className="w-full px-3 py-2 rounded bg-secondary text-secondary-foreground"
-              >
-                Sign in
-              </button>
-            </>
-          )}
-
-          <div className="relative my-3 text-center text-xs text-muted-foreground">
-            <span className="bg-card px-2">or</span>
-          </div>
-
-          <button onClick={signInWithGoogle} className="w-full px-3 py-2 rounded border">
-            Continue with Google
-          </button>
-        </div>
-      )}
-    </div>
-  );
 }
