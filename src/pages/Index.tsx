@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { AddBookDialog } from "@/components/AddBookDialog";
 import { BookCard } from "@/components/BookCard";
 import { TrendingUp, Target } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { AuthButtons } from "@/components/AuthButtons";
 
 interface Book {
   id: string;
@@ -12,159 +14,138 @@ interface Book {
 }
 
 const Index = () => {
+  const [sessionUserId, setSessionUserId] = useState<string | null>(null);
   const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Load books from localStorage on component mount
+  // Watch auth state
   useEffect(() => {
-    const savedBooks = localStorage.getItem("reading-tracker-books");
-    if (savedBooks) {
-      try {
-        setBooks(JSON.parse(savedBooks));
-      } catch {
-        // ignore corrupted data
-      }
-    }
+    supabase.auth.getSession().then(({ data }) => {
+      setSessionUserId(data.session?.user?.id ?? null);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
+      setSessionUserId(sess?.user?.id ?? null);
+    });
+    return () => sub.subscription.unsubscribe();
   }, []);
 
-  // Save books to localStorage whenever books change
+  // Load books (cloud if logged in, local otherwise)
   useEffect(() => {
-    localStorage.setItem("reading-tracker-books", JSON.stringify(books));
-  }, [books]);
+    const run = async () => {
+      setLoading(true);
+      try {
+        if (sessionUserId) {
+          // Cloud
+          const { data, error } = await supabase
+            .from("books")
+            .select("*")
+            .order("created_at", { ascending: true });
+          if (error) throw error;
 
-  const handleAddBook = (bookData: Omit<Book, "id" | "currentPage">) => {
-    const newBook: Book = {
-      id: Date.now().toString(),
-      ...bookData,
-      currentPage: 0,
+          // Optional one-time migration: if cloud empty but local has data, push it up
+          const saved = localStorage.getItem("reading-tracker-books");
+          if ((!data || data.length === 0) && saved) {
+            const parsed: Omit<Book, "id">[] = JSON.parse(saved).map((b: any) => ({
+              title: b.title, author: b.author, totalPages: b.totalPages, currentPage: b.currentPage
+            }));
+            if (parsed.length > 0) {
+              const rows = parsed.map((b) => ({ ...b, user_id: sessionUserId }));
+              await supabase.from("books").insert(rows);
+              localStorage.removeItem("reading-tracker-books");
+              const { data: migrated } = await supabase.from("books").select("*").order("created_at");
+              setBooks((migrated ?? []) as Book[]);
+              setLoading(false);
+              return;
+            }
+          }
+
+          setBooks((data ?? []) as Book[]);
+        } else {
+          // Local
+          const saved = localStorage.getItem("reading-tracker-books");
+          setBooks(saved ? JSON.parse(saved) : []);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
     };
-    setBooks((prev) => [...prev, newBook]);
+    run();
+  }, [sessionUserId]);
+
+  // Local persistence (only when logged out)
+  useEffect(() => {
+    if (!sessionUserId) {
+      localStorage.setItem("reading-tracker-books", JSON.stringify(books));
+    }
+  }, [books, sessionUserId]);
+
+  const handleAddBook = async (bookData: Omit<Book, "id" | "currentPage">) => {
+    if (sessionUserId) {
+      const { data, error } = await supabase
+        .from("books")
+        .insert([{ user_id: sessionUserId, title: bookData.title, author: bookData.author, total_pages: bookData.totalPages, current_page: 0 }])
+        .select();
+      if (!error && data) {
+        // normalize to frontend shape
+        const mapped = data.map((r: any) => ({
+          id: r.id, title: r.title, author: r.author, totalPages: r.total_pages, currentPage: r.current_page
+        }));
+        setBooks((prev) => [...prev, ...mapped]);
+      }
+    } else {
+      const newBook: Book = { id: Date.now().toString(), ...bookData, currentPage: 0 };
+      setBooks((prev) => [...prev, newBook]);
+    }
   };
 
-  const handleUpdateProgress = (id: string, currentPage: number) => {
-    setBooks((prev) =>
-      prev.map((book) => (book.id === id ? { ...book, currentPage } : book))
-    );
+  const handleUpdateProgress = async (id: string, currentPage: number) => {
+    if (sessionUserId) {
+      const { error } = await supabase
+        .from("books")
+        .update({ current_page: currentPage })
+        .eq("id", id);
+      if (!error) {
+        setBooks((prev) => prev.map((b) => (b.id === id ? { ...b, currentPage } : b)));
+      }
+    } else {
+      setBooks((prev) => prev.map((b) => (b.id === id ? { ...b, currentPage } : b)));
+    }
   };
 
   const totalBooks = books.length;
-  const booksInProgress = books.filter(
-    (book) => book.currentPage > 0 && book.currentPage < book.totalPages
-  ).length;
-  const completedBooks = books.filter(
-    (book) => book.currentPage === book.totalPages
-  ).length;
+  const booksInProgress = books.filter((b) => b.currentPage > 0 && b.currentPage < b.totalPages).length;
+  const completedBooks = books.filter((b) => b.currentPage === b.totalPages).length;
+
+  // Header (unchanged except maybe your ReadReceipt text/logo)
+  // ... keep your existing header JSX here ...
+
+  // Gate: if not logged in, show signin + keep local mode working
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-soft">
-      {/* Header */}
       <header className="bg-card shadow-soft border-b border-border">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              {/* ReadReceipt logo */}
-              <img
-                src="/assets/readreceipt-logo.png"
-                alt="ReadReceipt logo"
-                className="w-14 h-14"
-              />
+              <img src="/readreceipt-logo.png" alt="ReadReceipt logo" className="w-14 h-14" />
               <div>
-                <h1 className="text-2xl font-bold text-primary">
-  ReadReceipt
-</h1>
-                <p className="text-sm text-muted-foreground">
-                  Track your reading progress and stay motivated
-                </p>
+                <h1 className="text-2xl font-bold text-primary">ReadReceipt</h1>
+                <p className="text-sm text-muted-foreground">Track your reading progress and stay motivated</p>
               </div>
             </div>
-            <AddBookDialog onAddBook={handleAddBook} />
+            <AuthButtons />
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Stats */}
-        {totalBooks > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div className="bg-card rounded-lg p-4 shadow-soft border border-border">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
-                  {/* tiny logo in stat tile */}
-                  <img
-                    src="/assets/readreceipt-logo.png"
-                    alt="ReadReceipt logo"
-                    className="w-5 h-5"
-                  />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">
-                    {totalBooks}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Total Books</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-card rounded-lg p-4 shadow-soft border border-border">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-accent-foreground" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">
-                    {booksInProgress}
-                  </p>
-                  <p className="text-sm text-muted-foreground">In Progress</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-card rounded-lg p-4 shadow-soft border border-border">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
-                  <Target className="w-5 h-5 text-accent-foreground" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">
-                    {completedBooks}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Completed</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Books Grid or Empty State */}
-        {books.length === 0 ? (
-          <div className="text-center py-16">
-            {/* Empty state logo */}
-            <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-              <img
-                src="/assets/readreceipt-logo.png"
-                alt="ReadReceipt logo"
-                className="w-35 h-35"
-              />
-            </div>
-            <h2 className="text-2xl font-semibold text-foreground mb-2">
-              Start Your Reading Journey
-            </h2>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Add your first book to begin tracking your reading progress and
-              stay motivated with encouraging messages.
-            </p>
-            <AddBookDialog onAddBook={handleAddBook} />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {books.map((book) => (
-              <BookCard
-                key={book.id}
-                book={book}
-                onUpdateProgress={handleUpdateProgress}
-              />
-            ))}
-          </div>
-        )}
+        {/* Your existing stats + grids, reusing handleAddBook / handleUpdateProgress */}
+        {/* ... keep your previous JSX here ... */}
       </main>
     </div>
   );
