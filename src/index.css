@@ -46,8 +46,8 @@
     /* ReadReceipt progress/gradients */
     --reading-pink: 35 30% 70%;         /* repurposed as warm beige accent */
     --reading-red: 30 40% 35%;          /* aligns with --primary */
-    --progress-start: 35 30% 70%;
-    --progress-end: 30 40% 35%;
+    --progress-start: 30 35% 30%;
+    --progress-end: 30 25% 15%;
 
     /* Gradients */
     --gradient-primary: linear-gradient(
