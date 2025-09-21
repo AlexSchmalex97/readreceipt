@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { AddBookDialog } from "@/components/AddBookDialog";
 import { BookCard } from "@/components/BookCard";
 import { TrendingUp, Target } from "lucide-react";
@@ -20,7 +21,9 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [reviewFor, setReviewFor] = useState<{ bookId: string } | null>(null);
 
-  // Watch auth state (only if Supabase is configured)
+  const { pathname } = useLocation();
+
+  // Watch auth state
   useEffect(() => {
     if (!hasSupabase || !supabase) return;
 
@@ -45,7 +48,6 @@ const Index = () => {
       setLoading(true);
       try {
         if (hasSupabase && supabase && userId) {
-          // Fetch from cloud
           const { data, error } = await supabase
             .from("books")
             .select("id,title,author,total_pages,current_page,created_at")
@@ -53,7 +55,6 @@ const Index = () => {
 
           if (error) throw error;
 
-          // Optional migration: if cloud is empty but local has data, push it up once
           const saved = localStorage.getItem("reading-tracker-books");
           if ((!data || data.length === 0) && saved) {
             const parsed: Array<{
@@ -93,7 +94,6 @@ const Index = () => {
             }
           }
 
-          // Normal set from cloud
           setBooks(
             (data ?? []).map((r: any) => ({
               id: r.id,
@@ -104,7 +104,6 @@ const Index = () => {
             }))
           );
         } else {
-          // Local mode
           const saved = localStorage.getItem("reading-tracker-books");
           setBooks(saved ? JSON.parse(saved) : []);
         }
@@ -116,7 +115,7 @@ const Index = () => {
     })();
   }, [userId]);
 
-  // Persist to localStorage only when not logged in (local mode)
+  // Persist to localStorage when logged out
   useEffect(() => {
     if (!(hasSupabase && supabase && userId)) {
       localStorage.setItem("reading-tracker-books", JSON.stringify(books));
@@ -204,7 +203,8 @@ const Index = () => {
       <header className="bg-card shadow-soft border-b border-border">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            {/* Left: Logo + Title + Nav */}
+            <div className="flex items-center gap-3">
               <img
                 src="/assets/readreceipt-logo.png"
                 alt="ReadReceipt logo"
@@ -216,9 +216,78 @@ const Index = () => {
                   Track your reading progress and stay motivated
                 </p>
               </div>
+
+              <nav className="hidden sm:flex gap-6 ml-8">
+                <Link
+                  to="/people"
+                  className={`text-sm ${
+                    pathname === "/people"
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  People
+                </Link>
+                <Link
+                  to="/feed"
+                  className={`text-sm ${
+                    pathname === "/feed"
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Feed
+                </Link>
+                <Link
+                  to="/reviews"
+                  className={`text-sm ${
+                    pathname === "/reviews"
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Reviews
+                </Link>
+              </nav>
             </div>
+
+            {/* Right: Auth */}
             <AuthButtons />
           </div>
+
+          {/* Mobile nav */}
+          <nav className="sm:hidden mt-4 flex gap-6">
+            <Link
+              to="/people"
+              className={`text-sm ${
+                pathname === "/people"
+                  ? "text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              People
+            </Link>
+            <Link
+              to="/feed"
+              className={`text-sm ${
+                pathname === "/feed"
+                  ? "text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Feed
+            </Link>
+            <Link
+              to="/reviews"
+              className={`text-sm ${
+                pathname === "/reviews"
+                  ? "text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Reviews
+            </Link>
+          </nav>
         </div>
       </header>
 
@@ -282,8 +351,7 @@ const Index = () => {
               Start Your Reading Journey
             </h2>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Add your first book to begin tracking your reading progress and
-              stay motivated with encouraging messages.
+              Add your first book to begin tracking your reading progress and stay motivated with encouraging messages.
             </p>
             <AddBookDialog onAddBook={handleAddBook} />
           </div>
@@ -300,7 +368,7 @@ const Index = () => {
         )}
       </main>
 
-      {/* Review modal when a book is completed */}
+      {/* Review modal */}
       {reviewFor && userId && (
         <ReviewDialog
           open={true}
@@ -314,3 +382,4 @@ const Index = () => {
 };
 
 export default Index;
+
