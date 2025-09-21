@@ -65,7 +65,7 @@ const Index = () => {
               <img
                 src="/assets/readreceipt-logo.png"
                 alt="ReadReceipt logo"
-                className="w-10 h-10"
+                className="w-14 h-14"
               />
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
@@ -142,7 +142,7 @@ const Index = () => {
               <img
                 src="/assets/readreceipt-logo.png"
                 alt="ReadReceipt logo"
-                className="w-16 h-16"
+                className="w-25 h-25"
               />
             </div>
             <h2 className="text-2xl font-semibold text-foreground mb-2">
