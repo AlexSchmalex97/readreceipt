@@ -63,7 +63,7 @@ export default function Feed() {
         .order("created_at", { ascending: false })
         .limit(100);
 
-      console.log("Progress query:", { progress, progressError });
+      console.log("Progress query:", { progress, progressError, targetIds });
 
       const pItems: ProgressItem[] = (progress ?? []).map((r: any) => ({
         kind: "progress",
