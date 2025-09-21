@@ -1,4 +1,4 @@
-import { hasSupabase, supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 
 export default function AuthButtons() {
@@ -14,7 +14,6 @@ export default function AuthButtons() {
   const [username, setUsername] = useState("");
 
   useEffect(() => {
-    if (!hasSupabase || !supabase) return;
 
     const initAuth = async () => {
       try {
@@ -50,7 +49,6 @@ export default function AuthButtons() {
   }, []);
 
   async function fetchProfile(userId: string) {
-    if (!hasSupabase || !supabase) return;
     
     try {
       const { data } = await supabase
@@ -67,10 +65,6 @@ export default function AuthButtons() {
   const togglePanel = () => setPanelOpen((v) => !v);
 
   async function handleEmailPassword() {
-    if (!hasSupabase || !supabase) {
-      alert("Authentication is not configured.");
-      return;
-    }
 
     try {
       if (!email || !password) return alert("Enter email and password.");
@@ -132,10 +126,6 @@ export default function AuthButtons() {
   }
 
   async function signInWithGoogle() {
-    if (!hasSupabase || !supabase) {
-      alert("Authentication is not configured.");
-      return;
-    }
 
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -149,7 +139,6 @@ export default function AuthButtons() {
   }
 
   const signOut = async () => {
-    if (!hasSupabase || !supabase) return;
     
     try {
       await supabase.auth.signOut();
@@ -157,8 +146,6 @@ export default function AuthButtons() {
       console.error("Sign out error:", error);
     }
   };
-
-  if (!hasSupabase || !supabase) return null;
 
   return (
     <div className="relative">
