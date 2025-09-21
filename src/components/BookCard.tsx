@@ -53,7 +53,7 @@ export const BookCard = ({ book, onUpdateProgress }: BookCardProps) => {
     onUpdateProgress(book.id, newPage);
     setIsEditing(false);
 
-    if (newPage === book.totalPages && book.currentPage !== book.totalPages) {
+    if (newPage >= book.totalPages && book.currentPage < book.totalPages) {
       toast({
         title: "Congratulations! 🎉",
         description: "You've finished reading this book!",

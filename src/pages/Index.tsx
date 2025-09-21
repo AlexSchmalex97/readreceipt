@@ -5,6 +5,7 @@ import { TrendingUp, Target } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ReviewDialog } from "@/components/ReviewDialog";
 import { Navigation } from "@/components/Navigation";
+import { Link } from "react-router-dom";
 
 interface Book {
   id: string;
@@ -172,19 +173,28 @@ const Index = () => {
         setBooks((prevBooks) =>
           prevBooks.map((b) => (b.id === id ? { ...b, currentPage } : b))
         );
-        const total = books.find((b) => b.id === id)?.totalPages ?? -1;
-        if (currentPage === total) setReviewFor({ bookId: id });
+        const book = books.find((b) => b.id === id);
+        // Fix completion logic: book is complete when current page >= total pages
+        if (book && currentPage >= book.totalPages && prev < book.totalPages) {
+          setReviewFor({ bookId: id });
+        }
       }
     } else {
       setBooks((prev) => prev.map((b) => (b.id === id ? { ...b, currentPage } : b)));
+      const book = books.find((b) => b.id === id);
+      if (book && currentPage >= book.totalPages && book.currentPage < book.totalPages) {
+        setReviewFor({ bookId: id });
+      }
     }
   };
 
-  const totalBooks = books.length;
   const booksInProgress = books.filter(
     (b) => b.currentPage > 0 && b.currentPage < b.totalPages
   ).length;
-  const completedBooks = books.filter((b) => b.currentPage === b.totalPages).length;
+  const completedBooks = books.filter((b) => b.currentPage >= b.totalPages).length;
+  
+  // Filter out completed books from the main display
+  const inProgressBooks = books.filter((b) => b.currentPage < b.totalPages);
 
   if (loading) {
     return (
@@ -200,24 +210,8 @@ const Index = () => {
 
       <main className="container mx-auto px-4 py-8">
         {/* Stats */}
-        {totalBooks > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div className="bg-card rounded-lg p-4 shadow-soft border border-border">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
-                  <img
-                    src="/assets/readreceipt-logo.png"
-                    alt="ReadReceipt logo"
-                    className="w-5 h-5"
-                  />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">{totalBooks}</p>
-                  <p className="text-sm text-muted-foreground">Total Books</p>
-                </div>
-              </div>
-            </div>
-
+        {books.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <div className="bg-card rounded-lg p-4 shadow-soft border border-border">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
@@ -230,7 +224,7 @@ const Index = () => {
               </div>
             </div>
 
-            <div className="bg-card rounded-lg p-4 shadow-soft border border-border">
+            <Link to="/completed" className="bg-card rounded-lg p-4 shadow-soft border border-border hover:shadow-lg transition-shadow cursor-pointer">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
                   <Target className="w-5 h-5 text-accent-foreground" />
@@ -240,12 +234,12 @@ const Index = () => {
                   <p className="text-sm text-muted-foreground">Completed</p>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
         )}
 
         {/* Books Grid / Empty State */}
-        {books.length === 0 ? (
+        {inProgressBooks.length === 0 && books.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
               <img
@@ -262,15 +256,35 @@ const Index = () => {
             </p>
             <AddBookDialog onAddBook={handleAddBook} />
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {books.map((book) => (
-              <BookCard
-                key={book.id}
-                book={book}
-                onUpdateProgress={handleUpdateProgress}
+        ) : inProgressBooks.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+              <img
+                src="/assets/readreceipt-logo.png"
+                alt="ReadReceipt logo"
+                className="w-24 h-24"
               />
-            ))}
+            </div>
+            <h2 className="text-2xl font-semibold text-foreground mb-2">
+              All Books Completed! 🎉
+            </h2>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              Great job! You've finished all your books. Add a new book to continue your reading journey.
+            </p>
+            <AddBookDialog onAddBook={handleAddBook} />
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <h2 className="text-xl font-semibold text-foreground">Currently Reading</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {inProgressBooks.map((book) => (
+                <BookCard
+                  key={book.id}
+                  book={book}
+                  onUpdateProgress={handleUpdateProgress}
+                />
+              ))}
+            </div>
           </div>
         )}
       </main>

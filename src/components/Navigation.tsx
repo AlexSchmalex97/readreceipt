@@ -66,16 +66,6 @@ export function Navigation() {
                 Reviews
               </Link>
               <Link
-                to="/completed"
-                className={`text-sm ${
-                  isActive("/completed")
-                    ? "text-foreground font-medium"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Completed
-              </Link>
-              <Link
                 to="/profile"
                 className={`text-sm ${
                   isActive("/profile")
@@ -133,16 +123,6 @@ export function Navigation() {
             }`}
           >
             Reviews
-          </Link>
-          <Link
-            to="/completed"
-            className={`text-sm ${
-              isActive("/completed")
-                ? "text-foreground font-medium"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Completed
           </Link>
           <Link
             to="/profile"
