@@ -2,7 +2,12 @@ import { hasSupabase, supabase } from "@/lib/supabase";
 import { useEffect, useMemo, useState } from "react";
 
 function normalizeUsername(raw: string) {
-  return raw.toLowerCase().trim().replace(/[^a-z0-9_]/g, "_").replace(/_+/g, "_").replace(/^_+|_+$/g, "");
+  return raw
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9_]/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
 }
 
 export function AuthButtons() {
@@ -11,12 +16,15 @@ export function AuthButtons() {
 
   const [panelOpen, setPanelOpen] = useState(false);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [name, setName] = useState("");        // NEW
-  const [username, setUsername] = useState(""); // NEW
+
+  // Signup fields
+  const [name, setName] = useState("");          // display name
+  const [username, setUsername] = useState("");  // unique username
   const normUsername = useMemo(() => normalizeUsername(username), [username]);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [checking, setChecking] = useState(false);
 
+  // Auth fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -37,9 +45,9 @@ export function AuthButtons() {
 
         setDisplayName(
           prof?.display_name ??
-          data.session?.user?.user_metadata?.name ??
-          data.session?.user?.email ??
-          "Reader"
+            data.session?.user?.user_metadata?.name ??
+            data.session?.user?.email ??
+            "Reader"
         );
       } else {
         setDisplayName(null);
@@ -51,23 +59,42 @@ export function AuthButtons() {
       const uid = sess?.user?.id ?? null;
       setUserId(uid);
       if (uid) {
-        supabase.from("profiles").select("display_name").eq("id", uid).maybeSingle().then(({ data }) => {
-          setDisplayName(data?.display_name ?? sess?.user?.user_metadata?.name ?? sess?.user?.email ?? "Reader");
-        });
+        supabase
+          .from("profiles")
+          .select("display_name")
+          .eq("id", uid)
+          .maybeSingle()
+          .then(({ data }) => {
+            setDisplayName(
+              data?.display_name ?? sess?.user?.user_metadata?.name ?? sess?.user?.email ?? "Reader"
+            );
+          });
       } else {
         setDisplayName(null);
       }
     });
 
-    return () => { try { sub?.subscription?.unsubscribe(); } catch {} };
+    return () => {
+      try {
+        sub?.subscription?.unsubscribe();
+      } catch {}
+    };
   }, []);
 
-  // Username availability check (on signup mode)
+  // Username availability check (only on signup mode)
   useEffect(() => {
     (async () => {
-      if (mode !== "signup" || !normUsername) { setUsernameAvailable(null); return; }
+      if (!hasSupabase || !supabase) return;
+      if (mode !== "signup" || !normUsername) {
+        setUsernameAvailable(null);
+        return;
+      }
       setChecking(true);
-      const { data } = await supabase.from("profiles").select("id").eq("username", normUsername).limit(1);
+      const { data } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("username", normUsername)
+        .limit(1);
       setUsernameAvailable(!(data && data.length));
       setChecking(false);
     })();
@@ -75,7 +102,7 @@ export function AuthButtons() {
 
   if (!hasSupabase || !supabase) return null;
 
-  const togglePanel = () => setPanelOpen(v => !v);
+  const togglePanel = () => setPanelOpen((v) => !v);
 
   async function handleEmailPassword() {
     try {
@@ -89,31 +116,34 @@ export function AuthButtons() {
         if (!normUsername) return alert("Please choose a username.");
         if (usernameAvailable === false) return alert("Username is taken.");
 
-        // Create account with name in user metadata; redirect back here
+        // Sign up; Name goes into user metadata (trigger fills profiles.display_name)
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: window.location.origin,
-            data: { name }, // picked up by the trigger for display_name
+            data: { name },
           },
         });
         if (error) throw error;
 
-        // If a session is already active (email verification off), set username now.
+        // If session is already active (email verification off), also set username now
         const { data: u } = await supabase.auth.getUser();
         if (u?.user?.id) {
-          await supabase.from("profiles").update({
-            display_name: name,
-            username: normUsername,
-          }).eq("id", u.user.id);
+          await supabase
+            .from("profiles")
+            .update({ display_name: name, username: normUsername })
+            .eq("id", u.user.id);
         }
 
         alert("Account created. If email verification is enabled, check your inbox.");
       }
 
       setPanelOpen(false);
-      setName(""); setUsername(""); setEmail(""); setPassword("");
+      setName("");
+      setUsername("");
+      setEmail("");
+      setPassword("");
     } catch (e: any) {
       alert(e?.message ?? "Authentication failed.");
     }
@@ -131,14 +161,22 @@ export function AuthButtons() {
     }
   }
 
-  const signOut = async () => { await supabase.auth.signOut(); };
+  const signOut = async () => {
+    await supabase.auth.signOut();
+  };
 
-  // Logged-in view: greeting + sign out (+ link to profile page to edit username later)
+  // Logged-in view: greeting + Profile button + Sign out
   if (userId) {
     return (
       <div className="flex items-center gap-3">
-        <a href="/profile" className="text-sm text-muted-foreground hover:text-foreground">
+        <span className="text-sm">
           Happy reading, <span className="font-medium">{displayName ?? "Reader"}</span>!
+        </span>
+        <a
+          href="/profile"
+          className="px-3 py-2 rounded border hover:bg-muted text-sm"
+        >
+          Profile
         </a>
         <button
           onClick={signOut}
@@ -150,7 +188,7 @@ export function AuthButtons() {
     );
   }
 
-  // Logged-out view
+  // Logged-out view: button → panel (signup includes Name + Username)
   return (
     <div className="relative">
       <button
@@ -167,7 +205,7 @@ export function AuthButtons() {
               {mode === "signin" ? "Sign in with Email" : "Create an Account"}
             </div>
             <button
-              onClick={() => setMode(m => (m === "signin" ? "signup" : "signin"))}
+              onClick={() => setMode((m) => (m === "signin" ? "signup" : "signin"))}
               className="text-xs underline"
             >
               {mode === "signin" ? "Need an account?" : "Have an account?"}
@@ -196,7 +234,13 @@ export function AuthButtons() {
                 {username && (
                   <div className="text-xs mt-1">
                     @{normUsername}{" "}
-                    {checking ? "• checking…" : usernameAvailable == null ? "" : usernameAvailable ? "• available" : "• taken"}
+                    {checking
+                      ? "• checking…"
+                      : usernameAvailable == null
+                      ? ""
+                      : usernameAvailable
+                      ? "• available"
+                      : "• taken"}
                   </div>
                 )}
               </div>
