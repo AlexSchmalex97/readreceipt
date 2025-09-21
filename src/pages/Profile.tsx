@@ -5,7 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Camera, User } from "lucide-react";
+import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
 
 function normalizeUsername(raw: string) {
   return raw
@@ -35,6 +38,19 @@ export default function Profile() {
   const normUsername = useMemo(() => normalizeUsername(username), [username]);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
+
+  // Cropping states
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [crop, setCrop] = useState<Crop>({
+    unit: '%',
+    width: 90,
+    height: 90,
+    x: 5,
+    y: 5,
+  });
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
+  const imgRef = useRef<HTMLImageElement>(null);
 
   // auth fields
   const [email, setEmail] = useState("");
@@ -124,13 +140,50 @@ export default function Profile() {
   }
 
   // Actions
-  const uploadAvatar = async (file: File) => {
+  const getCroppedImg = (image: HTMLImageElement, crop: PixelCrop): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) {
+        reject(new Error('No 2d context'));
+        return;
+      }
+
+      const scaleX = image.naturalWidth / image.width;
+      const scaleY = image.naturalHeight / image.height;
+
+      canvas.width = crop.width;
+      canvas.height = crop.height;
+
+      ctx.drawImage(
+        image,
+        crop.x * scaleX,
+        crop.y * scaleY,
+        crop.width * scaleX,
+        crop.height * scaleY,
+        0,
+        0,
+        crop.width,
+        crop.height
+      );
+
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error('Canvas is empty'));
+          return;
+        }
+        resolve(blob);
+      }, 'image/jpeg', 0.95);
+    });
+  };
+
+  const uploadAvatar = async (blob: Blob) => {
     if (!uid) return;
     
     setUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${uid}/avatar.${fileExt}`;
+      const fileName = `${uid}/avatar.jpg`;
 
       // Remove old avatar if it exists
       if (avatarUrl) {
@@ -143,7 +196,7 @@ export default function Profile() {
       // Upload new avatar
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, blob, { upsert: true });
 
       if (uploadError) throw uploadError;
 
@@ -181,7 +234,30 @@ export default function Profile() {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      uploadAvatar(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setSelectedImage(reader.result as string);
+        setShowCropModal(true);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCropComplete = async () => {
+    if (!imgRef.current || !completedCrop) return;
+
+    try {
+      const croppedBlob = await getCroppedImg(imgRef.current, completedCrop);
+      await uploadAvatar(croppedBlob);
+      setShowCropModal(false);
+      setSelectedImage(null);
+    } catch (error) {
+      console.error('Error cropping image:', error);
+      toast({ 
+        title: "Error cropping image", 
+        description: "Please try again",
+        variant: "destructive" 
+      });
     }
   };
 
@@ -488,6 +564,52 @@ export default function Profile() {
         </div>
       </section>
       </div>
+
+      {/* Crop Modal */}
+      <Dialog open={showCropModal} onOpenChange={setShowCropModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Crop Your Photo</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {selectedImage && (
+              <div className="flex justify-center">
+                <ReactCrop
+                  crop={crop}
+                  onChange={(_, percentCrop) => setCrop(percentCrop)}
+                  onComplete={(c) => setCompletedCrop(c)}
+                  aspect={1}
+                  circularCrop
+                >
+                  <img
+                    ref={imgRef}
+                    src={selectedImage}
+                    alt="Crop preview"
+                    style={{ maxHeight: '400px', maxWidth: '100%' }}
+                  />
+                </ReactCrop>
+              </div>
+            )}
+            <div className="flex gap-2 justify-end">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowCropModal(false);
+                  setSelectedImage(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleCropComplete}
+                disabled={uploading || !completedCrop}
+              >
+                {uploading ? "Uploading..." : "Save Photo"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
