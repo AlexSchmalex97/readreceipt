@@ -11,28 +11,30 @@ export default function People() {
 
   useEffect(() => {
     if (!hasSupabase || !supabase) return;
+
     (async () => {
       setLoading(true);
 
-      // Base query
-      let query = supabase
+      // Base query (no filter => recent users)
+      let req = supabase
         .from("profiles")
-        .select("id, display_name, username, avatar_url")
+        .select("id, display_name, username, email, avatar_url")
         .order("created_at", { ascending: false })
         .limit(50);
 
-      // If searching, look in display_name OR username (case-insensitive)
-      if (debounced.trim()) {
-        const like = `%${debounced.trim()}%`;
-        query = supabase
+      // Filter ONLY by username OR email (case-insensitive)
+      const term = debounced.trim();
+      if (term) {
+        const like = `%${term}%`;
+        req = supabase
           .from("profiles")
-          .select("id, display_name, username, avatar_url")
-          .or(`display_name.ilike.${like},username.ilike.${like}`)
+          .select("id, display_name, username, email, avatar_url")
+          .or(`username.ilike.${like},email.ilike.${like}`)
           .order("created_at", { ascending: false })
           .limit(50);
       }
 
-      const { data, error } = await query;
+      const { data, error } = await req;
       if (!error) setResults(data ?? []);
       setLoading(false);
     })();
@@ -45,7 +47,7 @@ export default function People() {
       <input
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="Search by name or username"
+        placeholder="Search by @username or email"
         className="w-full max-w-md px-3 py-2 rounded border bg-background"
       />
 
@@ -56,7 +58,10 @@ export default function People() {
       ) : (
         <div className="grid gap-3">
           {results.map((p) => (
-            <div key={p.id} className="flex items-center justify-between bg-card p-3 rounded border">
+            <div
+              key={p.id}
+              className="flex items-center justify-between bg-card p-3 rounded border"
+            >
               <div className="flex items-center gap-3">
                 <img
                   src={p.avatar_url || "/assets/readreceipt-logo.png"}
@@ -64,7 +69,9 @@ export default function People() {
                 />
                 <div>
                   <div className="font-medium">{p.display_name || "Reader"}</div>
-                  <div className="text-xs text-muted-foreground">@{p.username || p.id.slice(0, 6)}</div>
+                  <div className="text-xs text-muted-foreground">
+                    @{p.username || p.id.slice(0, 6)} · {p.email}
+                  </div>
                 </div>
               </div>
               <FollowButton targetUserId={p.id} />
