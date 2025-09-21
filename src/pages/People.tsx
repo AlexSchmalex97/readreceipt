@@ -11,26 +11,27 @@ export default function People() {
   const debounced = useDebounce(q, 250);
 
   useEffect(() => {
-    
-
     (async () => {
       setLoading(true);
 
-      // Base query (no filter => recent users)
+      // Get current user to determine what data we can access
+      const { data: { user } } = await supabase.auth.getUser();
+
+      // Base query - only select public fields for other users
       let req = supabase
         .from("profiles")
-        .select("id, display_name, username, email, avatar_url")
+        .select("id, display_name, username, avatar_url")
         .order("created_at", { ascending: false })
         .limit(50);
 
-      // Filter ONLY by username OR email (case-insensitive)
+      // Filter ONLY by username (remove email search for security)
       const term = debounced.trim();
       if (term) {
         const like = `%${term}%`;
         req = supabase
           .from("profiles")
-          .select("id, display_name, username, email, avatar_url")
-          .or(`username.ilike.${like},email.ilike.${like}`)
+          .select("id, display_name, username, avatar_url")
+          .ilike("username", like)
           .order("created_at", { ascending: false })
           .limit(50);
       }
@@ -50,7 +51,7 @@ export default function People() {
       <input
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="Search by @username or email"
+        placeholder="Search by @username"
         className="w-full max-w-md px-3 py-2 rounded border bg-background"
       />
 
@@ -73,7 +74,7 @@ export default function People() {
                 <div>
                   <div className="font-medium">{p.display_name || "Reader"}</div>
                   <div className="text-xs text-muted-foreground">
-                    @{p.username || p.id.slice(0, 6)} · {p.email}
+                    @{p.username || p.id.slice(0, 6)}
                   </div>
                 </div>
               </div>
