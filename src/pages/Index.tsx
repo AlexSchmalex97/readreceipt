@@ -212,9 +212,7 @@ const Index = () => {
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
                   <img
-                    src="/readreceipt-logo.png"
-                    alt="ReadReceipt"
-                    className="w-5 h-5"
+                    src="/assets/readreceipt-logo.png" alt="ReadReceipt logo" className="w-5 h-5"
                   />
                 </div>
                 <div>
@@ -255,9 +253,7 @@ const Index = () => {
           <div className="text-center py-16">
             <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
               <img
-                src="/readreceipt-logo.png"
-                alt="ReadReceipt logo"
-                className="w-24 h-24"
+                src="/assets/readreceipt-logo.png" alt="ReadReceipt logo" className="w-24 h-24"
               />
             </div>
             <h2 className="text-2xl font-semibold text-foreground mb-2">
