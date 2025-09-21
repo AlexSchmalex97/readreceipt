@@ -54,11 +54,13 @@ export default function Profile() {
       setIdentities((user.identities as any) ?? []);
 
       // load profile
-      const { data: prof } = await supabase
+      const { data: prof, error: profileError } = await supabase
         .from("profiles")
         .select("display_name, username")
         .eq("id", user.id)
         .maybeSingle();
+
+      console.log("Profile load result:", { prof, profileError, userId: user.id });
 
       setDisplayName(prof?.display_name ?? "");
       setUsername(prof?.username ?? "");
