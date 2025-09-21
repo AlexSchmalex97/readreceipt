@@ -154,7 +154,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_public_profiles: {
+        Args: { limit_count?: number; search?: string }
+        Returns: {
+          avatar_url: string
+          created_at: string
+          display_name: string
+          id: string
+          username: string
+        }[]
+      }
+      get_public_profiles_by_ids: {
+        Args: { ids: string[] }
+        Returns: {
+          avatar_url: string
+          created_at: string
+          display_name: string
+          id: string
+          username: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

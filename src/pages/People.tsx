@@ -14,30 +14,27 @@ export default function People() {
     (async () => {
       setLoading(true);
 
-      // Get current user to determine what data we can access
-      const { data: { user } } = await supabase.auth.getUser();
+      try {
+        const term = debounced.trim();
+        
+        // Use the secure RPC function instead of direct table query
+        const { data, error } = await supabase
+          .rpc('get_public_profiles', {
+            search: term || null,
+            limit_count: 50
+          });
 
-      // Base query - only select public fields for other users
-      let req = supabase
-        .from("profiles")
-        .select("id, display_name, username, avatar_url")
-        .order("created_at", { ascending: false })
-        .limit(50);
-
-      // Filter ONLY by username (remove email search for security)
-      const term = debounced.trim();
-      if (term) {
-        const like = `%${term}%`;
-        req = supabase
-          .from("profiles")
-          .select("id, display_name, username, avatar_url")
-          .ilike("username", like)
-          .order("created_at", { ascending: false })
-          .limit(50);
+        if (!error) {
+          setResults(data ?? []);
+        } else {
+          console.error('Error fetching profiles:', error);
+          setResults([]);
+        }
+      } catch (error) {
+        console.error('Unexpected error:', error);
+        setResults([]);
       }
-
-      const { data, error } = await req;
-      if (!error) setResults(data ?? []);
+      
       setLoading(false);
     })();
   }, [debounced]);
@@ -51,7 +48,7 @@ export default function People() {
       <input
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="Search by @username"
+        placeholder="Search by @username or display name"
         className="w-full max-w-md px-3 py-2 rounded border bg-background"
       />
 
