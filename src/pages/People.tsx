@@ -17,13 +17,24 @@ export default function People() {
       try {
         const term = debounced.trim();
         
-        // Use the secure RPC function instead of direct table query
-        const { data, error } = await supabase
-          .rpc('get_public_profiles', {
-            search: term || null,
-            limit_count: 50
-          });
+        // Use direct query but only select safe fields (no email)
+        let req = supabase
+          .from("profiles")
+          .select("id, display_name, username, avatar_url, created_at")
+          .order("created_at", { ascending: false })
+          .limit(50);
 
+        if (term) {
+          req = supabase
+            .from("profiles")
+            .select("id, display_name, username, avatar_url, created_at")
+            .or(`username.ilike.%${term}%,display_name.ilike.%${term}%`)
+            .order("created_at", { ascending: false })
+            .limit(50);
+        }
+
+        const { data, error } = await req;
+        
         if (!error) {
           setResults(data ?? []);
         } else {

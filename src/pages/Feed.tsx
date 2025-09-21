@@ -49,12 +49,13 @@ export default function Feed() {
       console.log("Following check:", { followingIds, followError });
       if (followingIds.length === 0) { setItems([]); setLoading(false); return; }
 
-      // PROGRESS events - using join with profiles which should work since RLS allows reading profiles for followed users
+      // PROGRESS events - back to using joins but only selecting safe profile fields
       const { data: progress, error: progressError } = await supabase
         .from("reading_progress")
         .select(`
           id, created_at, user_id, from_page, to_page, book_id,
-          books:book_id ( title, author )
+          books:book_id ( title, author ),
+          profiles:user_id ( display_name )
         `)
         .in("user_id", followingIds)
         .order("created_at", { ascending: false })
@@ -62,38 +63,25 @@ export default function Feed() {
 
       console.log("Progress query:", { progress, progressError });
 
-      // Get profile data separately using secure function
-      const { data: profilesData, error: profilesError } = await supabase
-        .rpc('get_public_profiles_by_ids', {
-          ids: followingIds
-        });
-
-      console.log("Profiles query:", { profilesData, profilesError });
-
-      // Create a lookup map for profiles
-      const profilesMap = new Map();
-      (profilesData ?? []).forEach(profile => {
-        profilesMap.set(profile.id, profile);
-      });
-
       const pItems: ProgressItem[] = (progress ?? []).map((r: any) => ({
         kind: "progress",
         id: r.id,
         created_at: r.created_at,
         user_id: r.user_id,
-        display_name: profilesMap.get(r.user_id)?.display_name ?? null,
+        display_name: r.profiles?.display_name ?? null,
         book_title: r.books?.title ?? null,
         book_author: r.books?.author ?? null,
         from_page: r.from_page ?? null,
         to_page: r.to_page,
       }));
 
-      // REVIEWS - similar approach for consistency
+      // REVIEWS - back to using joins
       const { data: reviews, error: reviewsError } = await supabase
         .from("reviews")
         .select(`
           id, created_at, user_id, rating, review, book_id,
-          books:book_id ( title, author )
+          books:book_id ( title, author ),
+          profiles:user_id ( display_name )
         `)
         .in("user_id", followingIds)
         .order("created_at", { ascending: false })
@@ -106,7 +94,7 @@ export default function Feed() {
         id: r.id,
         created_at: r.created_at,
         user_id: r.user_id,
-        display_name: profilesMap.get(r.user_id)?.display_name ?? null,
+        display_name: r.profiles?.display_name ?? null,
         book_title: r.books?.title ?? null,
         book_author: r.books?.author ?? null,
         rating: r.rating,
