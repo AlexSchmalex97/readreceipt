@@ -142,7 +142,7 @@ const Index = () => {
               <img
                 src="/assets/readreceipt-logo.png"
                 alt="ReadReceipt logo"
-                className="w-40 h-40"
+                className="w-35 h-35"
               />
             </div>
             <h2 className="text-2xl font-semibold text-foreground mb-2">
