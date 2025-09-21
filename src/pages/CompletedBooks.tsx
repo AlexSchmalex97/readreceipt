@@ -7,6 +7,7 @@ type CompletedBook = {
   title: string;
   author: string;
   total_pages: number;
+  current_page: number;
   created_at: string;
   user_id: string;
   review?: {
@@ -20,6 +21,29 @@ export default function CompletedBooks() {
   const [userId, setUserId] = useState<string | null>(null);
   const [completedBooks, setCompletedBooks] = useState<CompletedBook[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const handleMarkUnread = async (book: CompletedBook) => {
+    if (!userId) return;
+    try {
+      // Reset progress
+      const { error: upErr } = await supabase
+        .from("books")
+        .update({ current_page: 0 })
+        .eq("id", book.id);
+
+      // Log progress reset (optional, for feed visibility)
+      await supabase.from("reading_progress").insert([
+        { user_id: userId, book_id: book.id, from_page: book.current_page ?? book.total_pages, to_page: 0 },
+      ]);
+
+      if (!upErr) {
+        // Remove from completed list locally
+        setCompletedBooks((prev) => prev.filter((b) => b.id !== book.id));
+      }
+    } catch (e) {
+      console.error("Failed to mark unread", e);
+    }
+  };
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -121,6 +145,16 @@ export default function CompletedBooks() {
                     <p className="text-sm text-muted-foreground italic">No review yet</p>
                   </div>
                 )}
+
+                <div className="mt-4 flex justify-end">
+                  <button
+                    onClick={() => handleMarkUnread(book)}
+                    className="px-3 py-2 rounded border hover:bg-muted transition"
+                    aria-label={`Mark ${book.title} as unread`}
+                  >
+                    Mark as unread
+                  </button>
+                </div>
               </div>
             ))}
           </div>

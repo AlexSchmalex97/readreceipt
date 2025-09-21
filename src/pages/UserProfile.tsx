@@ -45,6 +45,7 @@ export default function UserProfile() {
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [myId, setMyId] = useState<string | null>(null);
+  const [canSeeProgress, setCanSeeProgress] = useState<boolean>(true);
 
   useEffect(() => {
     if (!userId) return;
@@ -65,19 +66,37 @@ export default function UserProfile() {
         if (profileError) throw profileError;
         setProfile(profileData);
 
-        // Get user's reading progress
-        const { data: progress, error: progressError } = await supabase
-          .from("reading_progress")
-          .select(`
-            id, created_at, user_id, from_page, to_page, book_id,
-            books:book_id ( title, author ),
-            profiles:user_id ( display_name )
-          `)
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false })
-          .limit(50);
+        // Determine if viewer can see progress (own or following)
+        let canSee = true;
+        if (me?.user?.id && me.user.id !== userId) {
+          const { data: followRow } = await supabase
+            .from("follows")
+            .select("follower_id")
+            .eq("follower_id", me.user.id)
+            .eq("following_id", userId)
+            .maybeSingle();
+          canSee = !!followRow;
+        }
+        setCanSeeProgress(canSee);
 
-        // Get user's reviews
+        // Get user's reading progress (respect RLS/visibility)
+        let progress: any[] | null = [];
+        if (canSee) {
+          const { data, error: progressError } = await supabase
+            .from("reading_progress")
+            .select(`
+              id, created_at, user_id, from_page, to_page, book_id,
+              books:book_id ( title, author ),
+              profiles:user_id ( display_name )
+            `)
+            .eq("user_id", userId)
+            .order("created_at", { ascending: false })
+            .limit(50);
+          progress = data ?? [];
+          if (progressError) console.warn("UserProfile progress error", progressError);
+        }
+
+        // Get user's reviews (public)
         const { data: reviews, error: reviewsError } = await supabase
           .from("reviews")
           .select(`
@@ -199,6 +218,12 @@ export default function UserProfile() {
             <BookOpen className="w-5 h-5" />
             Reading Activity
           </h2>
+
+          {!canSeeProgress && myId !== profile.id && (
+            <div className="bg-card/50 border rounded p-3 text-sm text-muted-foreground">
+              Follow this user to see their reading progress. Reviews are always public.
+            </div>
+          )}
 
           {activity.length === 0 ? (
             <div className="bg-card p-6 rounded-lg border text-center">
