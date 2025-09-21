@@ -16,17 +16,24 @@ export default function AuthButtons() {
   useEffect(() => {
     if (!hasSupabase || !supabase) return;
 
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (data.session?.user) {
-        setLoggedIn(true);
-        await fetchProfile(data.session.user.id);
+    const initAuth = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (data.session?.user) {
+          setLoggedIn(true);
+          await fetchProfile(data.session.user.id);
+        }
+      } catch (error) {
+        console.error("Auth session error:", error);
       }
-    });
+    };
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, sess) => {
+    initAuth();
+
+    const { data: sub } = supabase.auth.onAuthStateChange(async (_e, sess) => {
       if (sess?.user) {
         setLoggedIn(true);
-        fetchProfile(sess.user.id);
+        await fetchProfile(sess.user.id);
       } else {
         setLoggedIn(false);
         setUserName(null);
@@ -36,22 +43,35 @@ export default function AuthButtons() {
     return () => {
       try {
         sub?.subscription?.unsubscribe();
-      } catch {}
+      } catch (error) {
+        console.error("Auth cleanup error:", error);
+      }
     };
   }, []);
 
   async function fetchProfile(userId: string) {
-    const { data } = await supabase
-      .from("profiles")
-      .select("display_name")
-      .eq("id", userId)
-      .single();
-    if (data) setUserName(data.display_name);
+    if (!hasSupabase || !supabase) return;
+    
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", userId)
+        .single();
+      if (data) setUserName(data.display_name);
+    } catch (error) {
+      console.error("Profile fetch error:", error);
+    }
   }
 
   const togglePanel = () => setPanelOpen((v) => !v);
 
   async function handleEmailPassword() {
+    if (!hasSupabase || !supabase) {
+      alert("Authentication is not configured.");
+      return;
+    }
+
     try {
       if (!email || !password) return alert("Enter email and password.");
 
@@ -112,6 +132,11 @@ export default function AuthButtons() {
   }
 
   async function signInWithGoogle() {
+    if (!hasSupabase || !supabase) {
+      alert("Authentication is not configured.");
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
@@ -124,7 +149,13 @@ export default function AuthButtons() {
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    if (!hasSupabase || !supabase) return;
+    
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
   };
 
   if (!hasSupabase || !supabase) return null;
@@ -138,7 +169,7 @@ export default function AuthButtons() {
           </span>
           <button
             onClick={signOut}
-            className="px-3 py-2 rounded bg-secondary text-secondary-foreground"
+            className="px-3 py-2 rounded bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
           >
             Sign out
           </button>
@@ -147,7 +178,7 @@ export default function AuthButtons() {
         <>
           <button
             onClick={togglePanel}
-            className="px-3 py-2 rounded bg-primary text-primary-foreground"
+            className="px-3 py-2 rounded bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             Sign in / Create account
           </button>
@@ -164,7 +195,7 @@ export default function AuthButtons() {
                   onClick={() =>
                     setMode((m) => (m === "signin" ? "signup" : "signin"))
                   }
-                  className="text-xs underline"
+                  className="text-xs underline hover:no-underline"
                 >
                   {mode === "signin" ? "Need an account?" : "Have an account?"}
                 </button>
@@ -178,14 +209,14 @@ export default function AuthButtons() {
                       placeholder="Display name"
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
-                      className="w-full px-3 py-2 rounded border bg-background"
+                      className="w-full px-3 py-2 rounded border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                     <input
                       type="text"
                       placeholder="Username (unique)"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="w-full px-3 py-2 rounded border bg-background"
+                      className="w-full px-3 py-2 rounded border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                   </>
                 )}
@@ -197,7 +228,7 @@ export default function AuthButtons() {
                   }
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 rounded border bg-background"
+                  className="w-full px-3 py-2 rounded border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                   autoComplete="email"
                 />
                 <input
@@ -205,7 +236,7 @@ export default function AuthButtons() {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 rounded border bg-background"
+                  className="w-full px-3 py-2 rounded border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                   autoComplete={
                     mode === "signin" ? "current-password" : "new-password"
                   }
@@ -213,19 +244,22 @@ export default function AuthButtons() {
 
                 <button
                   onClick={handleEmailPassword}
-                  className="w-full px-3 py-2 rounded bg-secondary text-secondary-foreground"
+                  className="w-full px-3 py-2 rounded bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
                 >
                   {mode === "signin" ? "Sign in" : "Create account"}
                 </button>
               </div>
 
               <div className="relative my-3 text-center text-xs text-muted-foreground">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border"></div>
+                </div>
                 <span className="bg-card px-2">or</span>
               </div>
 
               <button
                 onClick={signInWithGoogle}
-                className="w-full px-3 py-2 rounded border"
+                className="w-full px-3 py-2 rounded border border-border hover:bg-accent transition-colors"
               >
                 Continue with Google
               </button>
