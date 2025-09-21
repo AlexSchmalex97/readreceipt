@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 
 export function AuthButtons() {
   const [loggedIn, setLoggedIn] = useState(false);
-  const [chooserOpen, setChooserOpen] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     if (!hasSupabase || !supabase) return;
@@ -19,33 +21,42 @@ export function AuthButtons() {
 
   if (!hasSupabase || !supabase) return null;
 
-  const signIn = () => setChooserOpen((v) => !v);
+  const togglePanel = () => setPanelOpen(v => !v);
+
+  async function handleEmailPassword() {
+    try {
+      if (!email || !password) return alert("Enter email and password.");
+      if (mode === "signin") {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+      } else {
+        // If email confirmation is ON, user must click verify email before session starts
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: window.location.origin }
+        });
+        if (error) throw error;
+        alert("Account created. Check your email if verification is required.");
+      }
+      setPanelOpen(false);
+      setEmail(""); setPassword("");
+    } catch (e: any) {
+      alert(e?.message ?? "Authentication failed.");
+    }
+  }
 
   async function signInWithGoogle() {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({ provider: "google" });
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: window.location.origin }
+      });
       if (error) throw error;
     } catch (e: any) {
       alert(e?.message ?? "Google sign-in failed.");
     }
   }
-
-// in AuthButtons.tsx
-async function signInWithEmail() {
-  try {
-    if (!email) return alert("Enter your email address first.");
-    const { error } = await supabase!.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin }, // 👈 key line
-    });
-    if (error) throw error;
-    alert("Check your email for a login link.");
-    setChooserOpen(false);
-  } catch (e: any) {
-    alert(e?.message ?? "Email sign-in failed.");
-  }
-}
-
 
   const signOut = async () => { await supabase.auth.signOut(); };
 
@@ -61,36 +72,61 @@ async function signInWithEmail() {
       ) : (
         <>
           <button
-            onClick={signIn}
+            onClick={togglePanel}
             className="px-3 py-2 rounded bg-primary text-primary-foreground"
           >
             Sign in / Create account
           </button>
 
-          {chooserOpen && (
-            <div className="absolute right-0 mt-2 w-72 rounded border border-border bg-card p-4 shadow-card z-10 space-y-3">
-              <button
-                onClick={signInWithGoogle}
-                className="w-full px-3 py-2 rounded bg-secondary text-secondary-foreground"
-              >
-                Continue with Google
-              </button>
+          {panelOpen && (
+            <div className="absolute right-0 mt-2 w-80 rounded border border-border bg-card p-4 shadow-card z-10">
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-sm font-medium">
+                  {mode === "signin" ? "Sign in with Email" : "Create an Account"}
+                </div>
+                <button
+                  onClick={() => setMode(m => (m === "signin" ? "signup" : "signin"))}
+                  className="text-xs underline"
+                >
+                  {mode === "signin" ? "Need an account?" : "Have an account?"}
+                </button>
+              </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 mb-3">
                 <input
                   type="email"
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-3 py-2 rounded border bg-background"
+                  autoComplete="email"
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-3 py-2 rounded border bg-background"
+                  autoComplete={mode === "signin" ? "current-password" : "new-password"}
                 />
                 <button
-                  onClick={signInWithEmail}
+                  onClick={handleEmailPassword}
                   className="w-full px-3 py-2 rounded bg-secondary text-secondary-foreground"
                 >
-                  Send magic link
+                  {mode === "signin" ? "Sign in" : "Create account"}
                 </button>
               </div>
+
+              <div className="relative my-3 text-center text-xs text-muted-foreground">
+                <span className="bg-card px-2">or</span>
+              </div>
+
+              <button
+                onClick={signInWithGoogle}
+                className="w-full px-3 py-2 rounded border"
+              >
+                Continue with Google
+              </button>
             </div>
           )}
         </>
