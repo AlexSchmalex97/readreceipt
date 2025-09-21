@@ -29,11 +29,10 @@ export default function People() {
 
       try {
         const { data, error } = await supabase
-          .from("profiles")
-          .select("id, display_name, username, avatar_url, created_at")
-          .or(`username.ilike.%${term}%,display_name.ilike.%${term}%`)
-          .order("created_at", { ascending: false })
-          .limit(50);
+          .rpc('get_safe_public_profiles', { 
+            search: term, 
+            limit_count: 50 
+          });
         
         if (!error) {
           setResults(data ?? []);

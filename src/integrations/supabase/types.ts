@@ -190,6 +190,16 @@ export type Database = {
           username: string
         }[]
       }
+      get_safe_public_profiles: {
+        Args: { limit_count?: number; search?: string }
+        Returns: {
+          avatar_url: string
+          created_at: string
+          display_name: string
+          id: string
+          username: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
