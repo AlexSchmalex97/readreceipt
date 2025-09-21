@@ -18,19 +18,20 @@ export function AuthButtons() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
 
   // Signup fields
-  const [name, setName] = useState("");          // display name
-  const [username, setUsername] = useState("");  // unique username
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const normUsername = useMemo(() => normalizeUsername(username), [username]);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [checking, setChecking] = useState(false);
 
   // Auth fields
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState(""); // email OR username for sign-in
+  const [email, setEmail] = useState("");           // email for signup
   const [password, setPassword] = useState("");
 
-  // Load session + greeting name
   useEffect(() => {
     if (!hasSupabase || !supabase) return;
+
     const load = async () => {
       const { data } = await supabase.auth.getSession();
       const uid = data.session?.user?.id ?? null;
@@ -66,7 +67,10 @@ export function AuthButtons() {
           .maybeSingle()
           .then(({ data }) => {
             setDisplayName(
-              data?.display_name ?? sess?.user?.user_metadata?.name ?? sess?.user?.email ?? "Reader"
+              data?.display_name ??
+                sess?.user?.user_metadata?.name ??
+                sess?.user?.email ??
+                "Reader"
             );
           });
       } else {
@@ -81,7 +85,7 @@ export function AuthButtons() {
     };
   }, []);
 
-  // Username availability check (only on signup mode)
+  // Username availability check (signup)
   useEffect(() => {
     (async () => {
       if (!hasSupabase || !supabase) return;
@@ -106,17 +110,48 @@ export function AuthButtons() {
 
   async function handleEmailPassword() {
     try {
-      if (!email || !password) return alert("Enter email and password.");
+      if (!password) return alert("Enter your password.");
 
       if (mode === "signin") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (!identifier.trim()) return alert("Enter your email or username.");
+
+        // If identifier looks like an email, sign in directly.
+        let emailToUse = "";
+        const looksLikeEmail = identifier.includes("@");
+
+        if (looksLikeEmail) {
+          emailToUse = identifier.trim();
+        } else {
+          // Treat as username: look up the email for this username.
+          const uname = normalizeUsername(identifier);
+          if (!uname) return alert("Enter a valid username.");
+
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("email")
+            .eq("username", uname)
+            .maybeSingle();
+
+          if (error) throw error;
+          if (!data?.email) {
+            return alert("No account found for that username.");
+          }
+          emailToUse = data.email;
+        }
+
+        const { error } = await supabase.auth.signInWithPassword({
+          email: emailToUse,
+          password,
+        });
         if (error) throw error;
       } else {
+        // SIGN UP
         if (!name.trim()) return alert("Please enter your name.");
         if (!normUsername) return alert("Please choose a username.");
         if (usernameAvailable === false) return alert("Username is taken.");
+        if (!email.trim()) return alert("Enter your email.");
+        if (!password.trim()) return alert("Create a password.");
 
-        // Sign up; Name goes into user metadata (trigger fills profiles.display_name)
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -127,21 +162,23 @@ export function AuthButtons() {
         });
         if (error) throw error;
 
-        // If session is already active (email verification off), also set username now
+        // If session is already active (verification off), update profile row immediately
         const { data: u } = await supabase.auth.getUser();
         if (u?.user?.id) {
           await supabase
             .from("profiles")
-            .update({ display_name: name, username: normUsername })
+            .update({ display_name: name, username: normUsername, email })
             .eq("id", u.user.id);
         }
 
         alert("Account created. If email verification is enabled, check your inbox.");
       }
 
+      // reset panel inputs
       setPanelOpen(false);
       setName("");
       setUsername("");
+      setIdentifier("");
       setEmail("");
       setPassword("");
     } catch (e: any) {
@@ -165,17 +202,14 @@ export function AuthButtons() {
     await supabase.auth.signOut();
   };
 
-  // Logged-in view: greeting + Profile button + Sign out
+  // Logged-in view
   if (userId) {
     return (
       <div className="flex items-center gap-3">
         <span className="text-sm">
           Happy reading, <span className="font-medium">{displayName ?? "Reader"}</span>!
         </span>
-        <a
-          href="/profile"
-          className="px-3 py-2 rounded border hover:bg-muted text-sm"
-        >
+        <a href="/profile" className="px-3 py-2 rounded border hover:bg-muted text-sm">
           Profile
         </a>
         <button
@@ -188,7 +222,7 @@ export function AuthButtons() {
     );
   }
 
-  // Logged-out view: button → panel (signup includes Name + Username)
+  // Logged-out view
   return (
     <div className="relative">
       <button
@@ -202,7 +236,7 @@ export function AuthButtons() {
         <div className="absolute right-0 mt-2 w-80 rounded border border-border bg-card p-4 shadow-card z-10">
           <div className="flex items-center justify-between mb-3">
             <div className="text-sm font-medium">
-              {mode === "signin" ? "Sign in with Email" : "Create an Account"}
+              {mode === "signin" ? "Sign in" : "Create an Account"}
             </div>
             <button
               onClick={() => setMode((m) => (m === "signin" ? "signup" : "signin"))}
@@ -212,7 +246,7 @@ export function AuthButtons() {
             </button>
           </div>
 
-          {mode === "signup" && (
+          {mode === "signup" ? (
             <>
               <input
                 type="text"
@@ -225,7 +259,7 @@ export function AuthButtons() {
               <div className="mb-2">
                 <input
                   type="text"
-                  placeholder="Username (letters, numbers, _ )"
+                  placeholder="Choose a username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full px-3 py-2 rounded border bg-background"
@@ -244,33 +278,59 @@ export function AuthButtons() {
                   </div>
                 )}
               </div>
+              <div className="space-y-2 mb-3">
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-3 py-2 rounded border bg-background"
+                  autoComplete="email"
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-3 py-2 rounded border bg-background"
+                  autoComplete="new-password"
+                />
+              </div>
+              <button
+                onClick={handleEmailPassword}
+                className="w-full px-3 py-2 rounded bg-secondary text-secondary-foreground"
+              >
+                Create account
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="space-y-2 mb-3">
+                <input
+                  type="text"
+                  placeholder="Email or username"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  className="w-full px-3 py-2 rounded border bg-background"
+                  autoComplete="username email"
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-3 py-2 rounded border bg-background"
+                  autoComplete="current-password"
+                />
+              </div>
+              <button
+                onClick={handleEmailPassword}
+                className="w-full px-3 py-2 rounded bg-secondary text-secondary-foreground"
+              >
+                Sign in
+              </button>
             </>
           )}
-
-          <div className="space-y-2 mb-3">
-            <input
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 rounded border bg-background"
-              autoComplete="email"
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 rounded border bg-background"
-              autoComplete={mode === "signin" ? "current-password" : "new-password"}
-            />
-            <button
-              onClick={handleEmailPassword}
-              className="w-full px-3 py-2 rounded bg-secondary text-secondary-foreground"
-            >
-              {mode === "signin" ? "Sign in" : "Create account"}
-            </button>
-          </div>
 
           <div className="relative my-3 text-center text-xs text-muted-foreground">
             <span className="bg-card px-2">or</span>
