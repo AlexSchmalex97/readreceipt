@@ -7,34 +7,33 @@ import { Navigation } from "@/components/Navigation";
 export default function People() {
   const [q, setQ] = useState("");
   const [results, setResults] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const debounced = useDebounce(q, 250);
 
   useEffect(() => {
     (async () => {
+      const term = debounced.trim();
+      
+      // Don't search if there's no search term
+      if (!term) {
+        setResults([]);
+        setLoading(false);
+        setHasSearched(false);
+        return;
+      }
+
       setLoading(true);
+      setHasSearched(true);
 
       try {
-        const term = debounced.trim();
-        
-        // Use direct query but only select safe fields (no email)
-        let req = supabase
+        const { data, error } = await supabase
           .from("profiles")
           .select("id, display_name, username, avatar_url, created_at")
+          .or(`username.ilike.%${term}%,display_name.ilike.%${term}%`)
           .order("created_at", { ascending: false })
           .limit(50);
-
-        if (term) {
-          req = supabase
-            .from("profiles")
-            .select("id, display_name, username, avatar_url, created_at")
-            .or(`username.ilike.%${term}%,display_name.ilike.%${term}%`)
-            .order("created_at", { ascending: false })
-            .limit(50);
-        }
-
-        const { data, error } = await req;
         
         if (!error) {
           setResults(data ?? []);
@@ -65,9 +64,11 @@ export default function People() {
       />
 
       {loading ? (
-        <div className="text-muted-foreground">Loading…</div>
+        <div className="text-muted-foreground">Searching…</div>
+      ) : !hasSearched ? (
+        <div className="text-muted-foreground">Enter a username or display name to find readers.</div>
       ) : results.length === 0 ? (
-        <div className="text-muted-foreground">No users found.</div>
+        <div className="text-muted-foreground">No users found for "{q.trim()}".</div>
       ) : (
         <div className="grid gap-3">
           {results.map((p) => (
