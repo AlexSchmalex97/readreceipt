@@ -26,7 +26,6 @@ export default function Reviews() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
   }, []);
 
@@ -112,46 +111,89 @@ export default function Reviews() {
   return (
     <div className="min-h-screen bg-gradient-soft">
       <Navigation />
-      <div className="container mx-auto px-4 py-8 grid gap-10">
-      <section>
-        <h1 className="text-2xl font-bold mb-4">Finished Books</h1>
-        {finished.length === 0 ? (
-          <p className="text-muted-foreground">No finished books yet.</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {finished.map((b) => (
-              <div key={b.id} className="bg-card p-4 rounded border">
-                <div className="font-semibold">{b.title}</div>
-                <div className="text-sm text-muted-foreground">{b.author}</div>
-                <div className="mt-1 text-xs text-muted-foreground">
-                  Completed • {new Date(b.created_at).toLocaleDateString()}
+      <div className="container mx-auto px-4 py-8 space-y-10">
+        
+        <section>
+          <h1 className="text-2xl font-bold mb-6">Your Finished Books & Reviews</h1>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Finished Books */}
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Finished Books ({finished.length})</h2>
+              {finished.length === 0 ? (
+                <div className="bg-card p-6 rounded-lg border text-center">
+                  <p className="text-muted-foreground">No finished books yet.</p>
+                  <a href="/" className="text-primary underline mt-2 inline-block">Start reading a book</a>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+              ) : (
+                <div className="space-y-4">
+                  {finished.map((b) => (
+                    <div key={b.id} className="bg-card p-4 rounded-lg border">
+                      <div className="font-semibold">{b.title}</div>
+                      <div className="text-sm text-muted-foreground">{b.author}</div>
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        {b.total_pages} pages • Completed {new Date(b.created_at).toLocaleDateString()}
+                      </div>
+                      
+                      {/* Check if this book has a review */}
+                      {(() => {
+                        const bookReview = reviews.find(r => r.books?.title === b.title && r.books?.author === b.author);
+                        return bookReview ? (
+                          <div className="mt-3 pt-3 border-t">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-sm font-medium">Your Review:</span>
+                              <span className="text-sm">⭐ {bookReview.rating}/5</span>
+                            </div>
+                            {bookReview.review && (
+                              <p className="text-sm text-muted-foreground italic">"{bookReview.review}"</p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="mt-3 pt-3 border-t">
+                            <p className="text-sm text-muted-foreground italic">No review yet</p>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-      <section>
-        <h2 className="text-2xl font-bold mb-4">My Reviews</h2>
-        {reviews.length === 0 ? (
-          <p className="text-muted-foreground">You haven’t left any reviews yet.</p>
-        ) : (
-          <div className="space-y-4">
-            {reviews.map((r) => (
-              <div key={r.id} className="bg-card p-4 rounded border">
-                <div className="font-semibold">{r.books?.title ?? "Untitled"}</div>
-                <div className="text-sm text-muted-foreground">{r.books?.author ?? "Unknown author"}</div>
-                <div className="mt-2">⭐ {r.rating}/5</div>
-                {r.review && <p className="mt-2">{r.review}</p>}
-                <div className="mt-1 text-xs text-muted-foreground">
-                  {new Date(r.created_at).toLocaleString()}
+            {/* Your Reviews */}
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Your Reviews ({reviews.length})</h2>
+              {reviews.length === 0 ? (
+                <div className="bg-card p-6 rounded-lg border text-center">
+                  <p className="text-muted-foreground">You haven't left any reviews yet.</p>
+                  <p className="text-sm text-muted-foreground mt-1">Complete a book to add your first review!</p>
                 </div>
-              </div>
-            ))}
+              ) : (
+                <div className="space-y-4">
+                  {reviews.map((r) => (
+                    <div key={r.id} className="bg-card p-4 rounded-lg border">
+                      <div className="font-semibold">{r.books?.title ?? "Untitled"}</div>
+                      <div className="text-sm text-muted-foreground">{r.books?.author ?? "Unknown author"}</div>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className="text-sm font-medium">Rating:</span>
+                        <span>⭐ {r.rating}/5</span>
+                      </div>
+                      {r.review && (
+                        <div className="mt-2">
+                          <span className="text-sm font-medium">Review:</span>
+                          <p className="text-sm mt-1 italic">"{r.review}"</p>
+                        </div>
+                      )}
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        {new Date(r.created_at).toLocaleString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        )}
-      </section>
+        </section>
       </div>
     </div>
   );

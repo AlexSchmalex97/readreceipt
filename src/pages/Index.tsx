@@ -210,6 +210,12 @@ const Index = () => {
       <Navigation />
 
       <main className="container mx-auto px-4 py-8">
+        {/* Header with Add Book button */}
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-foreground">Your Reading Journey</h1>
+          <AddBookDialog onAddBook={handleAddBook} />
+        </div>
+
         {/* Stats */}
         {books.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
@@ -258,10 +264,10 @@ const Index = () => {
             <AddBookDialog onAddBook={handleAddBook} />
           </div>
         ) : (
-          <div className="space-y-10">
+          <div className="space-y-8">
             {inProgressBooks.length > 0 && (
               <section>
-                <h2 className="text-xl font-semibold text-foreground mb-4">In Progress</h2>
+                <h2 className="text-xl font-semibold text-foreground mb-4">Currently Reading</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {inProgressBooks.map((book) => (
                     <BookCard
@@ -274,30 +280,14 @@ const Index = () => {
               </section>
             )}
 
-            {completedBookItems.length > 0 && (
-              <section>
-                <h2 className="text-xl font-semibold text-foreground mb-4">Completed</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {completedBookItems.map((book) => (
-                    <BookCard
-                      key={book.id}
-                      book={book}
-                      onUpdateProgress={handleUpdateProgress}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {inProgressBooks.length === 0 && completedBookItems.length === 0 && (
-              <div className="text-center py-16">
-                <h2 className="text-2xl font-semibold text-foreground mb-2">
-                  No books in your library yet
-                </h2>
-                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                  Add a book to get started.
+            {inProgressBooks.length === 0 && (
+              <div className="text-center py-12 bg-card rounded-lg border">
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  No books in progress
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  Start reading a new book to track your progress!
                 </p>
-                <AddBookDialog onAddBook={handleAddBook} />
               </div>
             )}
           </div>
