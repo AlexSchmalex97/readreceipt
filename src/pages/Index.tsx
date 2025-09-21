@@ -193,8 +193,9 @@ const Index = () => {
   ).length;
   const completedBooks = books.filter((b) => b.currentPage >= b.totalPages).length;
   
-  // Filter out completed books from the main display
+  // Lists for rendering
   const inProgressBooks = books.filter((b) => b.currentPage < b.totalPages);
+  const completedBookItems = books.filter((b) => b.currentPage >= b.totalPages);
 
   if (loading) {
     return (
@@ -238,8 +239,8 @@ const Index = () => {
           </div>
         )}
 
-        {/* Books Grid / Empty State */}
-        {inProgressBooks.length === 0 && books.length === 0 ? (
+        {/* Books sections */}
+        {books.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
               <img
@@ -256,35 +257,49 @@ const Index = () => {
             </p>
             <AddBookDialog onAddBook={handleAddBook} />
           </div>
-        ) : inProgressBooks.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-              <img
-                src="/assets/readreceipt-logo.png"
-                alt="ReadReceipt logo"
-                className="w-24 h-24"
-              />
-            </div>
-            <h2 className="text-2xl font-semibold text-foreground mb-2">
-              All Books Completed! 🎉
-            </h2>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Great job! You've finished all your books. Add a new book to continue your reading journey.
-            </p>
-            <AddBookDialog onAddBook={handleAddBook} />
-          </div>
         ) : (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-foreground">Currently Reading</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {inProgressBooks.map((book) => (
-                <BookCard
-                  key={book.id}
-                  book={book}
-                  onUpdateProgress={handleUpdateProgress}
-                />
-              ))}
-            </div>
+          <div className="space-y-10">
+            {inProgressBooks.length > 0 && (
+              <section>
+                <h2 className="text-xl font-semibold text-foreground mb-4">In Progress</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {inProgressBooks.map((book) => (
+                    <BookCard
+                      key={book.id}
+                      book={book}
+                      onUpdateProgress={handleUpdateProgress}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {completedBookItems.length > 0 && (
+              <section>
+                <h2 className="text-xl font-semibold text-foreground mb-4">Completed</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {completedBookItems.map((book) => (
+                    <BookCard
+                      key={book.id}
+                      book={book}
+                      onUpdateProgress={handleUpdateProgress}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {inProgressBooks.length === 0 && completedBookItems.length === 0 && (
+              <div className="text-center py-16">
+                <h2 className="text-2xl font-semibold text-foreground mb-2">
+                  No books in your library yet
+                </h2>
+                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                  Add a book to get started.
+                </p>
+                <AddBookDialog onAddBook={handleAddBook} />
+              </div>
+            )}
           </div>
         )}
       </main>
