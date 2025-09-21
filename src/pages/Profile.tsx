@@ -1,6 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { Camera, User } from "lucide-react";
 
 function normalizeUsername(raw: string) {
   return raw
@@ -24,6 +29,9 @@ export default function Profile() {
   // profile fields
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
+  const [bio, setBio] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const normUsername = useMemo(() => normalizeUsername(username), [username]);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
@@ -31,6 +39,10 @@ export default function Profile() {
   // auth fields
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
+
+  // refs
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   // providers
   const [identities, setIdentities] = useState<Identity[]>([]);
@@ -56,7 +68,7 @@ export default function Profile() {
       // load profile
       const { data: prof, error: profileError } = await supabase
         .from("profiles")
-        .select("display_name, username")
+        .select("display_name, username, bio, avatar_url")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -64,6 +76,8 @@ export default function Profile() {
 
       setDisplayName(prof?.display_name ?? "");
       setUsername(prof?.username ?? "");
+      setBio(prof?.bio ?? "");
+      setAvatarUrl(prof?.avatar_url ?? null);
       setLoading(false);
     })();
   }, []);
@@ -110,18 +124,83 @@ export default function Profile() {
   }
 
   // Actions
+  const uploadAvatar = async (file: File) => {
+    if (!uid) return;
+    
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${uid}/avatar.${fileExt}`;
+
+      // Remove old avatar if it exists
+      if (avatarUrl) {
+        const oldPath = avatarUrl.split('/').pop();
+        if (oldPath) {
+          await supabase.storage.from('avatars').remove([`${uid}/${oldPath}`]);
+        }
+      }
+
+      // Upload new avatar
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data } = supabase.storage.from('avatars').getPublicUrl(fileName);
+      const newAvatarUrl = data.publicUrl;
+
+      // Update profile
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .upsert({ 
+          id: uid,
+          avatar_url: newAvatarUrl,
+          display_name: displayName.trim() || null,
+          username: normUsername || null,
+          bio: bio.trim() || null,
+          email: email
+        });
+
+      if (updateError) throw updateError;
+
+      setAvatarUrl(newAvatarUrl);
+      toast({ title: "Profile photo updated!" });
+    } catch (error: any) {
+      toast({ 
+        title: "Error uploading photo", 
+        description: error.message,
+        variant: "destructive" 
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      uploadAvatar(file);
+    }
+  };
+
   const saveProfile = async () => {
     try {
       if (!displayName.trim()) return alert("Please enter a display name.");
       if (!normUsername) return alert("Please enter a username.");
       if (usernameAvailable === false) return alert("That username is taken.");
 
-      console.log("Saving profile:", { uid, displayName: displayName.trim(), username: normUsername });
+      console.log("Saving profile:", { uid, displayName: displayName.trim(), username: normUsername, bio: bio.trim() });
 
-      // First try to update existing profile
+      // Try to update existing profile
       const { data: updateData, error: updateError } = await supabase
         .from("profiles")
-        .update({ display_name: displayName.trim(), username: normUsername })
+        .update({ 
+          display_name: displayName.trim(), 
+          username: normUsername,
+          bio: bio.trim() || null
+        })
         .eq("id", uid)
         .select();
 
@@ -137,7 +216,8 @@ export default function Profile() {
               id: uid,
               display_name: displayName.trim(),
               username: normUsername,
-              email: email // Include email from the current state
+              bio: bio.trim() || null,
+              email: email
             }
           ])
           .select();
@@ -152,10 +232,14 @@ export default function Profile() {
       // Dispatch a custom event to notify other components about the profile update
       window.dispatchEvent(new CustomEvent('profile-updated'));
       
-      alert("Profile updated! Your display name will now appear in greetings and social features.");
+      toast({ title: "Profile updated!" });
     } catch (e: any) {
       console.error("Profile save error:", e);
-      alert(e?.message ?? "Failed to update profile.");
+      toast({ 
+        title: "Error saving profile", 
+        description: e?.message ?? "Failed to update profile.",
+        variant: "destructive" 
+      });
     }
   };
 
@@ -224,6 +308,55 @@ export default function Profile() {
       <div className="container mx-auto px-4 py-8 max-w-2xl">
       <h1 className="text-2xl font-bold mb-6">Your Profile</h1>
 
+      {/* Profile Photo Section */}
+      <section className="bg-card border rounded p-4 mb-6">
+        <h2 className="font-semibold mb-3">Profile Photo</h2>
+        <div className="flex items-center gap-6">
+          <div className="relative">
+            <div className="w-16 h-16 rounded-full overflow-hidden bg-muted border-2 border-border">
+              {avatarUrl ? (
+                <img 
+                  src={avatarUrl} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <User className="w-6 h-6 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary rounded-full flex items-center justify-center text-primary-foreground hover:opacity-90 transition"
+            >
+              <Camera className="w-3 h-3" />
+            </button>
+          </div>
+          <div>
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              variant="outline"
+              size="sm"
+            >
+              {uploading ? "Uploading..." : "Change Photo"}
+            </Button>
+            <p className="text-xs text-muted-foreground mt-1">
+              JPG, PNG up to 5MB
+            </p>
+          </div>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+      </section>
+
       <section className="bg-card border rounded p-4 mb-6">
         <h2 className="font-semibold mb-3">Public Profile</h2>
         <div className="text-sm text-muted-foreground mb-4 p-3 bg-accent/30 rounded">
@@ -263,6 +396,17 @@ export default function Profile() {
                   : "• taken"}
               </div>
             )}
+          </label>
+
+          <label className="grid gap-1">
+            <span className="text-sm text-muted-foreground">Bio</span>
+            <textarea
+              className="border rounded px-3 py-2 bg-background resize-none"
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="Tell other readers about yourself..."
+              rows={3}
+            />
           </label>
 
           <div className="flex gap-2">

@@ -36,6 +36,7 @@ interface UserProfile {
   display_name: string | null;
   username: string | null;
   avatar_url: string | null;
+  bio: string | null;
   created_at: string;
 }
 
@@ -59,7 +60,7 @@ export default function UserProfile() {
         // Get user profile
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("id, display_name, username, avatar_url, created_at")
+          .select("id, display_name, username, avatar_url, bio, created_at")
           .eq("id", userId)
           .single();
 
@@ -197,7 +198,7 @@ export default function UserProfile() {
               <img
                 src={profile.avatar_url || "/assets/readreceipt-logo.png"}
                 alt="Profile"
-                className="w-16 h-16 rounded-full"
+                className="w-16 h-16 rounded-full object-cover"
               />
               <div>
                 <h1 className="text-2xl font-bold text-foreground">
@@ -206,7 +207,12 @@ export default function UserProfile() {
                 <p className="text-muted-foreground">
                   @{profile.username || profile.id.slice(0, 8)}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                {profile.bio && (
+                  <p className="text-sm text-muted-foreground mt-1 max-w-md">
+                    {profile.bio}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">
                   Member since {new Date(profile.created_at).toLocaleDateString()}
                 </p>
               </div>

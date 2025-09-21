@@ -8,6 +8,7 @@ type ProgressItem = {
   created_at: string;
   user_id: string;
   display_name: string | null;
+  avatar_url: string | null;
   book_title: string | null;
   book_author: string | null;
   from_page: number | null;
@@ -20,6 +21,7 @@ type ReviewItem = {
   created_at: string;
   user_id: string;
   display_name: string | null;
+  avatar_url: string | null;
   book_title: string | null;
   book_author: string | null;
   rating: number;
@@ -67,17 +69,18 @@ export default function Feed() {
       // Get profile information separately
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, display_name")
+        .select("id, display_name, avatar_url")
         .in("id", targetIds);
 
-      const profileMap = new Map(profiles?.map(p => [p.id, p.display_name]) || []);
+      const profileMap = new Map(profiles?.map(p => [p.id, { display_name: p.display_name, avatar_url: p.avatar_url }]) || []);
 
       const pItems: ProgressItem[] = (progress ?? []).map((r: any) => ({
         kind: "progress",
         id: r.id,
         created_at: r.created_at,
         user_id: r.user_id,
-        display_name: profileMap.get(r.user_id) ?? null,
+        display_name: profileMap.get(r.user_id)?.display_name ?? null,
+        avatar_url: profileMap.get(r.user_id)?.avatar_url ?? null,
         book_title: r.books?.title ?? null,
         book_author: r.books?.author ?? null,
         from_page: r.from_page ?? null,
@@ -102,7 +105,8 @@ export default function Feed() {
         id: r.id,
         created_at: r.created_at,
         user_id: r.user_id,
-        display_name: profileMap.get(r.user_id) ?? null,
+        display_name: profileMap.get(r.user_id)?.display_name ?? null,
+        avatar_url: profileMap.get(r.user_id)?.avatar_url ?? null,
         book_title: r.books?.title ?? null,
         book_author: r.books?.author ?? null,
         rating: r.rating,
@@ -142,11 +146,21 @@ export default function Feed() {
       {items.map((it) =>
         it.kind === "progress" ? (
           <div key={`p-${it.id}`} className="bg-card p-4 rounded border">
-            <div className="text-sm text-muted-foreground">
-              {new Date(it.created_at).toLocaleString()}
+            <div className="flex items-center gap-3 mb-2">
+              <img
+                src={it.avatar_url || "/assets/readreceipt-logo.png"}
+                alt="Profile"
+                className="w-8 h-8 rounded-full object-cover"
+              />
+              <div className="flex-1">
+                <div className="font-medium">{it.display_name || "Reader"}</div>
+                <div className="text-sm text-muted-foreground">
+                  {new Date(it.created_at).toLocaleString()}
+                </div>
+              </div>
             </div>
-            <div className="font-medium">
-              {it.display_name || "Reader"} read to page {it.to_page}
+            <div className="ml-11">
+              Read to page {it.to_page}
               {typeof it.from_page === "number" && it.from_page >= 0 ? ` (from ${it.from_page})` : ""} of{" "}
               <em>{it.book_title ?? "Untitled"}</em>
               {it.book_author ? ` by ${it.book_author}` : ""}
@@ -154,14 +168,26 @@ export default function Feed() {
           </div>
         ) : (
           <div key={`r-${it.id}`} className="bg-card p-4 rounded border">
-            <div className="text-sm text-muted-foreground">
-              {new Date(it.created_at).toLocaleString()}
+            <div className="flex items-center gap-3 mb-2">
+              <img
+                src={it.avatar_url || "/assets/readreceipt-logo.png"}
+                alt="Profile"
+                className="w-8 h-8 rounded-full object-cover"
+              />
+              <div className="flex-1">
+                <div className="font-medium">{it.display_name || "Reader"}</div>
+                <div className="text-sm text-muted-foreground">
+                  {new Date(it.created_at).toLocaleString()}
+                </div>
+              </div>
             </div>
-            <div className="font-medium">
-              {it.display_name || "Reader"} reviewed <em>{it.book_title ?? "Untitled"}</em>
-              {it.book_author ? ` by ${it.book_author}` : ""}: ⭐ {it.rating}/5
+            <div className="ml-11">
+              <div className="font-medium mb-1">
+                Reviewed <em>{it.book_title ?? "Untitled"}</em>
+                {it.book_author ? ` by ${it.book_author}` : ""}: ⭐ {it.rating}/5
+              </div>
+              {it.review && <p>{it.review}</p>}
             </div>
-            {it.review && <p className="mt-2">{it.review}</p>}
           </div>
         )
       )}
