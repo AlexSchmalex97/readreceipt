@@ -190,11 +190,8 @@ const Index = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <img
-                src="/readreceipt-logo.png"
-                alt="ReadReceipt logo"
-                className="w-14 h-14"
-              />
+              <img src="/assets/readreceipt-logo.png" alt="ReadReceipt logo" className="w-14 h-14" />
+
               <div>
                 <h1 className="text-2xl font-bold text-primary">ReadReceipt</h1>
                 <p className="text-sm text-muted-foreground">
