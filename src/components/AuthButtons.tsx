@@ -172,9 +172,10 @@ export default function AuthButtons() {
     <div className="relative">
       {loggedIn ? (
         <div className="flex items-center gap-3">
-          <span className="text-sm text-muted-foreground">
-            Happy reading, {userName || "Reader"}!
-          </span>
+          <div className="text-sm text-muted-foreground text-right">
+            <div>Happy reading,</div>
+            <div>{userName || "Reader"}!</div>
+          </div>
           <button
             onClick={signOut}
             className="px-3 py-2 rounded bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
