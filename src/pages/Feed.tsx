@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
+import { BookOpen } from "lucide-react";
 
 type ProgressItem = {
   kind: "progress";
@@ -11,6 +12,7 @@ type ProgressItem = {
   avatar_url: string | null;
   book_title: string | null;
   book_author: string | null;
+  book_cover_url?: string | null;
   from_page: number | null;
   to_page: number;
 };
@@ -24,6 +26,7 @@ type ReviewItem = {
   avatar_url: string | null;
   book_title: string | null;
   book_author: string | null;
+  book_cover_url?: string | null;
   rating: number;
   review: string | null;
 };
@@ -58,7 +61,7 @@ export default function Feed() {
         .from("reading_progress")
         .select(`
           id, created_at, user_id, from_page, to_page, book_id,
-          books!reading_progress_book_id_fkey ( title, author )
+          books!reading_progress_book_id_fkey ( title, author, cover_url )
         `)
         .in("user_id", targetIds)
         .order("created_at", { ascending: false })
@@ -83,6 +86,7 @@ export default function Feed() {
         avatar_url: profileMap.get(r.user_id)?.avatar_url ?? null,
         book_title: r.books?.title ?? null,
         book_author: r.books?.author ?? null,
+        book_cover_url: r.books?.cover_url ?? null,
         from_page: r.from_page ?? null,
         to_page: r.to_page,
       }));
@@ -92,7 +96,7 @@ export default function Feed() {
         .from("reviews")
         .select(`
           id, created_at, user_id, rating, review, book_id,
-          books!reviews_book_id_fkey ( title, author )
+          books!reviews_book_id_fkey ( title, author, cover_url )
         `)
         .in("user_id", targetIds)
         .order("created_at", { ascending: false })
@@ -109,6 +113,7 @@ export default function Feed() {
         avatar_url: profileMap.get(r.user_id)?.avatar_url ?? null,
         book_title: r.books?.title ?? null,
         book_author: r.books?.author ?? null,
+        book_cover_url: r.books?.cover_url ?? null,
         rating: r.rating,
         review: r.review,
       }));
@@ -146,47 +151,84 @@ export default function Feed() {
       {items.map((it) =>
         it.kind === "progress" ? (
           <div key={`p-${it.id}`} className="bg-card p-4 rounded border">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-start gap-3 mb-3">
               <img
                 src={it.avatar_url || "/assets/readreceipt-logo.png"}
                 alt="Profile"
-                className="w-8 h-8 rounded-full object-cover"
+                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
               />
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <div className="font-medium">{it.display_name || "Reader"}</div>
                 <div className="text-sm text-muted-foreground">
                   {new Date(it.created_at).toLocaleString()}
                 </div>
               </div>
             </div>
-            <div className="ml-11">
-              Read to page {it.to_page}
-              {typeof it.from_page === "number" && it.from_page >= 0 ? ` (from ${it.from_page})` : ""} of{" "}
-              <em>{it.book_title ?? "Untitled"}</em>
-              {it.book_author ? ` by ${it.book_author}` : ""}
+            
+            <div className="flex gap-3">
+              {/* Book Cover */}
+              {it.book_cover_url ? (
+                <img 
+                  src={it.book_cover_url} 
+                  alt={it.book_title || "Book cover"}
+                  className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
+                />
+              ) : (
+                <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                  <BookOpen className="w-4 h-4 text-muted-foreground" />
+                </div>
+              )}
+              
+              {/* Progress Info */}
+              <div className="flex-1 min-w-0">
+                <div className="font-medium mb-1">Reading Progress</div>
+                <div>
+                  Read to page {it.to_page}
+                  {typeof it.from_page === "number" && it.from_page >= 0 ? ` (from ${it.from_page})` : ""} of{" "}
+                  <em className="truncate">{it.book_title ?? "Untitled"}</em>
+                  {it.book_author ? ` by ${it.book_author}` : ""}
+                </div>
+              </div>
             </div>
           </div>
         ) : (
           <div key={`r-${it.id}`} className="bg-card p-4 rounded border">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-start gap-3 mb-3">
               <img
                 src={it.avatar_url || "/assets/readreceipt-logo.png"}
                 alt="Profile"
-                className="w-8 h-8 rounded-full object-cover"
+                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
               />
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <div className="font-medium">{it.display_name || "Reader"}</div>
                 <div className="text-sm text-muted-foreground">
                   {new Date(it.created_at).toLocaleString()}
                 </div>
               </div>
             </div>
-            <div className="ml-11">
-              <div className="font-medium mb-1">
-                Reviewed <em>{it.book_title ?? "Untitled"}</em>
-                {it.book_author ? ` by ${it.book_author}` : ""}: ⭐ {it.rating}/5
+            
+            <div className="flex gap-3">
+              {/* Book Cover */}
+              {it.book_cover_url ? (
+                <img 
+                  src={it.book_cover_url} 
+                  alt={it.book_title || "Book cover"}
+                  className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
+                />
+              ) : (
+                <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                  <BookOpen className="w-4 h-4 text-muted-foreground" />
+                </div>
+              )}
+              
+              {/* Review Info */}
+              <div className="flex-1 min-w-0">
+                <div className="font-medium mb-1">
+                  Reviewed <em className="truncate">{it.book_title ?? "Untitled"}</em>
+                  {it.book_author ? ` by ${it.book_author}` : ""}: ⭐ {it.rating}/5
+                </div>
+                {it.review && <p className="text-sm text-muted-foreground">{it.review}</p>}
               </div>
-              {it.review && <p>{it.review}</p>}
             </div>
           </div>
         )

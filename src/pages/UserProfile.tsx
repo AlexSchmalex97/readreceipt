@@ -13,6 +13,7 @@ type ProgressItem = {
   display_name: string | null;
   book_title: string | null;
   book_author: string | null;
+  book_cover_url?: string | null;
   from_page: number | null;
   to_page: number;
 };
@@ -25,6 +26,7 @@ type ReviewItem = {
   display_name: string | null;
   book_title: string | null;
   book_author: string | null;
+  book_cover_url?: string | null;
   rating: number;
   review: string | null;
 };
@@ -39,6 +41,7 @@ interface TBRBook {
   notes: string | null;
   priority: number;
   created_at: string;
+  cover_url?: string;
 }
 
 interface UserProfile {
@@ -98,7 +101,7 @@ export default function UserProfile() {
             .from("reading_progress")
             .select(`
               id, created_at, user_id, from_page, to_page, book_id,
-              books!reading_progress_book_id_fkey ( title, author )
+              books!reading_progress_book_id_fkey ( title, author, cover_url )
             `)
             .eq("user_id", userId)
             .order("created_at", { ascending: false })
@@ -115,7 +118,7 @@ export default function UserProfile() {
           .from("reviews")
           .select(`
             id, created_at, user_id, rating, review, book_id,
-            books!book_id ( title, author )
+            books!book_id ( title, author, cover_url )
           `)
           .eq("user_id", userId)
           .order("created_at", { ascending: false })
@@ -128,7 +131,7 @@ export default function UserProfile() {
         // Get user's TBR books (public)
         const { data: tbrData, error: tbrError } = await supabase
           .from("tbr_books")
-          .select("id, title, author, total_pages, notes, priority, created_at")
+          .select("id, title, author, total_pages, notes, priority, created_at, cover_url")
           .eq("user_id", userId)
           .order("priority", { ascending: false })
           .order("created_at", { ascending: false });
@@ -148,6 +151,7 @@ export default function UserProfile() {
           display_name: profileData?.display_name ?? null,
           book_title: r.books?.title ?? null,
           book_author: r.books?.author ?? null,
+          book_cover_url: r.books?.cover_url ?? null,
           from_page: r.from_page ?? null,
           to_page: r.to_page,
         }));
@@ -161,6 +165,7 @@ export default function UserProfile() {
           display_name: profileData?.display_name ?? null,
           book_title: r.books?.title ?? null,
           book_author: r.books?.author ?? null,
+          book_cover_url: r.books?.cover_url ?? null,
           rating: r.rating,
           review: r.review,
         }));
@@ -263,7 +268,21 @@ export default function UserProfile() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {tbrBooks.map((book) => (
                 <div key={book.id} className="bg-card border rounded-lg p-4 hover:bg-accent/5 transition-colors">
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex gap-3">
+                    {/* Book Cover */}
+                    {book.cover_url ? (
+                      <img 
+                        src={book.cover_url} 
+                        alt={book.title}
+                        className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                        <BookOpen className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                    )}
+                    
+                    {/* Book Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-medium text-foreground truncate">{book.title}</h3>
@@ -314,28 +333,65 @@ export default function UserProfile() {
             activity.map((item) =>
               item.kind === "progress" ? (
                 <div key={`p-${item.id}`} className="bg-card p-4 rounded border">
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-sm text-muted-foreground mb-2">
                     {new Date(item.created_at).toLocaleString()}
                   </div>
-                  <div className="font-medium">
-                    Read to page {item.to_page}
-                    {typeof item.from_page === "number" && item.from_page >= 0 
-                      ? ` (from ${item.from_page})` 
-                      : ""} of{" "}
-                    <em>{item.book_title ?? "Untitled"}</em>
-                    {item.book_author ? ` by ${item.book_author}` : ""}
+                  <div className="flex gap-3">
+                    {/* Book Cover */}
+                    {item.book_cover_url ? (
+                      <img 
+                        src={item.book_cover_url} 
+                        alt={item.book_title || "Book cover"}
+                        className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                        <BookOpen className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                    )}
+                    
+                    {/* Progress Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium">Reading Progress</div>
+                      <div>
+                        Read to page {item.to_page}
+                        {typeof item.from_page === "number" && item.from_page >= 0 
+                          ? ` (from ${item.from_page})` 
+                          : ""} of{" "}
+                        <em className="truncate">{item.book_title ?? "Untitled"}</em>
+                        {item.book_author ? ` by ${item.book_author}` : ""}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ) : (
                 <div key={`r-${item.id}`} className="bg-card p-4 rounded border">
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-sm text-muted-foreground mb-2">
                     {new Date(item.created_at).toLocaleString()}
                   </div>
-                  <div className="font-medium">
-                    Reviewed <em>{item.book_title ?? "Untitled"}</em>
-                    {item.book_author ? ` by ${item.book_author}` : ""}: ⭐ {item.rating}/5
+                  <div className="flex gap-3">
+                    {/* Book Cover */}
+                    {item.book_cover_url ? (
+                      <img 
+                        src={item.book_cover_url} 
+                        alt={item.book_title || "Book cover"}
+                        className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                        <BookOpen className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                    )}
+                    
+                    {/* Review Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium mb-1">
+                        Reviewed <em className="truncate">{item.book_title ?? "Untitled"}</em>
+                        {item.book_author ? ` by ${item.book_author}` : ""}: ⭐ {item.rating}/5
+                      </div>
+                      {item.review && <p className="text-sm text-muted-foreground">{item.review}</p>}
+                    </div>
                   </div>
-                  {item.review && <p className="mt-2">{item.review}</p>}
                 </div>
               )
             )

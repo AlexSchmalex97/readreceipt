@@ -31,6 +31,7 @@ type Review = {
   books: {
     title: string;
     author: string;
+    cover_url?: string;
   };
 };
 
@@ -42,6 +43,7 @@ type TBRBook = {
   notes: string | null;
   priority: number;
   created_at: string;
+  cover_url?: string;
 };
 
 export default function ProfileDisplay() {
@@ -104,7 +106,7 @@ export default function ProfileDisplay() {
         .from("reviews")
         .select(`
           id, rating, review, created_at,
-          books:book_id (title, author)
+          books:book_id (title, author, cover_url)
         `)
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
@@ -117,7 +119,7 @@ export default function ProfileDisplay() {
       // Load TBR books
       const { data: tbrData, error: tbrError } = await supabase
         .from("tbr_books")
-        .select("id, title, author, total_pages, notes, priority, created_at")
+        .select("id, title, author, total_pages, notes, priority, created_at, cover_url")
         .eq("user_id", user.id)
         .order("priority", { ascending: false })
         .order("created_at", { ascending: false });
@@ -300,7 +302,21 @@ export default function ProfileDisplay() {
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {tbrBooks.map((book) => (
                     <div key={book.id} className="border border-border rounded-lg p-3 hover:bg-accent/5 transition-colors">
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="flex gap-3">
+                        {/* Book Cover */}
+                        {book.cover_url ? (
+                          <img 
+                            src={book.cover_url} 
+                            alt={book.title}
+                            className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                            <BookOpen className="w-4 h-4 text-muted-foreground" />
+                          </div>
+                        )}
+                        
+                        {/* Book Info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <h3 className="font-medium text-foreground truncate">{book.title}</h3>
@@ -354,10 +370,24 @@ export default function ProfileDisplay() {
                 <div className="space-y-4 max-h-96 overflow-y-auto">
                   {recentReviews.map((review) => (
                     <div key={review.id} className="border-b border-border pb-4 last:border-b-0">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-medium text-foreground">{review.books.title}</h4>
-                          <p className="text-sm text-muted-foreground">{review.books.author}</p>
+                      <div className="flex gap-3">
+                        {/* Book Cover */}
+                        {review.books.cover_url ? (
+                          <img 
+                            src={review.books.cover_url} 
+                            alt={review.books.title}
+                            className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                            <BookOpen className="w-4 h-4 text-muted-foreground" />
+                          </div>
+                        )}
+                        
+                        {/* Review Info */}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-foreground truncate">{review.books.title}</h4>
+                          <p className="text-sm text-muted-foreground">by {review.books.author}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <div className="flex">
                               {[...Array(5)].map((_, i) => (
@@ -372,7 +402,7 @@ export default function ProfileDisplay() {
                             </span>
                           </div>
                           {review.review && (
-                            <p className="text-sm text-foreground mt-2">{review.review}</p>
+                            <p className="text-sm text-foreground mt-2 line-clamp-3">{review.review}</p>
                           )}
                         </div>
                       </div>
