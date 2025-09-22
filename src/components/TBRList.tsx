@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Search, BookOpen, X, Star, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -107,6 +107,7 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
   };
 
   const selectGoogleBook = (book: GoogleBookResult) => {
+    console.log('Selecting Google Book:', book);
     setSelectedGoogleBook(book);
     setNewBook(prev => ({
       ...prev,
@@ -114,9 +115,14 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
       author: book.authors?.join(', ') || 'Unknown Author',
       total_pages: book.pageCount?.toString() || ''
     }));
+    // Clear search results and show the form
+    setBookSearchResults([]);
+    setBookSearchQuery('');
+    console.log('selectedGoogleBook set, should show form now');
   };
 
   const handleAddBook = async () => {
+    console.log('handleAddBook called', { userId, newBook });
     if (!userId || !newBook.title.trim() || !newBook.author.trim()) {
       toast({
         title: 'Missing information',
@@ -238,6 +244,9 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
           <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Add Book to TBR List</DialogTitle>
+              <DialogDescription>
+                Search for books using Google Books or add them manually to your To Be Read list.
+              </DialogDescription>
             </DialogHeader>
             
             {!showManualForm && !selectedGoogleBook && (
