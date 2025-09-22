@@ -234,7 +234,7 @@ export default function ProfileDisplay() {
         </div>
 
         {/* Quick Actions */}
-        <div className="flex flex-wrap gap-4 mb-8">
+        <div className="flex flex-wrap gap-4 mb-8 justify-center">
           <Link to="/">
             <Button variant="outline">
               <BookOpen className="w-4 h-4 mr-2" />
