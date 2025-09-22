@@ -233,6 +233,27 @@ export default function ProfileDisplay() {
           </Card>
         </div>
 
+        {/* Quick Actions */}
+        <div className="flex flex-wrap gap-4 mb-8">
+          <Link to="/">
+            <Button variant="outline">
+              <BookOpen className="w-4 h-4 mr-2" />
+              View Books
+            </Button>
+          </Link>
+          <Link to="/completed">
+            <Button variant="outline">
+              <Star className="w-4 h-4 mr-2" />
+              Completed Books
+            </Button>
+          </Link>
+          <Link to="/feed">
+            <Button variant="outline">
+              Activity Feed
+            </Button>
+          </Link>
+        </div>
+
         {/* Recent Reviews */}
         <Card>
           <CardHeader>
@@ -285,26 +306,6 @@ export default function ProfileDisplay() {
           </CardContent>
         </Card>
 
-        {/* Quick Actions */}
-        <div className="flex flex-wrap gap-4 mt-8">
-          <Link to="/">
-            <Button variant="outline">
-              <BookOpen className="w-4 h-4 mr-2" />
-              View Books
-            </Button>
-          </Link>
-          <Link to="/completed">
-            <Button variant="outline">
-              <Star className="w-4 h-4 mr-2" />
-              Completed Books
-            </Button>
-          </Link>
-          <Link to="/feed">
-            <Button variant="outline">
-              Activity Feed
-            </Button>
-          </Link>
-        </div>
       </div>
     </div>
   );
