@@ -14,6 +14,7 @@ interface Book {
   author: string;
   totalPages: number;
   currentPage: number;
+  coverUrl?: string;
 }
 
 const Index = () => {
@@ -49,7 +50,7 @@ const Index = () => {
         if (userId) {
           const { data, error } = await supabase
             .from("books")
-            .select("id,title,author,total_pages,current_page,created_at")
+            .select("id,title,author,total_pages,current_page,cover_url,created_at")
             .eq("user_id", userId)  // Only fetch current user's books
             .order("created_at", { ascending: true });
 
@@ -77,7 +78,7 @@ const Index = () => {
                 localStorage.removeItem("reading-tracker-books");
                 const { data: migrated } = await supabase
                   .from("books")
-                  .select("id,title,author,total_pages,current_page,created_at")
+                  .select("id,title,author,total_pages,current_page,cover_url,created_at")
                   .eq("user_id", userId)  // Only fetch current user's books
                   .order("created_at", { ascending: true });
                 setBooks(
@@ -87,6 +88,7 @@ const Index = () => {
                     author: r.author,
                     totalPages: r.total_pages,
                     currentPage: r.current_page,
+                    coverUrl: r.cover_url,
                   }))
                 );
                 setLoading(false);
@@ -102,6 +104,7 @@ const Index = () => {
               author: r.author,
               totalPages: r.total_pages,
               currentPage: r.current_page,
+              coverUrl: r.cover_url,
             }))
           );
         } else {
@@ -134,6 +137,7 @@ const Index = () => {
             author: bookData.author,
             total_pages: bookData.totalPages,
             current_page: 0,
+            cover_url: bookData.coverUrl || null,
           },
         ])
         .select();
@@ -148,6 +152,7 @@ const Index = () => {
             author: r.author,
             totalPages: r.total_pages,
             currentPage: r.current_page,
+            coverUrl: r.cover_url,
           },
         ]);
       }

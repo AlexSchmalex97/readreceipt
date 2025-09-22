@@ -13,6 +13,7 @@ interface Book {
   author: string;
   totalPages: number;
   currentPage: number;
+  coverUrl?: string;
 }
 
 interface BookSearchResult {
@@ -111,6 +112,7 @@ export const AddBookDialog = ({ onAddBook }: AddBookDialogProps) => {
       title: title.trim(),
       author: author.trim(),
       totalPages: pages,
+      coverUrl: selectedBook?.imageLinks?.thumbnail,
     });
 
     // Reset form

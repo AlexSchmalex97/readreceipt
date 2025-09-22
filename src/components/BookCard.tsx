@@ -12,6 +12,7 @@ interface Book {
   author: string;
   totalPages: number;
   currentPage: number;
+  coverUrl?: string;
 }
 
 interface BookCardProps {
@@ -85,15 +86,32 @@ export const BookCard = ({ book, onUpdateProgress, onDeleteBook }: BookCardProps
   return (
     <Card className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-card">
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
+        <div className="flex items-start gap-3">
+          {/* Book Cover */}
+          <div className="w-16 h-20 bg-muted rounded border flex-shrink-0 overflow-hidden">
+            {book.coverUrl ? (
+              <img 
+                src={book.coverUrl} 
+                alt={`Cover of ${book.title}`}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-muted-foreground" />
+              </div>
+            )}
+          </div>
+          
+          {/* Book Info */}
+          <div className="flex-1 min-w-0">
             <CardTitle className="text-lg font-semibold text-foreground line-clamp-2">
               {book.title}
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-1">{book.author}</p>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-            <BookOpen className="w-5 h-5 text-primary" />
+          
+          {/* Actions */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             {onDeleteBook && (
               <Button
                 size="sm"

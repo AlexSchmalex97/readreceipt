@@ -21,7 +21,7 @@ interface TBRBook {
 
 interface TBRListProps {
   userId: string | null;
-  onMoveToReading?: (book: Omit<TBRBook, 'id' | 'priority' | 'notes' | 'created_at'>) => void;
+  onMoveToReading?: (book: Omit<TBRBook, 'id' | 'priority' | 'notes' | 'created_at'> & { coverUrl?: string }) => void;
 }
 
 export function TBRList({ userId, onMoveToReading }: TBRListProps) {
@@ -193,7 +193,8 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
       onMoveToReading({
         title: book.title,
         author: book.author,
-        total_pages: book.total_pages || 0
+        total_pages: book.total_pages || 0,
+        coverUrl: undefined // TBR books don't store covers yet
       });
       await handleRemoveBook(book.id);
     }
