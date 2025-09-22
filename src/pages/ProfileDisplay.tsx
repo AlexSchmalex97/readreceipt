@@ -34,12 +34,23 @@ type Review = {
   };
 };
 
+type TBRBook = {
+  id: string;
+  title: string;
+  author: string;
+  total_pages: number | null;
+  notes: string | null;
+  priority: number;
+  created_at: string;
+};
+
 export default function ProfileDisplay() {
   const [loading, setLoading] = useState(true);
   const [uid, setUid] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [bookStats, setBookStats] = useState<BookStats>({ totalBooks: 0, completedBooks: 0, inProgressBooks: 0 });
   const [recentReviews, setRecentReviews] = useState<Review[]>([]);
+  const [tbrBooks, setTbrBooks] = useState<TBRBook[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -101,6 +112,18 @@ export default function ProfileDisplay() {
 
       if (!reviewsError && reviews) {
         setRecentReviews(reviews as Review[]);
+      }
+
+      // Load TBR books
+      const { data: tbrData, error: tbrError } = await supabase
+        .from("tbr_books")
+        .select("id, title, author, total_pages, notes, priority, created_at")
+        .eq("user_id", user.id)
+        .order("priority", { ascending: false })
+        .order("created_at", { ascending: false });
+
+      if (!tbrError && tbrData) {
+        setTbrBooks(tbrData);
       }
 
       setLoading(false);
@@ -253,6 +276,58 @@ export default function ProfileDisplay() {
             </Button>
           </Link>
         </div>
+
+        {/* TBR List */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="w-5 h-5" />
+              To Be Read ({tbrBooks.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {tbrBooks.length === 0 ? (
+              <div className="text-center py-8">
+                <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">Your TBR list is empty</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Add books to your To Be Read list from the home page!
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {tbrBooks.map((book) => (
+                  <div key={book.id} className="border border-border rounded-lg p-4 hover:bg-accent/5 transition-colors">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-medium text-foreground truncate">{book.title}</h3>
+                          {book.priority > 0 && (
+                            <div className="flex">
+                              {Array(book.priority).fill(0).map((_, i) => (
+                                <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-1">by {book.author}</p>
+                        {book.total_pages && (
+                          <p className="text-xs text-muted-foreground mb-2">{book.total_pages} pages</p>
+                        )}
+                        {book.notes && (
+                          <p className="text-xs text-muted-foreground line-clamp-3 mb-2">{book.notes}</p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          Added {new Date(book.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Recent Reviews */}
         <Card>
