@@ -94,6 +94,10 @@ export const BookCard = ({ book, onUpdateProgress, onDeleteBook }: BookCardProps
                 src={book.coverUrl} 
                 alt={`Cover of ${book.title}`}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  console.log('Failed to load cover for:', book.title, book.coverUrl);
+                  e.currentTarget.style.display = 'none';
+                }}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">

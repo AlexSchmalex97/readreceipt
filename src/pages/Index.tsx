@@ -107,6 +107,7 @@ const Index = () => {
               coverUrl: r.cover_url,
             }))
           );
+          console.log('Books with covers:', data?.map(r => ({ title: r.title, coverUrl: r.cover_url })));
         } else {
           const saved = localStorage.getItem("reading-tracker-books");
           setBooks(saved ? JSON.parse(saved) : []);
