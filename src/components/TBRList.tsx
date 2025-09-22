@@ -304,7 +304,7 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
                     onClick={() => setShowManualForm(true)}
                     className="text-sm"
                   >
-                    Or add book manually
+                    Can't find your book? Add manually
                   </Button>
                 </div>
               </div>
