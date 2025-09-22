@@ -34,7 +34,7 @@ export default function ProfileSettings() {
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
-  const [displayPreference, setDisplayPreference] = useState<'quotes' | 'time_weather'>('quotes');
+  const [displayPreference, setDisplayPreference] = useState<'quotes' | 'time_weather' | 'both'>('quotes');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const normUsername = useMemo(() => normalizeUsername(username), [username]);
@@ -95,7 +95,7 @@ export default function ProfileSettings() {
       setDisplayName(prof?.display_name ?? "");
       setUsername(prof?.username ?? "");
       setBio(prof?.bio ?? "");
-      setDisplayPreference((prof?.display_preference as 'quotes' | 'time_weather') ?? 'quotes');
+      setDisplayPreference((prof?.display_preference as 'quotes' | 'time_weather' | 'both') ?? 'quotes');
       setAvatarUrl(prof?.avatar_url ?? null);
       setLoading(false);
     })();
@@ -504,10 +504,11 @@ export default function ProfileSettings() {
             <select
               className="border rounded px-3 py-2 bg-background"
               value={displayPreference}
-              onChange={(e) => setDisplayPreference(e.target.value as 'quotes' | 'time_weather')}
+              onChange={(e) => setDisplayPreference(e.target.value as 'quotes' | 'time_weather' | 'both')}
             >
               <option value="quotes">Inspirational Quotes</option>
               <option value="time_weather">Date/Time & Weather</option>
+              <option value="both">Both (Quotes + Date/Time/Weather)</option>
             </select>
             <div className="text-xs text-muted-foreground">
               Choose what appears in the navigation header between the menu and your greeting.

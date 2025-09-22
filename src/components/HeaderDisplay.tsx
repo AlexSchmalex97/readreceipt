@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { QuotesDisplay } from './QuotesDisplay';
 import { TimeWeatherIcons } from './TimeWeatherIcons';
 
-type DisplayPreference = 'quotes' | 'time_weather';
+type DisplayPreference = 'quotes' | 'time_weather' | 'both';
 
 export function HeaderDisplay() {
   const [displayPreference, setDisplayPreference] = useState<DisplayPreference>('quotes');
@@ -75,5 +75,20 @@ export function HeaderDisplay() {
   }
 
   // Render based on user preference
-  return displayPreference === 'quotes' ? <QuotesDisplay /> : <TimeWeatherIcons />;
+  if (displayPreference === 'quotes') {
+    return <QuotesDisplay />;
+  } else if (displayPreference === 'time_weather') {
+    return <TimeWeatherIcons />;
+  } else if (displayPreference === 'both') {
+    return (
+      <div className="flex flex-col lg:flex-row items-center gap-2 lg:gap-6">
+        <QuotesDisplay />
+        <div className="hidden md:block lg:block">
+          <TimeWeatherIcons />
+        </div>
+      </div>
+    );
+  }
+  
+  return <QuotesDisplay />;
 }
