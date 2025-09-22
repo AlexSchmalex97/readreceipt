@@ -49,6 +49,7 @@ const Index = () => {
           const { data, error } = await supabase
             .from("books")
             .select("id,title,author,total_pages,current_page,created_at")
+            .eq("user_id", userId)  // Only fetch current user's books
             .order("created_at", { ascending: true });
 
           if (error) throw error;
@@ -76,6 +77,7 @@ const Index = () => {
                 const { data: migrated } = await supabase
                   .from("books")
                   .select("id,title,author,total_pages,current_page,created_at")
+                  .eq("user_id", userId)  // Only fetch current user's books
                   .order("created_at", { ascending: true });
                 setBooks(
                   (migrated ?? []).map((r: any) => ({
@@ -193,6 +195,8 @@ const Index = () => {
       const { error } = await supabase.from("books").delete().eq("id", id);
       if (!error) {
         setBooks((prev) => prev.filter((b) => b.id !== id));
+      } else {
+        console.error("Failed to delete book:", error);
       }
     } else {
       setBooks((prev) => prev.filter((b) => b.id !== id));
