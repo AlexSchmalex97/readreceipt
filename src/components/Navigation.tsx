@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import AuthButtons from "@/components/AuthButtons";
-import { QuotesDisplay } from "@/components/QuotesDisplay";
+import { HeaderDisplay } from "@/components/HeaderDisplay";
 
 export function Navigation() {
   const { pathname } = useLocation();
@@ -79,8 +79,8 @@ export function Navigation() {
             </nav>
           </div>
 
-          {/* Center: Inspirational Quotes */}
-          <QuotesDisplay />
+          {/* Center: Dynamic Display (Quotes or Time/Weather) */}
+          <HeaderDisplay />
 
           {/* Right: Auth */}
           <AuthButtons />

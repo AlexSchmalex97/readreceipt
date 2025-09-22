@@ -34,6 +34,7 @@ export default function ProfileSettings() {
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
+  const [displayPreference, setDisplayPreference] = useState<'quotes' | 'time_weather'>('quotes');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const normUsername = useMemo(() => normalizeUsername(username), [username]);
@@ -85,7 +86,7 @@ export default function ProfileSettings() {
       // load profile
       const { data: prof, error: profileError } = await supabase
         .from("profiles")
-        .select("display_name, username, bio, avatar_url")
+        .select("display_name, username, bio, avatar_url, display_preference")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -94,6 +95,7 @@ export default function ProfileSettings() {
       setDisplayName(prof?.display_name ?? "");
       setUsername(prof?.username ?? "");
       setBio(prof?.bio ?? "");
+      setDisplayPreference((prof?.display_preference as 'quotes' | 'time_weather') ?? 'quotes');
       setAvatarUrl(prof?.avatar_url ?? null);
       setLoading(false);
     })();
@@ -276,7 +278,8 @@ export default function ProfileSettings() {
         .update({ 
           display_name: displayName.trim(), 
           username: normUsername,
-          bio: bio.trim() || null
+          bio: bio.trim() || null,
+          display_preference: displayPreference
         })
         .eq("id", uid)
         .select();
@@ -294,7 +297,8 @@ export default function ProfileSettings() {
               display_name: displayName.trim(),
               username: normUsername,
               bio: bio.trim() || null,
-              email: email
+              email: email,
+              display_preference: displayPreference
             }
           ])
           .select();
@@ -306,8 +310,9 @@ export default function ProfileSettings() {
         throw updateError;
       }
       
-      // Dispatch a custom event to notify other components about the profile update
+      // Dispatch events to notify other components about updates
       window.dispatchEvent(new CustomEvent('profile-updated'));
+      window.dispatchEvent(new CustomEvent('display-preference-updated'));
       
       toast({ title: "Profile updated!" });
     } catch (e: any) {
@@ -492,6 +497,21 @@ export default function ProfileSettings() {
               placeholder="Tell other readers about yourself..."
               rows={3}
             />
+          </label>
+
+          <label className="grid gap-1">
+            <span className="text-sm text-muted-foreground">Header Display</span>
+            <select
+              className="border rounded px-3 py-2 bg-background"
+              value={displayPreference}
+              onChange={(e) => setDisplayPreference(e.target.value as 'quotes' | 'time_weather')}
+            >
+              <option value="quotes">Inspirational Quotes</option>
+              <option value="time_weather">Date/Time & Weather</option>
+            </select>
+            <div className="text-xs text-muted-foreground">
+              Choose what appears in the navigation header between the menu and your greeting.
+            </div>
           </label>
 
           <div className="flex gap-2">
