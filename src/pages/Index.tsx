@@ -205,7 +205,7 @@ const Index = () => {
   };
 
   const booksInProgress = books.filter(
-    (b) => b.currentPage > 0 && b.currentPage < b.totalPages
+    (b) => b.currentPage < b.totalPages
   ).length;
   const completedBooks = books.filter((b) => b.currentPage >= b.totalPages).length;
   

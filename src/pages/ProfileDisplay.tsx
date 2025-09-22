@@ -94,7 +94,7 @@ export default function ProfileDisplay() {
       if (!booksError && books) {
         const totalBooks = books.length;
         const completedBooks = books.filter(book => book.current_page >= book.total_pages).length;
-        const inProgressBooks = books.filter(book => book.current_page > 0 && book.current_page < book.total_pages).length;
+        const inProgressBooks = books.filter(book => book.current_page < book.total_pages).length;
         
         setBookStats({ totalBooks, completedBooks, inProgressBooks });
       }
