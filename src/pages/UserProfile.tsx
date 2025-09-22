@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
 import { FollowButton } from "@/components/FollowButton";
-import { ArrowLeft, BookOpen } from "lucide-react";
+import { ArrowLeft, BookOpen, Star } from "lucide-react";
 
 type ProgressItem = {
   kind: "progress";
@@ -31,6 +31,16 @@ type ReviewItem = {
 
 type ActivityItem = ProgressItem | ReviewItem;
 
+interface TBRBook {
+  id: string;
+  title: string;
+  author: string;
+  total_pages: number | null;
+  notes: string | null;
+  priority: number;
+  created_at: string;
+}
+
 interface UserProfile {
   id: string;
   display_name: string | null;
@@ -44,6 +54,7 @@ export default function UserProfile() {
   const { userId } = useParams<{ userId: string }>();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
+  const [tbrBooks, setTbrBooks] = useState<TBRBook[]>([]);
   const [loading, setLoading] = useState(true);
   const [myId, setMyId] = useState<string | null>(null);
   const [canSeeProgress, setCanSeeProgress] = useState<boolean>(true);
@@ -112,6 +123,20 @@ export default function UserProfile() {
 
         if (reviewsError) {
           console.warn("UserProfile reviews error", reviewsError);
+        }
+
+        // Get user's TBR books (public)
+        const { data: tbrData, error: tbrError } = await supabase
+          .from("tbr_books")
+          .select("id, title, author, total_pages, notes, priority, created_at")
+          .eq("user_id", userId)
+          .order("priority", { ascending: false })
+          .order("created_at", { ascending: false });
+
+        if (tbrError) {
+          console.warn("UserProfile TBR error", tbrError);
+        } else {
+          setTbrBooks(tbrData || []);
         }
 
         // Transform progress items
@@ -221,6 +246,51 @@ export default function UserProfile() {
               <FollowButton targetUserId={profile.id} />
             )}
           </div>
+        </div>
+
+        {/* TBR List Section */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-foreground flex items-center gap-2 mb-4">
+            <BookOpen className="w-5 h-5" />
+            To Be Read ({tbrBooks.length})
+          </h2>
+          
+          {tbrBooks.length === 0 ? (
+            <div className="bg-card p-6 rounded-lg border text-center">
+              <p className="text-muted-foreground">No books in TBR list yet.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {tbrBooks.map((book) => (
+                <div key={book.id} className="bg-card border rounded-lg p-4 hover:bg-accent/5 transition-colors">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-medium text-foreground truncate">{book.title}</h3>
+                        {book.priority > 0 && (
+                          <div className="flex">
+                            {Array(book.priority).fill(0).map((_, i) => (
+                              <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-1">by {book.author}</p>
+                      {book.total_pages && (
+                        <p className="text-xs text-muted-foreground mb-2">{book.total_pages} pages</p>
+                      )}
+                      {book.notes && (
+                        <p className="text-xs text-muted-foreground line-clamp-3">{book.notes}</p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Added {new Date(book.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Activity Feed */}
