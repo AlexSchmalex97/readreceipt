@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ReviewDialog } from "@/components/ReviewDialog";
 import { Navigation } from "@/components/Navigation";
 import { Link } from "react-router-dom";
+import { searchGoogleBooks } from "@/lib/googleBooks";
 
 interface Book {
   id: string;
@@ -108,6 +109,11 @@ const Index = () => {
             }))
           );
           console.log('Books with covers:', data?.map(r => ({ title: r.title, coverUrl: r.cover_url })));
+          
+          // Auto-populate covers for books without them
+          if (data?.length) {
+            populateCoversForBooksWithoutThem(data, userId);
+          }
         } else {
           const saved = localStorage.getItem("reading-tracker-books");
           setBooks(saved ? JSON.parse(saved) : []);
@@ -119,6 +125,44 @@ const Index = () => {
       }
     })();
   }, [userId]);
+
+  // Function to populate covers for existing books without covers
+  const populateCoversForBooksWithoutThem = async (books: any[], userId: string) => {
+    const booksWithoutCovers = books.filter(book => !book.cover_url);
+    
+    for (const book of booksWithoutCovers) {
+      try {
+        // Search for the book to get cover URL
+        const searchQuery = `${book.title} ${book.author}`;
+        const results = await searchGoogleBooks(searchQuery);
+        
+        if (results.length > 0 && results[0].imageLinks?.thumbnail) {
+          // Update the book with the cover URL
+          const { error } = await supabase
+            .from('books')
+            .update({ cover_url: results[0].imageLinks.thumbnail })
+            .eq('id', book.id);
+            
+          if (!error) {
+            console.log(`Updated cover for "${book.title}" by ${book.author}`);
+            // Update local state
+            setBooks(prevBooks => 
+              prevBooks.map(b => 
+                b.id === book.id 
+                  ? { ...b, coverUrl: results[0].imageLinks.thumbnail }
+                  : b
+              )
+            );
+          }
+        }
+      } catch (error) {
+        console.log(`Failed to fetch cover for "${book.title}":`, error);
+      }
+      
+      // Add delay to avoid hitting Google Books API rate limits
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+  };
 
   // Persist to localStorage when logged out
   useEffect(() => {
