@@ -17,12 +17,13 @@ interface TBRBook {
   notes?: string;
   priority: number;
   created_at: string;
+  updated_at: string;
   cover_url?: string;
 }
 
 interface TBRListProps {
   userId: string | null;
-  onMoveToReading?: (book: Omit<TBRBook, 'id' | 'priority' | 'notes' | 'created_at'> & { coverUrl?: string }) => void;
+  onMoveToReading?: (book: { title: string; author: string; totalPages: number; coverUrl?: string }) => void;
 }
 
 export function TBRList({ userId, onMoveToReading }: TBRListProps) {
@@ -123,7 +124,7 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
   };
 
   const handleAddBook = async () => {
-    console.log('handleAddBook called', { userId, newBook });
+    console.log('handleAddBook called', { userId, newBook, selectedGoogleBook });
     if (!userId || !newBook.title.trim() || !newBook.author.trim()) {
       toast({
         title: 'Missing information',
@@ -142,7 +143,8 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
           author: newBook.author.trim(),
           total_pages: newBook.total_pages ? parseInt(newBook.total_pages) : null,
           notes: newBook.notes.trim() || null,
-          priority: newBook.priority
+          priority: newBook.priority,
+          cover_url: selectedGoogleBook?.imageLinks?.thumbnail || null,
         }])
         .select()
         .single();
@@ -194,8 +196,8 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
       onMoveToReading({
         title: book.title,
         author: book.author,
-        total_pages: book.total_pages || 0,
-        coverUrl: undefined // TBR books don't store covers yet
+        totalPages: book.total_pages || 0,
+        coverUrl: book.cover_url
       });
       await handleRemoveBook(book.id);
     }
