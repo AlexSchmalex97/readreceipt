@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, BookOpen, X, Star } from 'lucide-react';
+import { Plus, Search, BookOpen, X, Star, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { searchGoogleBooks, GoogleBookResult } from '@/lib/googleBooks';
 
 interface TBRBook {
   id: string;
@@ -27,6 +29,14 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddDialog, setShowAddDialog] = useState(false);
+  
+  // Google Books search states
+  const [bookSearchQuery, setBookSearchQuery] = useState('');
+  const [bookSearchResults, setBookSearchResults] = useState<GoogleBookResult[]>([]);
+  const [isSearchingBooks, setIsSearchingBooks] = useState(false);
+  const [selectedGoogleBook, setSelectedGoogleBook] = useState<GoogleBookResult | null>(null);
+  const [showManualForm, setShowManualForm] = useState(false);
+  
   const [newBook, setNewBook] = useState({
     title: '',
     author: '',
@@ -70,6 +80,42 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
     loadTBRBooks();
   }, [userId, toast]);
 
+  // Google Books search
+  const searchBooks = async () => {
+    if (!bookSearchQuery.trim()) return;
+    
+    setIsSearchingBooks(true);
+    try {
+      const results = await searchGoogleBooks(bookSearchQuery);
+      setBookSearchResults(results);
+      
+      if (results.length === 0) {
+        toast({
+          title: 'No books found',
+          description: 'Try a different search term'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Search failed',
+        description: 'Please try again',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSearchingBooks(false);
+    }
+  };
+
+  const selectGoogleBook = (book: GoogleBookResult) => {
+    setSelectedGoogleBook(book);
+    setNewBook(prev => ({
+      ...prev,
+      title: book.title,
+      author: book.authors?.join(', ') || 'Unknown Author',
+      total_pages: book.pageCount?.toString() || ''
+    }));
+  };
+
   const handleAddBook = async () => {
     if (!userId || !newBook.title.trim() || !newBook.author.trim()) {
       toast({
@@ -97,8 +143,7 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
       if (error) throw error;
 
       setTbrBooks(prev => [data, ...prev]);
-      setNewBook({ title: '', author: '', total_pages: '', notes: '', priority: 0 });
-      setShowAddDialog(false);
+      resetForm();
       toast({
         title: 'Book added to TBR',
         description: `${newBook.title} has been added to your reading list`
@@ -148,6 +193,15 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
     }
   };
 
+  const resetForm = () => {
+    setBookSearchQuery('');
+    setBookSearchResults([]);
+    setSelectedGoogleBook(null);
+    setShowManualForm(false);
+    setNewBook({ title: '', author: '', total_pages: '', notes: '', priority: 0 });
+    setShowAddDialog(false);
+  };
+
   const filteredBooks = tbrBooks.filter(book =>
     book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     book.author.toLowerCase().includes(searchQuery.toLowerCase())
@@ -181,66 +235,139 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
               Add Book
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Add Book to TBR List</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-foreground">Title *</label>
-                <Input
-                  value={newBook.title}
-                  onChange={(e) => setNewBook(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="Enter book title"
-                />
+            
+            {!showManualForm && !selectedGoogleBook && (
+              <div className="space-y-4">
+                {/* Google Books Search */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Search for a book</label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={bookSearchQuery}
+                      onChange={(e) => setBookSearchQuery(e.target.value)}
+                      placeholder="Enter book title or author..."
+                      onKeyDown={(e) => e.key === 'Enter' && searchBooks()}
+                    />
+                    <Button 
+                      onClick={searchBooks} 
+                      disabled={isSearchingBooks || !bookSearchQuery.trim()}
+                      size="sm"
+                    >
+                      {isSearchingBooks ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Search Results */}
+                {bookSearchResults.length > 0 && (
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    <label className="text-sm font-medium text-foreground">Search Results</label>
+                    {bookSearchResults.map((book) => (
+                      <Card 
+                        key={book.id} 
+                        className="p-3 cursor-pointer hover:bg-accent/10 transition-colors"
+                        onClick={() => selectGoogleBook(book)}
+                      >
+                        <div className="flex gap-3">
+                          {book.imageLinks?.thumbnail && (
+                            <img 
+                              src={book.imageLinks.thumbnail} 
+                              alt={book.title}
+                              className="w-12 h-16 object-cover rounded"
+                            />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-sm truncate">{book.title}</h4>
+                            <p className="text-sm text-muted-foreground">
+                              {book.authors?.join(", ") || "Unknown Author"}
+                            </p>
+                            {book.pageCount && (
+                              <p className="text-xs text-muted-foreground">{book.pageCount} pages</p>
+                            )}
+                            {book.publishedDate && (
+                              <p className="text-xs text-muted-foreground">Published: {book.publishedDate}</p>
+                            )}
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex justify-center">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowManualForm(true)}
+                    className="text-sm"
+                  >
+                    Or add book manually
+                  </Button>
+                </div>
               </div>
-              <div>
-                <label className="text-sm font-medium text-foreground">Author *</label>
-                <Input
-                  value={newBook.author}
-                  onChange={(e) => setNewBook(prev => ({ ...prev, author: e.target.value }))}
-                  placeholder="Enter author name"
-                />
+            )}
+
+            {(showManualForm || selectedGoogleBook) && (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-foreground">Title *</label>
+                  <Input
+                    value={newBook.title}
+                    onChange={(e) => setNewBook(prev => ({ ...prev, title: e.target.value }))}
+                    placeholder="Enter book title"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground">Author *</label>
+                  <Input
+                    value={newBook.author}
+                    onChange={(e) => setNewBook(prev => ({ ...prev, author: e.target.value }))}
+                    placeholder="Enter author name"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground">Total Pages</label>
+                  <Input
+                    type="number"
+                    value={newBook.total_pages}
+                    onChange={(e) => setNewBook(prev => ({ ...prev, total_pages: e.target.value }))}
+                    placeholder="Number of pages (optional)"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground">Notes</label>
+                  <Textarea
+                    value={newBook.notes}
+                    onChange={(e) => setNewBook(prev => ({ ...prev, notes: e.target.value }))}
+                    placeholder="Why do you want to read this book? (optional)"
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground">Priority</label>
+                  <select
+                    value={newBook.priority}
+                    onChange={(e) => setNewBook(prev => ({ ...prev, priority: parseInt(e.target.value) }))}
+                    className="w-full border border-border rounded-md px-3 py-2 bg-background"
+                  >
+                    <option value={0}>Normal</option>
+                    <option value={1}>High</option>
+                    <option value={2}>Very High</option>
+                  </select>
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <Button variant="outline" onClick={resetForm}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleAddBook}>
+                    Add to TBR
+                  </Button>
+                </div>
               </div>
-              <div>
-                <label className="text-sm font-medium text-foreground">Total Pages</label>
-                <Input
-                  type="number"
-                  value={newBook.total_pages}
-                  onChange={(e) => setNewBook(prev => ({ ...prev, total_pages: e.target.value }))}
-                  placeholder="Number of pages (optional)"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground">Notes</label>
-                <Textarea
-                  value={newBook.notes}
-                  onChange={(e) => setNewBook(prev => ({ ...prev, notes: e.target.value }))}
-                  placeholder="Why do you want to read this book? (optional)"
-                  rows={3}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground">Priority</label>
-                <select
-                  value={newBook.priority}
-                  onChange={(e) => setNewBook(prev => ({ ...prev, priority: parseInt(e.target.value) }))}
-                  className="w-full border border-border rounded-md px-3 py-2 bg-background"
-                >
-                  <option value={0}>Normal</option>
-                  <option value={1}>High</option>
-                  <option value={2}>Very High</option>
-                </select>
-              </div>
-              <div className="flex gap-2 justify-end">
-                <Button variant="outline" onClick={() => setShowAddDialog(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleAddBook}>
-                  Add to TBR
-                </Button>
-              </div>
-            </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>
