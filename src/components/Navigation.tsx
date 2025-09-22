@@ -9,26 +9,28 @@ export function Navigation() {
 
   return (
     <header className="bg-card shadow-soft border-b border-border">
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-0">
           {/* Left: Logo + Title + Nav */}
-          <div className="flex items-center gap-3">
-            <img
-              src="/assets/readreceipt-logo.png"
-              alt="ReadReceipt logo"
-              className="w-14 h-14"
-            />
-            <div>
-              <h1 className="text-2xl font-bold text-primary">ReadReceipt</h1>
-              <p className="text-sm text-muted-foreground">
-                Track your reading progress and stay motivated
-              </p>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full lg:w-auto">
+            <div className="flex items-center gap-3">
+              <img
+                src="/assets/readreceipt-logo.png"
+                alt="ReadReceipt logo"
+                className="w-10 h-10 sm:w-14 sm:h-14"
+              />
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-primary">ReadReceipt</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
+                  Track your reading progress and stay motivated
+                </p>
+              </div>
             </div>
 
-            <nav className="hidden sm:flex gap-6 ml-8">
+            <nav className="flex gap-4 sm:gap-6 mt-2 sm:mt-0 sm:ml-8 w-full sm:w-auto overflow-x-auto">
               <Link
                 to="/"
-                className={`text-sm ${
+                className={`text-sm whitespace-nowrap ${
                   isActive("/")
                     ? "text-foreground font-medium"
                     : "text-muted-foreground hover:text-foreground"
@@ -38,7 +40,7 @@ export function Navigation() {
               </Link>
               <Link
                 to="/people"
-                className={`text-sm ${
+                className={`text-sm whitespace-nowrap ${
                   isActive("/people")
                     ? "text-foreground font-medium"
                     : "text-muted-foreground hover:text-foreground"
@@ -48,7 +50,7 @@ export function Navigation() {
               </Link>
               <Link
                 to="/feed"
-                className={`text-sm ${
+                className={`text-sm whitespace-nowrap ${
                   isActive("/feed")
                     ? "text-foreground font-medium"
                     : "text-muted-foreground hover:text-foreground"
@@ -58,7 +60,7 @@ export function Navigation() {
               </Link>
               <Link
                 to="/reviews"
-                className={`text-sm ${
+                className={`text-sm whitespace-nowrap ${
                   isActive("/reviews")
                     ? "text-foreground font-medium"
                     : "text-muted-foreground hover:text-foreground"
@@ -68,7 +70,7 @@ export function Navigation() {
               </Link>
               <Link
                 to="/profile"
-                className={`text-sm ${
+                className={`text-sm whitespace-nowrap ${
                   isActive("/profile")
                     ? "text-foreground font-medium"
                     : "text-muted-foreground hover:text-foreground"
@@ -79,66 +81,19 @@ export function Navigation() {
             </nav>
           </div>
 
-          {/* Center: Dynamic Display (Quotes or Time/Weather) */}
-          <HeaderDisplay />
+          {/* Center: Dynamic Display (Quotes or Time/Weather) - Hidden on small screens */}
+          <div className="hidden lg:block">
+            <HeaderDisplay />
+          </div>
 
           {/* Right: Auth */}
           <AuthButtons />
         </div>
-
-        {/* Mobile nav */}
-        <nav className="sm:hidden mt-4 flex gap-6">
-          <Link
-            to="/"
-            className={`text-sm ${
-              isActive("/")
-                ? "text-foreground font-medium"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Home
-          </Link>
-          <Link
-            to="/people"
-            className={`text-sm ${
-              isActive("/people")
-                ? "text-foreground font-medium"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            People
-          </Link>
-          <Link
-            to="/feed"
-            className={`text-sm ${
-              isActive("/feed")
-                ? "text-foreground font-medium"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Feed
-          </Link>
-          <Link
-            to="/reviews"
-            className={`text-sm ${
-              isActive("/reviews")
-                ? "text-foreground font-medium"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Reviews
-          </Link>
-          <Link
-            to="/profile"
-            className={`text-sm ${
-              isActive("/profile")
-                ? "text-foreground font-medium"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Profile
-          </Link>
-        </nav>
+        
+        {/* Mobile-only quotes/time display */}
+        <div className="lg:hidden mt-3 pt-3 border-t border-border">
+          <HeaderDisplay />
+        </div>
       </div>
     </header>
   );

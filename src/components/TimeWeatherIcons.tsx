@@ -110,7 +110,7 @@ export function TimeWeatherIcons() {
   };
 
   return (
-    <div className="flex items-center gap-4 px-4 py-2">
+    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 px-2 sm:px-4 py-2">
       {/* Time Icon with Date/Time */}
       <div 
         className="flex items-center gap-2" 
@@ -121,7 +121,7 @@ export function TimeWeatherIcons() {
         ) : (
           <Moon className="w-5 h-5 text-blue-300" />
         )}
-        <div className="text-sm text-muted-foreground">
+        <div className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
           <div className="font-medium">{formatDate(currentDateTime)}</div>
           <div className="text-xs">{formatTime(currentDateTime)}</div>
         </div>
@@ -132,7 +132,7 @@ export function TimeWeatherIcons() {
         {loading ? (
           <>
             <Wind className="w-5 h-5 text-gray-400 animate-spin" />
-            <span className="text-sm text-muted-foreground">Loading...</span>
+            <span className="text-xs sm:text-sm text-muted-foreground">Loading...</span>
           </>
         ) : weather ? (
           <div 
@@ -140,7 +140,7 @@ export function TimeWeatherIcons() {
             title={`${weather.temperature}°C in ${weather.city}, ${weather.country} - ${weather.description}`}
           >
             {getWeatherIcon(weather.condition)}
-            <div className="text-sm text-muted-foreground">
+            <div className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
               <div className="font-medium">{weather.temperature}°C</div>
               <div className="text-xs capitalize">{weather.description}</div>
             </div>
@@ -148,7 +148,7 @@ export function TimeWeatherIcons() {
         ) : (
           <div className="flex items-center gap-2" title="Weather unavailable">
             <Cloud className="w-5 h-5 text-gray-400" />
-            <span className="text-sm text-muted-foreground">Weather unavailable</span>
+            <span className="text-xs sm:text-sm text-muted-foreground">Weather unavailable</span>
           </div>
         )}
       </div>

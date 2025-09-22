@@ -224,16 +224,16 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-soft">
       <Navigation />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
         {/* Header with Add Book button */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Your Reading Journey</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Your Reading Journey</h1>
           <AddBookDialog onAddBook={handleAddBook} />
         </div>
 
         {/* Stats */}
         {books.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 sm:mb-8">
             <div className="bg-card rounded-lg p-4 shadow-soft border border-border">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
@@ -283,7 +283,7 @@ const Index = () => {
             {inProgressBooks.length > 0 && (
               <section>
                 <h2 className="text-xl font-semibold text-foreground mb-4">Currently Reading</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                    {inProgressBooks.map((book) => (
                      <BookCard
                        key={book.id}
