@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { AddBookDialog } from "@/components/AddBookDialog";
 import { BookCard } from "@/components/BookCard";
+import { TBRList } from "@/components/TBRList";
 import { TrendingUp, Target } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ReviewDialog } from "@/components/ReviewDialog";
@@ -231,32 +232,47 @@ const Index = () => {
           <AddBookDialog onAddBook={handleAddBook} />
         </div>
 
-        {/* Stats */}
+        {/* Stats and TBR */}
         {books.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 sm:mb-8">
-            <div className="bg-card rounded-lg p-4 shadow-soft border border-border">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-accent-foreground" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">{booksInProgress}</p>
-                  <p className="text-sm text-muted-foreground">In Progress</p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 sm:mb-8">
+            {/* Stats section */}
+            <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-card rounded-lg p-4 shadow-soft border border-border">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-accent-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-foreground">{booksInProgress}</p>
+                    <p className="text-sm text-muted-foreground">In Progress</p>
+                  </div>
                 </div>
               </div>
+
+              <Link to="/completed" className="bg-card rounded-lg p-4 shadow-soft border border-border hover:shadow-lg transition-shadow cursor-pointer">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
+                    <Target className="w-5 h-5 text-accent-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-foreground">{completedBooks}</p>
+                    <p className="text-sm text-muted-foreground">Completed</p>
+                  </div>
+                </div>
+              </Link>
             </div>
 
-            <Link to="/completed" className="bg-card rounded-lg p-4 shadow-soft border border-border hover:shadow-lg transition-shadow cursor-pointer">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
-                  <Target className="w-5 h-5 text-accent-foreground" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">{completedBooks}</p>
-                  <p className="text-sm text-muted-foreground">Completed</p>
-                </div>
-              </div>
-            </Link>
+            {/* TBR section */}
+            <div className="lg:col-span-1">
+              <TBRList userId={userId} onAddToCurrentlyReading={handleAddBook} />
+            </div>
+          </div>
+        )}
+
+        {/* TBR for new users */}
+        {books.length === 0 && userId && (
+          <div className="mb-6">
+            <TBRList userId={userId} onAddToCurrentlyReading={handleAddBook} />
           </div>
         )}
 

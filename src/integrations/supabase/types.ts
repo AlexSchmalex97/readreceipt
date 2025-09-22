@@ -171,6 +171,42 @@ export type Database = {
           },
         ]
       }
+      tbr_books: {
+        Row: {
+          author: string
+          created_at: string
+          id: string
+          notes: string | null
+          priority: number | null
+          title: string
+          total_pages: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          author: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          priority?: number | null
+          title: string
+          total_pages?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          author?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          priority?: number | null
+          title?: string
+          total_pages?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
