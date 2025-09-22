@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 type CompletedBook = {
   id: string;
@@ -21,6 +24,7 @@ export default function CompletedBooks() {
   const [userId, setUserId] = useState<string | null>(null);
   const [completedBooks, setCompletedBooks] = useState<CompletedBook[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   const handleMarkUnread = async (book: CompletedBook) => {
     if (!userId) return;
@@ -42,6 +46,22 @@ export default function CompletedBooks() {
       }
     } catch (e) {
       console.error("Failed to mark unread", e);
+    }
+  };
+
+  const handleDeleteBook = async (book: CompletedBook) => {
+    if (!userId) return;
+    try {
+      const { error } = await supabase.from("books").delete().eq("id", book.id);
+      if (!error) {
+        setCompletedBooks((prev) => prev.filter((b) => b.id !== book.id));
+        toast({
+          title: "Book deleted",
+          description: `"${book.title}" has been removed from your library.`,
+        });
+      }
+    } catch (e) {
+      console.error("Failed to delete book", e);
     }
   };
 
@@ -146,14 +166,24 @@ export default function CompletedBooks() {
                   </div>
                 )}
 
-                <div className="mt-4 flex justify-end">
-                  <button
+                <div className="mt-4 flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => handleMarkUnread(book)}
-                    className="px-3 py-2 rounded border hover:bg-muted transition"
                     aria-label={`Mark ${book.title} as unread`}
                   >
                     Mark as unread
-                  </button>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDeleteBook(book)}
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    aria-label={`Delete ${book.title}`}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
             ))}

@@ -188,6 +188,17 @@ const Index = () => {
     }
   };
 
+  const handleDeleteBook = async (id: string) => {
+    if (userId) {
+      const { error } = await supabase.from("books").delete().eq("id", id);
+      if (!error) {
+        setBooks((prev) => prev.filter((b) => b.id !== id));
+      }
+    } else {
+      setBooks((prev) => prev.filter((b) => b.id !== id));
+    }
+  };
+
   const booksInProgress = books.filter(
     (b) => b.currentPage > 0 && b.currentPage < b.totalPages
   ).length;
@@ -269,13 +280,14 @@ const Index = () => {
               <section>
                 <h2 className="text-xl font-semibold text-foreground mb-4">Currently Reading</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {inProgressBooks.map((book) => (
-                    <BookCard
-                      key={book.id}
-                      book={book}
-                      onUpdateProgress={handleUpdateProgress}
-                    />
-                  ))}
+                   {inProgressBooks.map((book) => (
+                     <BookCard
+                       key={book.id}
+                       book={book}
+                       onUpdateProgress={handleUpdateProgress}
+                       onDeleteBook={handleDeleteBook}
+                     />
+                   ))}
                 </div>
               </section>
             )}

@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Edit3, Check, X } from "lucide-react";
+import { BookOpen, Edit3, Check, X, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Book {
@@ -17,6 +17,7 @@ interface Book {
 interface BookCardProps {
   book: Book;
   onUpdateProgress: (id: string, currentPage: number) => void;
+  onDeleteBook?: (id: string) => void;
 }
 
 const getEncouragingMessage = (percentage: number): string => {
@@ -30,7 +31,7 @@ const getEncouragingMessage = (percentage: number): string => {
   return "Congratulations! Book completed! 🎉📚";
 };
 
-export const BookCard = ({ book, onUpdateProgress }: BookCardProps) => {
+export const BookCard = ({ book, onUpdateProgress, onDeleteBook }: BookCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentPageInput, setCurrentPageInput] = useState(book.currentPage.toString());
   const { toast } = useToast();
@@ -71,6 +72,16 @@ export const BookCard = ({ book, onUpdateProgress }: BookCardProps) => {
     setIsEditing(false);
   };
 
+  const handleDelete = () => {
+    if (onDeleteBook) {
+      onDeleteBook(book.id);
+      toast({
+        title: "Book deleted",
+        description: `"${book.title}" has been removed from your library.`,
+      });
+    }
+  };
+
   return (
     <Card className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-card">
       <CardHeader className="pb-3">
@@ -81,7 +92,19 @@ export const BookCard = ({ book, onUpdateProgress }: BookCardProps) => {
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-1">{book.author}</p>
           </div>
-          <BookOpen className="w-5 h-5 text-primary flex-shrink-0 ml-2" />
+          <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+            <BookOpen className="w-5 h-5 text-primary" />
+            {onDeleteBook && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleDelete}
+                className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
       
