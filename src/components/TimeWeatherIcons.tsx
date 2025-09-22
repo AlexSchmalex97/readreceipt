@@ -12,6 +12,7 @@ type WeatherData = {
 
 export function TimeWeatherIcons() {
   const [timeIcon, setTimeIcon] = useState<'sun' | 'moon'>('sun');
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [weather, setWeather] = useState<WeatherData>(null);
   const [loading, setLoading] = useState(true);
 
@@ -40,16 +41,19 @@ export function TimeWeatherIcons() {
   };
 
   useEffect(() => {
-    // Determine time of day
-    const updateTimeIcon = () => {
-      const hour = new Date().getHours();
+    // Update date/time and time icon
+    const updateDateTime = () => {
+      const now = new Date();
+      setCurrentDateTime(now);
+      
+      const hour = now.getHours();
       // Consider 6 AM - 6 PM as day time
       setTimeIcon(hour >= 6 && hour < 18 ? 'sun' : 'moon');
     };
 
-    updateTimeIcon();
-    // Update every hour
-    const timeInterval = setInterval(updateTimeIcon, 60 * 60 * 1000);
+    updateDateTime();
+    // Update every minute
+    const timeInterval = setInterval(updateDateTime, 60 * 1000);
 
     return () => clearInterval(timeInterval);
   }, []);
@@ -99,11 +103,28 @@ export function TimeWeatherIcons() {
     fetchWeather();
   }, []);
 
+  // Format date and time
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'short', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    });
+  };
+
   return (
-    <div className="flex items-center gap-3 px-4 py-2">
-      {/* Time Icon */}
+    <div className="flex items-center gap-4 px-4 py-2">
+      {/* Time Icon with Date/Time */}
       <div 
-        className="flex items-center gap-1" 
+        className="flex items-center gap-2" 
         title={timeIcon === 'sun' ? 'Good day!' : 'Good evening!'}
       >
         {timeIcon === 'sun' ? (
@@ -111,25 +132,34 @@ export function TimeWeatherIcons() {
         ) : (
           <Moon className="w-5 h-5 text-blue-300" />
         )}
+        <div className="text-sm text-muted-foreground">
+          <div className="font-medium">{formatDate(currentDateTime)}</div>
+          <div className="text-xs">{formatTime(currentDateTime)}</div>
+        </div>
       </div>
 
-      {/* Weather Icon */}
-      <div className="flex items-center gap-1">
+      {/* Weather Icon with Conditions */}
+      <div className="flex items-center gap-2">
         {loading ? (
-          <Wind className="w-5 h-5 text-gray-400 animate-spin" />
+          <>
+            <Wind className="w-5 h-5 text-gray-400 animate-spin" />
+            <span className="text-sm text-muted-foreground">Loading...</span>
+          </>
         ) : weather ? (
           <div 
-            className="flex items-center gap-1" 
+            className="flex items-center gap-2" 
             title={`${weather.temperature}°C in ${weather.city}, ${weather.country} - ${weather.description}`}
           >
             {getWeatherIcon(weather.condition)}
-            <span className="text-xs text-muted-foreground font-medium">
-              {weather.temperature}°
-            </span>
+            <div className="text-sm text-muted-foreground">
+              <div className="font-medium">{weather.temperature}°C</div>
+              <div className="text-xs capitalize">{weather.description}</div>
+            </div>
           </div>
         ) : (
-          <div className="flex items-center gap-1" title="Weather unavailable">
+          <div className="flex items-center gap-2" title="Weather unavailable">
             <Cloud className="w-5 h-5 text-gray-400" />
+            <span className="text-sm text-muted-foreground">Weather unavailable</span>
           </div>
         )}
       </div>
