@@ -17,6 +17,7 @@ interface TBRBook {
   notes?: string;
   priority: number;
   created_at: string;
+  cover_url?: string;
 }
 
 interface TBRListProps {
@@ -406,51 +407,90 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
             {searchQuery ? 'No books match your search' : 'Your TBR list is empty'}
           </div>
         ) : (
-          filteredBooks.map((book) => (
-            <div key={book.id} className="border border-border rounded-lg p-3 hover:bg-accent/5 transition-colors">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium text-foreground truncate">{book.title}</h3>
-                    {book.priority > 0 && (
-                      <div className="flex">
-                        {Array(book.priority).fill(0).map((_, i) => (
-                          <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                        ))}
+          <div className="space-y-3">
+            {/* Small cover thumbnails row */}
+            {filteredBooks.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto pb-2 mb-3">
+                {filteredBooks.slice(0, 8).map((book) => (
+                  <div key={`cover-${book.id}`} className="flex-shrink-0">
+                    {book.cover_url ? (
+                      <img 
+                        src={book.cover_url} 
+                        alt={book.title}
+                        className="w-8 h-12 object-cover rounded shadow-sm"
+                        title={`${book.title} by ${book.author}`}
+                      />
+                    ) : (
+                      <div className="w-8 h-12 bg-muted rounded flex items-center justify-center shadow-sm" title={`${book.title} by ${book.author}`}>
+                        <BookOpen className="w-3 h-3 text-muted-foreground" />
                       </div>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground">by {book.author}</p>
-                  {book.total_pages && (
-                    <p className="text-xs text-muted-foreground">{book.total_pages} pages</p>
-                  )}
-                  {book.notes && (
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{book.notes}</p>
-                  )}
-                </div>
-                <div className="flex gap-1">
-                  {onMoveToReading && (
+                ))}
+                {filteredBooks.length > 8 && (
+                  <div className="flex-shrink-0 w-8 h-12 bg-muted/50 rounded flex items-center justify-center text-xs text-muted-foreground">
+                    +{filteredBooks.length - 8}
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Book list */}
+            {filteredBooks.map((book) => (
+              <div key={book.id} className="border border-border rounded-lg p-3 hover:bg-accent/5 transition-colors">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex gap-3 flex-1 min-w-0">
+                    {book.cover_url && (
+                      <img 
+                        src={book.cover_url} 
+                        alt={book.title}
+                        className="w-10 h-14 object-cover rounded flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-medium text-foreground truncate">{book.title}</h3>
+                        {book.priority > 0 && (
+                          <div className="flex">
+                            {Array(book.priority).fill(0).map((_, i) => (
+                              <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">by {book.author}</p>
+                      {book.total_pages && (
+                        <p className="text-xs text-muted-foreground">{book.total_pages} pages</p>
+                      )}
+                      {book.notes && (
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{book.notes}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    {onMoveToReading && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleMoveToReading(book)}
+                        title="Start reading this book"
+                      >
+                        <BookOpen className="w-3 h-3" />
+                      </Button>
+                    )}
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleMoveToReading(book)}
-                      title="Start reading this book"
+                      onClick={() => handleRemoveBook(book.id)}
+                      title="Remove from TBR"
                     >
-                      <BookOpen className="w-3 h-3" />
+                      <X className="w-3 h-3" />
                     </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleRemoveBook(book.id)}
-                    title="Remove from TBR"
-                  >
-                    <X className="w-3 h-3" />
-                  </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
     </div>

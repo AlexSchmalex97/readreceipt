@@ -290,11 +290,37 @@ const Index = () => {
                 <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
                   <TrendingUp className="w-5 h-5 text-accent-foreground" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <p className="text-2xl font-bold text-foreground">{booksInProgress}</p>
                   <p className="text-sm text-muted-foreground">In Progress</p>
                 </div>
               </div>
+              {/* Small covers for in-progress books */}
+              {inProgressBooks.length > 0 && (
+                <div className="flex gap-1 mt-3 overflow-hidden">
+                  {inProgressBooks.slice(0, 5).map((book) => (
+                    <div key={`progress-cover-${book.id}`} className="flex-shrink-0">
+                      {book.coverUrl ? (
+                        <img 
+                          src={book.coverUrl} 
+                          alt={book.title}
+                          className="w-6 h-8 object-cover rounded shadow-sm"
+                          title={`${book.title} by ${book.author}`}
+                        />
+                      ) : (
+                        <div className="w-6 h-8 bg-muted rounded flex items-center justify-center shadow-sm" title={`${book.title} by ${book.author}`}>
+                          <TrendingUp className="w-2 h-2 text-muted-foreground" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {inProgressBooks.length > 5 && (
+                    <div className="flex-shrink-0 w-6 h-8 bg-muted/50 rounded flex items-center justify-center text-xs text-muted-foreground">
+                      +{inProgressBooks.length - 5}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <Link to="/completed" className="bg-card rounded-lg p-4 shadow-soft border border-border hover:shadow-lg transition-shadow cursor-pointer">
@@ -302,11 +328,37 @@ const Index = () => {
                 <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
                   <Target className="w-5 h-5 text-accent-foreground" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <p className="text-2xl font-bold text-foreground">{completedBooks}</p>
                   <p className="text-sm text-muted-foreground">Completed</p>
                 </div>
               </div>
+              {/* Small covers for completed books */}
+              {completedBookItems.length > 0 && (
+                <div className="flex gap-1 mt-3 overflow-hidden">
+                  {completedBookItems.slice(0, 5).map((book) => (
+                    <div key={`completed-cover-${book.id}`} className="flex-shrink-0">
+                      {book.coverUrl ? (
+                        <img 
+                          src={book.coverUrl} 
+                          alt={book.title}
+                          className="w-6 h-8 object-cover rounded shadow-sm"
+                          title={`${book.title} by ${book.author}`}
+                        />
+                      ) : (
+                        <div className="w-6 h-8 bg-muted rounded flex items-center justify-center shadow-sm" title={`${book.title} by ${book.author}`}>
+                          <Target className="w-2 h-2 text-muted-foreground" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {completedBookItems.length > 5 && (
+                    <div className="flex-shrink-0 w-6 h-8 bg-muted/50 rounded flex items-center justify-center text-xs text-muted-foreground">
+                      +{completedBookItems.length - 5}
+                    </div>
+                  )}
+                </div>
+              )}
             </Link>
 
             {/* TBR List - positioned to the right of Completed */}
