@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { BookOpen, Edit3, Check, X, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { BookEditionSelector } from "@/components/BookEditionSelector";
 
 interface Book {
   id: string;
@@ -19,6 +20,7 @@ interface BookCardProps {
   book: Book;
   onUpdateProgress: (id: string, currentPage: number) => void;
   onDeleteBook?: (id: string) => void;
+  onCoverUpdate?: (id: string, newCoverUrl: string) => void;
 }
 
 const getEncouragingMessage = (percentage: number): string => {
@@ -32,7 +34,7 @@ const getEncouragingMessage = (percentage: number): string => {
   return "Congratulations! Book completed! 🎉📚";
 };
 
-export const BookCard = ({ book, onUpdateProgress, onDeleteBook }: BookCardProps) => {
+export const BookCard = ({ book, onUpdateProgress, onDeleteBook, onCoverUpdate }: BookCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentPageInput, setCurrentPageInput] = useState(book.currentPage.toString());
   const { toast } = useToast();
@@ -88,7 +90,7 @@ export const BookCard = ({ book, onUpdateProgress, onDeleteBook }: BookCardProps
       <CardHeader className="pb-3">
         <div className="flex items-start gap-3">
           {/* Book Cover */}
-          <div className="w-16 h-20 bg-muted rounded border flex-shrink-0 overflow-hidden">
+          <div className="relative w-16 h-20 bg-muted rounded border flex-shrink-0 overflow-hidden">
             {book.coverUrl ? (
               <img 
                 src={book.coverUrl} 
@@ -104,6 +106,18 @@ export const BookCard = ({ book, onUpdateProgress, onDeleteBook }: BookCardProps
                 <BookOpen className="w-6 h-6 text-muted-foreground" />
               </div>
             )}
+            {/* Edition selector overlay */}
+            <div className="absolute -top-1 -right-1">
+              <BookEditionSelector
+                bookId={book.id}
+                bookTitle={book.title}
+                bookAuthor={book.author}
+                currentCoverUrl={book.coverUrl}
+                onCoverUpdate={(newCoverUrl) => {
+                  onCoverUpdate?.(book.id, newCoverUrl);
+                }}
+              />
+            </div>
           </div>
           
           {/* Book Info */}

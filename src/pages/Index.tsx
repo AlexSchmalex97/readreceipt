@@ -254,6 +254,14 @@ const Index = () => {
     }
   };
 
+  const handleCoverUpdate = (bookId: string, newCoverUrl: string) => {
+    setBooks((prevBooks) =>
+      prevBooks.map((book) =>
+        book.id === bookId ? { ...book, coverUrl: newCoverUrl } : book
+      )
+    );
+  };
+
   const booksInProgress = books.filter(
     (b) => b.currentPage < b.totalPages
   ).length;
@@ -406,6 +414,7 @@ const Index = () => {
                        book={book}
                        onUpdateProgress={handleUpdateProgress}
                        onDeleteBook={handleDeleteBook}
+                       onCoverUpdate={handleCoverUpdate}
                      />
                    ))}
                 </div>

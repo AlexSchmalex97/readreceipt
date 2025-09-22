@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { BookEditionSelector } from "@/components/BookEditionSelector";
 
 type CompletedBook = {
   id: string;
@@ -13,6 +14,7 @@ type CompletedBook = {
   current_page: number;
   created_at: string;
   user_id: string;
+  cover_url?: string;
   review?: {
     id: string;
     rating: number;
@@ -81,7 +83,7 @@ export default function CompletedBooks() {
       const { data: books, error: booksError } = await supabase
         .from("books")
         .select(`
-          id, title, author, total_pages, current_page, created_at, user_id
+          id, title, author, total_pages, current_page, created_at, user_id, cover_url
         `)
         .eq("user_id", userId)
         .order("created_at", { ascending: false });
@@ -144,11 +146,49 @@ export default function CompletedBooks() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {completedBooks.map((book) => (
               <div key={book.id} className="bg-card p-6 rounded-lg border shadow-soft">
-                <h3 className="font-semibold text-lg mb-2">{book.title}</h3>
-                <p className="text-muted-foreground mb-2">{book.author}</p>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {book.total_pages} pages • Completed {new Date(book.created_at).toLocaleDateString()}
-                </p>
+                <div className="flex gap-4 mb-4">
+                  {/* Book Cover */}
+                  <div className="relative flex-shrink-0">
+                    {book.cover_url ? (
+                      <img 
+                        src={book.cover_url} 
+                        alt={book.title}
+                        className="w-20 h-28 object-cover rounded shadow-sm"
+                      />
+                    ) : (
+                      <div className="w-20 h-28 bg-muted rounded flex items-center justify-center shadow-sm">
+                        <BookOpen className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                    )}
+                    {/* Edition selector overlay */}
+                    <div className="absolute -top-2 -right-2">
+                      <BookEditionSelector
+                        bookId={book.id}
+                        bookTitle={book.title}
+                        bookAuthor={book.author}
+                        currentCoverUrl={book.cover_url}
+                        onCoverUpdate={(newCoverUrl) => {
+                          setCompletedBooks(prev => 
+                            prev.map(b => 
+                              b.id === book.id 
+                                ? { ...b, cover_url: newCoverUrl }
+                                : b
+                            )
+                          );
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Book Info */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-lg mb-2 truncate">{book.title}</h3>
+                    <p className="text-muted-foreground mb-2">by {book.author}</p>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {book.total_pages} pages • Completed {new Date(book.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
                 
                 {book.review ? (
                   <div className="border-t pt-4">

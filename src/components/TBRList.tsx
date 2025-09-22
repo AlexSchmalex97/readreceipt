@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { searchGoogleBooks, GoogleBookResult } from '@/lib/googleBooks';
+import { BookEditionSelector } from '@/components/BookEditionSelector';
 
 interface TBRBook {
   id: string;
@@ -442,13 +443,41 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
               <div key={book.id} className="border border-border rounded-lg p-3 hover:bg-accent/5 transition-colors">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex gap-3 flex-1 min-w-0">
-                    {book.cover_url && (
-                      <img 
-                        src={book.cover_url} 
-                        alt={book.title}
-                        className="w-10 h-14 object-cover rounded flex-shrink-0"
-                      />
-                    )}
+                    {/* Book Cover - always shown on the left */}
+                    <div className="relative flex-shrink-0">
+                      {book.cover_url ? (
+                        <img 
+                          src={book.cover_url} 
+                          alt={book.title}
+                          className="w-12 h-16 object-cover rounded shadow-sm"
+                        />
+                      ) : (
+                        <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm">
+                          <BookOpen className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                      )}
+                      {/* Edition selector overlay */}
+                      <div className="absolute -top-1 -right-1">
+                        <BookEditionSelector
+                          bookId={book.id}
+                          bookTitle={book.title}
+                          bookAuthor={book.author}
+                          currentCoverUrl={book.cover_url}
+                          table="tbr_books"
+                          onCoverUpdate={(newCoverUrl) => {
+                            setTbrBooks(prev => 
+                              prev.map(b => 
+                                b.id === book.id 
+                                  ? { ...b, cover_url: newCoverUrl }
+                                  : b
+                              )
+                            );
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Book Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <h3 className="font-medium text-foreground truncate">{book.title}</h3>
