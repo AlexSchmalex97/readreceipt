@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import AuthButtons from "@/components/AuthButtons";
+import { TimeWeatherIcons } from "@/components/TimeWeatherIcons";
 
 export function Navigation() {
   const { pathname } = useLocation();
@@ -77,6 +78,9 @@ export function Navigation() {
               </Link>
             </nav>
           </div>
+
+          {/* Center: Time and Weather Icons */}
+          <TimeWeatherIcons />
 
           {/* Right: Auth */}
           <AuthButtons />
