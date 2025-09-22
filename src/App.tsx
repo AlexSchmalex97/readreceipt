@@ -10,6 +10,7 @@ import Feed from "./pages/Feed";
 import People from "./pages/People";
 import Reviews from "./pages/Reviews";
 import Profile from "./pages/Profile";
+import ProfileSettings from "./pages/ProfileSettings";
 import CompletedBooks from "./pages/CompletedBooks";
 import UserProfile from "./pages/UserProfile";
 
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/user/:userId" element={<UserProfile />} />
           <Route path="/reviews" element={<Reviews />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/settings" element={<ProfileSettings />} />
           <Route path="/completed" element={<CompletedBooks />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
