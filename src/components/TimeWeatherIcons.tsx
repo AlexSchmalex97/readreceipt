@@ -15,6 +15,7 @@ export function TimeWeatherIcons() {
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [weather, setWeather] = useState<WeatherData>(null);
   const [loading, setLoading] = useState(true);
+  const [temperatureUnit, setTemperatureUnit] = useState<'celsius' | 'fahrenheit'>('celsius');
 
   // Get weather icon based on condition
   const getWeatherIcon = (condition: string) => {
@@ -59,6 +60,30 @@ export function TimeWeatherIcons() {
   }, []);
 
   useEffect(() => {
+    // Fetch user's temperature unit preference
+    const fetchUserPreference = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('temperature_unit')
+            .eq('id', user.id)
+            .single();
+          
+          if (profileData?.temperature_unit) {
+            setTemperatureUnit(profileData.temperature_unit as 'celsius' | 'fahrenheit');
+          }
+        }
+      } catch (error) {
+        console.log('Failed to fetch temperature unit preference');
+      }
+    };
+
+    fetchUserPreference();
+  }, []);
+
+  useEffect(() => {
     // Get user's location and fetch weather (simplified for now)
     const fetchWeather = async () => {
       try {
@@ -91,6 +116,14 @@ export function TimeWeatherIcons() {
 
     fetchWeather();
   }, []);
+
+  // Convert temperature between units
+  const convertTemperature = (temp: number, unit: 'celsius' | 'fahrenheit') => {
+    if (unit === 'fahrenheit') {
+      return Math.round((temp * 9/5) + 32);
+    }
+    return temp;
+  };
 
   // Format date and time
   const formatDate = (date: Date) => {
@@ -137,11 +170,13 @@ export function TimeWeatherIcons() {
         ) : weather ? (
           <div 
             className="flex items-center gap-2" 
-            title={`${weather.temperature}°C in ${weather.city}, ${weather.country} - ${weather.description}`}
+            title={`${convertTemperature(weather.temperature, temperatureUnit)}°${temperatureUnit === 'celsius' ? 'C' : 'F'} in ${weather.city}, ${weather.country} - ${weather.description}`}
           >
             {getWeatherIcon(weather.condition)}
             <div className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
-              <div className="font-medium">{weather.temperature}°C</div>
+              <div className="font-medium">
+                {convertTemperature(weather.temperature, temperatureUnit)}°{temperatureUnit === 'celsius' ? 'C' : 'F'}
+              </div>
               <div className="text-xs capitalize">{weather.description}</div>
             </div>
           </div>

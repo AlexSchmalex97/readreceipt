@@ -35,6 +35,7 @@ export default function ProfileSettings() {
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [displayPreference, setDisplayPreference] = useState<'quotes' | 'time_weather' | 'both'>('quotes');
+  const [temperatureUnit, setTemperatureUnit] = useState<'celsius' | 'fahrenheit'>('celsius');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const normUsername = useMemo(() => normalizeUsername(username), [username]);
@@ -86,7 +87,7 @@ export default function ProfileSettings() {
       // load profile
       const { data: prof, error: profileError } = await supabase
         .from("profiles")
-        .select("display_name, username, bio, avatar_url, display_preference")
+        .select("display_name, username, bio, avatar_url, display_preference, temperature_unit")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -96,6 +97,7 @@ export default function ProfileSettings() {
       setUsername(prof?.username ?? "");
       setBio(prof?.bio ?? "");
       setDisplayPreference((prof?.display_preference as 'quotes' | 'time_weather' | 'both') ?? 'quotes');
+      setTemperatureUnit((prof?.temperature_unit as 'celsius' | 'fahrenheit') ?? 'celsius');
       setAvatarUrl(prof?.avatar_url ?? null);
       setLoading(false);
     })();
@@ -279,7 +281,8 @@ export default function ProfileSettings() {
           display_name: displayName.trim(), 
           username: normUsername,
           bio: bio.trim() || null,
-          display_preference: displayPreference
+          display_preference: displayPreference,
+          temperature_unit: temperatureUnit
         })
         .eq("id", uid)
         .select();
@@ -298,7 +301,8 @@ export default function ProfileSettings() {
               username: normUsername,
               bio: bio.trim() || null,
               email: email,
-              display_preference: displayPreference
+              display_preference: displayPreference,
+              temperature_unit: temperatureUnit
             }
           ])
           .select();
@@ -512,6 +516,21 @@ export default function ProfileSettings() {
             </select>
             <div className="text-xs text-muted-foreground">
               Choose what appears in the navigation header between the menu and your greeting.
+            </div>
+          </label>
+
+          <label className="grid gap-1">
+            <span className="text-sm text-muted-foreground">Temperature Unit</span>
+            <select
+              className="border rounded px-3 py-2 bg-background"
+              value={temperatureUnit}
+              onChange={(e) => setTemperatureUnit(e.target.value as 'celsius' | 'fahrenheit')}
+            >
+              <option value="celsius">Celsius (°C)</option>
+              <option value="fahrenheit">Fahrenheit (°F)</option>
+            </select>
+            <div className="text-xs text-muted-foreground">
+              Choose your preferred temperature unit for weather display.
             </div>
           </label>
 

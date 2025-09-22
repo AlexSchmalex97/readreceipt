@@ -71,6 +71,7 @@ export type Database = {
           display_preference: string | null
           email: string | null
           id: string
+          temperature_unit: string | null
           username: string | null
         }
         Insert: {
@@ -81,6 +82,7 @@ export type Database = {
           display_preference?: string | null
           email?: string | null
           id: string
+          temperature_unit?: string | null
           username?: string | null
         }
         Update: {
@@ -91,6 +93,7 @@ export type Database = {
           display_preference?: string | null
           email?: string | null
           id?: string
+          temperature_unit?: string | null
           username?: string | null
         }
         Relationships: []
