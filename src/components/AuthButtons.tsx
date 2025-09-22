@@ -172,7 +172,7 @@ export default function AuthButtons() {
     <div className="relative">
       {loggedIn ? (
         <div className="flex items-center gap-3">
-          <div className="text-sm text-muted-foreground text-right">
+          <div className="text-sm text-muted-foreground text-center">
             <div>Happy reading,</div>
             <div>{userName || "Reader"}!</div>
           </div>
