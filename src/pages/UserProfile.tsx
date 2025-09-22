@@ -87,7 +87,7 @@ export default function UserProfile() {
             .from("reading_progress")
             .select(`
               id, created_at, user_id, from_page, to_page, book_id,
-              books!book_id ( title, author )
+              books!reading_progress_book_id_fkey ( title, author )
             `)
             .eq("user_id", userId)
             .order("created_at", { ascending: false })

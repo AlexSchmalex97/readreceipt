@@ -58,7 +58,7 @@ export default function Feed() {
         .from("reading_progress")
         .select(`
           id, created_at, user_id, from_page, to_page, book_id,
-          books!book_id ( title, author )
+          books!reading_progress_book_id_fkey ( title, author )
         `)
         .in("user_id", targetIds)
         .order("created_at", { ascending: false })
@@ -92,7 +92,7 @@ export default function Feed() {
         .from("reviews")
         .select(`
           id, created_at, user_id, rating, review, book_id,
-          books!book_id ( title, author )
+          books!reviews_book_id_fkey ( title, author )
         `)
         .in("user_id", targetIds)
         .order("created_at", { ascending: false })
