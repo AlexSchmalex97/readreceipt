@@ -264,7 +264,7 @@ const Index = () => {
 
             {/* TBR section */}
             <div className="lg:col-span-1">
-              <TBRList userId={userId} onAddToCurrentlyReading={handleAddBook} />
+              <TBRList userId={userId} onMoveToReading={handleAddBook} />
             </div>
           </div>
         )}
@@ -272,11 +272,11 @@ const Index = () => {
         {/* TBR for new users */}
         {books.length === 0 && userId && (
           <div className="mb-6">
-            <TBRList userId={userId} onAddToCurrentlyReading={handleAddBook} />
+            <TBRList userId={userId} onMoveToReading={handleAddBook} />
           </div>
         )}
 
-        {/* Books sections */}
+        {/* Main Content Area */}
         {books.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -295,33 +295,42 @@ const Index = () => {
             <AddBookDialog onAddBook={handleAddBook} />
           </div>
         ) : (
-          <div className="space-y-8">
-            {inProgressBooks.length > 0 && (
-              <section>
-                <h2 className="text-xl font-semibold text-foreground mb-4">Currently Reading</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                   {inProgressBooks.map((book) => (
-                     <BookCard
-                       key={book.id}
-                       book={book}
-                       onUpdateProgress={handleUpdateProgress}
-                       onDeleteBook={handleDeleteBook}
-                     />
-                   ))}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Currently Reading Section */}
+            <div className="lg:col-span-2 space-y-8">
+              {inProgressBooks.length > 0 ? (
+                <section>
+                  <h2 className="text-xl font-semibold text-foreground mb-4">Currently Reading</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                     {inProgressBooks.map((book) => (
+                        <BookCard
+                          key={book.id}
+                          book={book}
+                          onUpdateProgress={handleUpdateProgress}
+                          onDeleteBook={handleDeleteBook}
+                        />
+                      ))}
+                  </div>
+                </section>
+              ) : (
+                <div className="text-center py-12 bg-card rounded-lg border">
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    No books in progress
+                  </h3>
+                  <p className="text-muted-foreground mb-4">
+                    Start reading a new book to track your progress!
+                  </p>
                 </div>
-              </section>
-            )}
+              )}
+            </div>
 
-            {inProgressBooks.length === 0 && (
-              <div className="text-center py-12 bg-card rounded-lg border">
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  No books in progress
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  Start reading a new book to track your progress!
-                </p>
-              </div>
-            )}
+            {/* TBR List Section */}
+            <div className="lg:col-span-1">
+              <TBRList 
+                userId={userId} 
+                onMoveToReading={handleAddBook}
+              />
+            </div>
           </div>
         )}
       </main>

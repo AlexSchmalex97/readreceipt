@@ -1,15 +1,11 @@
-import { useState, useEffect } from "react";
-import { BookPlus, Search, Star, Trash2, BookOpen } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from 'react';
+import { Plus, Search, BookOpen, X, Star } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TBRBook {
   id: string;
@@ -23,85 +19,77 @@ interface TBRBook {
 
 interface TBRListProps {
   userId: string | null;
-  onAddToCurrentlyReading?: (book: { title: string; author: string; totalPages: number }) => void;
+  onMoveToReading?: (book: Omit<TBRBook, 'id' | 'priority' | 'notes' | 'created_at'>) => void;
 }
 
-export function TBRList({ userId, onAddToCurrentlyReading }: TBRListProps) {
+export function TBRList({ userId, onMoveToReading }: TBRListProps) {
   const [tbrBooks, setTbrBooks] = useState<TBRBook[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newBook, setNewBook] = useState({
-    title: "",
-    author: "",
-    total_pages: "",
-    notes: "",
-    priority: "0"
+    title: '',
+    author: '',
+    total_pages: '',
+    notes: '',
+    priority: 0
   });
   const { toast } = useToast();
 
+  // Load TBR books
   useEffect(() => {
-    if (userId) {
-      fetchTBRBooks();
-    } else {
+    if (!userId) {
+      setTbrBooks([]);
       setLoading(false);
+      return;
     }
-  }, [userId]);
 
-  const fetchTBRBooks = async () => {
-    if (!userId) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from("tbr_books")
-        .select("*")
-        .eq("user_id", userId)
-        .order("priority", { ascending: false })
-        .order("created_at", { ascending: true });
+    const loadTBRBooks = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('tbr_books')
+          .select('*')
+          .eq('user_id', userId)
+          .order('priority', { ascending: false })
+          .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setTbrBooks(data || []);
-    } catch (error) {
-      console.error("Error fetching TBR books:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load your TBR list",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+        if (error) throw error;
+        setTbrBooks(data || []);
+      } catch (error) {
+        console.error('Error loading TBR books:', error);
+        toast({
+          title: 'Error loading TBR list',
+          description: 'Please try again',
+          variant: 'destructive'
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTBRBooks();
+  }, [userId, toast]);
 
   const handleAddBook = async () => {
-    if (!userId) {
+    if (!userId || !newBook.title.trim() || !newBook.author.trim()) {
       toast({
-        title: "Authentication required",
-        description: "Please sign in to add books to your TBR list",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!newBook.title.trim() || !newBook.author.trim()) {
-      toast({
-        title: "Missing information",
-        description: "Please enter both title and author",
-        variant: "destructive"
+        title: 'Missing information',
+        description: 'Please enter both title and author',
+        variant: 'destructive'
       });
       return;
     }
 
     try {
       const { data, error } = await supabase
-        .from("tbr_books")
+        .from('tbr_books')
         .insert([{
           user_id: userId,
           title: newBook.title.trim(),
           author: newBook.author.trim(),
           total_pages: newBook.total_pages ? parseInt(newBook.total_pages) : null,
           notes: newBook.notes.trim() || null,
-          priority: parseInt(newBook.priority)
+          priority: newBook.priority
         }])
         .select()
         .single();
@@ -109,61 +97,55 @@ export function TBRList({ userId, onAddToCurrentlyReading }: TBRListProps) {
       if (error) throw error;
 
       setTbrBooks(prev => [data, ...prev]);
-      setNewBook({ title: "", author: "", total_pages: "", notes: "", priority: "0" });
+      setNewBook({ title: '', author: '', total_pages: '', notes: '', priority: 0 });
       setShowAddDialog(false);
-      
       toast({
-        title: "Book added!",
-        description: "Added to your TBR list"
+        title: 'Book added to TBR',
+        description: `${newBook.title} has been added to your reading list`
       });
     } catch (error) {
-      console.error("Error adding book:", error);
+      console.error('Error adding TBR book:', error);
       toast({
-        title: "Error",
-        description: "Failed to add book to TBR list",
-        variant: "destructive"
+        title: 'Error adding book',
+        description: 'Please try again',
+        variant: 'destructive'
       });
     }
   };
 
-  const handleDeleteBook = async (id: string) => {
-    if (!userId) return;
-
+  const handleRemoveBook = async (bookId: string) => {
     try {
       const { error } = await supabase
-        .from("tbr_books")
+        .from('tbr_books')
         .delete()
-        .eq("id", id);
+        .eq('id', bookId);
 
       if (error) throw error;
 
-      setTbrBooks(prev => prev.filter(book => book.id !== id));
+      setTbrBooks(prev => prev.filter(book => book.id !== bookId));
       toast({
-        title: "Book removed",
-        description: "Removed from your TBR list"
+        title: 'Book removed',
+        description: 'Book has been removed from your TBR list'
       });
     } catch (error) {
-      console.error("Error deleting book:", error);
+      console.error('Error removing TBR book:', error);
       toast({
-        title: "Error",
-        description: "Failed to remove book",
-        variant: "destructive"
+        title: 'Error removing book',
+        description: 'Please try again',
+        variant: 'destructive'
       });
     }
   };
 
-  const handleMoveToCurrentlyReading = async (book: TBRBook) => {
-    if (!userId || !onAddToCurrentlyReading) return;
-
-    // Add to currently reading books
-    onAddToCurrentlyReading({
-      title: book.title,
-      author: book.author,
-      totalPages: book.total_pages || 100
-    });
-
-    // Remove from TBR
-    await handleDeleteBook(book.id);
+  const handleMoveToReading = async (book: TBRBook) => {
+    if (onMoveToReading) {
+      onMoveToReading({
+        title: book.title,
+        author: book.author,
+        total_pages: book.total_pages || 0
+      });
+      await handleRemoveBook(book.id);
+    }
   };
 
   const filteredBooks = tbrBooks.filter(book =>
@@ -171,167 +153,137 @@ export function TBRList({ userId, onAddToCurrentlyReading }: TBRListProps) {
     book.author.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const getPriorityBadge = (priority: number) => {
-    switch (priority) {
-      case 2:
-        return <Badge variant="destructive">High</Badge>;
-      case 1:
-        return <Badge variant="secondary">Medium</Badge>;
-      default:
-        return <Badge variant="outline">Low</Badge>;
-    }
-  };
-
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BookPlus className="w-5 h-5" />
-            TBR List
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            Loading...
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   if (!userId) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BookPlus className="w-5 h-5" />
-            TBR List
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <p>Sign in to manage your To Be Read list</p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="bg-card rounded-lg p-6 shadow-soft border border-border">
+        <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
+          <BookOpen className="w-5 h-5" />
+          To Be Read
+        </h2>
+        <p className="text-muted-foreground text-center py-8">
+          Sign in to manage your TBR list
+        </p>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BookPlus className="w-5 h-5" />
-          TBR List ({tbrBooks.length})
-        </CardTitle>
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+    <div className="bg-card rounded-lg p-6 shadow-soft border border-border">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+          <BookOpen className="w-5 h-5" />
+          To Be Read ({tbrBooks.length})
+        </h2>
+        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+          <DialogTrigger asChild>
+            <Button size="sm" className="gap-2">
+              <Plus className="w-4 h-4" />
+              Add Book
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Book to TBR List</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-foreground">Title *</label>
+                <Input
+                  value={newBook.title}
+                  onChange={(e) => setNewBook(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Enter book title"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground">Author *</label>
+                <Input
+                  value={newBook.author}
+                  onChange={(e) => setNewBook(prev => ({ ...prev, author: e.target.value }))}
+                  placeholder="Enter author name"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground">Total Pages</label>
+                <Input
+                  type="number"
+                  value={newBook.total_pages}
+                  onChange={(e) => setNewBook(prev => ({ ...prev, total_pages: e.target.value }))}
+                  placeholder="Number of pages (optional)"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground">Notes</label>
+                <Textarea
+                  value={newBook.notes}
+                  onChange={(e) => setNewBook(prev => ({ ...prev, notes: e.target.value }))}
+                  placeholder="Why do you want to read this book? (optional)"
+                  rows={3}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground">Priority</label>
+                <select
+                  value={newBook.priority}
+                  onChange={(e) => setNewBook(prev => ({ ...prev, priority: parseInt(e.target.value) }))}
+                  className="w-full border border-border rounded-md px-3 py-2 bg-background"
+                >
+                  <option value={0}>Normal</option>
+                  <option value={1}>High</option>
+                  <option value={2}>Very High</option>
+                </select>
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setShowAddDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleAddBook}>
+                  Add to TBR
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {tbrBooks.length > 0 && (
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search books..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
+              placeholder="Search your TBR list..."
+              className="pl-10"
             />
           </div>
-          
-          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-            <DialogTrigger asChild>
-              <Button size="sm">
-                <BookPlus className="w-4 h-4 mr-2" />
-                Add Book
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add Book to TBR</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="title">Title *</Label>
-                  <Input
-                    id="title"
-                    value={newBook.title}
-                    onChange={(e) => setNewBook(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="Enter book title"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="author">Author *</Label>
-                  <Input
-                    id="author"
-                    value={newBook.author}
-                    onChange={(e) => setNewBook(prev => ({ ...prev, author: e.target.value }))}
-                    placeholder="Enter author name"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="pages">Total Pages</Label>
-                  <Input
-                    id="pages"
-                    type="number"
-                    value={newBook.total_pages}
-                    onChange={(e) => setNewBook(prev => ({ ...prev, total_pages: e.target.value }))}
-                    placeholder="Enter total pages (optional)"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="priority">Priority</Label>
-                  <Select value={newBook.priority} onValueChange={(value) => setNewBook(prev => ({ ...prev, priority: value }))}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0">Low</SelectItem>
-                      <SelectItem value="1">Medium</SelectItem>
-                      <SelectItem value="2">High</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="notes">Notes</Label>
-                  <Textarea
-                    id="notes"
-                    value={newBook.notes}
-                    onChange={(e) => setNewBook(prev => ({ ...prev, notes: e.target.value }))}
-                    placeholder="Add any notes about this book (optional)"
-                    rows={3}
-                  />
-                </div>
-
-                <div className="flex gap-2 justify-end">
-                  <Button variant="outline" onClick={() => setShowAddDialog(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleAddBook}>Add Book</Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
         </div>
-      </CardHeader>
-      <CardContent>
-        {filteredBooks.length === 0 ? (
+      )}
+
+      <div className="space-y-3 max-h-96 overflow-y-auto">
+        {loading ? (
           <div className="text-center py-8 text-muted-foreground">
-            {searchQuery ? "No books found matching your search" : "Your TBR list is empty. Add some books!"}
+            Loading...
+          </div>
+        ) : filteredBooks.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            {searchQuery ? 'No books match your search' : 'Your TBR list is empty'}
           </div>
         ) : (
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {filteredBooks.map((book) => (
-              <div key={book.id} className="flex items-start justify-between p-3 border rounded-lg bg-card/50">
+          filteredBooks.map((book) => (
+            <div key={book.id} className="border border-border rounded-lg p-3 hover:bg-accent/5 transition-colors">
+              <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start gap-2 mb-1">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-sm leading-tight">{book.title}</h4>
-                      <p className="text-xs text-muted-foreground">by {book.author}</p>
-                    </div>
-                    {getPriorityBadge(book.priority)}
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-medium text-foreground truncate">{book.title}</h3>
+                    {book.priority > 0 && (
+                      <div className="flex">
+                        {Array(book.priority).fill(0).map((_, i) => (
+                          <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                        ))}
+                      </div>
+                    )}
                   </div>
+                  <p className="text-sm text-muted-foreground">by {book.author}</p>
                   {book.total_pages && (
                     <p className="text-xs text-muted-foreground">{book.total_pages} pages</p>
                   )}
@@ -339,31 +291,31 @@ export function TBRList({ userId, onAddToCurrentlyReading }: TBRListProps) {
                     <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{book.notes}</p>
                   )}
                 </div>
-                <div className="flex gap-1 ml-2">
-                  {onAddToCurrentlyReading && (
-                    <Button 
-                      size="sm" 
-                      variant="ghost"
-                      onClick={() => handleMoveToCurrentlyReading(book)}
-                      title="Start reading"
+                <div className="flex gap-1">
+                  {onMoveToReading && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleMoveToReading(book)}
+                      title="Start reading this book"
                     >
                       <BookOpen className="w-3 h-3" />
                     </Button>
                   )}
-                  <Button 
-                    size="sm" 
-                    variant="ghost"
-                    onClick={() => handleDeleteBook(book.id)}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleRemoveBook(book.id)}
                     title="Remove from TBR"
                   >
-                    <Trash2 className="w-3 h-3" />
+                    <X className="w-3 h-3" />
                   </Button>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
