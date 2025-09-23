@@ -69,37 +69,57 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          birthday: string | null
           created_at: string | null
           display_name: string | null
           display_preference: string | null
           email: string | null
+          favorite_book_id: string | null
           id: string
+          social_media_links: Json | null
           temperature_unit: string | null
           username: string | null
+          website_url: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          birthday?: string | null
           created_at?: string | null
           display_name?: string | null
           display_preference?: string | null
           email?: string | null
+          favorite_book_id?: string | null
           id: string
+          social_media_links?: Json | null
           temperature_unit?: string | null
           username?: string | null
+          website_url?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          birthday?: string | null
           created_at?: string | null
           display_name?: string | null
           display_preference?: string | null
           email?: string | null
+          favorite_book_id?: string | null
           id?: string
+          social_media_links?: Json | null
           temperature_unit?: string | null
           username?: string | null
+          website_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_favorite_book_id_fkey"
+            columns: ["favorite_book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reading_progress: {
         Row: {
@@ -247,6 +267,10 @@ export type Database = {
           id: string
           username: string
         }[]
+      }
+      get_zodiac_sign: {
+        Args: { birth_date: string }
+        Returns: string
       }
     }
     Enums: {
