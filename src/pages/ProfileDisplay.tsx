@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, User, BookOpen, Star, Calendar } from "lucide-react";
+import { Settings, User, BookOpen, Star, Calendar, Globe, Facebook, Twitter, Instagram, Linkedin, Youtube, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type UserProfile = {
@@ -15,6 +15,17 @@ type UserProfile = {
   avatar_url: string | null;
   created_at: string;
   email?: string;
+  birthday?: string | null;
+  favorite_book_id?: string | null;
+  social_media_links?: any;
+  website_url?: string | null;
+};
+
+type FavoriteBook = {
+  id: string;
+  title: string;
+  author: string;
+  cover_url: string | null;
 };
 
 type BookStats = {
@@ -53,6 +64,8 @@ export default function ProfileDisplay() {
   const [bookStats, setBookStats] = useState<BookStats>({ totalBooks: 0, completedBooks: 0, inProgressBooks: 0 });
   const [recentReviews, setRecentReviews] = useState<Review[]>([]);
   const [tbrBooks, setTbrBooks] = useState<TBRBook[]>([]);
+  const [favoriteBook, setFavoriteBook] = useState<FavoriteBook | null>(null);
+  const [zodiacSign, setZodiacSign] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -85,6 +98,29 @@ export default function ProfileDisplay() {
           ...profileData,
           email: user.email
         });
+
+        // Fetch favorite book if exists
+        if (profileData.favorite_book_id) {
+          const { data: bookData } = await supabase
+            .from('books')
+            .select('id, title, author, cover_url')
+            .eq('id', profileData.favorite_book_id)
+            .single();
+          
+          if (bookData) {
+            setFavoriteBook(bookData);
+          }
+        }
+
+        // Calculate zodiac sign if birthday exists
+        if (profileData.birthday) {
+          const { data: zodiacData } = await supabase
+            .rpc('get_zodiac_sign', { birth_date: profileData.birthday });
+          
+          if (zodiacData) {
+            setZodiacSign(zodiacData);
+          }
+        }
       }
 
       // Load book statistics
@@ -131,6 +167,17 @@ export default function ProfileDisplay() {
       setLoading(false);
     })();
   }, []);
+
+  const getSocialMediaIcon = (platform: string) => {
+    switch (platform.toLowerCase()) {
+      case 'facebook': return Facebook;
+      case 'twitter': return Twitter;
+      case 'instagram': return Instagram;
+      case 'linkedin': return Linkedin;
+      case 'youtube': return Youtube;
+      default: return Globe;
+    }
+  };
 
   // Listen for profile updates
   useEffect(() => {
@@ -198,10 +245,73 @@ export default function ProfileDisplay() {
               {profile.bio && (
                 <p className="text-foreground mt-2 max-w-md">{profile.bio}</p>
               )}
-              <p className="text-sm text-muted-foreground mt-2">
-                <Calendar className="w-4 h-4 inline mr-1" />
-                Member since {new Date(profile.created_at).toLocaleDateString()}
-              </p>
+              <div className="flex items-center gap-4 mt-2">
+                <p className="text-sm text-muted-foreground">
+                  <Calendar className="w-4 h-4 inline mr-1" />
+                  Member since {new Date(profile.created_at).toLocaleDateString()}
+                </p>
+                {zodiacSign && (
+                  <p className="text-sm text-muted-foreground">
+                    <Star className="w-4 h-4 inline mr-1" />
+                    {zodiacSign}
+                  </p>
+                )}
+              </div>
+
+              {/* Favorite Book */}
+              {favoriteBook && (
+                <div className="mt-4">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Favorite Book</h3>
+                  <div className="flex items-center gap-3 p-3 border rounded-lg">
+                    {favoriteBook.cover_url && (
+                      <img
+                        src={favoriteBook.cover_url}
+                        alt={favoriteBook.title}
+                        className="w-12 h-16 object-cover rounded"
+                      />
+                    )}
+                    <div>
+                      <div className="font-medium">{favoriteBook.title}</div>
+                      <div className="text-sm text-muted-foreground">{favoriteBook.author}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Social Media & Website */}
+              {(profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url ? (
+                <div className="mt-4">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Links</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
+                      const Icon = getSocialMediaIcon(platform);
+                      return (
+                        <a
+                          key={platform}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-3 py-1 text-sm border rounded-full hover:bg-accent transition-colors"
+                        >
+                          <Icon className="w-4 h-4" />
+                          {platform}
+                        </a>
+                      );
+                    })}
+                    {profile.website_url && (
+                      <a
+                        href={profile.website_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-3 py-1 text-sm border rounded-full hover:bg-accent transition-colors"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        Website
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
           

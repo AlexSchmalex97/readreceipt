@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Camera, User, ArrowLeft } from "lucide-react";
 import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
+import { SocialMediaInput } from "@/components/SocialMediaInput";
+import { FavoriteBookSelector } from "@/components/FavoriteBookSelector";
 
 function normalizeUsername(raw: string) {
   return raw
@@ -37,6 +39,10 @@ export default function ProfileSettings() {
   const [displayPreference, setDisplayPreference] = useState<'quotes' | 'time_weather' | 'both'>('quotes');
   const [temperatureUnit, setTemperatureUnit] = useState<'celsius' | 'fahrenheit'>('celsius');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [birthday, setBirthday] = useState("");
+  const [favoriteBookId, setFavoriteBookId] = useState<string | undefined>();
+  const [socialMediaLinks, setSocialMediaLinks] = useState<{platform: string, url: string}[]>([]);
+  const [websiteUrl, setWebsiteUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const normUsername = useMemo(() => normalizeUsername(username), [username]);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
@@ -87,7 +93,7 @@ export default function ProfileSettings() {
       // load profile
       const { data: prof, error: profileError } = await supabase
         .from("profiles")
-        .select("display_name, username, bio, avatar_url, display_preference, temperature_unit")
+        .select("*")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -99,6 +105,10 @@ export default function ProfileSettings() {
       setDisplayPreference((prof?.display_preference as 'quotes' | 'time_weather' | 'both') ?? 'quotes');
       setTemperatureUnit((prof?.temperature_unit as 'celsius' | 'fahrenheit') ?? 'celsius');
       setAvatarUrl(prof?.avatar_url ?? null);
+      setBirthday(prof?.birthday ?? "");
+      setFavoriteBookId(prof?.favorite_book_id ?? undefined);
+      setSocialMediaLinks(prof?.social_media_links ? Object.entries(prof.social_media_links).map(([platform, url]) => ({ platform, url: url as string })) : []);
+      setWebsiteUrl(prof?.website_url ?? "");
       setLoading(false);
     })();
   }, []);
@@ -274,6 +284,12 @@ export default function ProfileSettings() {
 
       console.log("Saving profile:", { uid, displayName: displayName.trim(), username: normUsername, bio: bio.trim() });
 
+      // Convert social media links array to object format
+      const socialMediaObject = socialMediaLinks.reduce((acc, link) => {
+        acc[link.platform] = link.url;
+        return acc;
+      }, {} as Record<string, string>);
+
       // Try to update existing profile
       const { data: updateData, error: updateError } = await supabase
         .from("profiles")
@@ -282,7 +298,11 @@ export default function ProfileSettings() {
           username: normUsername,
           bio: bio.trim() || null,
           display_preference: displayPreference,
-          temperature_unit: temperatureUnit
+          temperature_unit: temperatureUnit,
+          birthday: birthday || null,
+          favorite_book_id: favoriteBookId || null,
+          social_media_links: socialMediaObject,
+          website_url: websiteUrl || null,
         })
         .eq("id", uid)
         .select();
@@ -302,7 +322,11 @@ export default function ProfileSettings() {
               bio: bio.trim() || null,
               email: email,
               display_preference: displayPreference,
-              temperature_unit: temperatureUnit
+              temperature_unit: temperatureUnit,
+              birthday: birthday || null,
+              favorite_book_id: favoriteBookId || null,
+              social_media_links: socialMediaObject,
+              website_url: websiteUrl || null,
             }
           ])
           .select();
@@ -500,6 +524,41 @@ export default function ProfileSettings() {
               onChange={(e) => setBio(e.target.value)}
               placeholder="Tell other readers about yourself..."
               rows={3}
+            />
+          </label>
+
+          <label className="grid gap-1">
+            <span className="text-sm text-muted-foreground">Birthday</span>
+            <input
+              type="date"
+              className="border rounded px-3 py-2 bg-background"
+              value={birthday}
+              onChange={(e) => setBirthday(e.target.value)}
+            />
+          </label>
+
+          <div className="grid gap-1">
+            <FavoriteBookSelector
+              value={favoriteBookId}
+              onChange={setFavoriteBookId}
+            />
+          </div>
+
+          <div className="grid gap-1">
+            <SocialMediaInput
+              value={socialMediaLinks}
+              onChange={setSocialMediaLinks}
+            />
+          </div>
+
+          <label className="grid gap-1">
+            <span className="text-sm text-muted-foreground">Website</span>
+            <input
+              type="url"
+              className="border rounded px-3 py-2 bg-background"
+              value={websiteUrl}
+              onChange={(e) => setWebsiteUrl(e.target.value)}
+              placeholder="https://your-website.com"
             />
           </label>
 

@@ -67,6 +67,30 @@ export default function CompletedBooks() {
     }
   };
 
+  const markAsFavorite = async (bookId: string) => {
+    try {
+      if (!userId) return;
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ favorite_book_id: bookId })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Favorite book updated",
+        description: "This book has been marked as your favorite.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
   }, []);
@@ -214,6 +238,14 @@ export default function CompletedBooks() {
                     aria-label={`Mark ${book.title} as unread`}
                   >
                     Mark as unread
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => markAsFavorite(book.id)}
+                    aria-label={`Mark ${book.title} as favorite`}
+                  >
+                    ⭐ Favorite
                   </Button>
                   <Button
                     variant="outline"

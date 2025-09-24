@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
 import { FollowButton } from "@/components/FollowButton";
-import { ArrowLeft, BookOpen, Star } from "lucide-react";
+import { ArrowLeft, BookOpen, Star, Calendar, Globe, Facebook, Twitter, Instagram, Linkedin, Youtube, ExternalLink } from "lucide-react";
 
 type ProgressItem = {
   kind: "progress";
@@ -51,6 +51,17 @@ interface UserProfile {
   avatar_url: string | null;
   bio: string | null;
   created_at: string;
+  birthday?: string | null;
+  favorite_book_id?: string | null;
+  social_media_links?: any;
+  website_url?: string | null;
+}
+
+interface FavoriteBook {
+  id: string;
+  title: string;
+  author: string;
+  cover_url: string | null;
 }
 
 export default function UserProfile() {
@@ -61,6 +72,8 @@ export default function UserProfile() {
   const [loading, setLoading] = useState(true);
   const [myId, setMyId] = useState<string | null>(null);
   const [canSeeProgress, setCanSeeProgress] = useState<boolean>(true);
+  const [favoriteBook, setFavoriteBook] = useState<FavoriteBook | null>(null);
+  const [zodiacSign, setZodiacSign] = useState<string | null>(null);
 
   useEffect(() => {
     if (!userId) return;
@@ -74,12 +87,35 @@ export default function UserProfile() {
         // Get user profile
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("id, display_name, username, avatar_url, bio, created_at")
+          .select("*")
           .eq("id", userId)
           .single();
 
         if (profileError) throw profileError;
         setProfile(profileData);
+
+        // Fetch favorite book if exists
+        if (profileData.favorite_book_id) {
+          const { data: bookData } = await supabase
+            .from('books')
+            .select('id, title, author, cover_url')
+            .eq('id', profileData.favorite_book_id)
+            .single();
+          
+          if (bookData) {
+            setFavoriteBook(bookData);
+          }
+        }
+
+        // Calculate zodiac sign if birthday exists
+        if (profileData.birthday) {
+          const { data: zodiacData } = await supabase
+            .rpc('get_zodiac_sign', { birth_date: profileData.birthday });
+          
+          if (zodiacData) {
+            setZodiacSign(zodiacData);
+          }
+        }
 
         // Determine if viewer can see progress (own or following)
         let canSee = true;
