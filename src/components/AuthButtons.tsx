@@ -14,7 +14,6 @@ export default function AuthButtons() {
   const [username, setUsername] = useState("");
 
   useEffect(() => {
-
     const initAuth = async () => {
       try {
         const { data } = await supabase.auth.getSession();
@@ -26,7 +25,6 @@ export default function AuthButtons() {
         console.error("Auth session error:", error);
       }
     };
-
     initAuth();
 
     const { data: sub } = supabase.auth.onAuthStateChange(async (_e, sess) => {
@@ -48,7 +46,6 @@ export default function AuthButtons() {
     };
   }, []);
 
-  // Add an effect to listen for profile updates using the browser's storage events or custom events
   useEffect(() => {
     const handleProfileUpdate = async () => {
       const { data } = await supabase.auth.getSession();
@@ -56,22 +53,18 @@ export default function AuthButtons() {
         await fetchProfile(data.session.user.id);
       }
     };
-
-    // Listen for profile update events
-    window.addEventListener('profile-updated', handleProfileUpdate);
-    
-    return () => {
-      window.removeEventListener('profile-updated', handleProfileUpdate);
-    };
+    window.addEventListener("profile-updated", handleProfileUpdate);
+    return () => window.removeEventListener("profile-updated", handleProfileUpdate);
   }, []);
 
   async function fetchProfile(userId: string) {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select("display_name")
         .eq("id", userId)
         .single();
+      if (error) throw error;
       if (data) setUserName(data.display_name);
     } catch (error) {
       console.error("Profile fetch error:", error);
@@ -81,7 +74,6 @@ export default function AuthButtons() {
   const togglePanel = () => setPanelOpen((v) => !v);
 
   async function handleEmailPassword() {
-
     try {
       if (!email || !password) return alert("Enter email and password.");
 
@@ -89,19 +81,15 @@ export default function AuthButtons() {
         // Allow login via username OR email
         let loginEmail = email;
         if (!email.includes("@")) {
-          // looks like a username → look it up
-          const { data: userByUsername, error: usernameError } = await supabase
+          const usernameInput = email.trim().toLowerCase(); // case-insensitive
+          const { data: row, error } = await supabase
             .from("profiles")
-            .select("id, email")
-            .eq("username", email.toLowerCase())
+            .select("email")
+            .eq("username", usernameInput)
             .maybeSingle();
-          
-          console.log("Username lookup:", { userByUsername, usernameError, searchUsername: email.toLowerCase() });
-          
-          if (!userByUsername || !userByUsername.email) {
-            throw new Error("No account found with that username.");
-          }
-          loginEmail = userByUsername.email;
+          if (error) throw error;
+          if (!row?.email) throw new Error("No account found with that username.");
+          loginEmail = row.email;
         }
 
         const { error } = await supabase.auth.signInWithPassword({
@@ -115,22 +103,42 @@ export default function AuthButtons() {
           return alert("Enter display name and username.");
         }
 
-        const { data, error } = await supabase.auth.signUp({
+        const normalizedUsername = username.trim().toLowerCase();
+
+        // Check availability (case-insensitive in DB, but we store lowercase)
+        const { data: taken, error: checkErr } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("username", normalizedUsername)
+          .maybeSingle();
+        if (checkErr) throw checkErr;
+        if (taken) throw new Error("That username is already taken.");
+
+        // Create auth user and store username/display in user_metadata
+        const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: {
+            emailRedirectTo: window.location.origin,
+            data: {
+              username: normalizedUsername,
+              display_name: displayName,
+            },
+          },
         });
-        if (error) throw error;
+        if (signUpError) throw signUpError;
 
+        // Insert into profiles for joins & uniqueness
         if (data.user) {
-          await supabase.from("profiles").insert([
+          const { error: profileErr } = await supabase.from("profiles").insert([
             {
               id: data.user.id,
               email,
               display_name: displayName,
-              username: username.toLowerCase(),
+              username: normalizedUsername, // always lowercase
             },
           ]);
+          if (profileErr) throw profileErr;
         }
 
         alert("Account created. Check your email if verification is required.");
@@ -147,7 +155,6 @@ export default function AuthButtons() {
   }
 
   async function signInWithGoogle() {
-
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
@@ -160,7 +167,6 @@ export default function AuthButtons() {
   }
 
   const signOut = async () => {
-    
     try {
       await supabase.auth.signOut();
     } catch (error) {
