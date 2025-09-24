@@ -19,7 +19,7 @@ export default function AuthButtons() {
         const { data } = await supabase.auth.getSession();
         if (data.session?.user) {
           setLoggedIn(true);
-          await fetchProfile(data.session.user.id);
+          await loadGreeting(data.session.user.id);
         }
       } catch (error) {
         console.error("Auth session error:", error);
@@ -30,7 +30,7 @@ export default function AuthButtons() {
     const { data: sub } = supabase.auth.onAuthStateChange(async (_e, sess) => {
       if (sess?.user) {
         setLoggedIn(true);
-        await fetchProfile(sess.user.id);
+        await loadGreeting(sess.user.id);
       } else {
         setLoggedIn(false);
         setUserName(null);
@@ -46,28 +46,39 @@ export default function AuthButtons() {
     };
   }, []);
 
+  // Refresh greeting if profile updates elsewhere
   useEffect(() => {
     const handleProfileUpdate = async () => {
       const { data } = await supabase.auth.getSession();
-      if (data.session?.user) {
-        await fetchProfile(data.session.user.id);
-      }
+      if (data.session?.user) await loadGreeting(data.session.user.id);
     };
     window.addEventListener("profile-updated", handleProfileUpdate);
     return () => window.removeEventListener("profile-updated", handleProfileUpdate);
   }, []);
 
-  async function fetchProfile(userId: string) {
+  async function loadGreeting(userId: string) {
     try {
-      const { data, error } = await supabase
+      // Prefer profiles.display_name
+      const { data: prof } = await supabase
         .from("profiles")
         .select("display_name")
         .eq("id", userId)
-        .single();
-      if (error) throw error;
-      if (data) setUserName(data.display_name);
+        .maybeSingle();
+
+      if (prof?.display_name) {
+        setUserName(prof.display_name);
+        return;
+      }
+
+      // Fallback to user_metadata.display_name
+      const { data: { user } } = await supabase.auth.getUser();
+      const dn =
+        (user?.user_metadata as any)?.display_name ??
+        (user?.user_metadata as any)?.name ??
+        null;
+      setUserName(dn);
     } catch (error) {
-      console.error("Profile fetch error:", error);
+      console.error("Greeting load error:", error);
     }
   }
 
@@ -78,6 +89,7 @@ export default function AuthButtons() {
       if (!email || !password) return alert("Enter email and password.");
 
       if (mode === "signin") {
+        // ---------- SIGN IN ----------
         // Allow login via username OR email
         let loginEmail = email;
         if (!email.includes("@")) {
@@ -97,15 +109,17 @@ export default function AuthButtons() {
           password,
         });
         if (error) throw error;
+
       } else {
-        // Sign up new user
+        // ---------- SIGN UP ----------
         if (!displayName || !username) {
           return alert("Enter display name and username.");
         }
 
+        // 1) normalize username (NOT case-sensitive)
         const normalizedUsername = username.trim().toLowerCase();
 
-        // Check availability (case-insensitive in DB, but we store lowercase)
+        // 2) check availability in profiles (DB also enforces with lower(username) unique index)
         const { data: taken, error: checkErr } = await supabase
           .from("profiles")
           .select("id")
@@ -114,8 +128,9 @@ export default function AuthButtons() {
         if (checkErr) throw checkErr;
         if (taken) throw new Error("That username is already taken.");
 
-        // Create auth user and store username/display in user_metadata
-        const { data, error: signUpError } = await supabase.auth.signUp({
+        // 3) create auth user AND store identity in user_metadata
+        //    (DB trigger will auto-create the profiles row from this)
+        const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -128,22 +143,11 @@ export default function AuthButtons() {
         });
         if (signUpError) throw signUpError;
 
-        // Insert into profiles for joins & uniqueness
-        if (data.user) {
-          const { error: profileErr } = await supabase.from("profiles").insert([
-            {
-              id: data.user.id,
-              email,
-              display_name: displayName,
-              username: normalizedUsername, // always lowercase
-            },
-          ]);
-          if (profileErr) throw profileErr;
-        }
-
-        alert("Account created. Check your email if verification is required.");
+        // 4) DO NOT insert into profiles here — the DB trigger handles it
+        alert("Account created. You’re all set!");
       }
 
+      // reset form + close panel
       setPanelOpen(false);
       setEmail("");
       setPassword("");
