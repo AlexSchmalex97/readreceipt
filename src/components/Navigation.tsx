@@ -83,6 +83,16 @@ export function Navigation() {
             >
               Profile
             </Link>
+            <Link
+              to="/contact"
+              className={`text-sm whitespace-nowrap ${
+                isActive("/contact")
+                  ? "text-foreground font-medium"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Contact
+            </Link>
           </nav>
 
           {/* Dynamic Display (Quotes or Time/Weather) */}

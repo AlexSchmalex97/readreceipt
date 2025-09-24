@@ -6,13 +6,14 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import Feed from "./pages/Feed";
+import Feed from "./pages/EnhancedFeed";
 import People from "./pages/People";
 import Reviews from "./pages/Reviews";
 import Profile from "./pages/Profile";
 import ProfileSettings from "./pages/ProfileSettings";
 import CompletedBooks from "./pages/CompletedBooks";
 import UserProfile from "./pages/UserProfile";
+import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/settings" element={<ProfileSettings />} />
           <Route path="/completed" element={<CompletedBooks />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

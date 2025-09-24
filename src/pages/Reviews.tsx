@@ -124,163 +124,77 @@ export default function Reviews() {
       <div className="container mx-auto px-4 py-8 space-y-10">
         
         <section>
-          <h1 className="text-2xl font-bold mb-6">Your Finished Books & Reviews</h1>
+          <h1 className="text-2xl font-bold mb-6">Your Reviews</h1>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Finished Books */}
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Finished Books ({finished.length})</h2>
-              {finished.length === 0 ? (
-                <div className="bg-card p-6 rounded-lg border text-center">
-                  <p className="text-muted-foreground">No finished books yet.</p>
-                  <a href="/" className="text-primary underline mt-2 inline-block">Start reading a book</a>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {finished.map((b) => (
-                    <div key={b.id} className="bg-card p-4 rounded-lg border">
-                      <div className="flex gap-4 mb-3">
-                        {/* Book Cover */}
-                        <div className="relative flex-shrink-0">
-                          {b.cover_url ? (
-                            <img 
-                              src={b.cover_url} 
-                              alt={b.title}
-                              className="w-16 h-24 object-cover rounded shadow-sm"
-                            />
-                          ) : (
-                            <div className="w-16 h-24 bg-muted rounded flex items-center justify-center shadow-sm">
-                              <BookOpen className="w-6 h-6 text-muted-foreground" />
-                            </div>
-                          )}
-                          {/* Edition selector overlay */}
-                          <div className="absolute -top-2 -right-2">
-                            <BookEditionSelector
-                              bookId={b.id}
-                              bookTitle={b.title}
-                              bookAuthor={b.author}
-                              currentCoverUrl={b.cover_url}
-                              onCoverUpdate={(newCoverUrl) => {
-                                setFinished(prev => 
-                                  prev.map(book => 
-                                    book.id === b.id 
-                                      ? { ...book, cover_url: newCoverUrl }
-                                      : book
-                                  )
-                                );
-                              }}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Book Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold truncate">{b.title}</div>
-                          <div className="text-sm text-muted-foreground">by {b.author}</div>
-                          <div className="mt-1 text-xs text-muted-foreground">
-                            {b.total_pages} pages • Completed {new Date(b.created_at).toLocaleDateString()}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Check if this book has a review */}
-                      {(() => {
-                        const bookReview = reviews.find(r => r.books?.title === b.title && r.books?.author === b.author);
-                        return bookReview ? (
-                          <div className="mt-3 pt-3 border-t">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-sm font-medium">Your Review:</span>
-                              <span className="text-sm">⭐ {bookReview.rating}/5</span>
-                            </div>
-                            {bookReview.review && (
-                              <p className="text-sm text-muted-foreground italic">"{bookReview.review}"</p>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="mt-3 pt-3 border-t">
-                            <p className="text-sm text-muted-foreground italic">No review yet</p>
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  ))}
-                </div>
-              )}
+          {/* Your Reviews */}
+          {reviews.length === 0 ? (
+            <div className="bg-card p-6 rounded-lg border text-center">
+              <p className="text-muted-foreground">You haven't left any reviews yet.</p>
+              <p className="text-sm text-muted-foreground mt-1">Complete a book to add your first review!</p>
             </div>
-
-            {/* Your Reviews */}
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Your Reviews ({reviews.length})</h2>
-              {reviews.length === 0 ? (
-                <div className="bg-card p-6 rounded-lg border text-center">
-                  <p className="text-muted-foreground">You haven't left any reviews yet.</p>
-                  <p className="text-sm text-muted-foreground mt-1">Complete a book to add your first review!</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {reviews.map((r) => (
-                    <div key={r.id} className="bg-card p-4 rounded-lg border">
-                      <div className="flex gap-4 mb-3">
-                        {/* Book Cover */}
-                        <div className="relative flex-shrink-0">
-                          {r.books?.cover_url ? (
-                            <img 
-                              src={r.books.cover_url} 
-                              alt={r.books.title}
-                              className="w-16 h-24 object-cover rounded shadow-sm"
-                            />
-                          ) : (
-                            <div className="w-16 h-24 bg-muted rounded flex items-center justify-center shadow-sm">
-                              <BookOpen className="w-6 h-6 text-muted-foreground" />
-                            </div>
-                          )}
-                          {/* Edition selector overlay */}
-                          {r.book_id && (
-                            <div className="absolute -top-2 -right-2">
-                              <BookEditionSelector
-                                bookId={r.book_id}
-                                bookTitle={r.books?.title ?? "Untitled"}
-                                bookAuthor={r.books?.author ?? "Unknown author"}
-                                currentCoverUrl={r.books?.cover_url}
-                                onCoverUpdate={(newCoverUrl) => {
-                                  setReviews(prev => 
-                                    prev.map(review => 
-                                      review.id === r.id 
-                                        ? { ...review, books: review.books ? { ...review.books, cover_url: newCoverUrl } : null }
-                                        : review
-                                    )
-                                  );
-                                }}
-                              />
-                            </div>
-                          )}
+          ) : (
+            <div className="space-y-4">
+              {reviews.map((r) => (
+                <div key={r.id} className="bg-card p-4 rounded-lg border">
+                  <div className="flex gap-4 mb-3">
+                    {/* Book Cover */}
+                    <div className="relative flex-shrink-0">
+                      {r.books?.cover_url ? (
+                        <img 
+                          src={r.books.cover_url} 
+                          alt={r.books.title}
+                          className="w-16 h-24 object-cover rounded shadow-sm"
+                        />
+                      ) : (
+                        <div className="w-16 h-24 bg-muted rounded flex items-center justify-center shadow-sm">
+                          <BookOpen className="w-6 h-6 text-muted-foreground" />
                         </div>
-
-                        {/* Book Info and Review */}
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold truncate">{r.books?.title ?? "Untitled"}</div>
-                          <div className="text-sm text-muted-foreground">by {r.books?.author ?? "Unknown author"}</div>
-                          <div className="mt-2 flex items-center gap-2">
-                            <span className="text-sm font-medium">Rating:</span>
-                            <span>⭐ {r.rating}/5</span>
-                          </div>
-                          {r.review && (
-                            <div className="mt-2">
-                              <span className="text-sm font-medium">Review:</span>
-                              <p className="text-sm mt-1 italic">"{r.review}"</p>
-                            </div>
-                          )}
-                          <div className="mt-2 text-xs text-muted-foreground">
-                            {new Date(r.created_at).toLocaleString()}
-                          </div>
+                      )}
+                      {/* Edition selector overlay */}
+                      {r.book_id && (
+                        <div className="absolute -top-2 -right-2">
+                          <BookEditionSelector
+                            bookId={r.book_id}
+                            bookTitle={r.books?.title ?? "Untitled"}
+                            bookAuthor={r.books?.author ?? "Unknown author"}
+                            currentCoverUrl={r.books?.cover_url}
+                            onCoverUpdate={(newCoverUrl) => {
+                              setReviews(prev => 
+                                prev.map(review => 
+                                  review.id === r.id 
+                                    ? { ...review, books: review.books ? { ...review.books, cover_url: newCoverUrl } : null }
+                                    : review
+                                )
+                              );
+                            }}
+                          />
                         </div>
+                      )}
+                    </div>
+
+                    {/* Book Info and Review */}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold truncate">{r.books?.title ?? "Untitled"}</div>
+                      <div className="text-sm text-muted-foreground">by {r.books?.author ?? "Unknown author"}</div>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className="text-sm font-medium">Rating:</span>
+                        <span>⭐ {r.rating}/5</span>
+                      </div>
+                      {r.review && (
+                        <div className="mt-2">
+                          <span className="text-sm font-medium">Review:</span>
+                          <p className="text-sm mt-1 italic">"{r.review}"</p>
+                        </div>
+                      )}
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        {new Date(r.created_at).toLocaleString()}
                       </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
-              )}
+              ))}
             </div>
-          </div>
+          )}
         </section>
       </div>
     </div>

@@ -31,6 +31,8 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
   const [tbrBooks, setTbrBooks] = useState<TBRBook[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'title' | 'author' | 'pages' | 'date_added' | 'priority'>('priority');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [showAddDialog, setShowAddDialog] = useState(false);
   
   // Google Books search states
@@ -213,10 +215,36 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
     setShowAddDialog(false);
   };
 
-  const filteredBooks = tbrBooks.filter(book =>
-    book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    book.author.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const sortedAndFilteredBooks = tbrBooks
+    .filter(book =>
+      book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      book.author.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortBy) {
+        case 'title':
+          comparison = a.title.localeCompare(b.title);
+          break;
+        case 'author':
+          comparison = a.author.localeCompare(b.author);
+          break;
+        case 'pages':
+          comparison = (a.total_pages || 0) - (b.total_pages || 0);
+          break;
+        case 'date_added':
+          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          break;
+        case 'priority':
+          comparison = b.priority - a.priority; // Higher priority first by default
+          break;
+        default:
+          comparison = 0;
+      }
+      
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
 
   if (!userId) {
     return (
@@ -387,7 +415,7 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
       </div>
 
       {tbrBooks.length > 0 && (
-        <div className="mb-4">
+        <div className="mb-4 space-y-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
@@ -397,6 +425,30 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
               className="pl-10"
             />
           </div>
+          
+          {/* Sorting Controls */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-sm font-medium text-foreground">Sort by:</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="border border-border rounded px-2 py-1 text-sm bg-background"
+            >
+              <option value="priority">Priority</option>
+              <option value="title">Title</option>
+              <option value="author">Author</option>
+              <option value="pages">Page Count</option>
+              <option value="date_added">Date Added</option>
+            </select>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              className="text-xs px-2 py-1 h-auto"
+            >
+              {sortOrder === 'asc' ? '↑' : '↓'}
+            </Button>
+          </div>
         </div>
       )}
 
@@ -405,16 +457,16 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
           <div className="text-center py-8 text-muted-foreground">
             Loading...
           </div>
-        ) : filteredBooks.length === 0 ? (
+        ) : sortedAndFilteredBooks.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             {searchQuery ? 'No books match your search' : 'Your TBR list is empty'}
           </div>
         ) : (
           <div className="space-y-3">
             {/* Small cover thumbnails row */}
-            {filteredBooks.length > 0 && (
+            {sortedAndFilteredBooks.length > 0 && (
               <div className="flex gap-2 overflow-x-auto pb-2 mb-3">
-                {filteredBooks.slice(0, 8).map((book) => (
+                {sortedAndFilteredBooks.slice(0, 8).map((book) => (
                   <div key={`cover-${book.id}`} className="flex-shrink-0">
                     {book.cover_url ? (
                       <img 
@@ -430,16 +482,16 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
                     )}
                   </div>
                 ))}
-                {filteredBooks.length > 8 && (
+                {sortedAndFilteredBooks.length > 8 && (
                   <div className="flex-shrink-0 w-8 h-12 bg-muted/50 rounded flex items-center justify-center text-xs text-muted-foreground">
-                    +{filteredBooks.length - 8}
+                    +{sortedAndFilteredBooks.length - 8}
                   </div>
                 )}
               </div>
             )}
             
             {/* Book list */}
-            {filteredBooks.map((book) => (
+            {sortedAndFilteredBooks.map((book) => (
               <div key={book.id} className="border border-border rounded-lg p-3 hover:bg-accent/5 transition-colors">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex gap-3 flex-1 min-w-0">
