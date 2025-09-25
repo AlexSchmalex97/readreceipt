@@ -243,9 +243,10 @@ export default function UserProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-soft">
-      <Navigation />
-      <div className="container mx-auto px-4 py-6">
+    <UserColorProvider userColorPalette={profile?.color_palette}>
+      <div className="min-h-screen bg-gradient-soft">
+        <Navigation />
+        <div className="container mx-auto px-4 py-6">
         {/* Header with back button */}
         <div className="flex items-center gap-4 mb-6">
           <Link 
@@ -434,6 +435,6 @@ export default function UserProfile() {
           )}
         </div>
       </div>
-    </div>
+    </UserColorProvider>
   );
 }

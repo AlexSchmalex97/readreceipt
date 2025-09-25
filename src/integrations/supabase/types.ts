@@ -45,15 +45,7 @@ export type Database = {
           total_pages?: number
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "books_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users_with_usernames"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       comments: {
         Row: {
@@ -101,22 +93,7 @@ export type Database = {
           follower_id?: string
           following_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "follows_follower_id_fkey"
-            columns: ["follower_id"]
-            isOneToOne: false
-            referencedRelation: "users_with_usernames"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "follows_following_id_fkey"
-            columns: ["following_id"]
-            isOneToOne: false
-            referencedRelation: "users_with_usernames"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       likes: {
         Row: {
@@ -229,13 +206,6 @@ export type Database = {
             referencedRelation: "books"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "profiles_id_fkey"
-            columns: ["id"]
-            isOneToOne: false
-            referencedRelation: "users_with_usernames"
-            referencedColumns: ["id"]
-          },
         ]
       }
       reading_progress: {
@@ -274,13 +244,6 @@ export type Database = {
             referencedRelation: "books"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "reading_progress_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users_with_usernames"
-            referencedColumns: ["id"]
-          },
         ]
       }
       reviews: {
@@ -314,13 +277,6 @@ export type Database = {
             columns: ["book_id"]
             isOneToOne: false
             referencedRelation: "books"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reviews_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users_with_usernames"
             referencedColumns: ["id"]
           },
         ]
@@ -366,18 +322,7 @@ export type Database = {
       }
     }
     Views: {
-      users_with_usernames: {
-        Row: {
-          created_at: string | null
-          display_name_meta: string | null
-          display_name_profile: string | null
-          email: string | null
-          id: string | null
-          username_meta: string | null
-          username_profile: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       get_public_profiles: {

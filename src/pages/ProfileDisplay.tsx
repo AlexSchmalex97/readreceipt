@@ -17,8 +17,10 @@ type UserProfile = {
   email?: string;
   birthday?: string | null;
   favorite_book_id?: string | null;
+  current_book_id?: string | null;
   social_media_links?: any;
   website_url?: string | null;
+  color_palette?: any;
 };
 
 type FavoriteBook = {
@@ -26,6 +28,15 @@ type FavoriteBook = {
   title: string;
   author: string;
   cover_url: string | null;
+};
+
+type CurrentBook = {
+  id: string;
+  title: string;
+  author: string;
+  cover_url: string | null;
+  current_page: number;
+  total_pages: number;
 };
 
 type BookStats = {
@@ -65,6 +76,7 @@ export default function ProfileDisplay() {
   const [recentReviews, setRecentReviews] = useState<Review[]>([]);
   const [tbrBooks, setTbrBooks] = useState<TBRBook[]>([]);
   const [favoriteBook, setFavoriteBook] = useState<FavoriteBook | null>(null);
+  const [currentBook, setCurrentBook] = useState<CurrentBook | null>(null);
   const [zodiacSign, setZodiacSign] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -109,6 +121,19 @@ export default function ProfileDisplay() {
           
           if (bookData) {
             setFavoriteBook(bookData);
+          }
+        }
+
+        // Fetch current book if exists
+        if (profileData.current_book_id) {
+          const { data: currentBookData } = await supabase
+            .from('books')
+            .select('id, title, author, cover_url, current_page, total_pages')
+            .eq('id', profileData.current_book_id)
+            .single();
+          
+          if (currentBookData) {
+            setCurrentBook(currentBookData);
           }
         }
 
@@ -258,25 +283,51 @@ export default function ProfileDisplay() {
                 )}
               </div>
 
-              {/* Favorite Book */}
-              {favoriteBook && (
-                <div className="mt-4">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Favorite Book</h3>
-                  <div className="flex items-center gap-3 p-3 border rounded-lg">
-                    {favoriteBook.cover_url && (
-                      <img
-                        src={favoriteBook.cover_url}
-                        alt={favoriteBook.title}
-                        className="w-12 h-16 object-cover rounded"
-                      />
-                    )}
-                    <div>
-                      <div className="font-medium">{favoriteBook.title}</div>
-                      <div className="text-sm text-muted-foreground">{favoriteBook.author}</div>
+              {/* Current Read and Favorite Book - Side by Side */}
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Current Read */}
+                {currentBook && (
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-2">Currently Reading</h3>
+                    <div className="flex items-center gap-3 p-3 border rounded-lg">
+                      {currentBook.cover_url && (
+                        <img
+                          src={currentBook.cover_url}
+                          alt={currentBook.title}
+                          className="w-12 h-16 object-cover rounded"
+                        />
+                      )}
+                      <div className="flex-1">
+                        <div className="font-medium">{currentBook.title}</div>
+                        <div className="text-sm text-muted-foreground">{currentBook.author}</div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Page {currentBook.current_page} of {currentBook.total_pages}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+
+                {/* Favorite Book */}
+                {favoriteBook && (
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-2">Favorite Book</h3>
+                    <div className="flex items-center gap-3 p-3 border rounded-lg">
+                      {favoriteBook.cover_url && (
+                        <img
+                          src={favoriteBook.cover_url}
+                          alt={favoriteBook.title}
+                          className="w-12 h-16 object-cover rounded"
+                        />
+                      )}
+                      <div>
+                        <div className="font-medium">{favoriteBook.title}</div>
+                        <div className="text-sm text-muted-foreground">{favoriteBook.author}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Social Media & Website */}
               {(profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url ? (

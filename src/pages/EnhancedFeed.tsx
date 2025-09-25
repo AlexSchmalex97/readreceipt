@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BookOpen, Heart, MessageCircle, Edit2, Trash2, Send, Plus, MoreHorizontal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -18,6 +19,10 @@ type Post = {
   display_name: string | null;
   avatar_url: string | null;
   content: string;
+  book_id?: string | null;
+  book_title?: string | null;
+  book_author?: string | null;
+  book_cover_url?: string | null;
   likes_count: number;
   comments_count: number;
   user_liked: boolean;
@@ -74,6 +79,8 @@ export default function EnhancedFeed() {
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [newPostContent, setNewPostContent] = useState("");
+  const [selectedBookId, setSelectedBookId] = useState<string>("");
+  const [userBooks, setUserBooks] = useState<any[]>([]);
   const [showNewPostDialog, setShowNewPostDialog] = useState(false);
   const [editingPost, setEditingPost] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
@@ -86,7 +93,24 @@ export default function EnhancedFeed() {
 
   useEffect(() => {
     loadFeed();
+    loadUserBooks();
   }, []);
+
+  const loadUserBooks = async () => {
+    const { data: me } = await supabase.auth.getUser();
+    const myId = me?.user?.id;
+    if (!myId) return;
+
+    const { data: books } = await supabase
+      .from("books")
+      .select("id, title, author")
+      .eq("user_id", myId)
+      .order("title");
+
+    if (books) {
+      setUserBooks(books);
+    }
+  };
 
   const loadFeed = async () => {
     // Get current user
@@ -115,7 +139,10 @@ export default function EnhancedFeed() {
     // Load posts
     const { data: posts } = await supabase
       .from("posts")
-      .select("*")
+      .select(`
+        *, 
+        books!posts_book_id_fkey ( title, author, cover_url )
+      `)
       .in("user_id", targetIds)
       .order("created_at", { ascending: false })
       .limit(50);
@@ -186,7 +213,7 @@ export default function EnhancedFeed() {
     const commentsMap = new Map(commentsData.map(c => [`${c.type}-${c.id}`, c.comments_count]));
 
     // Transform data to feed items
-    const postItems: Post[] = (posts || []).map(p => ({
+    const postItems: Post[] = (posts || []).map((p: any) => ({
       kind: "post",
       id: p.id,
       created_at: p.created_at,
@@ -195,6 +222,10 @@ export default function EnhancedFeed() {
       display_name: profileMap.get(p.user_id)?.display_name ?? null,
       avatar_url: profileMap.get(p.user_id)?.avatar_url ?? null,
       content: p.content,
+      book_id: p.book_id,
+      book_title: p.books?.title ?? null,
+      book_author: p.books?.author ?? null,
+      book_cover_url: p.books?.cover_url ?? null,
       likes_count: likesMap.get(`post-${p.id}`)?.likes_count || 0,
       comments_count: commentsMap.get(`post-${p.id}`) || 0,
       user_liked: likesMap.get(`post-${p.id}`)?.user_liked || false,
@@ -234,8 +265,12 @@ export default function EnhancedFeed() {
       user_liked: likesMap.get(`review-${r.id}`)?.user_liked || false,
     }));
 
-    // Merge and sort by date
-    const merged = [...postItems, ...progressItems, ...reviewItems].sort(
+    // Merge and sort by date, with Currently Reading before In Progress
+    const currentlyReading = progressItems.filter(p => p.from_page === null);
+    const inProgress = progressItems.filter(p => p.from_page !== null);
+    const sortedProgress = [...currentlyReading, ...inProgress];
+    
+    const merged = [...postItems, ...sortedProgress, ...reviewItems].sort(
       (a, b) => +new Date(b.created_at) - +new Date(a.created_at)
     );
 
@@ -287,7 +322,8 @@ export default function EnhancedFeed() {
       .from("posts")
       .insert({
         user_id: currentUserId,
-        content: newPostContent.trim()
+        content: newPostContent.trim(),
+        book_id: selectedBookId || null
       });
 
     if (error) {
@@ -300,6 +336,7 @@ export default function EnhancedFeed() {
     }
 
     setNewPostContent("");
+    setSelectedBookId("");
     setShowNewPostDialog(false);
     loadFeed(); // Reload feed
     toast({
@@ -497,7 +534,15 @@ export default function EnhancedFeed() {
                 </div>
               </div>
             ) : (
-              <p className="whitespace-pre-wrap">{item.content}</p>
+              <div>
+                {item.book_title && (
+                  <div className="mb-2 text-sm text-muted-foreground flex items-center gap-2">
+                    <BookOpen className="w-4 h-4" />
+                    About: <em>{item.book_title}</em> {item.book_author && `by ${item.book_author}`}
+                  </div>
+                )}
+                <p className="whitespace-pre-wrap">{item.content}</p>
+              </div>
             )}
           </div>
         )}
@@ -652,6 +697,19 @@ export default function EnhancedFeed() {
                   <DialogTitle>Create a new post</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
+                  <Select value={selectedBookId} onValueChange={setSelectedBookId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a book (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">General post (no book)</SelectItem>
+                      {userBooks.map((book) => (
+                        <SelectItem key={book.id} value={book.id}>
+                          {book.title} by {book.author}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Textarea
                     placeholder="What's on your mind about reading?"
                     value={newPostContent}
@@ -662,6 +720,7 @@ export default function EnhancedFeed() {
                     <Button variant="outline" onClick={() => {
                       setShowNewPostDialog(false);
                       setNewPostContent("");
+                      setSelectedBookId("");
                     }}>
                       Cancel
                     </Button>
