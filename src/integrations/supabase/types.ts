@@ -45,7 +45,15 @@ export type Database = {
           total_pages?: number
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "books_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_with_usernames"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       comments: {
         Row: {
@@ -93,7 +101,22 @@ export type Database = {
           follower_id?: string
           following_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "users_with_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_following_id_fkey"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "users_with_usernames"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       likes: {
         Row: {
@@ -121,6 +144,7 @@ export type Database = {
       }
       posts: {
         Row: {
+          book_id: string | null
           content: string
           created_at: string
           id: string
@@ -128,6 +152,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          book_id?: string | null
           content: string
           created_at?: string
           id?: string
@@ -135,6 +160,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          book_id?: string | null
           content?: string
           created_at?: string
           id?: string
@@ -148,7 +174,9 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           birthday: string | null
+          color_palette: Json | null
           created_at: string | null
+          current_book_id: string | null
           display_name: string | null
           display_preference: string | null
           email: string | null
@@ -156,14 +184,16 @@ export type Database = {
           id: string
           social_media_links: Json | null
           temperature_unit: string | null
-          username: string | null
+          username: string
           website_url: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
           birthday?: string | null
+          color_palette?: Json | null
           created_at?: string | null
+          current_book_id?: string | null
           display_name?: string | null
           display_preference?: string | null
           email?: string | null
@@ -171,14 +201,16 @@ export type Database = {
           id: string
           social_media_links?: Json | null
           temperature_unit?: string | null
-          username?: string | null
+          username: string
           website_url?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
           birthday?: string | null
+          color_palette?: Json | null
           created_at?: string | null
+          current_book_id?: string | null
           display_name?: string | null
           display_preference?: string | null
           email?: string | null
@@ -186,7 +218,7 @@ export type Database = {
           id?: string
           social_media_links?: Json | null
           temperature_unit?: string | null
-          username?: string | null
+          username?: string
           website_url?: string | null
         }
         Relationships: [
@@ -195,6 +227,13 @@ export type Database = {
             columns: ["favorite_book_id"]
             isOneToOne: false
             referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: false
+            referencedRelation: "users_with_usernames"
             referencedColumns: ["id"]
           },
         ]
@@ -235,6 +274,13 @@ export type Database = {
             referencedRelation: "books"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "reading_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_with_usernames"
+            referencedColumns: ["id"]
+          },
         ]
       }
       reviews: {
@@ -268,6 +314,13 @@ export type Database = {
             columns: ["book_id"]
             isOneToOne: false
             referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_with_usernames"
             referencedColumns: ["id"]
           },
         ]
@@ -313,7 +366,18 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      users_with_usernames: {
+        Row: {
+          created_at: string | null
+          display_name_meta: string | null
+          display_name_profile: string | null
+          email: string | null
+          id: string | null
+          username_meta: string | null
+          username_profile: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_public_profiles: {
