@@ -79,7 +79,7 @@ export default function EnhancedFeed() {
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [newPostContent, setNewPostContent] = useState("");
-  const [selectedBookId, setSelectedBookId] = useState<string>("");
+  const [selectedBookId, setSelectedBookId] = useState<string>("none");
   const [userBooks, setUserBooks] = useState<any[]>([]);
   const [showNewPostDialog, setShowNewPostDialog] = useState(false);
   const [editingPost, setEditingPost] = useState<string | null>(null);
@@ -323,7 +323,7 @@ export default function EnhancedFeed() {
       .insert({
         user_id: currentUserId,
         content: newPostContent.trim(),
-        book_id: selectedBookId || null
+        book_id: selectedBookId === "none" ? null : selectedBookId
       });
 
     if (error) {
@@ -336,7 +336,7 @@ export default function EnhancedFeed() {
     }
 
     setNewPostContent("");
-    setSelectedBookId("");
+    setSelectedBookId("none");
     setShowNewPostDialog(false);
     loadFeed(); // Reload feed
     toast({
@@ -702,7 +702,7 @@ export default function EnhancedFeed() {
                       <SelectValue placeholder="Select a book (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">General post (no book)</SelectItem>
+                      <SelectItem value="none">General post (no book)</SelectItem>
                       {userBooks.map((book) => (
                         <SelectItem key={book.id} value={book.id}>
                           {book.title} by {book.author}
@@ -720,7 +720,7 @@ export default function EnhancedFeed() {
                     <Button variant="outline" onClick={() => {
                       setShowNewPostDialog(false);
                       setNewPostContent("");
-                      setSelectedBookId("");
+                      setSelectedBookId("none");
                     }}>
                       Cancel
                     </Button>
