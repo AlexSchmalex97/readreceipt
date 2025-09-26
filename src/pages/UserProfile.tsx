@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
 import { FollowButton } from "@/components/FollowButton";
+import { UserColorProvider } from "@/components/UserColorProvider";
 import { ArrowLeft, BookOpen, Star, Calendar, Globe, Facebook, Twitter, Instagram, Linkedin, Youtube, ExternalLink } from "lucide-react";
 
 type ProgressItem = {
@@ -55,6 +56,7 @@ interface UserProfile {
   favorite_book_id?: string | null;
   social_media_links?: any;
   website_url?: string | null;
+  color_palette?: any;
 }
 
 interface FavoriteBook {
@@ -247,7 +249,7 @@ export default function UserProfile() {
       <div className="min-h-screen bg-gradient-soft">
         <Navigation />
         <div className="container mx-auto px-4 py-6">
-        {/* Header with back button */}
+          {/* Header with back button */}
         <div className="flex items-center gap-4 mb-6">
           <Link 
             to="/people" 
@@ -433,6 +435,7 @@ export default function UserProfile() {
               )
             )
           )}
+        </div>
         </div>
       </div>
     </UserColorProvider>
