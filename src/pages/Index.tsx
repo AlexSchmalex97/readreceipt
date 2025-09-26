@@ -290,100 +290,6 @@ const Index = () => {
           <AddBookDialog onAddBook={handleAddBook} />
         </div>
 
-        {/* Stats Grid with TBR */}
-        {books.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6 sm:mb-8">
-            <div className="bg-card rounded-lg p-4 shadow-soft border border-border">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-accent-foreground" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-2xl font-bold text-foreground">{booksInProgress}</p>
-                  <p className="text-sm text-muted-foreground">In Progress</p>
-                </div>
-              </div>
-              {/* Small covers for in-progress books */}
-              {inProgressBooks.length > 0 && (
-                <div className="flex gap-1 mt-3 overflow-hidden">
-                  {inProgressBooks.slice(0, 5).map((book) => (
-                    <div key={`progress-cover-${book.id}`} className="flex-shrink-0">
-                      {book.coverUrl ? (
-                        <img 
-                          src={book.coverUrl} 
-                          alt={book.title}
-                          className="w-6 h-8 object-cover rounded shadow-sm"
-                          title={`${book.title} by ${book.author}`}
-                        />
-                      ) : (
-                        <div className="w-6 h-8 bg-muted rounded flex items-center justify-center shadow-sm" title={`${book.title} by ${book.author}`}>
-                          <TrendingUp className="w-2 h-2 text-muted-foreground" />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  {inProgressBooks.length > 5 && (
-                    <div className="flex-shrink-0 w-6 h-8 bg-muted/50 rounded flex items-center justify-center text-xs text-muted-foreground">
-                      +{inProgressBooks.length - 5}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <Link to="/completed" className="bg-card rounded-lg p-4 shadow-soft border border-border hover:shadow-lg transition-shadow cursor-pointer">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
-                  <Target className="w-5 h-5 text-accent-foreground" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-2xl font-bold text-foreground">{completedBooks}</p>
-                  <p className="text-sm text-muted-foreground">Completed</p>
-                </div>
-              </div>
-              {/* Small covers for completed books */}
-              {completedBookItems.length > 0 && (
-                <div className="flex gap-1 mt-3 overflow-hidden">
-                  {completedBookItems.slice(0, 5).map((book) => (
-                    <div key={`completed-cover-${book.id}`} className="flex-shrink-0">
-                      {book.coverUrl ? (
-                        <img 
-                          src={book.coverUrl} 
-                          alt={book.title}
-                          className="w-6 h-8 object-cover rounded shadow-sm"
-                          title={`${book.title} by ${book.author}`}
-                        />
-                      ) : (
-                        <div className="w-6 h-8 bg-muted rounded flex items-center justify-center shadow-sm" title={`${book.title} by ${book.author}`}>
-                          <Target className="w-2 h-2 text-muted-foreground" />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  {completedBookItems.length > 5 && (
-                    <div className="flex-shrink-0 w-6 h-8 bg-muted/50 rounded flex items-center justify-center text-xs text-muted-foreground">
-                      +{completedBookItems.length - 5}
-                    </div>
-                  )}
-                </div>
-              )}
-            </Link>
-
-            {/* TBR List - positioned to the right of Completed */}
-            <div className="lg:col-span-2">
-              <TBRList userId={userId} onMoveToReading={handleAddBook} />
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <div></div>
-            {/* TBR List for new users */}
-            {userId && (
-              <TBRList userId={userId} onMoveToReading={handleAddBook} />
-            )}
-          </div>
-        )}
-
         {/* Main Content Area */}
         {books.length === 0 ? (
           <div className="text-center py-16">
@@ -404,7 +310,8 @@ const Index = () => {
           </div>
         ) : (
           <div className="space-y-8">
-            {inProgressBooks.length > 0 ? (
+            {/* Currently Reading Section - Now at the top */}
+            {inProgressBooks.length > 0 && (
               <section>
                 <h2 className="text-xl font-semibold text-foreground mb-4">Currently Reading</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -419,7 +326,94 @@ const Index = () => {
                    ))}
                 </div>
               </section>
-            ) : (
+            )}
+
+            {/* Stats Grid with TBR - Now below Currently Reading */}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+              <div className="bg-card rounded-lg p-4 shadow-soft border border-border">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-accent-foreground" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-2xl font-bold text-foreground">{booksInProgress}</p>
+                    <p className="text-sm text-muted-foreground">In Progress</p>
+                  </div>
+                </div>
+                {/* Small covers for in-progress books */}
+                {inProgressBooks.length > 0 && (
+                  <div className="flex gap-1 mt-3 overflow-hidden">
+                    {inProgressBooks.slice(0, 5).map((book) => (
+                      <div key={`progress-cover-${book.id}`} className="flex-shrink-0">
+                        {book.coverUrl ? (
+                          <img 
+                            src={book.coverUrl} 
+                            alt={book.title}
+                            className="w-6 h-8 object-cover rounded shadow-sm"
+                            title={`${book.title} by ${book.author}`}
+                          />
+                        ) : (
+                          <div className="w-6 h-8 bg-muted rounded flex items-center justify-center shadow-sm" title={`${book.title} by ${book.author}`}>
+                            <TrendingUp className="w-2 h-2 text-muted-foreground" />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {inProgressBooks.length > 5 && (
+                      <div className="flex-shrink-0 w-6 h-8 bg-muted/50 rounded flex items-center justify-center text-xs text-muted-foreground">
+                        +{inProgressBooks.length - 5}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <Link to="/completed" className="bg-card rounded-lg p-4 shadow-soft border border-border hover:shadow-lg transition-shadow cursor-pointer">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
+                    <Target className="w-5 h-5 text-accent-foreground" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-2xl font-bold text-foreground">{completedBooks}</p>
+                    <p className="text-sm text-muted-foreground">Completed</p>
+                  </div>
+                </div>
+                {/* Small covers for completed books */}
+                {completedBookItems.length > 0 && (
+                  <div className="flex gap-1 mt-3 overflow-hidden">
+                    {completedBookItems.slice(0, 5).map((book) => (
+                      <div key={`completed-cover-${book.id}`} className="flex-shrink-0">
+                        {book.coverUrl ? (
+                          <img 
+                            src={book.coverUrl} 
+                            alt={book.title}
+                            className="w-6 h-8 object-cover rounded shadow-sm"
+                            title={`${book.title} by ${book.author}`}
+                          />
+                        ) : (
+                          <div className="w-6 h-8 bg-muted rounded flex items-center justify-center shadow-sm" title={`${book.title} by ${book.author}`}>
+                            <Target className="w-2 h-2 text-muted-foreground" />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {completedBookItems.length > 5 && (
+                      <div className="flex-shrink-0 w-6 h-8 bg-muted/50 rounded flex items-center justify-center text-xs text-muted-foreground">
+                        +{completedBookItems.length - 5}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Link>
+
+              {/* TBR List - positioned to the right */}
+              <div className="lg:col-span-2">
+                {userId && <TBRList userId={userId} onMoveToReading={handleAddBook} />}
+              </div>
+            </div>
+
+            {/* Show message if no books in progress */}
+            {inProgressBooks.length === 0 && (
               <div className="text-center py-12 bg-card rounded-lg border">
                 <h3 className="text-lg font-semibold text-foreground mb-2">
                   No books in progress
