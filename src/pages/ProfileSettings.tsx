@@ -545,6 +545,7 @@ export default function ProfileSettings() {
           </label>
 
           <div className="grid gap-1">
+            <span className="text-sm text-muted-foreground">Favorite Book</span>
             <FavoriteBookSelector
               value={favoriteBookId}
               onChange={setFavoriteBookId}

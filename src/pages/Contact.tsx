@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, MessageSquare, HelpCircle, Send } from "lucide-react";
+import { Mail, MessageSquare, HelpCircle, Send, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Contact() {
@@ -15,19 +15,32 @@ export default function Contact() {
     message: "",
     type: "general"
   });
+  const [subscriberEmail, setSubscriberEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubscribing, setIsSubscribing] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Create mailto link to direct email to support@readreceiptapp.com
+    const subject = encodeURIComponent(`[${formData.type.toUpperCase()}] ${formData.subject}`);
+    const body = encodeURIComponent(`
+Name: ${formData.name}
+Email: ${formData.email}
+Message Type: ${formData.type}
+
+Message:
+${formData.message}
+    `);
+    
+    const mailtoLink = `mailto:support@readreceiptapp.com?subject=${subject}&body=${body}`;
+    window.open(mailtoLink, '_blank');
 
     toast({
-      title: "Message sent!",
-      description: "Thank you for your feedback. We'll get back to you soon.",
+      title: "Opening email client",
+      description: "Your message will be sent to support@readreceiptapp.com",
     });
 
     setFormData({
@@ -38,6 +51,24 @@ export default function Contact() {
       type: "general"
     });
     setIsSubmitting(false);
+  };
+
+  const handleSubscribe = async () => {
+    if (!subscriberEmail.trim()) return;
+    
+    setIsSubscribing(true);
+    
+    // Open the Substack subscription page with pre-filled email
+    const substackUrl = `https://readreceiptapp.substack.com/subscribe?email=${encodeURIComponent(subscriberEmail)}`;
+    window.open(substackUrl, '_blank');
+    
+    toast({
+      title: "Opening subscription page",
+      description: "You'll be redirected to subscribe to ReadReceipt Updates!",
+    });
+    
+    setSubscriberEmail("");
+    setIsSubscribing(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -112,6 +143,46 @@ export default function Contact() {
                 </p>
               </CardContent>
             </Card>
+
+            {/* Newsletter Subscription */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="w-5 h-5" />
+                  ReadReceipt Updates
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Subscribe to our Substack newsletter for app updates, reading tips, and community highlights!
+                </p>
+                <div className="space-y-3">
+                  <Input
+                    type="email"
+                    placeholder="your.email@example.com"
+                    value={subscriberEmail}
+                    onChange={(e) => setSubscriberEmail(e.target.value)}
+                  />
+                  <Button 
+                    onClick={handleSubscribe}
+                    disabled={isSubscribing || !subscriberEmail.trim()}
+                    className="w-full gap-2"
+                  >
+                    {isSubscribing ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        Opening...
+                      </>
+                    ) : (
+                      <>
+                        <Mail className="w-4 h-4" />
+                        Subscribe to Updates
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Contact Form */}
@@ -119,6 +190,9 @@ export default function Contact() {
             <Card>
               <CardHeader>
                 <CardTitle>Send us a message</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  All messages will be sent to <strong>support@readreceiptapp.com</strong>
+                </p>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
