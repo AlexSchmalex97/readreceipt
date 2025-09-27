@@ -18,9 +18,11 @@ interface Book {
 interface FavoriteBookSelectorProps {
   value?: string;
   onChange: (bookId?: string) => void;
+  label?: string;
+  placeholder?: string;
 }
 
-export const FavoriteBookSelector = ({ value, onChange }: FavoriteBookSelectorProps) => {
+export const FavoriteBookSelector = ({ value, onChange, label = "Favorite Book", placeholder = "Select your favorite book..." }: FavoriteBookSelectorProps) => {
   const [open, setOpen] = useState(false);
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
@@ -71,7 +73,7 @@ export const FavoriteBookSelector = ({ value, onChange }: FavoriteBookSelectorPr
 
   return (
     <div className="space-y-2">
-      <Label>Favorite Book</Label>
+      <Label>{label}</Label>
       <div className="flex gap-2">
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
@@ -86,7 +88,7 @@ export const FavoriteBookSelector = ({ value, onChange }: FavoriteBookSelectorPr
                   {selectedBook.title} by {selectedBook.author}
                 </span>
               ) : (
-                "Select your favorite book..."
+                placeholder
               )}
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>

@@ -329,8 +329,8 @@ const Index = () => {
             )}
 
             {/* Stats Grid with TBR - Now below Currently Reading */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-              <div className="bg-card rounded-lg p-3 shadow-soft border border-border">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+              <div className="bg-card rounded-lg p-3 shadow-soft border border-border self-start">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
                     <TrendingUp className="w-4 h-4 text-accent-foreground" />
@@ -367,7 +367,7 @@ const Index = () => {
                 )}
               </div>
 
-              <Link to="/completed" className="bg-card rounded-lg p-3 shadow-soft border border-border hover:shadow-lg transition-shadow cursor-pointer">
+              <Link to="/completed" className="bg-card rounded-lg p-3 shadow-soft border border-border hover:shadow-lg transition-shadow cursor-pointer self-start">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
                     <Target className="w-4 h-4 text-accent-foreground" />

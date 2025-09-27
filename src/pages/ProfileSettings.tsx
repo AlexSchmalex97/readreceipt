@@ -544,16 +544,18 @@ export default function ProfileSettings() {
           </label>
 
           <div className="grid gap-1">
-            <span className="text-sm text-muted-foreground">Favorite Book</span>
             <FavoriteBookSelector
+              label="Favourite Book"
+              placeholder="Select your favourite book..."
               value={favoriteBookId}
               onChange={setFavoriteBookId}
             />
           </div>
 
           <div className="grid gap-1">
-            <span className="text-sm text-muted-foreground">Current Book</span>
             <FavoriteBookSelector
+              label="Current Read"
+              placeholder="Select your current read..."
               value={currentBookId}
               onChange={setCurrentBookId}
             />
