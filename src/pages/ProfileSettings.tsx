@@ -12,7 +12,7 @@ import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { SocialMediaInput } from "@/components/SocialMediaInput";
 import { FavoriteBookSelector } from "@/components/FavoriteBookSelector";
-import { ColorPaletteSelector } from "@/components/ColorPaletteSelector";
+
 
 function normalizeUsername(raw: string) {
   return raw
@@ -45,7 +45,7 @@ export default function ProfileSettings() {
   const [currentBookId, setCurrentBookId] = useState<string | undefined>();
   const [socialMediaLinks, setSocialMediaLinks] = useState<{platform: string, url: string}[]>([]);
   const [websiteUrl, setWebsiteUrl] = useState("");
-  const [colorPalette, setColorPalette] = useState<any>(null);
+  
   const [uploading, setUploading] = useState(false);
   const normUsername = useMemo(() => normalizeUsername(username), [username]);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
@@ -113,7 +113,7 @@ export default function ProfileSettings() {
       setCurrentBookId(prof?.current_book_id ?? undefined);
       setSocialMediaLinks(prof?.social_media_links ? Object.entries(prof.social_media_links).map(([platform, url]) => ({ platform, url: url as string })) : []);
       setWebsiteUrl(prof?.website_url ?? "");
-      setColorPalette(prof?.color_palette || { name: "default" });
+      
       setLoading(false);
     })();
   }, []);
@@ -309,7 +309,6 @@ export default function ProfileSettings() {
           current_book_id: currentBookId || null,
           social_media_links: socialMediaObject,
           website_url: websiteUrl || null,
-          color_palette: colorPalette,
         })
         .eq("id", uid)
         .select();
@@ -560,16 +559,6 @@ export default function ProfileSettings() {
             />
           </div>
 
-          <div className="grid gap-1">
-            <span className="text-sm text-muted-foreground">Color Palette</span>
-            <ColorPaletteSelector
-              currentPalette={colorPalette}
-              onPaletteChange={() => {
-                // Refresh palette state
-                window.location.reload();
-              }}
-            />
-          </div>
 
           <div className="grid gap-1">
             <SocialMediaInput

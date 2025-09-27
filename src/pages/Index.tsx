@@ -340,9 +340,8 @@ const Index = () => {
                     <p className="text-sm text-muted-foreground">In Progress</p>
                   </div>
                 </div>
-                {/* Small covers for in-progress books */}
-                {inProgressBooks.length > 0 && (
-                  <div className="flex gap-1 mt-3 overflow-hidden">
+{inProgressBooks.length > 0 && (
+                  <div className="flex gap-1 mt-2 overflow-hidden">
                     {inProgressBooks.slice(0, 5).map((book) => (
                       <div key={`progress-cover-${book.id}`} className="flex-shrink-0">
                         {book.coverUrl ? (
@@ -378,9 +377,8 @@ const Index = () => {
                     <p className="text-sm text-muted-foreground">Completed</p>
                   </div>
                 </div>
-                {/* Small covers for completed books */}
-                {completedBookItems.length > 0 && (
-                  <div className="flex gap-1 mt-3 overflow-hidden">
+{completedBookItems.length > 0 && (
+                  <div className="flex gap-1 mt-2 overflow-hidden">
                     {completedBookItems.slice(0, 5).map((book) => (
                       <div key={`completed-cover-${book.id}`} className="flex-shrink-0">
                         {book.coverUrl ? (
