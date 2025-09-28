@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Plus, Search, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
+import { searchGoogleBooks, GoogleBookResult } from "@/lib/googleBooks";
 
 interface Book {
   id: string;
@@ -16,16 +17,6 @@ interface Book {
   coverUrl?: string;
 }
 
-interface BookSearchResult {
-  id: string;
-  title: string;
-  authors?: string[];
-  pageCount?: number;
-  imageLinks?: {
-    thumbnail?: string;
-  };
-  description?: string;
-}
 
 interface AddBookDialogProps {
   onAddBook: (book: Omit<Book, "id" | "currentPage">) => void;
@@ -34,9 +25,9 @@ interface AddBookDialogProps {
 export const AddBookDialog = ({ onAddBook }: AddBookDialogProps) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<BookSearchResult[]>([]);
+  const [searchResults, setSearchResults] = useState<GoogleBookResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [selectedBook, setSelectedBook] = useState<BookSearchResult | null>(null);
+  const [selectedBook, setSelectedBook] = useState<GoogleBookResult | null>(null);
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [totalPages, setTotalPages] = useState("");
@@ -48,23 +39,10 @@ export const AddBookDialog = ({ onAddBook }: AddBookDialogProps) => {
     
     setIsSearching(true);
     try {
-      const response = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(searchQuery)}&maxResults=10`
-      );
-      const data = await response.json();
+      const books = await searchGoogleBooks(searchQuery);
+      setSearchResults(books);
       
-      if (data.items) {
-        const books: BookSearchResult[] = data.items.map((item: any) => ({
-          id: item.id,
-          title: item.volumeInfo.title || "Unknown Title",
-          authors: item.volumeInfo.authors || [],
-          pageCount: item.volumeInfo.pageCount,
-          imageLinks: item.volumeInfo.imageLinks,
-          description: item.volumeInfo.description,
-        }));
-        setSearchResults(books);
-      } else {
-        setSearchResults([]);
+      if (books.length === 0) {
         toast({
           title: "No books found",
           description: "Try a different search term",
@@ -81,7 +59,7 @@ export const AddBookDialog = ({ onAddBook }: AddBookDialogProps) => {
     }
   };
 
-  const selectBook = (book: BookSearchResult) => {
+  const selectBook = (book: GoogleBookResult) => {
     setSelectedBook(book);
     setTitle(book.title);
     setAuthor(book.authors?.join(", ") || "Unknown Author");
