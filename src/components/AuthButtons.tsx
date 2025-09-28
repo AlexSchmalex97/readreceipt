@@ -84,6 +84,13 @@ export default function AuthButtons() {
 
   const togglePanel = () => setPanelOpen((v) => !v);
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleEmailPassword();
+    }
+  };
+
   async function handleEmailPassword() {
     try {
       if (!email || !password) return alert("Enter email and password.");
@@ -247,6 +254,7 @@ export default function AuthButtons() {
                   }
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   className="w-full px-3 py-2 rounded border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                   autoComplete="email"
                 />
@@ -255,6 +263,7 @@ export default function AuthButtons() {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   className="w-full px-3 py-2 rounded border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                   autoComplete={
                     mode === "signin" ? "current-password" : "new-password"
