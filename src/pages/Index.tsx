@@ -6,6 +6,8 @@ import { TrendingUp, Target } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ReviewDialog } from "@/components/ReviewDialog";
 import { Navigation } from "@/components/Navigation";
+import { ReadingGoals } from "@/components/ReadingGoals";
+import { BookDatesDialog } from "@/components/BookDatesDialog";
 import { Link } from "react-router-dom";
 import { searchGoogleBooks } from "@/lib/googleBooks";
 
@@ -16,6 +18,8 @@ interface Book {
   totalPages: number;
   currentPage: number;
   coverUrl?: string;
+  started_at?: string;
+  finished_at?: string;
 }
 
 const Index = () => {
@@ -51,7 +55,7 @@ const Index = () => {
         if (userId) {
           const { data, error } = await supabase
             .from("books")
-            .select("id,title,author,total_pages,current_page,cover_url,created_at")
+            .select("id,title,author,total_pages,current_page,cover_url,started_at,finished_at,created_at")
             .eq("user_id", userId)  // Only fetch current user's books
             .order("created_at", { ascending: true });
 
@@ -79,7 +83,7 @@ const Index = () => {
                 localStorage.removeItem("reading-tracker-books");
                 const { data: migrated } = await supabase
                   .from("books")
-                  .select("id,title,author,total_pages,current_page,cover_url,created_at")
+                  .select("id,title,author,total_pages,current_page,cover_url,started_at,finished_at,created_at")
                   .eq("user_id", userId)  // Only fetch current user's books
                   .order("created_at", { ascending: true });
                 setBooks(
@@ -90,6 +94,8 @@ const Index = () => {
                     totalPages: r.total_pages,
                     currentPage: r.current_page,
                     coverUrl: r.cover_url,
+                    started_at: r.started_at,
+                    finished_at: r.finished_at,
                   }))
                 );
                 setLoading(false);
@@ -106,6 +112,8 @@ const Index = () => {
               totalPages: r.total_pages,
               currentPage: r.current_page,
               coverUrl: r.cover_url,
+              started_at: r.started_at,
+              finished_at: r.finished_at,
             }))
           );
           console.log('Books with covers:', data?.map(r => ({ title: r.title, coverUrl: r.cover_url })));
@@ -198,6 +206,8 @@ const Index = () => {
             totalPages: r.total_pages,
             currentPage: r.current_page,
             coverUrl: r.cover_url,
+            started_at: r.started_at,
+            finished_at: r.finished_at,
           },
         ]);
       }
@@ -241,6 +251,45 @@ const Index = () => {
     }
   };
 
+  const handleUpdateDates = async (id: string, startedAt?: string, finishedAt?: string) => {
+    if (userId) {
+      const updateData: any = {};
+      if (startedAt !== undefined) updateData.started_at = startedAt || null;
+      if (finishedAt !== undefined) updateData.finished_at = finishedAt || null;
+
+      const { error } = await supabase
+        .from("books")
+        .update(updateData)
+        .eq("id", id);
+
+      if (!error) {
+        setBooks((prevBooks) =>
+          prevBooks.map((b) => 
+            b.id === id 
+              ? { 
+                  ...b, 
+                  started_at: startedAt, 
+                  finished_at: finishedAt 
+                } 
+              : b
+          )
+        );
+      }
+    } else {
+      setBooks((prev) => 
+        prev.map((b) => 
+          b.id === id 
+            ? { 
+                ...b, 
+                started_at: startedAt, 
+                finished_at: finishedAt 
+              } 
+            : b
+        )
+      );
+    }
+  };
+
   const handleDeleteBook = async (id: string) => {
     if (userId) {
       const { error } = await supabase.from("books").delete().eq("id", id);
@@ -266,6 +315,15 @@ const Index = () => {
     (b) => b.currentPage < b.totalPages
   ).length;
   const completedBooks = books.filter((b) => b.currentPage >= b.totalPages).length;
+  
+  // Calculate completed books for current year
+  const currentYear = new Date().getFullYear();
+  const completedBooksThisYear = books.filter((b) => {
+    if (b.currentPage < b.totalPages) return false;
+    if (!b.finished_at) return false;
+    const finishedDate = new Date(b.finished_at);
+    return finishedDate.getFullYear() === currentYear;
+  }).length;
   
   // Lists for rendering
   const inProgressBooks = books.filter((b) => b.currentPage < b.totalPages);
@@ -310,6 +368,8 @@ const Index = () => {
           </div>
         ) : (
           <div className="space-y-8">
+            {/* Reading Goals Section */}
+            <ReadingGoals userId={userId} completedBooksThisYear={completedBooksThisYear} />
             {/* Currently Reading Section - Now at the top */}
             {inProgressBooks.length > 0 && (
               <section>
@@ -322,6 +382,7 @@ const Index = () => {
                        onUpdateProgress={handleUpdateProgress}
                        onDeleteBook={handleDeleteBook}
                        onCoverUpdate={handleCoverUpdate}
+                       onUpdateDates={handleUpdateDates}
                      />
                    ))}
                 </div>

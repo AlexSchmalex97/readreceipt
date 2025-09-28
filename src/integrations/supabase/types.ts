@@ -20,7 +20,9 @@ export type Database = {
           cover_url: string | null
           created_at: string | null
           current_page: number
+          finished_at: string | null
           id: string
+          started_at: string | null
           title: string
           total_pages: number
           user_id: string
@@ -30,7 +32,9 @@ export type Database = {
           cover_url?: string | null
           created_at?: string | null
           current_page?: number
+          finished_at?: string | null
           id?: string
+          started_at?: string | null
           title: string
           total_pages: number
           user_id: string
@@ -40,7 +44,9 @@ export type Database = {
           cover_url?: string | null
           created_at?: string | null
           current_page?: number
+          finished_at?: string | null
           id?: string
+          started_at?: string | null
           title?: string
           total_pages?: number
           user_id?: string
@@ -207,6 +213,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      reading_goals: {
+        Row: {
+          created_at: string
+          goal_count: number
+          id: string
+          manual_count: number | null
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          goal_count?: number
+          id?: string
+          manual_count?: number | null
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          goal_count?: number
+          id?: string
+          manual_count?: number | null
+          updated_at?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
       }
       reading_progress: {
         Row: {

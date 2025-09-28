@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { BookOpen, Edit3, Check, X, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { BookEditionSelector } from "@/components/BookEditionSelector";
+import { BookDatesDialog } from "@/components/BookDatesDialog";
 
 interface Book {
   id: string;
@@ -14,6 +15,8 @@ interface Book {
   totalPages: number;
   currentPage: number;
   coverUrl?: string;
+  started_at?: string;
+  finished_at?: string;
 }
 
 interface BookCardProps {
@@ -21,6 +24,7 @@ interface BookCardProps {
   onUpdateProgress: (id: string, currentPage: number) => void;
   onDeleteBook?: (id: string) => void;
   onCoverUpdate?: (id: string, newCoverUrl: string) => void;
+  onUpdateDates?: (id: string, startedAt?: string, finishedAt?: string) => void;
 }
 
 const getEncouragingMessage = (percentage: number): string => {
@@ -34,7 +38,7 @@ const getEncouragingMessage = (percentage: number): string => {
   return "Congratulations! Book completed! 🎉📚";
 };
 
-export const BookCard = ({ book, onUpdateProgress, onDeleteBook, onCoverUpdate }: BookCardProps) => {
+export const BookCard = ({ book, onUpdateProgress, onDeleteBook, onCoverUpdate, onUpdateDates }: BookCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentPageInput, setCurrentPageInput] = useState(book.currentPage.toString());
   const { toast } = useToast();
@@ -130,6 +134,12 @@ export const BookCard = ({ book, onUpdateProgress, onDeleteBook, onCoverUpdate }
           
           {/* Actions */}
           <div className="flex items-center gap-2 flex-shrink-0">
+            {onUpdateDates && (
+              <BookDatesDialog
+                book={book}
+                onUpdateDates={onUpdateDates}
+              />
+            )}
             {onDeleteBook && (
               <Button
                 size="sm"
