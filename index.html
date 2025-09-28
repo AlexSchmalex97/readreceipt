@@ -31,5 +31,25 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Force-remove any old/broken service worker -->
+    <script>
+      (function () {
+        if (!('serviceWorker' in navigator)) return;
+        navigator.serviceWorker.getRegistrations()
+          .then(regs => Promise.all(regs.map(r => r.unregister())))
+          .then(() => {
+            if (window.caches && caches.keys) {
+              caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+            }
+            if (!sessionStorage.getItem('sw_cleared')) {
+              sessionStorage.setItem('sw_cleared', '1');
+              location.reload();
+            }
+          })
+          .catch(console.warn);
+      })();
+    </script>
   </body>
 </html>
+
