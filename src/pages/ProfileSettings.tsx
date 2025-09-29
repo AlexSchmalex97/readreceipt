@@ -12,6 +12,7 @@ import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { SocialMediaInput } from "@/components/SocialMediaInput";
 import { FavoriteBookSelector } from "@/components/FavoriteBookSelector";
+import { ReadingGoals } from "@/components/ReadingGoals";
 
 
 function normalizeUsername(raw: string) {
@@ -487,6 +488,9 @@ export default function ProfileSettings() {
           <strong>Note:</strong> Your display name and username are for social features and will appear in greetings, feeds, and when other users find you. 
           <br />
           <strong>Authentication:</strong> For login, use the same method you signed up with (Google OAuth or email/password).
+        </div>
+        <div className="space-y-4">
+          <ReadingGoals userId={uid || ""} completedBooksThisYear={0} />
         </div>
         <div className="grid gap-3">
           <label className="grid gap-1">

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, User, BookOpen, Star, Calendar, Globe, Facebook, Twitter, Instagram, Linkedin, Youtube, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ReadingGoals } from "@/components/ReadingGoals";
 
 type UserProfile = {
   id: string;
@@ -151,15 +152,33 @@ export default function ProfileDisplay() {
       // Load book statistics
       const { data: books, error: booksError } = await supabase
         .from("books")
-        .select("current_page, total_pages")
+        .select("current_page, total_pages, status, finished_at")
         .eq("user_id", user.id);
 
       if (!booksError && books) {
         const totalBooks = books.length;
-        const completedBooks = books.filter(book => book.current_page >= book.total_pages).length;
-        const inProgressBooks = books.filter(book => book.current_page < book.total_pages).length;
+        const currentYear = new Date().getFullYear();
+        const completedBooks = books.filter(book => 
+          book.status === 'completed' || book.current_page >= book.total_pages
+        ).length;
+        const completedThisYear = books.filter(book => {
+          if (book.status !== 'completed' && book.current_page < book.total_pages) return false;
+          if (book.finished_at) {
+            return new Date(book.finished_at).getFullYear() === currentYear;
+          }
+          return false;
+        }).length;
+        const inProgressBooks = books.filter(book => 
+          book.status === 'in_progress' || (book.current_page < book.total_pages && book.status !== 'dnf')
+        ).length;
         
         setBookStats({ totalBooks, completedBooks, inProgressBooks });
+        
+        // Pass completed this year count to reading goals
+        const readingGoalsElement = document.querySelector('[data-completed-this-year]');
+        if (readingGoalsElement) {
+          readingGoalsElement.setAttribute('data-completed-this-year', completedThisYear.toString());
+        }
       }
 
       // Load recent reviews
@@ -372,6 +391,11 @@ export default function ProfileDisplay() {
               Settings
             </Button>
           </Link>
+        </div>
+
+        {/* Reading Goals Section */}
+        <div data-completed-this-year="0">
+          <ReadingGoals userId={uid} completedBooksThisYear={0} />
         </div>
 
         {/* Stats Cards */}

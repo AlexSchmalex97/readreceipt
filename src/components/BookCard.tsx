@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Edit3, Check, X, Trash2 } from "lucide-react";
+import { BookOpen, Edit3, Check, X, Trash2, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { BookEditionSelector } from "@/components/BookEditionSelector";
 import { BookDatesDialog } from "@/components/BookDatesDialog";
@@ -17,6 +17,7 @@ interface Book {
   coverUrl?: string;
   started_at?: string;
   finished_at?: string;
+  status?: 'in_progress' | 'completed' | 'dnf';
 }
 
 interface BookCardProps {
@@ -25,6 +26,7 @@ interface BookCardProps {
   onDeleteBook?: (id: string) => void;
   onCoverUpdate?: (id: string, newCoverUrl: string) => void;
   onUpdateDates?: (id: string, startedAt?: string, finishedAt?: string) => void;
+  onMarkAsDnf?: (id: string) => void;
 }
 
 const getEncouragingMessage = (percentage: number): string => {
@@ -38,7 +40,7 @@ const getEncouragingMessage = (percentage: number): string => {
   return "Congratulations! Book completed! 🎉📚";
 };
 
-export const BookCard = ({ book, onUpdateProgress, onDeleteBook, onCoverUpdate, onUpdateDates }: BookCardProps) => {
+export const BookCard = ({ book, onUpdateProgress, onDeleteBook, onCoverUpdate, onUpdateDates, onMarkAsDnf }: BookCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentPageInput, setCurrentPageInput] = useState(book.currentPage.toString());
   const { toast } = useToast();
@@ -139,6 +141,17 @@ export const BookCard = ({ book, onUpdateProgress, onDeleteBook, onCoverUpdate, 
                 book={book}
                 onUpdateDates={onUpdateDates}
               />
+            )}
+            {book.status !== 'dnf' && onMarkAsDnf && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => onMarkAsDnf(book.id)}
+                className="h-8 w-8 p-0 text-orange-500 hover:text-orange-600 hover:bg-orange-100"
+                title="Mark as Did Not Finish"
+              >
+                <XCircle className="w-4 h-4" />
+              </Button>
             )}
             {onDeleteBook && (
               <Button

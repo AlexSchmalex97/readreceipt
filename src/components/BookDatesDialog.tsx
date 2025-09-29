@@ -15,6 +15,7 @@ interface Book {
   coverUrl?: string;
   started_at?: string;
   finished_at?: string;
+  status?: 'in_progress' | 'completed' | 'dnf';
 }
 
 interface BookDatesDialogProps {

@@ -10,6 +10,7 @@ import { ReadingGoals } from "@/components/ReadingGoals";
 import { BookDatesDialog } from "@/components/BookDatesDialog";
 import { Link } from "react-router-dom";
 import { searchGoogleBooks } from "@/lib/googleBooks";
+import { useToast } from "@/hooks/use-toast";
 
 interface Book {
   id: string;
@@ -20,6 +21,7 @@ interface Book {
   coverUrl?: string;
   started_at?: string;
   finished_at?: string;
+  status?: 'in_progress' | 'completed' | 'dnf';
 }
 
 const Index = () => {
@@ -27,6 +29,7 @@ const Index = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [reviewFor, setReviewFor] = useState<{ bookId: string } | null>(null);
+  const { toast } = useToast();
 
   // Watch auth state
   useEffect(() => {
@@ -290,6 +293,29 @@ const Index = () => {
     }
   };
 
+  const handleMarkAsDnf = async (id: string) => {
+    if (userId) {
+      const { error } = await supabase
+        .from("books")
+        .update({ status: 'dnf' })
+        .eq("id", id);
+
+      if (!error) {
+        setBooks((prev) => prev.filter(b => b.id !== id));
+        toast({
+          title: "Book marked as DNF",
+          description: "Book moved to Did Not Finish list",
+        });
+      }
+    } else {
+      setBooks((prev) => prev.filter(b => b.id !== id));
+      toast({
+        title: "Book marked as DNF",
+        description: "Book moved to Did Not Finish list",
+      });
+    }
+  };
+
   const handleDeleteBook = async (id: string) => {
     if (userId) {
       const { error } = await supabase.from("books").delete().eq("id", id);
@@ -379,10 +405,11 @@ const Index = () => {
                      <BookCard
                        key={book.id}
                        book={book}
-                       onUpdateProgress={handleUpdateProgress}
-                       onDeleteBook={handleDeleteBook}
-                       onCoverUpdate={handleCoverUpdate}
-                       onUpdateDates={handleUpdateDates}
+                    onUpdateProgress={handleUpdateProgress}
+                    onDeleteBook={handleDeleteBook}
+                    onCoverUpdate={handleCoverUpdate}
+                    onUpdateDates={handleUpdateDates}
+                    onMarkAsDnf={handleMarkAsDnf}
                      />
                    ))}
                 </div>

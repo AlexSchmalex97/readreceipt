@@ -23,6 +23,7 @@ export type Database = {
           finished_at: string | null
           id: string
           started_at: string | null
+          status: string | null
           title: string
           total_pages: number
           user_id: string
@@ -35,6 +36,7 @@ export type Database = {
           finished_at?: string | null
           id?: string
           started_at?: string | null
+          status?: string | null
           title: string
           total_pages: number
           user_id: string
@@ -47,6 +49,7 @@ export type Database = {
           finished_at?: string | null
           id?: string
           started_at?: string | null
+          status?: string | null
           title?: string
           total_pages?: number
           user_id?: string
@@ -208,6 +211,50 @@ export type Database = {
           {
             foreignKeyName: "profiles_favorite_book_id_fkey"
             columns: ["favorite_book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reading_entries: {
+        Row: {
+          book_id: string
+          created_at: string
+          finished_at: string | null
+          id: string
+          notes: string | null
+          started_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          finished_at?: string | null
+          id?: string
+          notes?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          finished_at?: string | null
+          id?: string
+          notes?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_entries_book_id_fkey"
+            columns: ["book_id"]
             isOneToOne: false
             referencedRelation: "books"
             referencedColumns: ["id"]
