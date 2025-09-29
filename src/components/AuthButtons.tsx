@@ -235,6 +235,7 @@ export default function AuthButtons() {
                       placeholder="Display name"
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
+                      onKeyDown={handleKeyDown}
                       className="w-full px-3 py-2 rounded border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                     <input
@@ -242,6 +243,7 @@ export default function AuthButtons() {
                       placeholder="Username (unique)"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
+                      onKeyDown={handleKeyDown}
                       className="w-full px-3 py-2 rounded border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                   </>

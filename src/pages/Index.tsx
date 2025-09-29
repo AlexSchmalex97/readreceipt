@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { AddBookDialog } from "@/components/AddBookDialog";
 import { BookCard } from "@/components/BookCard";
 import { TBRList } from "@/components/TBRList";
-import { TrendingUp, Target } from "lucide-react";
+import { TrendingUp, Target, CheckCircle, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ReviewDialog } from "@/components/ReviewDialog";
 import { Navigation } from "@/components/Navigation";
 import { ReadingGoals } from "@/components/ReadingGoals";
+import { HomeReadingGoals } from "@/components/HomeReadingGoals";
 import { BookDatesDialog } from "@/components/BookDatesDialog";
 import { Link } from "react-router-dom";
 import { searchGoogleBooks } from "@/lib/googleBooks";
@@ -403,9 +404,7 @@ const Index = () => {
           </div>
         ) : (
           <div className="space-y-8">
-            {/* Reading Goals Section */}
-            <ReadingGoals userId={userId} completedBooksThisYear={completedBooksThisYear} />
-            {/* Currently Reading Section - Now at the top */}
+            {/* Currently Reading Section - At the top */}
             {inProgressBooks.length > 0 && (
               <section>
                 <h2 className="text-xl font-semibold text-foreground mb-4">Currently Reading</h2>
@@ -425,6 +424,9 @@ const Index = () => {
               </section>
             )}
 
+            {/* Reading Goals Section - Compact card style */}
+            <HomeReadingGoals userId={userId} completedBooksThisYear={completedBooksThisYear} />
+
             {/* Stats Grid with TBR - Now below Currently Reading */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
               <div className="bg-card rounded-lg p-3 shadow-soft border border-border self-start">
@@ -438,28 +440,23 @@ const Index = () => {
                   </div>
                 </div>
                 {inProgressBooks.length > 0 && (
-                  <div className="flex gap-1 mt-2 overflow-hidden">
-                    {inProgressBooks.slice(0, 5).map((book) => (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {inProgressBooks.map((book) => (
                       <div key={`progress-cover-${book.id}`} className="flex-shrink-0">
                         {book.coverUrl ? (
                           <img 
                             src={book.coverUrl} 
                             alt={book.title}
-                            className="w-5 h-7 object-cover rounded shadow-sm"
+                            className="w-6 h-8 object-cover rounded shadow-sm"
                             title={`${book.title} by ${book.author}`}
                           />
                         ) : (
-                          <div className="w-5 h-7 bg-muted rounded flex items-center justify-center shadow-sm" title={`${book.title} by ${book.author}`}>
-                            <TrendingUp className="w-2 h-2 text-muted-foreground" />
+                          <div className="w-6 h-8 bg-muted rounded flex items-center justify-center shadow-sm" title={`${book.title} by ${book.author}`}>
+                            <TrendingUp className="w-3 h-3 text-muted-foreground" />
                           </div>
                         )}
                       </div>
                     ))}
-                    {inProgressBooks.length > 5 && (
-                      <div className="flex-shrink-0 w-5 h-7 bg-muted/50 rounded flex items-center justify-center text-xs text-muted-foreground">
-                        +{inProgressBooks.length - 5}
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
@@ -475,28 +472,23 @@ const Index = () => {
                   </div>
                 </div>
                 {completedBookItems.length > 0 && (
-                  <div className="flex gap-1 mt-2 overflow-hidden">
-                    {completedBookItems.slice(0, 5).map((book) => (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {completedBookItems.map((book) => (
                       <div key={`completed-cover-${book.id}`} className="flex-shrink-0">
                         {book.coverUrl ? (
                           <img 
                             src={book.coverUrl} 
                             alt={book.title}
-                            className="w-5 h-7 object-cover rounded shadow-sm"
+                            className="w-6 h-8 object-cover rounded shadow-sm"
                             title={`${book.title} by ${book.author}`}
                           />
                         ) : (
-                          <div className="w-5 h-7 bg-muted rounded flex items-center justify-center shadow-sm" title={`${book.title} by ${book.author}`}>
-                            <Target className="w-2 h-2 text-muted-foreground" />
+                          <div className="w-6 h-8 bg-muted rounded flex items-center justify-center shadow-sm" title={`${book.title} by ${book.author}`}>
+                            <Target className="w-3 h-3 text-muted-foreground" />
                           </div>
                         )}
                       </div>
                     ))}
-                    {completedBookItems.length > 5 && (
-                      <div className="flex-shrink-0 w-5 h-7 bg-muted/50 rounded flex items-center justify-center text-xs text-muted-foreground">
-                        +{completedBookItems.length - 5}
-                      </div>
-                    )}
                   </div>
                 )}
               </Link>
@@ -506,6 +498,45 @@ const Index = () => {
                 {userId && <TBRList userId={userId} onMoveToReading={handleAddBook} />}
               </div>
             </div>
+
+            {/* Completed Books Section */}
+            <section className="space-y-4">
+              <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                <CheckCircle className="w-6 h-6 text-green-500" />
+                Completed Books ({completedBookItems.length})
+              </h2>
+              {completedBookItems.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <CheckCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No completed books yet. Keep reading!</p>
+                </div>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {completedBookItems.map((book) => (
+                    <BookCard
+                      key={book.id}
+                      book={book}
+                      onUpdateProgress={handleUpdateProgress}
+                      onDeleteBook={handleDeleteBook}
+                      onCoverUpdate={handleCoverUpdate}
+                      onUpdateDates={handleUpdateDates}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* DNF Books Section - Last */}
+            <section className="space-y-4">
+              <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                <XCircle className="w-6 h-6 text-orange-500" />
+                Did Not Finish (0)
+              </h2>
+              <div className="text-center py-8 text-muted-foreground">
+                <XCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>No DNF books. Every book deserves a chance!</p>
+              </div>
+            </section>
 
             {/* Show message if no books in progress */}
             {inProgressBooks.length === 0 && (
