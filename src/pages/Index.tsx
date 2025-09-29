@@ -294,24 +294,33 @@ const Index = () => {
   };
 
   const handleMarkAsDnf = async (id: string) => {
-    if (userId) {
-      const { error } = await supabase
-        .from("books")
-        .update({ status: 'dnf' })
-        .eq("id", id);
+    try {
+      if (userId) {
+        const { error } = await supabase
+          .from("books")
+          .update({ status: 'dnf' })
+          .eq("id", id);
 
-      if (!error) {
+        if (error) throw error;
+
+        setBooks((prev) => prev.filter(b => b.id !== id));
+        toast({
+          title: "Book marked as DNF",
+          description: "Book moved to Did Not Finish list",
+        });
+      } else {
         setBooks((prev) => prev.filter(b => b.id !== id));
         toast({
           title: "Book marked as DNF",
           description: "Book moved to Did Not Finish list",
         });
       }
-    } else {
-      setBooks((prev) => prev.filter(b => b.id !== id));
+    } catch (error: any) {
+      console.error("Error marking book as DNF:", error);
       toast({
-        title: "Book marked as DNF",
-        description: "Book moved to Did Not Finish list",
+        title: "Error updating book",
+        description: error.message || "Failed to mark book as DNF",
+        variant: "destructive",
       });
     }
   };
