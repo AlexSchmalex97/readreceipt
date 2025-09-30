@@ -502,12 +502,17 @@ const Index = () => {
             </div>
 
             {/* DNF Books Section */}
-            {dnfBookItems.length > 0 && (
-              <section>
-                <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <XCircle className="w-5 h-5 text-orange-500" />
-                  Did Not Finish
-                </h2>
+            <section>
+              <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
+                <XCircle className="w-5 h-5 text-orange-500" />
+                Did Not Finish
+              </h2>
+              {dnfBookItems.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <XCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No DNF books. Every book deserves a chance!</p>
+                </div>
+              ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {dnfBookItems.map((book) => (
                     <BookCard
@@ -520,8 +525,8 @@ const Index = () => {
                     />
                   ))}
                 </div>
-              </section>
-            )}
+              )}
+            </section>
 
             {/* Show message if no books in progress */}
             {inProgressBooks.length === 0 && (

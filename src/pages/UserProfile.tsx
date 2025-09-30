@@ -5,7 +5,7 @@ import { Navigation } from "@/components/Navigation";
 import { FollowButton } from "@/components/FollowButton";
 import { UserColorProvider } from "@/components/UserColorProvider";
 import { ArrowLeft, BookOpen, Star, Calendar, Globe, Facebook, Twitter, Instagram, Linkedin, Youtube, ExternalLink } from "lucide-react";
-import { ReadingGoals } from "@/components/ReadingGoals";
+import { HomeReadingGoals } from "@/components/HomeReadingGoals";
 
 type ProgressItem = {
   kind: "progress";
@@ -296,7 +296,7 @@ export default function UserProfile() {
         {/* Reading Goals Section */}
         {myId === profile.id && (
           <div className="mb-6">
-            <ReadingGoals userId={profile.id} completedBooksThisYear={0} />
+            <HomeReadingGoals userId={profile.id} completedBooksThisYear={0} />
           </div>
         )}
 

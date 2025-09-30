@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, User, BookOpen, Star, Calendar, Globe, Facebook, Twitter, Instagram, Linkedin, Youtube, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { ReadingGoals } from "@/components/ReadingGoals";
+import { HomeReadingGoals } from "@/components/HomeReadingGoals";
 
 type UserProfile = {
   id: string;
@@ -394,9 +394,7 @@ export default function ProfileDisplay() {
         </div>
 
         {/* Reading Goals Section */}
-        <div data-completed-this-year="0">
-          <ReadingGoals userId={uid} completedBooksThisYear={0} />
-        </div>
+        <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedBooks} />
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
