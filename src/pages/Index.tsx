@@ -348,9 +348,10 @@ const Index = () => {
   };
 
   const booksInProgress = books.filter(
-    (b) => b.currentPage < b.totalPages
+    (b) => b.currentPage < b.totalPages && b.status !== 'dnf'
   ).length;
-  const completedBooks = books.filter((b) => b.currentPage >= b.totalPages).length;
+  const completedBooks = books.filter((b) => b.currentPage >= b.totalPages && b.status !== 'dnf').length;
+  const dnfBooks = books.filter((b) => b.status === 'dnf').length;
   
   // Calculate completed books for current year
   const currentYear = new Date().getFullYear();
@@ -362,8 +363,9 @@ const Index = () => {
   }).length;
   
   // Lists for rendering
-  const inProgressBooks = books.filter((b) => b.currentPage < b.totalPages);
-  const completedBookItems = books.filter((b) => b.currentPage >= b.totalPages);
+  const inProgressBooks = books.filter((b) => b.currentPage < b.totalPages && b.status !== 'dnf');
+  const completedBookItems = books.filter((b) => b.currentPage >= b.totalPages && b.status !== 'dnf');
+  const dnfBookItems = books.filter((b) => b.status === 'dnf');
 
   if (loading) {
     return (
@@ -499,20 +501,15 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Completed Books Section */}
-            <section className="space-y-4">
-              <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                <CheckCircle className="w-6 h-6 text-green-500" />
-                Completed Books ({completedBookItems.length})
-              </h2>
-              {completedBookItems.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <CheckCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No completed books yet. Keep reading!</p>
-                </div>
-              ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {completedBookItems.map((book) => (
+            {/* DNF Books Section - Last */}
+            {dnfBookItems.length > 0 && (
+              <section>
+                <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <XCircle className="w-5 h-5 text-orange-500" />
+                  Did Not Finish
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  {dnfBookItems.map((book) => (
                     <BookCard
                       key={book.id}
                       book={book}
@@ -523,20 +520,8 @@ const Index = () => {
                     />
                   ))}
                 </div>
-              )}
-            </section>
-
-            {/* DNF Books Section - Last */}
-            <section className="space-y-4">
-              <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                <XCircle className="w-6 h-6 text-orange-500" />
-                Did Not Finish (0)
-              </h2>
-              <div className="text-center py-8 text-muted-foreground">
-                <XCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No DNF books. Every book deserves a chance!</p>
-              </div>
-            </section>
+              </section>
+            )}
 
             {/* Show message if no books in progress */}
             {inProgressBooks.length === 0 && (
