@@ -304,13 +304,13 @@ const Index = () => {
 
         if (error) throw error;
 
-        setBooks((prev) => prev.filter(b => b.id !== id));
+        setBooks((prev) => prev.map(b => b.id === id ? { ...b, status: 'dnf' as const } : b));
         toast({
           title: "Book marked as DNF",
           description: "Book moved to Did Not Finish list",
         });
       } else {
-        setBooks((prev) => prev.filter(b => b.id !== id));
+        setBooks((prev) => prev.map(b => b.id === id ? { ...b, status: 'dnf' as const } : b));
         toast({
           title: "Book marked as DNF",
           description: "Book moved to Did Not Finish list",
