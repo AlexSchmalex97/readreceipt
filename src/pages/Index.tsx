@@ -475,7 +475,7 @@ const Index = () => {
                 </div>
                 {completedBookItems.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {completedBookItems.map((book) => (
+                    {completedBookItems.slice(0, 12).map((book) => (
                       <div key={`completed-cover-${book.id}`} className="flex-shrink-0">
                         {book.coverUrl ? (
                           <img 
@@ -501,7 +501,7 @@ const Index = () => {
               </div>
             </div>
 
-            {/* DNF Books Section - Last */}
+            {/* DNF Books Section */}
             {dnfBookItems.length > 0 && (
               <section>
                 <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
