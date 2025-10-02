@@ -352,6 +352,126 @@ const Index = () => {
     }
   };
 
+  const handleMoveToInProgress = async (id: string) => {
+    try {
+      if (userId) {
+        const { error } = await supabase
+          .from("books")
+          .update({ status: 'in_progress' })
+          .eq("id", id);
+
+        if (error) throw error;
+      }
+      
+      setBooks((prev) => prev.map(b => 
+        b.id === id ? { ...b, status: 'in_progress' as const } : b
+      ));
+      
+      toast({
+        title: "Book moved",
+        description: "Book moved to In Progress",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to move book",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleMoveToCompleted = async (id: string) => {
+    try {
+      const book = books.find(b => b.id === id);
+      if (!book) return;
+
+      if (userId) {
+        const { error } = await supabase
+          .from("books")
+          .update({ 
+            status: 'completed',
+            current_page: book.totalPages,
+            finished_at: new Date().toISOString()
+          })
+          .eq("id", id);
+
+        if (error) throw error;
+      }
+      
+      setBooks((prev) => prev.map(b => 
+        b.id === id 
+          ? { 
+              ...b, 
+              status: 'completed' as const, 
+              currentPage: b.totalPages,
+              finished_at: new Date().toISOString() 
+            } 
+          : b
+      ));
+      
+      toast({
+        title: "Congratulations! 🎉",
+        description: "Book marked as completed",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to mark book as completed",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleMoveToDNF = async (id: string) => {
+    const book = books.find(b => b.id === id);
+    if (!book) return;
+    
+    setDnfDialogFor({ bookId: id, bookTitle: book.title });
+  };
+
+  const handleMoveToTBR = async (id: string) => {
+    try {
+      const book = books.find(b => b.id === id);
+      if (!book) return;
+
+      if (userId) {
+        // Insert into TBR table
+        const { error: insertError } = await supabase
+          .from("tbr_books")
+          .insert({
+            user_id: userId,
+            title: book.title,
+            author: book.author,
+            total_pages: book.totalPages,
+            cover_url: book.coverUrl,
+          });
+
+        if (insertError) throw insertError;
+
+        // Delete from books table
+        const { error: deleteError } = await supabase
+          .from("books")
+          .delete()
+          .eq("id", id);
+
+        if (deleteError) throw deleteError;
+      }
+      
+      setBooks((prev) => prev.filter(b => b.id !== id));
+      
+      toast({
+        title: "Book moved",
+        description: "Book moved to TBR list",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to move book to TBR",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDeleteBook = async (id: string) => {
     if (userId) {
       const { error } = await supabase.from("books").delete().eq("id", id);
@@ -436,19 +556,22 @@ const Index = () => {
             {inProgressBooks.length > 0 && (
               <section>
                 <h2 className="text-xl font-semibold text-foreground mb-4">Currently Reading</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                    {inProgressBooks.map((book) => (
                      <BookCard
                        key={book.id}
                        book={book}
-                    onUpdateProgress={handleUpdateProgress}
-                    onDeleteBook={handleDeleteBook}
-                    onCoverUpdate={handleCoverUpdate}
-                    onUpdateDates={handleUpdateDates}
-                    onMarkAsDnf={handleMarkAsDnf}
+                       onUpdateProgress={handleUpdateProgress}
+                       onDeleteBook={handleDeleteBook}
+                       onCoverUpdate={handleCoverUpdate}
+                       onUpdateDates={handleUpdateDates}
+                       onMoveToInProgress={handleMoveToInProgress}
+                       onMoveToCompleted={handleMoveToCompleted}
+                       onMoveToDNF={handleMoveToDNF}
+                       onMoveToTBR={handleMoveToTBR}
                      />
                    ))}
-                </div>
+                 </div>
               </section>
             )}
 
@@ -548,9 +671,13 @@ const Index = () => {
                         onDeleteBook={handleDeleteBook}
                         onCoverUpdate={handleCoverUpdate}
                         onUpdateDates={handleUpdateDates}
+                        onMoveToInProgress={handleMoveToInProgress}
+                        onMoveToCompleted={handleMoveToCompleted}
+                        onMoveToDNF={handleMoveToDNF}
+                        onMoveToTBR={handleMoveToTBR}
                       />
                       {book.dnf_type && (
-                        <div className="absolute top-2 right-2 bg-orange-500/90 text-white text-xs px-2 py-1 rounded-md shadow-lg">
+                        <div className="absolute top-2 right-2 bg-orange-500/90 text-white text-xs px-2 py-1 rounded-md shadow-lg z-10">
                           {book.dnf_type === 'soft' ? 'Soft DNF' : 'Hard DNF'}
                         </div>
                       )}
