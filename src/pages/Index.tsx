@@ -9,6 +9,7 @@ import { Navigation } from "@/components/Navigation";
 import { ReadingGoals } from "@/components/ReadingGoals";
 import { HomeReadingGoals } from "@/components/HomeReadingGoals";
 import { BookDatesDialog } from "@/components/BookDatesDialog";
+import { DNFTypeDialog } from "@/components/DNFTypeDialog";
 import { Link } from "react-router-dom";
 import { searchGoogleBooks } from "@/lib/googleBooks";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +24,7 @@ interface Book {
   started_at?: string;
   finished_at?: string;
   status?: 'in_progress' | 'completed' | 'dnf';
+  dnf_type?: 'soft' | 'hard' | null;
 }
 
 const Index = () => {
@@ -30,6 +32,7 @@ const Index = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [reviewFor, setReviewFor] = useState<{ bookId: string } | null>(null);
+  const [dnfDialogFor, setDnfDialogFor] = useState<{ bookId: string; bookTitle: string } | null>(null);
   const { toast } = useToast();
 
   // Watch auth state
@@ -59,7 +62,7 @@ const Index = () => {
         if (userId) {
           const { data, error } = await supabase
             .from("books")
-            .select("id,title,author,total_pages,current_page,cover_url,started_at,finished_at,created_at")
+            .select("id,title,author,total_pages,current_page,cover_url,started_at,finished_at,created_at,status,dnf_type")
             .eq("user_id", userId)  // Only fetch current user's books
             .order("created_at", { ascending: true });
 
@@ -87,7 +90,7 @@ const Index = () => {
                 localStorage.removeItem("reading-tracker-books");
                 const { data: migrated } = await supabase
                   .from("books")
-                  .select("id,title,author,total_pages,current_page,cover_url,started_at,finished_at,created_at")
+                  .select("id,title,author,total_pages,current_page,cover_url,started_at,finished_at,created_at,status,dnf_type")
                   .eq("user_id", userId)  // Only fetch current user's books
                   .order("created_at", { ascending: true });
                 setBooks(
@@ -98,6 +101,8 @@ const Index = () => {
                     totalPages: r.total_pages,
                     currentPage: r.current_page,
                     coverUrl: r.cover_url,
+                    status: r.status,
+                    dnf_type: r.dnf_type,
                     started_at: r.started_at,
                     finished_at: r.finished_at,
                   }))
@@ -118,6 +123,8 @@ const Index = () => {
               coverUrl: r.cover_url,
               started_at: r.started_at,
               finished_at: r.finished_at,
+              status: r.status,
+              dnf_type: r.dnf_type,
             }))
           );
           console.log('Books with covers:', data?.map(r => ({ title: r.title, coverUrl: r.cover_url })));
@@ -295,25 +302,42 @@ const Index = () => {
   };
 
   const handleMarkAsDnf = async (id: string) => {
+    const book = books.find(b => b.id === id);
+    if (!book) return;
+    
+    setDnfDialogFor({ bookId: id, bookTitle: book.title });
+  };
+
+  const handleDnfTypeSelect = async (dnfType: 'soft' | 'hard') => {
+    if (!dnfDialogFor) return;
+    
     try {
       if (userId) {
         const { error } = await supabase
           .from("books")
-          .update({ status: 'dnf' })
-          .eq("id", id);
+          .update({ status: 'dnf', dnf_type: dnfType })
+          .eq("id", dnfDialogFor.bookId);
 
         if (error) throw error;
 
-        setBooks((prev) => prev.map(b => b.id === id ? { ...b, status: 'dnf' as const } : b));
+        setBooks((prev) => prev.map(b => 
+          b.id === dnfDialogFor.bookId 
+            ? { ...b, status: 'dnf' as const, dnf_type: dnfType } 
+            : b
+        ));
         toast({
           title: "Book marked as DNF",
-          description: "Book moved to Did Not Finish list",
+          description: `Book marked as ${dnfType === 'soft' ? 'Soft' : 'Hard'} DNF`,
         });
       } else {
-        setBooks((prev) => prev.map(b => b.id === id ? { ...b, status: 'dnf' as const } : b));
+        setBooks((prev) => prev.map(b => 
+          b.id === dnfDialogFor.bookId 
+            ? { ...b, status: 'dnf' as const, dnf_type: dnfType } 
+            : b
+        ));
         toast({
           title: "Book marked as DNF",
-          description: "Book moved to Did Not Finish list",
+          description: `Book marked as ${dnfType === 'soft' ? 'Soft' : 'Hard'} DNF`,
         });
       }
     } catch (error: any) {
@@ -323,6 +347,8 @@ const Index = () => {
         description: error.message || "Failed to mark book as DNF",
         variant: "destructive",
       });
+    } finally {
+      setDnfDialogFor(null);
     }
   };
 
@@ -515,14 +541,20 @@ const Index = () => {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {dnfBookItems.map((book) => (
-                    <BookCard
-                      key={book.id}
-                      book={book}
-                      onUpdateProgress={handleUpdateProgress}
-                      onDeleteBook={handleDeleteBook}
-                      onCoverUpdate={handleCoverUpdate}
-                      onUpdateDates={handleUpdateDates}
-                    />
+                    <div key={book.id} className="relative">
+                      <BookCard
+                        book={book}
+                        onUpdateProgress={handleUpdateProgress}
+                        onDeleteBook={handleDeleteBook}
+                        onCoverUpdate={handleCoverUpdate}
+                        onUpdateDates={handleUpdateDates}
+                      />
+                      {book.dnf_type && (
+                        <div className="absolute top-2 right-2 bg-orange-500/90 text-white text-xs px-2 py-1 rounded-md shadow-lg">
+                          {book.dnf_type === 'soft' ? 'Soft DNF' : 'Hard DNF'}
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               )}
@@ -550,6 +582,16 @@ const Index = () => {
           onClose={() => setReviewFor(null)}
           userId={userId}
           bookId={reviewFor.bookId}
+        />
+      )}
+
+      {/* DNF Type Dialog */}
+      {dnfDialogFor && (
+        <DNFTypeDialog
+          open={true}
+          onClose={() => setDnfDialogFor(null)}
+          onSelect={handleDnfTypeSelect}
+          bookTitle={dnfDialogFor.bookTitle}
         />
       )}
     </div>

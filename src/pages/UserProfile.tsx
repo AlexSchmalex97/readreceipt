@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
 import { FollowButton } from "@/components/FollowButton";
 import { UserColorProvider } from "@/components/UserColorProvider";
-import { ArrowLeft, BookOpen, Star, Calendar, Globe, Facebook, Twitter, Instagram, Linkedin, Youtube, ExternalLink } from "lucide-react";
+import { ArrowLeft, BookOpen, Star, Calendar, Globe, Facebook, Twitter, Instagram, Linkedin, Youtube, ExternalLink, XCircle } from "lucide-react";
 import { HomeReadingGoals } from "@/components/HomeReadingGoals";
 
 type ProgressItem = {
@@ -46,6 +46,15 @@ interface TBRBook {
   cover_url?: string;
 }
 
+interface DNFBook {
+  id: string;
+  title: string;
+  author: string;
+  cover_url: string | null;
+  dnf_type: 'soft' | 'hard' | null;
+  created_at: string;
+}
+
 interface UserProfile {
   id: string;
   display_name: string | null;
@@ -72,6 +81,7 @@ export default function UserProfile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [tbrBooks, setTbrBooks] = useState<TBRBook[]>([]);
+  const [dnfBooks, setDnfBooks] = useState<DNFBook[]>([]);
   const [loading, setLoading] = useState(true);
   const [myId, setMyId] = useState<string | null>(null);
   const [canSeeProgress, setCanSeeProgress] = useState<boolean>(true);
@@ -179,6 +189,23 @@ export default function UserProfile() {
           console.warn("UserProfile TBR error", tbrError);
         } else {
           setTbrBooks(tbrData || []);
+        }
+
+        // Get user's DNF books (public)
+        const { data: dnfData, error: dnfError } = await supabase
+          .from("books")
+          .select("id, title, author, cover_url, dnf_type, created_at")
+          .eq("user_id", userId)
+          .eq("status", "dnf")
+          .order("created_at", { ascending: false });
+
+        if (dnfError) {
+          console.warn("UserProfile DNF error", dnfError);
+        } else {
+          setDnfBooks((dnfData || []).map((book: any) => ({
+            ...book,
+            dnf_type: book.dnf_type as 'soft' | 'hard' | null
+          })));
         }
 
         // Transform progress items
@@ -350,6 +377,55 @@ export default function UserProfile() {
                       )}
                       <p className="text-xs text-muted-foreground mt-2">
                         Added {new Date(book.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* DNF Books Section */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-foreground flex items-center gap-2 mb-4">
+            <XCircle className="w-5 h-5 text-orange-500" />
+            Did Not Finish ({dnfBooks.length})
+          </h2>
+          
+          {dnfBooks.length === 0 ? (
+            <div className="bg-card p-6 rounded-lg border text-center">
+              <p className="text-muted-foreground">No DNF books yet.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {dnfBooks.map((book) => (
+                <div key={book.id} className="bg-card border rounded-lg p-4 hover:bg-accent/5 transition-colors relative">
+                  <div className="flex gap-3">
+                    {/* Book Cover */}
+                    {book.cover_url ? (
+                      <img 
+                        src={book.cover_url} 
+                        alt={book.title}
+                        className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                        <BookOpen className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                    )}
+                    
+                    {/* Book Info */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-foreground truncate">{book.title}</h3>
+                      <p className="text-sm text-muted-foreground mb-1">by {book.author}</p>
+                      {book.dnf_type && (
+                        <span className="inline-block bg-orange-500/20 text-orange-700 dark:text-orange-400 text-xs px-2 py-1 rounded-md mt-1">
+                          {book.dnf_type === 'soft' ? 'Soft DNF' : 'Hard DNF'}
+                        </span>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {new Date(book.created_at).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
