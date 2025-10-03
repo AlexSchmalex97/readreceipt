@@ -69,6 +69,30 @@ type TBRBook = {
   cover_url?: string;
 };
 
+type ProgressItem = {
+  kind: "progress";
+  id: string;
+  created_at: string;
+  book_title: string | null;
+  book_author: string | null;
+  book_cover_url?: string | null;
+  from_page: number | null;
+  to_page: number;
+};
+
+type ReviewActivity = {
+  kind: "review";
+  id: string;
+  created_at: string;
+  book_title: string | null;
+  book_author: string | null;
+  book_cover_url?: string | null;
+  rating: number;
+  review: string | null;
+};
+
+type ActivityItem = ProgressItem | ReviewActivity;
+
 export default function ProfileDisplay() {
   const [loading, setLoading] = useState(true);
   const [uid, setUid] = useState<string | null>(null);
@@ -76,6 +100,7 @@ export default function ProfileDisplay() {
   const [bookStats, setBookStats] = useState<BookStats>({ totalBooks: 0, completedBooks: 0, inProgressBooks: 0 });
   const [recentReviews, setRecentReviews] = useState<Review[]>([]);
   const [tbrBooks, setTbrBooks] = useState<TBRBook[]>([]);
+  const [activityFeed, setActivityFeed] = useState<ActivityItem[]>([]);
   const [favoriteBook, setFavoriteBook] = useState<FavoriteBook | null>(null);
   const [currentBook, setCurrentBook] = useState<CurrentBook | null>(null);
   const [zodiacSign, setZodiacSign] = useState<string | null>(null);
@@ -207,6 +232,55 @@ export default function ProfileDisplay() {
       if (!tbrError && tbrData) {
         setTbrBooks(tbrData);
       }
+
+      // Load activity feed (progress + reviews for activity section)
+      const { data: progressData } = await supabase
+        .from("reading_progress")
+        .select(`
+          id, created_at, from_page, to_page,
+          books!reading_progress_book_id_fkey ( title, author, cover_url )
+        `)
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      const pItems: ProgressItem[] = (progressData ?? []).map((r: any) => ({
+        kind: "progress",
+        id: r.id,
+        created_at: r.created_at,
+        book_title: r.books?.title ?? null,
+        book_author: r.books?.author ?? null,
+        book_cover_url: r.books?.cover_url ?? null,
+        from_page: r.from_page ?? null,
+        to_page: r.to_page,
+      }));
+
+      const { data: reviewActivityData } = await supabase
+        .from("reviews")
+        .select(`
+          id, created_at, rating, review,
+          books:book_id (title, author, cover_url)
+        `)
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      const rItems: ReviewActivity[] = (reviewActivityData ?? []).map((r: any) => ({
+        kind: "review",
+        id: r.id,
+        created_at: r.created_at,
+        book_title: r.books?.title ?? null,
+        book_author: r.books?.author ?? null,
+        book_cover_url: r.books?.cover_url ?? null,
+        rating: r.rating,
+        review: r.review,
+      }));
+
+      const merged = [...pItems, ...rItems].sort(
+        (a, b) => +new Date(b.created_at) - +new Date(a.created_at)
+      );
+
+      setActivityFeed(merged);
 
       setLoading(false);
     })();
@@ -455,15 +529,10 @@ export default function ProfileDisplay() {
               Completed Books
             </Button>
           </Link>
-          <Link to="/feed">
-            <Button variant="outline">
-              Activity Feed
-            </Button>
-          </Link>
         </div>
 
-        {/* Recent Reviews and TBR List - Side by Side */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Three Column Layout: Recent Reviews - Activity Feed - TBR List */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Recent Reviews */}
           <Card>
             <CardHeader>
@@ -525,6 +594,92 @@ export default function ProfileDisplay() {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Activity Feed */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5" />
+                Reading Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {activityFeed.length === 0 ? (
+                <div className="text-center py-8">
+                  <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No activity yet</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Start reading to see your activity!
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {activityFeed.map((item) =>
+                    item.kind === "progress" ? (
+                      <div key={`p-${item.id}`} className="border border-border rounded-lg p-3">
+                        <div className="text-xs text-muted-foreground mb-2">
+                          {new Date(item.created_at).toLocaleString()}
+                        </div>
+                        <div className="flex gap-3">
+                          {item.book_cover_url ? (
+                            <img 
+                              src={item.book_cover_url} 
+                              alt={item.book_title || "Book cover"}
+                              className="w-10 h-14 object-cover rounded shadow-sm flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="w-10 h-14 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                              <BookOpen className="w-3 h-3 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm mb-1">Reading Progress</div>
+                            <div className="text-xs text-muted-foreground">
+                              Page {item.to_page}
+                              {typeof item.from_page === "number" && item.from_page >= 0
+                                ? ` (from ${item.from_page})`
+                                : ""}{" "}
+                              of <span className="truncate">{item.book_title ?? "Untitled"}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div key={`r-${item.id}`} className="border border-border rounded-lg p-3">
+                        <div className="text-xs text-muted-foreground mb-2">
+                          {new Date(item.created_at).toLocaleString()}
+                        </div>
+                        <div className="flex gap-3">
+                          {item.book_cover_url ? (
+                            <img 
+                              src={item.book_cover_url} 
+                              alt={item.book_title || "Book cover"}
+                              className="w-10 h-14 object-cover rounded shadow-sm flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="w-10 h-14 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                              <BookOpen className="w-3 h-3 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm mb-1">
+                              Reviewed: ⭐ {item.rating}/5
+                            </div>
+                            <div className="text-xs text-muted-foreground truncate">
+                              {item.book_title ?? "Untitled"}
+                            </div>
+                            {item.review && (
+                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.review}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  )}
                 </div>
               )}
             </CardContent>
