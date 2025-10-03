@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { searchGoogleBooks, GoogleBookResult } from '@/lib/googleBooks';
 import { BookEditionSelector } from '@/components/BookEditionSelector';
+import { BookMoveMenu } from '@/components/BookMoveMenu';
 
 interface TBRBook {
   id: string;
@@ -25,9 +26,11 @@ interface TBRBook {
 interface TBRListProps {
   userId: string | null;
   onMoveToReading?: (book: { title: string; author: string; totalPages: number; coverUrl?: string }) => void;
+  onMoveToCompleted?: (tbrBookId: string) => void;
+  onMoveToDNF?: (tbrBookId: string) => void;
 }
 
-export function TBRList({ userId, onMoveToReading }: TBRListProps) {
+export function TBRList({ userId, onMoveToReading, onMoveToCompleted, onMoveToDNF }: TBRListProps) {
   const [tbrBooks, setTbrBooks] = useState<TBRBook[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -203,6 +206,20 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
         coverUrl: book.cover_url
       });
       await handleRemoveBook(book.id);
+    }
+  };
+
+  const handleMoveToCompletedFromTBR = async (tbrBookId: string) => {
+    if (onMoveToCompleted) {
+      onMoveToCompleted(tbrBookId);
+      await handleRemoveBook(tbrBookId);
+    }
+  };
+
+  const handleMoveToDNFFromTBR = async (tbrBookId: string) => {
+    if (onMoveToDNF) {
+      onMoveToDNF(tbrBookId);
+      await handleRemoveBook(tbrBookId);
     }
   };
 
@@ -551,15 +568,15 @@ export function TBRList({ userId, onMoveToReading }: TBRListProps) {
                     </div>
                   </div>
                   <div className="flex gap-1">
-                    {onMoveToReading && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleMoveToReading(book)}
-                        title="Start reading this book"
-                      >
-                        <BookOpen className="w-3 h-3" />
-                      </Button>
+                    {onMoveToCompleted && onMoveToDNF && (
+                      <BookMoveMenu
+                        bookId={book.id}
+                        currentStatus="in_progress"
+                        onMoveToInProgress={() => handleMoveToReading(book)}
+                        onMoveToCompleted={() => handleMoveToCompletedFromTBR(book.id)}
+                        onMoveToDNF={() => handleMoveToDNFFromTBR(book.id)}
+                        onMoveToTBR={() => {}}
+                      />
                     )}
                     <Button
                       size="sm"

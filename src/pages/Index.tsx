@@ -55,16 +55,15 @@ const Index = () => {
   }, []);
 
   // Load books: Supabase when logged in, otherwise localStorage
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      try {
-        if (userId) {
-          const { data, error } = await supabase
-            .from("books")
-            .select("id,title,author,total_pages,current_page,cover_url,started_at,finished_at,created_at,status,dnf_type")
-            .eq("user_id", userId)  // Only fetch current user's books
-            .order("created_at", { ascending: true });
+  const loadBooks = async () => {
+    setLoading(true);
+    try {
+      if (userId) {
+        const { data, error } = await supabase
+          .from("books")
+          .select("id,title,author,total_pages,current_page,cover_url,started_at,finished_at,created_at,status,dnf_type")
+          .eq("user_id", userId)  // Only fetch current user's books
+          .order("created_at", { ascending: true });
 
           if (error) throw error;
 
@@ -133,16 +132,19 @@ const Index = () => {
           if (data?.length) {
             populateCoversForBooksWithoutThem(data, userId);
           }
-        } else {
-          const saved = localStorage.getItem("reading-tracker-books");
-          setBooks(saved ? JSON.parse(saved) : []);
-        }
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
+      } else {
+        const saved = localStorage.getItem("reading-tracker-books");
+        setBooks(saved ? JSON.parse(saved) : []);
       }
-    })();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadBooks();
   }, [userId]);
 
   // Function to populate covers for existing books without covers
@@ -313,22 +315,54 @@ const Index = () => {
     
     try {
       if (userId) {
-        const { error } = await supabase
-          .from("books")
-          .update({ status: 'dnf', dnf_type: dnfType })
-          .eq("id", dnfDialogFor.bookId);
+        // Check if this is a TBR book being moved to DNF
+        const pendingTBRBook = (window as any)._pendingTBRBook;
+        if (pendingTBRBook && pendingTBRBook.id === dnfDialogFor.bookId) {
+          // Create a new book entry with DNF status
+          const { error } = await supabase
+            .from("books")
+            .insert({
+              user_id: userId,
+              title: pendingTBRBook.title,
+              author: pendingTBRBook.author,
+              total_pages: pendingTBRBook.total_pages || 0,
+              current_page: 0,
+              cover_url: pendingTBRBook.cover_url,
+              status: 'dnf',
+              dnf_type: dnfType,
+            });
 
-        if (error) throw error;
+          if (error) throw error;
 
-        setBooks((prev) => prev.map(b => 
-          b.id === dnfDialogFor.bookId 
-            ? { ...b, status: 'dnf' as const, dnf_type: dnfType } 
-            : b
-        ));
-        toast({
-          title: "Book marked as DNF",
-          description: `Book marked as ${dnfType === 'soft' ? 'Soft' : 'Hard'} DNF`,
-        });
+          // Clear the temporary data
+          delete (window as any)._pendingTBRBook;
+
+          toast({
+            title: "Book marked as DNF",
+            description: `"${pendingTBRBook.title}" has been marked as ${dnfType === 'soft' ? 'Soft' : 'Hard'} DNF`,
+          });
+
+          // Reload books
+          loadBooks();
+        } else {
+          // Regular book being marked as DNF
+          const { error } = await supabase
+            .from("books")
+            .update({ status: 'dnf', dnf_type: dnfType })
+            .eq("id", dnfDialogFor.bookId);
+
+          if (error) throw error;
+
+          setBooks((prev) => prev.map(b => 
+            b.id === dnfDialogFor.bookId 
+              ? { ...b, status: 'dnf' as const, dnf_type: dnfType } 
+              : b
+          ));
+          toast({
+            title: "Book marked as DNF",
+            description: `Book marked as ${dnfType === 'soft' ? 'Soft' : 'Hard'} DNF`,
+          });
+        }
       } else {
         setBooks((prev) => prev.map(b => 
           b.id === dnfDialogFor.bookId 
@@ -349,6 +383,7 @@ const Index = () => {
       });
     } finally {
       setDnfDialogFor(null);
+      delete (window as any)._pendingTBRBook;
     }
   };
 
@@ -427,6 +462,81 @@ const Index = () => {
     if (!book) return;
     
     setDnfDialogFor({ bookId: id, bookTitle: book.title });
+  };
+
+  const handleMoveToCompletedFromTBR = async (tbrBookId: string) => {
+    try {
+      if (!userId) return;
+
+      // Get the TBR book details
+      const { data: tbrBook, error: fetchError } = await supabase
+        .from("tbr_books")
+        .select("*")
+        .eq("id", tbrBookId)
+        .single();
+
+      if (fetchError || !tbrBook) throw fetchError;
+
+      // Create a book in the books table with completed status
+      const { error: insertError } = await supabase
+        .from("books")
+        .insert({
+          user_id: userId,
+          title: tbrBook.title,
+          author: tbrBook.author,
+          total_pages: tbrBook.total_pages || 0,
+          current_page: tbrBook.total_pages || 0,
+          cover_url: tbrBook.cover_url,
+          status: 'completed',
+          finished_at: new Date().toISOString(),
+        });
+
+      if (insertError) throw insertError;
+
+      toast({
+        title: "Book marked as completed",
+        description: `"${tbrBook.title}" has been moved to completed books`,
+      });
+
+      // Reload books
+      loadBooks();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to move book to completed",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleMoveToDNFFromTBR = async (tbrBookId: string) => {
+    try {
+      if (!userId) return;
+
+      // Get the TBR book details
+      const { data: tbrBook, error: fetchError } = await supabase
+        .from("tbr_books")
+        .select("*")
+        .eq("id", tbrBookId)
+        .single();
+
+      if (fetchError || !tbrBook) throw fetchError;
+
+      // Show DNF type selection dialog
+      setDnfDialogFor({ 
+        bookId: tbrBookId, 
+        bookTitle: tbrBook.title 
+      });
+
+      // Store TBR book data temporarily for later use
+      (window as any)._pendingTBRBook = tbrBook;
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to move book to DNF",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleMoveToTBR = async (id: string) => {
@@ -646,7 +756,14 @@ const Index = () => {
 
               {/* TBR List - positioned to the right */}
               <div className="lg:col-span-2">
-                {userId && <TBRList userId={userId} onMoveToReading={handleAddBook} />}
+                {userId && (
+                  <TBRList 
+                    userId={userId} 
+                    onMoveToReading={handleAddBook}
+                    onMoveToCompleted={handleMoveToCompletedFromTBR}
+                    onMoveToDNF={handleMoveToDNFFromTBR}
+                  />
+                )}
               </div>
             </div>
 
