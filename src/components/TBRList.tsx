@@ -571,11 +571,12 @@ export function TBRList({ userId, onMoveToReading, onMoveToCompleted, onMoveToDN
                     {onMoveToCompleted && onMoveToDNF && (
                       <BookMoveMenu
                         bookId={book.id}
-                        currentStatus="completed"
+                        currentStatus="tbr"
                         onMoveToInProgress={() => handleMoveToReading(book)}
                         onMoveToCompleted={() => handleMoveToCompletedFromTBR(book.id)}
                         onMoveToDNF={() => handleMoveToDNFFromTBR(book.id)}
                         onMoveToTBR={() => {}}
+                        showMoveToTBR={false}
                       />
                     )}
                     <Button

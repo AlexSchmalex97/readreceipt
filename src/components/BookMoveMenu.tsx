@@ -9,11 +9,12 @@ import { ArrowRightLeft, BookOpen, CheckCircle, XCircle, ListTodo } from "lucide
 
 interface BookMoveMenuProps {
   bookId: string;
-  currentStatus: 'in_progress' | 'completed' | 'dnf';
+  currentStatus: 'in_progress' | 'completed' | 'dnf' | 'tbr';
   onMoveToInProgress: (id: string) => void;
   onMoveToCompleted: (id: string) => void;
   onMoveToDNF: (id: string) => void;
   onMoveToTBR: (id: string) => void;
+  showMoveToTBR?: boolean;
 }
 
 export function BookMoveMenu({
@@ -23,6 +24,7 @@ export function BookMoveMenu({
   onMoveToCompleted,
   onMoveToDNF,
   onMoveToTBR,
+  showMoveToTBR = true,
 }: BookMoveMenuProps) {
   return (
     <DropdownMenu>
@@ -55,10 +57,12 @@ export function BookMoveMenu({
             Mark as DNF
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem onClick={() => onMoveToTBR(bookId)}>
-          <ListTodo className="w-4 h-4 mr-2" />
-          Move to TBR
-        </DropdownMenuItem>
+        {showMoveToTBR && currentStatus !== 'tbr' && (
+          <DropdownMenuItem onClick={() => onMoveToTBR(bookId)}>
+            <ListTodo className="w-4 h-4 mr-2" />
+            Move to TBR
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
