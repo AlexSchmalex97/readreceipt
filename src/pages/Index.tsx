@@ -688,8 +688,8 @@ const Index = () => {
             {/* Reading Goals Section - Compact card style */}
             <HomeReadingGoals userId={userId} completedBooksThisYear={completedBooksThisYear} />
 
-            {/* Stats Grid with TBR - Now below Currently Reading */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+            {/* Stats Grid - Now 2 columns */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
               <div className="bg-card rounded-lg p-3 shadow-soft border border-border self-start">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
@@ -753,9 +753,12 @@ const Index = () => {
                   </div>
                 )}
               </Link>
+            </div>
 
-              {/* TBR List - positioned to the right */}
-              <div className="lg:col-span-2">
+            {/* TBR and DNF Lists side by side */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+              {/* TBR List */}
+              <div>
                 {userId && (
                   <TBRList 
                     userId={userId} 
@@ -765,44 +768,60 @@ const Index = () => {
                   />
                 )}
               </div>
-            </div>
 
-            {/* DNF Books Section */}
-            <section>
-              <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
-                <XCircle className="w-5 h-5 text-orange-500" />
-                Did Not Finish
-              </h2>
-              {dnfBookItems.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <XCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No DNF books. Every book deserves a chance!</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                  {dnfBookItems.map((book) => (
-                    <div key={book.id} className="relative">
-                      <BookCard
-                        book={book}
-                        onUpdateProgress={handleUpdateProgress}
-                        onDeleteBook={handleDeleteBook}
-                        onCoverUpdate={handleCoverUpdate}
-                        onUpdateDates={handleUpdateDates}
-                        onMoveToInProgress={handleMoveToInProgress}
-                        onMoveToCompleted={handleMoveToCompleted}
-                        onMoveToDNF={handleMoveToDNF}
-                        onMoveToTBR={handleMoveToTBR}
-                      />
-                      {book.dnf_type && (
-                        <div className="absolute top-2 right-2 bg-orange-500/90 text-white text-xs px-2 py-1 rounded-md shadow-lg z-10">
-                          {book.dnf_type === 'soft' ? 'Soft DNF' : 'Hard DNF'}
+              {/* DNF Books Section */}
+              <div className="bg-card rounded-lg p-6 shadow-soft border border-border">
+                <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <XCircle className="w-5 h-5 text-orange-500" />
+                  Did Not Finish ({dnfBooks})
+                </h2>
+                {dnfBookItems.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <XCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No DNF books. Every book deserves a chance!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {dnfBookItems.map((book) => (
+                      <div key={book.id} className="border border-border rounded-lg p-3 hover:bg-accent/5 transition-colors relative">
+                        <div className="flex items-start gap-3">
+                          {/* Book Cover */}
+                          <div className="flex-shrink-0">
+                            {book.coverUrl ? (
+                              <img 
+                                src={book.coverUrl} 
+                                alt={book.title}
+                                className="w-12 h-16 object-cover rounded shadow-sm"
+                              />
+                            ) : (
+                              <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm">
+                                <XCircle className="w-4 h-4 text-muted-foreground" />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Book Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-medium text-foreground truncate">{book.title}</h3>
+                              {book.dnf_type && (
+                                <span className="text-xs px-2 py-0.5 rounded-md bg-orange-500/20 text-orange-700 dark:text-orange-300 whitespace-nowrap">
+                                  {book.dnf_type === 'soft' ? 'Soft DNF' : 'Hard DNF'}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground">by {book.author}</p>
+                            {book.totalPages && (
+                              <p className="text-xs text-muted-foreground">{book.totalPages} pages</p>
+                            )}
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* Show message if no books in progress */}
             {inProgressBooks.length === 0 && (
