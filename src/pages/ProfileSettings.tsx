@@ -33,6 +33,7 @@ type Identity = {
 export default function ProfileSettings() {
   const [loading, setLoading] = useState(true);
   const [uid, setUid] = useState<string | null>(null);
+  const [completedBooksThisYear, setCompletedBooksThisYear] = useState(0);
 
   // profile fields
   const [displayName, setDisplayName] = useState("");
@@ -114,6 +115,18 @@ export default function ProfileSettings() {
       setCurrentBookId(prof?.current_book_id ?? undefined);
       setSocialMediaLinks(prof?.social_media_links ? Object.entries(prof.social_media_links).map(([platform, url]) => ({ platform, url: url as string })) : []);
       setWebsiteUrl(prof?.website_url ?? "");
+      
+      // Fetch completed books count for this year
+      const currentYear = new Date().getFullYear();
+      const { data: completedBooks } = await supabase
+        .from("books")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("status", "completed")
+        .gte("finished_at", `${currentYear}-01-01`)
+        .lte("finished_at", `${currentYear}-12-31`);
+      
+      setCompletedBooksThisYear(completedBooks?.length ?? 0);
       
       setLoading(false);
     })();
@@ -490,7 +503,7 @@ export default function ProfileSettings() {
           <strong>Authentication:</strong> For login, use the same method you signed up with (Google OAuth or email/password).
         </div>
         <div className="space-y-4">
-          <ReadingGoals userId={uid || ""} completedBooksThisYear={0} />
+          <ReadingGoals userId={uid || ""} completedBooksThisYear={completedBooksThisYear} />
         </div>
         <div className="grid gap-3">
           <label className="grid gap-1">
