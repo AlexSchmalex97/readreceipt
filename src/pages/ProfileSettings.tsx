@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Camera, User, ArrowLeft } from "lucide-react";
+import { Camera, User, ArrowLeft, Link2 } from "lucide-react";
 import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { SocialMediaInput } from "@/components/SocialMediaInput";
@@ -692,6 +692,19 @@ export default function ProfileSettings() {
             </button>
           )}
         </div>
+      </section>
+
+      <section className="bg-card border rounded p-4">
+        <h2 className="font-semibold mb-3">Integrations</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Connect with other reading platforms to sync your library
+        </p>
+        <Link to="/integrations">
+          <Button variant="outline" className="gap-2">
+            <Link2 className="h-4 w-4" />
+            Manage Integrations
+          </Button>
+        </Link>
       </section>
       </div>
 
