@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import AuthButtons from "@/components/AuthButtons";
 import { HeaderDisplay } from "@/components/HeaderDisplay";
+import { Link2 } from "lucide-react";
 
 export function Navigation() {
   const { pathname } = useLocation();
@@ -92,6 +93,17 @@ export function Navigation() {
               }`}
             >
               Contact
+            </Link>
+            <Link
+              to="/integrations"
+              className={`text-sm whitespace-nowrap flex items-center gap-1 ${
+                isActive("/integrations")
+                  ? "text-foreground font-medium"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Link2 className="h-3 w-3" />
+              Integrations
             </Link>
           </nav>
 

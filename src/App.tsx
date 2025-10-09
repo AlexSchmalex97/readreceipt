@@ -15,6 +15,7 @@ import ProfileSettings from "./pages/ProfileSettings";
 import CompletedBooks from "./pages/CompletedBooks";
 import UserProfile from "./pages/UserProfile";
 import Contact from "./pages/Contact";
+import Integrations from "./pages/Integrations";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/profile/settings" element={<ProfileSettings />} />
           <Route path="/completed" element={<CompletedBooks />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/integrations" element={<Integrations />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
