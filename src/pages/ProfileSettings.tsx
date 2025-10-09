@@ -118,7 +118,7 @@ export default function ProfileSettings() {
       
       // Fetch completed books count for this year
       const currentYear = new Date().getFullYear();
-      const { data: completedBooks } = await supabase
+      const { data: completedBooks, error: booksError } = await supabase
         .from("books")
         .select("id")
         .eq("user_id", user.id)
@@ -126,6 +126,7 @@ export default function ProfileSettings() {
         .gte("finished_at", `${currentYear}-01-01`)
         .lte("finished_at", `${currentYear}-12-31`);
       
+      console.log("Completed books count:", { completedBooks, booksError, count: completedBooks?.length });
       setCompletedBooksThisYear(completedBooks?.length ?? 0);
       
       setLoading(false);
@@ -495,15 +496,18 @@ export default function ProfileSettings() {
         />
       </section>
 
+      {/* Reading Goals Section */}
+      <section className="bg-card border rounded p-4 mb-6">
+        <h2 className="font-semibold mb-3">Reading Goals</h2>
+        <ReadingGoals userId={uid || ""} completedBooksThisYear={completedBooksThisYear} />
+      </section>
+
       <section className="bg-card border rounded p-4 mb-6">
         <h2 className="font-semibold mb-3">Public Profile</h2>
         <div className="text-sm text-muted-foreground mb-4 p-3 bg-accent/30 rounded">
           <strong>Note:</strong> Your display name and username are for social features and will appear in greetings, feeds, and when other users find you. 
           <br />
           <strong>Authentication:</strong> For login, use the same method you signed up with (Google OAuth or email/password).
-        </div>
-        <div className="space-y-4">
-          <ReadingGoals userId={uid || ""} completedBooksThisYear={completedBooksThisYear} />
         </div>
         <div className="grid gap-3">
           <label className="grid gap-1">
