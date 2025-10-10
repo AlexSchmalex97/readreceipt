@@ -116,17 +116,23 @@ export default function ProfileSettings() {
       setSocialMediaLinks(prof?.social_media_links ? Object.entries(prof.social_media_links).map(([platform, url]) => ({ platform, url: url as string })) : []);
       setWebsiteUrl(prof?.website_url ?? "");
       
-      // Fetch completed books count for this year
+      // Fetch completed books count for this year (match logic used elsewhere)
       const currentYear = new Date().getFullYear();
-      const { count: completedCount, error: booksError } = await supabase
+      const { data: books, error: booksError } = await supabase
         .from("books")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .eq("status", "completed")
-        .gte("finished_at", `${currentYear}-01-01`)
-        .lte("finished_at", `${currentYear}-12-31`);
-      
-      setCompletedBooksThisYear(completedCount ?? 0);
+        .select("status, current_page, total_pages, finished_at")
+        .eq("user_id", user.id);
+
+      let completedThisYear = 0;
+      if (!booksError && books) {
+        completedThisYear = books.filter((book: any) => {
+          const isCompleted = book.status === 'completed' || (book.current_page ?? 0) >= (book.total_pages ?? 0);
+          if (!isCompleted) return false;
+          if (!book.finished_at) return false;
+          return new Date(book.finished_at).getFullYear() === currentYear;
+        }).length;
+      }
+      setCompletedBooksThisYear(completedThisYear);
       
       setLoading(false);
     })();
