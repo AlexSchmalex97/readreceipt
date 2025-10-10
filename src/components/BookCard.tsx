@@ -57,22 +57,41 @@ export const BookCard = ({
   onMoveToTBR,
 }: BookCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [trackingMode, setTrackingMode] = useState<"page" | "percentage">("page");
   const [currentPageInput, setCurrentPageInput] = useState(book.currentPage.toString());
+  const [percentageInput, setPercentageInput] = useState(Math.round((book.currentPage / book.totalPages) * 100).toString());
   const { toast } = useToast();
 
   const percentage = Math.round((book.currentPage / book.totalPages) * 100);
   const pagesLeft = book.totalPages - book.currentPage;
 
   const handleSave = () => {
-    const newPage = parseInt(currentPageInput);
+    let newPage: number;
     
-    if (isNaN(newPage) || newPage < 0 || newPage > book.totalPages) {
-      toast({
-        title: "Invalid page number",
-        description: `Please enter a number between 0 and ${book.totalPages}`,
-        variant: "destructive",
-      });
-      return;
+    if (trackingMode === "page") {
+      newPage = parseInt(currentPageInput);
+      
+      if (isNaN(newPage) || newPage < 0 || newPage > book.totalPages) {
+        toast({
+          title: "Invalid page number",
+          description: `Please enter a number between 0 and ${book.totalPages}`,
+          variant: "destructive",
+        });
+        return;
+      }
+    } else {
+      const percentValue = parseInt(percentageInput);
+      
+      if (isNaN(percentValue) || percentValue < 0 || percentValue > 100) {
+        toast({
+          title: "Invalid percentage",
+          description: "Please enter a number between 0 and 100",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      newPage = Math.round((percentValue / 100) * book.totalPages);
     }
 
     onUpdateProgress(book.id, newPage);
@@ -93,6 +112,7 @@ export const BookCard = ({
 
   const handleCancel = () => {
     setCurrentPageInput(book.currentPage.toString());
+    setPercentageInput(Math.round((book.currentPage / book.totalPages) * 100).toString());
     setIsEditing(false);
   };
 
@@ -206,18 +226,31 @@ export const BookCard = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Current page:</span>
+          <span className="text-sm text-muted-foreground">Current {trackingMode === "page" ? "page" : "progress"}:</span>
           {isEditing ? (
             <>
               <Input
                 type="number"
-                value={currentPageInput}
-                onChange={(e) => setCurrentPageInput(e.target.value)}
+                value={trackingMode === "page" ? currentPageInput : percentageInput}
+                onChange={(e) => trackingMode === "page" 
+                  ? setCurrentPageInput(e.target.value)
+                  : setPercentageInput(e.target.value)}
                 className="flex-1 h-8"
                 min="0"
-                max={book.totalPages}
+                max={trackingMode === "page" ? book.totalPages : 100}
+                placeholder={trackingMode === "page" ? "Page" : "%"}
                 autoFocus
               />
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setTrackingMode(trackingMode === "page" ? "percentage" : "page");
+                }}
+                className="h-8 px-2 text-xs"
+              >
+                {trackingMode === "page" ? "%" : "#"}
+              </Button>
               <Button
                 size="sm"
                 onClick={handleSave}

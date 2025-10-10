@@ -118,16 +118,15 @@ export default function ProfileSettings() {
       
       // Fetch completed books count for this year
       const currentYear = new Date().getFullYear();
-      const { data: completedBooks, error: booksError } = await supabase
+      const { count: completedCount, error: booksError } = await supabase
         .from("books")
-        .select("id")
+        .select("*", { count: "exact", head: true })
         .eq("user_id", user.id)
         .eq("status", "completed")
         .gte("finished_at", `${currentYear}-01-01`)
         .lte("finished_at", `${currentYear}-12-31`);
       
-      console.log("Completed books count:", { completedBooks, booksError, count: completedBooks?.length });
-      setCompletedBooksThisYear(completedBooks?.length ?? 0);
+      setCompletedBooksThisYear(completedCount ?? 0);
       
       setLoading(false);
     })();
