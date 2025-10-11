@@ -33,6 +33,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [reviewFor, setReviewFor] = useState<{ bookId: string } | null>(null);
   const [dnfDialogFor, setDnfDialogFor] = useState<{ bookId: string; bookTitle: string } | null>(null);
+  const [completedBooksThisYear, setCompletedBooksThisYear] = useState(0);
   const { toast } = useToast();
 
   // Watch auth state
@@ -145,6 +146,30 @@ const Index = () => {
 
   useEffect(() => {
     loadBooks();
+  }, [userId]);
+
+  // Fetch completed entries count for the current year (counts re-reads)
+  useEffect(() => {
+    const fetchCompletedCount = async () => {
+      if (!userId) { setCompletedBooksThisYear(0); return; }
+      const y = new Date().getFullYear();
+      const start = `${y}-01-01`;
+      const end = `${y}-12-31`;
+      const { count, error } = await supabase
+        .from('reading_entries')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('status', 'completed')
+        .gte('finished_at', start)
+        .lte('finished_at', end);
+      if (error) {
+        console.error('Failed to load completed count', error);
+        setCompletedBooksThisYear(0);
+      } else {
+        setCompletedBooksThisYear(count ?? 0);
+      }
+    };
+    fetchCompletedCount();
   }, [userId]);
 
   // Function to populate covers for existing books without covers
@@ -609,14 +634,8 @@ const Index = () => {
   const completedBooks = books.filter((b) => b.currentPage >= b.totalPages && b.status !== 'dnf').length;
   const dnfBooks = books.filter((b) => b.status === 'dnf').length;
   
-  // Calculate completed books for current year
+  // Load completed entries (supports re-reads) for current year from reading_entries
   const currentYear = new Date().getFullYear();
-  const completedBooksThisYear = books.filter((b) => {
-    if (b.currentPage < b.totalPages) return false;
-    if (!b.finished_at) return false;
-    const finishedDate = new Date(b.finished_at);
-    return finishedDate.getFullYear() === currentYear;
-  }).length;
   
   // Lists for rendering
   const inProgressBooks = books.filter((b) => b.currentPage < b.totalPages && b.status !== 'dnf');

@@ -116,23 +116,20 @@ export default function ProfileSettings() {
       setSocialMediaLinks(prof?.social_media_links ? Object.entries(prof.social_media_links).map(([platform, url]) => ({ platform, url: url as string })) : []);
       setWebsiteUrl(prof?.website_url ?? "");
       
-      // Fetch completed books count for this year (match Home/Index logic)
+      // Fetch completed reads this year from reading_entries (counts re-reads)
       const currentYear = new Date().getFullYear();
-      const { data: books, error: booksError } = await supabase
-        .from("books")
-        .select("current_page, total_pages, finished_at, status")
-        .eq("user_id", user.id);
+      const start = `${currentYear}-01-01`;
+      const end = `${currentYear}-12-31`;
+      const { count, error: entriesError } = await supabase
+        .from('reading_entries')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('status', 'completed')
+        .gte('finished_at', start)
+        .lte('finished_at', end);
 
-      let completedThisYear = 0;
-      if (!booksError && books) {
-        completedThisYear = books.filter((b: any) => {
-          if ((b.current_page ?? 0) < (b.total_pages ?? 0)) return false;
-          if (!b.finished_at) return false;
-          const finishedDate = new Date(b.finished_at);
-          return finishedDate.getFullYear() === currentYear && b.status !== 'dnf';
-        }).length;
-      }
-      console.log("Settings completedThisYear computed:", { completedThisYear, booksError, totalBooks: books?.length });
+      const completedThisYear = count ?? 0;
+      console.log("Settings completedThisYear computed (entries):", { completedThisYear, entriesError });
       setCompletedBooksThisYear(completedThisYear);
       
       setLoading(false);

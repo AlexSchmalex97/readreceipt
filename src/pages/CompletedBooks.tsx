@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { BookEditionSelector } from "@/components/BookEditionSelector";
+import { ReadingEntriesDialog } from "@/components/ReadingEntriesDialog";
 
 type CompletedBook = {
   id: string;
@@ -13,6 +14,8 @@ type CompletedBook = {
   total_pages: number;
   current_page: number;
   created_at: string;
+  finished_at?: string | null;
+  status?: string | null;
   user_id: string;
   cover_url?: string;
   review?: {
@@ -104,13 +107,13 @@ export default function CompletedBooks() {
       setLoading(true);
 
       // Get all books for user and filter completed client-side (current_page >= total_pages)
-      const { data: books, error: booksError } = await supabase
-        .from("books")
-        .select(`
-          id, title, author, total_pages, current_page, created_at, user_id, cover_url
+          const { data: books, error: booksError } = await supabase
+            .from("books")
+            .select(`
+          id, title, author, total_pages, current_page, created_at, finished_at, status, user_id, cover_url
         `)
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false });
+            .eq("user_id", userId)
+            .order("created_at", { ascending: false });
 
       console.log("CompletedBooks - books query:", { books, booksError });
 
@@ -209,7 +212,7 @@ export default function CompletedBooks() {
                     <h3 className="font-semibold text-lg mb-2 truncate">{book.title}</h3>
                     <p className="text-muted-foreground mb-2">by {book.author}</p>
                     <p className="text-sm text-muted-foreground mb-4">
-                      {book.total_pages} pages • Completed {new Date(book.created_at).toLocaleDateString()}
+                      {book.total_pages} pages • Completed {new Date(book.finished_at ?? book.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
@@ -230,15 +233,16 @@ export default function CompletedBooks() {
                   </div>
                 )}
 
-                <div className="mt-4 flex justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleMarkUnread(book)}
-                    aria-label={`Mark ${book.title} as unread`}
-                  >
-                    Mark as unread
-                  </Button>
+                 <div className="mt-4 flex justify-end gap-2">
+                   <ReadingEntriesDialog bookId={book.id} bookTitle={book.title} onChanged={() => { /* no-op refresh */ }} />
+                   <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={() => handleMarkUnread(book)}
+                     aria-label={`Mark ${book.title} as unread`}
+                   >
+                     Mark as unread
+                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
