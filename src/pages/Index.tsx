@@ -148,26 +148,52 @@ const Index = () => {
     loadBooks();
   }, [userId]);
 
-  // Fetch completed entries count for the current year (counts re-reads)
+  // Fetch completed entries count for the current year (counts re-reads) + fallback to books without entries
   useEffect(() => {
     const fetchCompletedCount = async () => {
       if (!userId) { setCompletedBooksThisYear(0); return; }
       const y = new Date().getFullYear();
       const start = `${y}-01-01`;
       const end = `${y}-12-31`;
-      const { count, error } = await supabase
+
+      // 1) Completed reading entries this year (re-reads supported)
+      const { data: entries, error: entriesError } = await supabase
         .from('reading_entries')
-        .select('id', { count: 'exact', head: true })
+        .select('id, book_id')
         .eq('user_id', userId)
         .eq('status', 'completed')
         .gte('finished_at', start)
         .lte('finished_at', end);
-      if (error) {
-        console.error('Failed to load completed count', error);
-        setCompletedBooksThisYear(0);
-      } else {
-        setCompletedBooksThisYear(count ?? 0);
+
+      const entryCount = entries?.length ?? 0;
+      const booksWithEntry = new Set((entries ?? []).map((e: any) => e.book_id));
+
+      // 2) Fallback: completed books this year that have NO entry this year (avoid double count)
+      const { data: books, error: booksError } = await supabase
+        .from('books')
+        .select('id, current_page, total_pages, finished_at, created_at, status')
+        .eq('user_id', userId);
+
+      let extra = 0;
+      if (books) {
+        extra = books.filter((b: any) => {
+          if (booksWithEntry.has(b.id)) return false;
+          if (b.status === 'dnf') return false;
+          if ((b.current_page ?? 0) < (b.total_pages ?? 0)) return false;
+          if (b.finished_at) {
+            const fy = new Date(b.finished_at).getFullYear();
+            return fy === y;
+          }
+          if (b.status === 'completed' && b.created_at) {
+            const cy = new Date(b.created_at).getFullYear();
+            return cy === y;
+          }
+          return false;
+        }).length;
       }
+
+      setCompletedBooksThisYear(entryCount + extra);
+      console.log('Home completed count:', { entryCount, extra, total: entryCount + extra, entriesError, booksError });
     };
     fetchCompletedCount();
   }, [userId]);

@@ -116,21 +116,48 @@ export default function ProfileSettings() {
       setSocialMediaLinks(prof?.social_media_links ? Object.entries(prof.social_media_links).map(([platform, url]) => ({ platform, url: url as string })) : []);
       setWebsiteUrl(prof?.website_url ?? "");
       
-      // Fetch completed reads this year from reading_entries (counts re-reads)
-      const currentYear = new Date().getFullYear();
-      const start = `${currentYear}-01-01`;
-      const end = `${currentYear}-12-31`;
-      const { count, error: entriesError } = await supabase
+      // Completed reads this year: entries count + books without entries fallback
+      const y = new Date().getFullYear();
+      const start = `${y}-01-01`;
+      const end = `${y}-12-31`;
+
+      const { data: entries, error: entriesError } = await supabase
         .from('reading_entries')
-        .select('id', { count: 'exact', head: true })
+        .select('id, book_id')
         .eq('user_id', user.id)
         .eq('status', 'completed')
         .gte('finished_at', start)
         .lte('finished_at', end);
 
-      const completedThisYear = count ?? 0;
-      console.log("Settings completedThisYear computed (entries):", { completedThisYear, entriesError });
-      setCompletedBooksThisYear(completedThisYear);
+      const entryCount = entries?.length ?? 0;
+      const booksWithEntry = new Set((entries ?? []).map((e: any) => e.book_id));
+
+      const { data: books, error: booksError } = await supabase
+        .from('books')
+        .select('id, current_page, total_pages, finished_at, created_at, status')
+        .eq('user_id', user.id);
+
+      let extra = 0;
+      if (books) {
+        extra = books.filter((b: any) => {
+          if (booksWithEntry.has(b.id)) return false;
+          if (b.status === 'dnf') return false;
+          if ((b.current_page ?? 0) < (b.total_pages ?? 0)) return false;
+          if (b.finished_at) {
+            const fy = new Date(b.finished_at).getFullYear();
+            return fy === y;
+          }
+          if (b.status === 'completed' && b.created_at) {
+            const cy = new Date(b.created_at).getFullYear();
+            return cy === y;
+          }
+          return false;
+        }).length;
+      }
+
+      const totalCompletedThisYear = entryCount + extra;
+      console.log("Settings completedThisYear (merged):", { entryCount, extra, total: totalCompletedThisYear, entriesError, booksError });
+      setCompletedBooksThisYear(totalCompletedThisYear);
       
       setLoading(false);
     })();
