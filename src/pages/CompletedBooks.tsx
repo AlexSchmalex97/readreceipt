@@ -172,7 +172,7 @@ export default function CompletedBooks() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {completedBooks.map((book) => (
-              <div key={book.id} className="bg-card p-6 rounded-lg border shadow-soft">
+              <div key={book.id} className="bg-card p-6 rounded-lg border shadow-soft flex flex-col h-full">
                 <div className="flex gap-4 mb-4">
                   {/* Book Cover */}
                   <div className="relative flex-shrink-0">
@@ -233,7 +233,7 @@ export default function CompletedBooks() {
                   </div>
                 )}
 
-                 <div className="mt-4 flex justify-end gap-2">
+                 <div className="mt-auto flex justify-end gap-2 pt-4">
                    <ReadingEntriesDialog bookId={book.id} bookTitle={book.title} onChanged={() => { /* no-op refresh */ }} />
                    <Button
                      variant="outline"

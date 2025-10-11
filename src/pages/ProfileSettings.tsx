@@ -142,7 +142,8 @@ export default function ProfileSettings() {
         extra = books.filter((b: any) => {
           if (booksWithEntry.has(b.id)) return false;
           if (b.status === 'dnf') return false;
-          if ((b.current_page ?? 0) < (b.total_pages ?? 0)) return false;
+          const completedFlag = (b.status === 'completed') || ((b.current_page ?? 0) >= (b.total_pages ?? 0));
+          if (!completedFlag) return false;
           if (b.finished_at) {
             const fy = new Date(b.finished_at).getFullYear();
             return fy === y;
