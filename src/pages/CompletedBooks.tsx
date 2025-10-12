@@ -15,6 +15,8 @@ type CompletedBook = {
   current_page: number;
   created_at: string;
   finished_at?: string | null;
+  // Computed from latest reading_entries.finished_at (falls back to book.finished_at)
+  computed_finished_at?: string | null;
   status?: string | null;
   user_id: string;
   cover_url?: string;
@@ -30,6 +32,7 @@ export default function CompletedBooks() {
   const [completedBooks, setCompletedBooks] = useState<CompletedBook[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const [reloadCounter, setReloadCounter] = useState(0);
 
   const handleMarkUnread = async (book: CompletedBook) => {
     if (!userId) return;
@@ -98,6 +101,13 @@ export default function CompletedBooks() {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
   }, []);
 
+  // Refresh this page when reading entries change (e.g., Edit dates saved)
+  useEffect(() => {
+    const handler = () => setReloadCounter((c) => c + 1);
+    window.addEventListener('reading-entries-changed', handler);
+    return () => window.removeEventListener('reading-entries-changed', handler);
+  }, []);
+
   useEffect(() => {
     (async () => {
       if (!userId) {
@@ -107,19 +117,18 @@ export default function CompletedBooks() {
       setLoading(true);
 
       // Get all books for user and filter completed client-side (current_page >= total_pages)
-          const { data: books, error: booksError } = await supabase
-            .from("books")
-            .select(`
-          id, title, author, total_pages, current_page, created_at, finished_at, status, user_id, cover_url
-        `)
-            .eq("user_id", userId)
-            .order("created_at", { ascending: false });
+      const { data: books, error: booksError } = await supabase
+        .from("books")
+        .select(`id, title, author, total_pages, current_page, created_at, finished_at, status, user_id, cover_url`)
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
 
       console.log("CompletedBooks - books query:", { books, booksError });
 
+      const bookIds = (books ?? []).map((book: any) => book.id);
+
       // Get reviews for these books
-      const bookIds = (books ?? []).map(book => book.id);
-      let reviewsData = [];
+      let reviewsData: any[] = [];
       if (bookIds.length > 0) {
         const { data: reviews, error: reviewsError } = await supabase
           .from("reviews")
@@ -129,20 +138,40 @@ export default function CompletedBooks() {
         reviewsData = reviews ?? [];
       }
 
+      // Get latest finished_at per book from reading_entries
+      let latestFinishedByBookId: Record<string, string> = {};
+      if (bookIds.length > 0) {
+        const { data: entries, error: entriesError } = await supabase
+          .from("reading_entries")
+          .select("book_id, finished_at")
+          .in("book_id", bookIds)
+          .not("finished_at", "is", null);
+        console.log("Reading entries query:", { entries, entriesError });
+        (entries ?? []).forEach((e: any) => {
+          if (!e.finished_at) return;
+          const prev = latestFinishedByBookId[e.book_id];
+          if (!prev || new Date(e.finished_at) > new Date(prev)) {
+            latestFinishedByBookId[e.book_id] = e.finished_at;
+          }
+        });
+      }
+
       const completed = (books ?? [])
         .filter((b: any) => (b.current_page ?? 0) >= (b.total_pages ?? Number.MAX_SAFE_INTEGER))
         .map((book: any) => {
           const review = reviewsData.find((r: any) => r.book_id === book.id);
+          const computed_finished_at = latestFinishedByBookId[book.id] ?? book.finished_at ?? null;
           return {
             ...book,
             review,
+            computed_finished_at,
           } as CompletedBook;
         });
 
       setCompletedBooks(completed);
       setLoading(false);
     })();
-  }, [userId]);
+  }, [userId, reloadCounter]);
 
   if (loading) return (
     <div className="min-h-screen bg-gradient-soft">
@@ -212,7 +241,7 @@ export default function CompletedBooks() {
                     <h3 className="font-semibold text-lg mb-2 truncate">{book.title}</h3>
                     <p className="text-muted-foreground mb-2">by {book.author}</p>
                     <p className="text-sm text-muted-foreground mb-4">
-                      {book.total_pages} pages • Completed {new Date(book.finished_at ?? book.created_at).toLocaleDateString()}
+                      {book.total_pages} pages • Completed {new Date((book.computed_finished_at ?? book.finished_at ?? book.created_at)).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
@@ -234,10 +263,11 @@ export default function CompletedBooks() {
                 )}
 
                  <div className="mt-auto flex flex-wrap items-center justify-end gap-2 pt-4">
-                   <ReadingEntriesDialog bookId={book.id} bookTitle={book.title} onChanged={() => { /* no-op refresh */ }} />
+                   <ReadingEntriesDialog bookId={book.id} bookTitle={book.title} onChanged={() => setReloadCounter((c) => c + 1)} />
                    <Button
                      variant="outline"
                      size="sm"
+                     className="shrink-0 whitespace-nowrap"
                      onClick={() => handleMarkUnread(book)}
                      aria-label={`Mark ${book.title} as unread`}
                    >
@@ -246,6 +276,7 @@ export default function CompletedBooks() {
                   <Button
                     variant="outline"
                     size="sm"
+                    className="shrink-0 whitespace-nowrap"
                     onClick={() => markAsFavorite(book.id)}
                     aria-label={`Mark ${book.title} as favorite`}
                   >
@@ -255,7 +286,7 @@ export default function CompletedBooks() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleDeleteBook(book)}
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
                     aria-label={`Delete ${book.title}`}
                   >
                     <Trash2 className="w-4 h-4" />
