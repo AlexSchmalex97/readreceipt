@@ -117,50 +117,60 @@ export default function ProfileSettings() {
       setWebsiteUrl(prof?.website_url ?? "");
       
       // Completed reads this year: entries count + books without entries fallback
-      const y = new Date().getFullYear();
-      const start = `${y}-01-01`;
-      const end = `${y}-12-31`;
+      const computeCompletedCount = async () => {
+        const y = new Date().getFullYear();
+        const start = `${y}-01-01`;
+        const end = `${y}-12-31`;
+  
+        const { data: entries, error: entriesError } = await supabase
+          .from('reading_entries')
+          .select('id, book_id')
+          .eq('user_id', user.id)
+          .not('finished_at', 'is', null)
+          .gte('finished_at', start)
+          .lte('finished_at', end);
+  
+        const entryCount = entries?.length ?? 0;
+        const booksWithEntry = new Set((entries ?? []).map((e: any) => e.book_id));
+  
+        const { data: books, error: booksError } = await supabase
+          .from('books')
+          .select('id, current_page, total_pages, finished_at, created_at, status')
+          .eq('user_id', user.id);
+  
+        let extra = 0;
+        if (books) {
+          extra = books.filter((b: any) => {
+            if (booksWithEntry.has(b.id)) return false;
+            if (b.status === 'dnf') return false;
+            const completedFlag = (b.status === 'completed') || ((b.current_page ?? 0) >= (b.total_pages ?? 0));
+            if (!completedFlag) return false;
+            if (b.finished_at) {
+              const fy = new Date(b.finished_at).getFullYear();
+              return fy === y;
+            }
+            if (b.status === 'completed' && b.created_at) {
+              const cy = new Date(b.created_at).getFullYear();
+              return cy === y;
+            }
+            return false;
+          }).length;
+        }
+  
+        const totalCompletedThisYear = entryCount + extra;
+        console.log("Settings completedThisYear (merged):", { entryCount, extra, total: totalCompletedThisYear, entriesError, booksError });
+        setCompletedBooksThisYear(totalCompletedThisYear);
+      };
 
-      const { data: entries, error: entriesError } = await supabase
-        .from('reading_entries')
-        .select('id, book_id')
-        .eq('user_id', user.id)
-        .eq('status', 'completed')
-        .gte('finished_at', start)
-        .lte('finished_at', end);
-
-      const entryCount = entries?.length ?? 0;
-      const booksWithEntry = new Set((entries ?? []).map((e: any) => e.book_id));
-
-      const { data: books, error: booksError } = await supabase
-        .from('books')
-        .select('id, current_page, total_pages, finished_at, created_at, status')
-        .eq('user_id', user.id);
-
-      let extra = 0;
-      if (books) {
-        extra = books.filter((b: any) => {
-          if (booksWithEntry.has(b.id)) return false;
-          if (b.status === 'dnf') return false;
-          const completedFlag = (b.status === 'completed') || ((b.current_page ?? 0) >= (b.total_pages ?? 0));
-          if (!completedFlag) return false;
-          if (b.finished_at) {
-            const fy = new Date(b.finished_at).getFullYear();
-            return fy === y;
-          }
-          if (b.status === 'completed' && b.created_at) {
-            const cy = new Date(b.created_at).getFullYear();
-            return cy === y;
-          }
-          return false;
-        }).length;
-      }
-
-      const totalCompletedThisYear = entryCount + extra;
-      console.log("Settings completedThisYear (merged):", { entryCount, extra, total: totalCompletedThisYear, entriesError, booksError });
-      setCompletedBooksThisYear(totalCompletedThisYear);
+      await computeCompletedCount();
       
       setLoading(false);
+
+      // Refresh when reading entries change
+      const onEntriesChanged = () => { computeCompletedCount(); };
+      window.addEventListener('reading-entries-changed', onEntriesChanged);
+      // Cleanup listener when component unmounts
+      return () => window.removeEventListener('reading-entries-changed', onEntriesChanged);
     })();
   }, []);
 

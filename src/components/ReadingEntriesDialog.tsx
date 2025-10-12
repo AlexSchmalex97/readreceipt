@@ -106,6 +106,8 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
     resetForm();
     await loadEntries();
     onChanged?.();
+    // Notify app to refresh reading goal counts
+    window.dispatchEvent(new CustomEvent('reading-entries-changed'));
   };
 
   const handleEdit = (entry: ReadingEntry) => {
@@ -127,6 +129,8 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
     if (editingId === id) resetForm();
     await loadEntries();
     onChanged?.();
+    // Notify app to refresh reading goal counts
+    window.dispatchEvent(new CustomEvent('reading-entries-changed'));
   };
 
   const latestFinished = useMemo(() => {
@@ -138,7 +142,7 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="h-8 px-2" title="Edit reading dates">
+        <Button size="sm" variant="outline" className="h-8 px-2 whitespace-nowrap" title="Edit reading dates">
           <Calendar className="w-4 h-4 mr-2" /> Edit dates
         </Button>
       </DialogTrigger>

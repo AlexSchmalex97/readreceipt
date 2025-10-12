@@ -10,6 +10,7 @@ import { ReadingGoals } from "@/components/ReadingGoals";
 import { HomeReadingGoals } from "@/components/HomeReadingGoals";
 import { BookDatesDialog } from "@/components/BookDatesDialog";
 import { DNFTypeDialog } from "@/components/DNFTypeDialog";
+import { BookMoveMenu } from "@/components/BookMoveMenu";
 import { Link } from "react-router-dom";
 import { searchGoogleBooks } from "@/lib/googleBooks";
 import { useToast } from "@/hooks/use-toast";
@@ -161,7 +162,7 @@ const Index = () => {
         .from('reading_entries')
         .select('id, book_id')
         .eq('user_id', userId)
-        .eq('status', 'completed')
+        .not('finished_at', 'is', null)
         .gte('finished_at', start)
         .lte('finished_at', end);
 
@@ -197,6 +198,11 @@ const Index = () => {
       console.log('Home completed count:', { entryCount, extra, total: entryCount + extra, entriesError, booksError });
     };
     fetchCompletedCount();
+
+    // Refresh when reading entries change
+    const onEntriesChanged = () => fetchCompletedCount();
+    window.addEventListener('reading-entries-changed', onEntriesChanged);
+    return () => window.removeEventListener('reading-entries-changed', onEntriesChanged);
   }, [userId]);
 
   // Function to populate covers for existing books without covers
@@ -861,6 +867,17 @@ const Index = () => {
                               <p className="text-xs text-muted-foreground">{book.totalPages} pages</p>
                             )}
                           </div>
+                        </div>
+                        {/* Actions: Move menu */}
+                        <div className="absolute top-2 right-2">
+                          <BookMoveMenu
+                            bookId={book.id}
+                            currentStatus={'dnf'}
+                            onMoveToInProgress={handleMoveToInProgress}
+                            onMoveToCompleted={handleMoveToCompleted}
+                            onMoveToDNF={handleMoveToDNF}
+                            onMoveToTBR={handleMoveToTBR}
+                          />
                         </div>
                       </div>
                     ))}

@@ -233,7 +233,7 @@ export default function CompletedBooks() {
                   </div>
                 )}
 
-                 <div className="mt-auto flex justify-end gap-2 pt-4">
+                 <div className="mt-auto flex flex-wrap items-center justify-end gap-2 pt-4">
                    <ReadingEntriesDialog bookId={book.id} bookTitle={book.title} onChanged={() => { /* no-op refresh */ }} />
                    <Button
                      variant="outline"
