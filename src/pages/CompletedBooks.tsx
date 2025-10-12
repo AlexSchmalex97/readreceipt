@@ -34,6 +34,16 @@ export default function CompletedBooks() {
   const { toast } = useToast();
   const [reloadCounter, setReloadCounter] = useState(0);
 
+  // Format Supabase date-only (YYYY-MM-DD) as local date to avoid timezone shift
+  const toLocalDateString = (dateLike?: string | null) => {
+    if (!dateLike) return "";
+    // If it's a date-only string, build a local Date; otherwise parse normally
+    const d = /\d{4}-\d{2}-\d{2}$/.test(dateLike)
+      ? new Date(dateLike + "T00:00:00")
+      : new Date(dateLike);
+    return d.toLocaleDateString();
+  };
+
   const handleMarkUnread = async (book: CompletedBook) => {
     if (!userId) return;
     try {
@@ -241,7 +251,7 @@ export default function CompletedBooks() {
                     <h3 className="font-semibold text-lg mb-2 truncate">{book.title}</h3>
                     <p className="text-muted-foreground mb-2">by {book.author}</p>
                     <p className="text-sm text-muted-foreground mb-4">
-                      {book.total_pages} pages • Completed {new Date((book.computed_finished_at ?? book.finished_at ?? book.created_at)).toLocaleDateString()}
+                      {book.total_pages} pages • Completed {toLocalDateString(book.computed_finished_at ?? book.finished_at ?? book.created_at)}
                     </p>
                   </div>
                 </div>
