@@ -14,32 +14,33 @@ export default function AuthButtons() {
   const [username, setUsername] = useState("");
 
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        if (data.session?.user) {
-          setLoggedIn(true);
-          await loadGreeting(data.session.user.id);
-        }
-      } catch (error) {
-        console.error("Auth session error:", error);
-      }
-    };
-    initAuth();
-
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_e, sess) => {
+    // Subscribe first to avoid missing initial auth events
+    const { data: subscription } = supabase.auth.onAuthStateChange((_e, sess) => {
       if (sess?.user) {
         setLoggedIn(true);
-        await loadGreeting(sess.user.id);
+        // Defer any Supabase calls inside the callback to avoid deadlocks
+        setTimeout(() => loadGreeting(sess.user!.id), 0);
       } else {
         setLoggedIn(false);
         setUserName(null);
       }
     });
 
+    // Then read the current session
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        const user = data.session?.user ?? null;
+        if (user) {
+          setLoggedIn(true);
+          setTimeout(() => loadGreeting(user.id), 0);
+        }
+      })
+      .catch((error) => console.error("Auth session error:", error));
+
     return () => {
       try {
-        sub?.subscription?.unsubscribe();
+        subscription?.subscription?.unsubscribe();
       } catch (error) {
         console.error("Auth cleanup error:", error);
       }
@@ -54,6 +55,17 @@ export default function AuthButtons() {
     };
     window.addEventListener("profile-updated", handleProfileUpdate);
     return () => window.removeEventListener("profile-updated", handleProfileUpdate);
+  }, []);
+
+  // Proactively refresh session when tab becomes visible
+  useEffect(() => {
+    const handler = () => {
+      if (document.visibilityState === 'visible') {
+        supabase.auth.getSession().catch(() => {});
+      }
+    };
+    document.addEventListener('visibilitychange', handler);
+    return () => document.removeEventListener('visibilitychange', handler);
   }, []);
 
   async function loadGreeting(userId: string) {
@@ -91,6 +103,10 @@ export default function AuthButtons() {
     }
   };
 
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleEmailPassword();
+  };
   async function handleEmailPassword() {
     try {
       if (!email || !password) return alert("Enter email and password.");
@@ -227,7 +243,7 @@ export default function AuthButtons() {
                 </button>
               </div>
 
-              <div className="space-y-2 mb-3">
+              <form onSubmit={onSubmit} className="space-y-2 mb-3">
                 {mode === "signup" && (
                   <>
                     <input
@@ -273,12 +289,12 @@ export default function AuthButtons() {
                 />
 
                 <button
-                  onClick={handleEmailPassword}
+                  type="submit"
                   className="w-full px-3 py-2 rounded bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
                 >
                   {mode === "signin" ? "Sign in" : "Create account"}
                 </button>
-              </div>
+              </form>
 
               <div className="relative my-3 text-center text-xs text-muted-foreground">
                 <div className="absolute inset-0 flex items-center">
