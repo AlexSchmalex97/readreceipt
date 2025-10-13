@@ -38,9 +38,14 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
 
-    <!-- Comprehensive cache and service worker cleanup -->
+    <!-- Cleanup old service workers and caches without affecting auth -->
     <script>
-      (async function cleanupCacheAndSW() {
+      (async function cleanupCacheOnly() {
+        // Only run cleanup once per browser session
+        if (sessionStorage.getItem('cache_cleaned_v3')) {
+          return;
+        }
+        
         try {
           // Unregister all service workers
           if ('serviceWorker' in navigator) {
@@ -48,28 +53,14 @@
             await Promise.all(registrations.map(reg => reg.unregister()));
           }
           
-          // Clear all caches
+          // Clear all caches (but NOT localStorage or sessionStorage)
           if ('caches' in window) {
             const cacheNames = await caches.keys();
             await Promise.all(cacheNames.map(name => caches.delete(name)));
           }
           
-          // Clear old localStorage data that might be corrupted
-          try {
-            const testKey = '__storage_test__';
-            localStorage.setItem(testKey, '1');
-            localStorage.removeItem(testKey);
-          } catch (e) {
-            // If localStorage is broken, clear it
-            localStorage.clear();
-          }
-          
-          // One-time reload after cleanup (only if not already cleaned in this session)
-          if (!sessionStorage.getItem('cache_cleaned_v2')) {
-            sessionStorage.setItem('cache_cleaned_v2', '1');
-            // Small delay to ensure cleanup completes
-            setTimeout(() => location.reload(), 100);
-          }
+          // Mark cleanup as complete
+          sessionStorage.setItem('cache_cleaned_v3', '1');
         } catch (err) {
           console.warn('Cache cleanup warning:', err);
         }
