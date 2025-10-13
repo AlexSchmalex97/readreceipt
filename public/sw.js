@@ -1,21 +1,26 @@
-const CACHE_NAME = "rr-cache-v1";
-const ASSETS = ["/", "/favicon.ico", "/icons/icon-192.png", "/icons/icon-512.png"];
-
-self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
+// Self-destructing service worker - uninstalls itself immediately
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
 });
 
-self.addEventListener("activate", (e) => {
-  e.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.map((k) => (k === CACHE_NAME ? null : caches.delete(k))))
-    )
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    (async () => {
+      // Delete all caches
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map(name => caches.delete(name)));
+      
+      // Unregister this service worker
+      const registration = await self.registration;
+      await registration.unregister();
+      
+      // Take control of all clients
+      await self.clients.claim();
+    })()
   );
 });
 
-self.addEventListener("fetch", (e) => {
-  const req = e.request;
-  e.respondWith(
-    caches.match(req).then((cached) => cached || fetch(req).catch(() => caches.match("/")))
-  );
+// Don't cache anything - pass through all requests
+self.addEventListener('fetch', (event) => {
+  event.respondWith(fetch(event.request));
 });

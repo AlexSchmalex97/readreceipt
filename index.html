@@ -3,6 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Prevent aggressive caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    
     <title>Reading Tracker - Happy Reading!</title>
     <meta name="description" content="Beautiful reading progress tracker with encouraging messages. Track your books, pages read, and stay motivated on your reading journey.">
     <meta name="author" content="Reading Tracker" />
@@ -32,22 +38,41 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
 
-    <!-- Force-remove any old/broken service worker -->
+    <!-- Comprehensive cache and service worker cleanup -->
     <script>
-      (function () {
-        if (!('serviceWorker' in navigator)) return;
-        navigator.serviceWorker.getRegistrations()
-          .then(regs => Promise.all(regs.map(r => r.unregister())))
-          .then(() => {
-            if (window.caches && caches.keys) {
-              caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-            }
-            if (!sessionStorage.getItem('sw_cleared')) {
-              sessionStorage.setItem('sw_cleared', '1');
-              location.reload();
-            }
-          })
-          .catch(console.warn);
+      (async function cleanupCacheAndSW() {
+        try {
+          // Unregister all service workers
+          if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(registrations.map(reg => reg.unregister()));
+          }
+          
+          // Clear all caches
+          if ('caches' in window) {
+            const cacheNames = await caches.keys();
+            await Promise.all(cacheNames.map(name => caches.delete(name)));
+          }
+          
+          // Clear old localStorage data that might be corrupted
+          try {
+            const testKey = '__storage_test__';
+            localStorage.setItem(testKey, '1');
+            localStorage.removeItem(testKey);
+          } catch (e) {
+            // If localStorage is broken, clear it
+            localStorage.clear();
+          }
+          
+          // One-time reload after cleanup (only if not already cleaned in this session)
+          if (!sessionStorage.getItem('cache_cleaned_v2')) {
+            sessionStorage.setItem('cache_cleaned_v2', '1');
+            // Small delay to ensure cleanup completes
+            setTimeout(() => location.reload(), 100);
+          }
+        } catch (err) {
+          console.warn('Cache cleanup warning:', err);
+        }
       })();
     </script>
   </body>
