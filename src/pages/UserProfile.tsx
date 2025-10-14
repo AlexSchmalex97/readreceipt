@@ -33,18 +33,7 @@ type ReviewItem = {
   review: string | null;
 };
 
-type Post = {
-  kind: "post";
-  id: string;
-  created_at: string;
-  content: string;
-  book_id?: string | null;
-  book_title?: string | null;
-  book_author?: string | null;
-  book_cover_url?: string | null;
-};
-
-type ActivityItem = ProgressItem | ReviewItem | Post;
+type ActivityItem = ProgressItem | ReviewItem;
 
 interface TBRBook {
   id: string;
@@ -173,21 +162,6 @@ export default function UserProfile() {
           }
         }
 
-        // Get user's posts
-        const { data: posts, error: postsError } = await supabase
-          .from("posts")
-          .select(`
-            id, created_at, content, book_id,
-            books!posts_book_id_fkey ( title, author, cover_url )
-          `)
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false })
-          .limit(50);
-
-        if (postsError) {
-          console.warn("UserProfile posts error", postsError);
-        }
-
         // Get user's reviews (public)
         const { data: reviews, error: reviewsError } = await supabase
           .from("reviews")
@@ -234,18 +208,6 @@ export default function UserProfile() {
           })));
         }
 
-        // Transform post items
-        const postItems: Post[] = (posts ?? []).map((p: any) => ({
-          kind: "post",
-          id: p.id,
-          created_at: p.created_at,
-          content: p.content,
-          book_id: p.book_id,
-          book_title: p.books?.title ?? null,
-          book_author: p.books?.author ?? null,
-          book_cover_url: p.books?.cover_url ?? null,
-        }));
-
         // Transform progress items
         const pItems: ProgressItem[] = (progress ?? []).map((r: any) => ({
           kind: "progress",
@@ -275,7 +237,7 @@ export default function UserProfile() {
         }));
 
         // Merge and sort activity
-        const merged = [...postItems, ...pItems, ...rItems].sort(
+        const merged = [...pItems, ...rItems].sort(
           (a, b) => +new Date(b.created_at) - +new Date(a.created_at)
         );
 
@@ -491,105 +453,71 @@ export default function UserProfile() {
               <p className="text-muted-foreground">No reading activity yet.</p>
             </div>
           ) : (
-            activity.map((item) => {
-              if (item.kind === "post") {
-                return (
-                  <div key={`post-${item.id}`} className="bg-card p-4 rounded border">
-                    <div className="text-sm text-muted-foreground mb-2">
-                      {new Date(item.created_at).toLocaleString()}
-                    </div>
-                    <div className="flex gap-3">
-                      {/* Book Cover (if post is about a book) */}
-                      {item.book_cover_url && (
-                        <img 
-                          src={item.book_cover_url} 
-                          alt={item.book_title || "Book cover"}
-                          className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
-                        />
-                      )}
-                      
-                      {/* Post Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium mb-1">Posted</div>
-                        <p className="text-sm">{item.content}</p>
-                        {item.book_title && (
-                          <p className="text-sm text-muted-foreground mt-2">
-                            About: <em>{item.book_title}</em>
-                            {item.book_author && ` by ${item.book_author}`}
-                          </p>
-                        )}
+            activity.map((item) =>
+              item.kind === "progress" ? (
+                <div key={`p-${item.id}`} className="bg-card p-4 rounded border">
+                  <div className="text-sm text-muted-foreground mb-2">
+                    {new Date(item.created_at).toLocaleString()}
+                  </div>
+                  <div className="flex gap-3">
+                    {/* Book Cover */}
+                    {item.book_cover_url ? (
+                      <img 
+                        src={item.book_cover_url} 
+                        alt={item.book_title || "Book cover"}
+                        className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                        <BookOpen className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                    )}
+                    
+                    {/* Progress Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium">Reading Progress</div>
+                      <div>
+                        Read to page {item.to_page}
+                        {typeof item.from_page === "number" && item.from_page >= 0 
+                          ? ` (from ${item.from_page})` 
+                          : ""} of{" "}
+                        <em className="truncate">{item.book_title ?? "Untitled"}</em>
+                        {item.book_author ? ` by ${item.book_author}` : ""}
                       </div>
                     </div>
                   </div>
-                );
-              } else if (item.kind === "progress") {
-                return (
-                  <div key={`p-${item.id}`} className="bg-card p-4 rounded border">
-                    <div className="text-sm text-muted-foreground mb-2">
-                      {new Date(item.created_at).toLocaleString()}
-                    </div>
-                    <div className="flex gap-3">
-                      {/* Book Cover */}
-                      {item.book_cover_url ? (
-                        <img 
-                          src={item.book_cover_url} 
-                          alt={item.book_title || "Book cover"}
-                          className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
-                        />
-                      ) : (
-                        <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
-                          <BookOpen className="w-4 h-4 text-muted-foreground" />
-                        </div>
-                      )}
-                      
-                      {/* Progress Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium">Reading Progress</div>
-                        <div>
-                          Read to page {item.to_page}
-                          {typeof item.from_page === "number" && item.from_page >= 0 
-                            ? ` (from ${item.from_page})` 
-                            : ""} of{" "}
-                          <em className="truncate">{item.book_title ?? "Untitled"}</em>
-                          {item.book_author ? ` by ${item.book_author}` : ""}
-                        </div>
+                </div>
+              ) : (
+                <div key={`r-${item.id}`} className="bg-card p-4 rounded border">
+                  <div className="text-sm text-muted-foreground mb-2">
+                    {new Date(item.created_at).toLocaleString()}
+                  </div>
+                  <div className="flex gap-3">
+                    {/* Book Cover */}
+                    {item.book_cover_url ? (
+                      <img 
+                        src={item.book_cover_url} 
+                        alt={item.book_title || "Book cover"}
+                        className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                        <BookOpen className="w-4 h-4 text-muted-foreground" />
                       </div>
+                    )}
+                    
+                    {/* Review Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium mb-1">
+                        Reviewed <em className="truncate">{item.book_title ?? "Untitled"}</em>
+                        {item.book_author ? ` by ${item.book_author}` : ""}: ⭐ {item.rating}/5
+                      </div>
+                      {item.review && <p className="text-sm text-muted-foreground">{item.review}</p>}
                     </div>
                   </div>
-                );
-              } else {
-                return (
-                  <div key={`r-${item.id}`} className="bg-card p-4 rounded border">
-                    <div className="text-sm text-muted-foreground mb-2">
-                      {new Date(item.created_at).toLocaleString()}
-                    </div>
-                    <div className="flex gap-3">
-                      {/* Book Cover */}
-                      {item.book_cover_url ? (
-                        <img 
-                          src={item.book_cover_url} 
-                          alt={item.book_title || "Book cover"}
-                          className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
-                        />
-                      ) : (
-                        <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
-                          <BookOpen className="w-4 h-4 text-muted-foreground" />
-                        </div>
-                      )}
-                      
-                      {/* Review Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium mb-1">
-                          Reviewed <em className="truncate">{item.book_title ?? "Untitled"}</em>
-                          {item.book_author ? ` by ${item.book_author}` : ""}: ⭐ {item.rating}/5
-                        </div>
-                        {item.review && <p className="text-sm text-muted-foreground">{item.review}</p>}
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-            })
+                </div>
+              )
+            )
           )}
         </div>
         </div>

@@ -194,10 +194,7 @@ export default function ProfileDisplay() {
           return false;
         }).length;
         const inProgressBooks = books.filter(book => 
-          (book.status === 'in_progress' || (!book.status && book.current_page < book.total_pages)) &&
-          book.status !== 'dnf' &&
-          book.status !== 'completed' &&
-          book.current_page < book.total_pages
+          book.status === 'in_progress' || (book.current_page < book.total_pages && book.status !== 'dnf')
         ).length;
         
         setBookStats({ totalBooks, completedBooks, inProgressBooks });
