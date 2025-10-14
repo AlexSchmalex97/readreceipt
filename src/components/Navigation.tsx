@@ -1,12 +1,71 @@
 import { Link, useLocation } from "react-router-dom";
 import AuthButtons from "@/components/AuthButtons";
 import { HeaderDisplay } from "@/components/HeaderDisplay";
+import { usePlatform } from "@/hooks/usePlatform";
+import { Home, Users, Rss, Star, User, Mail } from "lucide-react";
 
 export function Navigation() {
   const { pathname } = useLocation();
+  const { isIOS } = usePlatform();
 
   const isActive = (path: string) => pathname === path;
 
+  const navItems = [
+    { path: "/", label: "Home", icon: Home },
+    { path: "/people", label: "People", icon: Users },
+    { path: "/feed", label: "Feed", icon: Rss },
+    { path: "/reviews", label: "Reviews", icon: Star },
+    { path: "/profile", label: "Profile", icon: User },
+    { path: "/contact", label: "Contact", icon: Mail },
+  ];
+
+  // iOS: Bottom tab bar navigation
+  if (isIOS) {
+    return (
+      <>
+        {/* Top header - simplified for iOS */}
+        <header className="bg-card shadow-soft border-b border-border pb-safe-top">
+          <div className="container mx-auto px-3 py-3">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <img
+                  src="/assets/readreceipt-logo.png"
+                  alt="ReadReceipt logo"
+                  className="w-10 h-10"
+                />
+                <h1 className="text-xl font-bold text-primary">ReadReceipt</h1>
+              </div>
+              <AuthButtons />
+            </div>
+          </div>
+        </header>
+
+        {/* Bottom tab bar navigation for iOS */}
+        <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border pb-safe-bottom z-50">
+          <div className="flex justify-around items-center h-16">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.path);
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors ${
+                    active ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="text-xs font-medium">{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      </>
+    );
+  }
+
+  // Web: Original navigation layout
   return (
     <header className="bg-card shadow-soft border-b border-border">
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">

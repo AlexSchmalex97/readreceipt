@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { BookEditionSelector } from "@/components/BookEditionSelector";
 import { BookDatesDialog } from "@/components/BookDatesDialog";
 import { BookMoveMenu } from "@/components/BookMoveMenu";
+import { usePlatform } from "@/hooks/usePlatform";
 
 interface Book {
   id: string;
@@ -61,6 +62,7 @@ export const BookCard = ({
   const [currentPageInput, setCurrentPageInput] = useState(book.currentPage.toString());
   const [percentageInput, setPercentageInput] = useState(Math.round((book.currentPage / book.totalPages) * 100).toString());
   const { toast } = useToast();
+  const { isIOS } = usePlatform();
 
   const percentage = Math.round((book.currentPage / book.totalPages) * 100);
   const pagesLeft = book.totalPages - book.currentPage;
@@ -127,11 +129,15 @@ export const BookCard = ({
   };
 
   return (
-    <Card className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-card">
-      <CardHeader className="pb-3">
+    <Card className={`shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-card ${
+      isIOS ? 'compact-card' : ''
+    }`}>
+      <CardHeader className={isIOS ? "pb-2 pt-3" : "pb-3"}>
         <div className="flex items-start gap-3">
           {/* Book Cover */}
-          <div className="relative w-16 h-20 bg-muted rounded border flex-shrink-0 overflow-hidden">
+          <div className={`relative bg-muted rounded border flex-shrink-0 overflow-hidden ${
+            isIOS ? 'w-12 h-16' : 'w-16 h-20'
+          }`}>
             {book.coverUrl ? (
               <img 
                 src={book.coverUrl} 
@@ -163,10 +169,14 @@ export const BookCard = ({
           
           {/* Book Info */}
           <div className="flex-1 min-w-0">
-            <CardTitle className="text-lg font-semibold text-foreground line-clamp-2">
+            <CardTitle className={`font-semibold text-foreground line-clamp-2 ${
+              isIOS ? 'text-base' : 'text-lg'
+            }`}>
               {book.title}
             </CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">{book.author}</p>
+            <p className={`text-muted-foreground ${isIOS ? 'text-xs mt-0.5' : 'text-sm mt-1'}`}>
+              {book.author}
+            </p>
           </div>
           
           {/* Actions */}
@@ -201,8 +211,8 @@ export const BookCard = ({
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
+      <CardContent className={isIOS ? "space-y-2 pt-2" : "space-y-4"}>
+        <div className={isIOS ? "space-y-1" : "space-y-2"}>
           <div className="flex justify-between items-center text-sm">
             <span className="text-muted-foreground">Progress</span>
             <span className="font-medium text-primary">{percentage}%</span>
@@ -214,11 +224,13 @@ export const BookCard = ({
           />
         </div>
 
-        <div className="bg-accent/50 rounded-lg p-3 text-center">
-          <p className="text-sm font-medium text-accent-foreground animate-bounce-gentle">
-            {getEncouragingMessage(percentage)}
-          </p>
-        </div>
+        {!isIOS && (
+          <div className="bg-accent/50 rounded-lg p-3 text-center">
+            <p className="text-sm font-medium text-accent-foreground animate-bounce-gentle">
+              {getEncouragingMessage(percentage)}
+            </p>
+          </div>
+        )}
 
         <div className="flex justify-between text-sm text-muted-foreground">
           <span>Pages read: {book.currentPage}</span>
