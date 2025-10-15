@@ -689,10 +689,10 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-soft">
       <Navigation />
 
-      <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
+      <main className={isIOS ? "container mx-auto px-2 py-2" : "container mx-auto px-3 sm:px-4 py-6 sm:py-8"}>
         {/* Header with Add Book button */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Your Reading Journey</h1>
+        <div className={isIOS ? "flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4" : "flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8"}>
+          <h1 className={isIOS ? "text-xl font-bold text-foreground" : "text-2xl sm:text-3xl font-bold text-foreground"}>Your Reading Journey</h1>
           <AddBookDialog onAddBook={handleAddBook} />
         </div>
 
@@ -715,7 +715,7 @@ const Index = () => {
             <AddBookDialog onAddBook={handleAddBook} />
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className={isIOS ? "space-y-4" : "space-y-8"}>
             {/* Currently Reading Section - At the top */}
             {inProgressBooks.length > 0 && (
               <section>
