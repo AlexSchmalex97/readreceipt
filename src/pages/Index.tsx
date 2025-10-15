@@ -14,6 +14,7 @@ import { BookMoveMenu } from "@/components/BookMoveMenu";
 import { Link } from "react-router-dom";
 import { searchGoogleBooks } from "@/lib/googleBooks";
 import { useToast } from "@/hooks/use-toast";
+import { usePlatform } from "@/hooks/usePlatform";
 
 interface Book {
   id: string;
@@ -29,6 +30,7 @@ interface Book {
 }
 
 const Index = () => {
+  const { isIOS } = usePlatform();
   const [userId, setUserId] = useState<string | null>(null);
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
@@ -718,7 +720,11 @@ const Index = () => {
             {inProgressBooks.length > 0 && (
               <section>
                 <h2 className="text-xl font-semibold text-foreground mb-4">Currently Reading</h2>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                 <div className={`grid gap-4 sm:gap-6 ${
+                   isIOS 
+                     ? 'grid-cols-2 lg:grid-cols-3' 
+                     : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+                 }`}>
                    {inProgressBooks.map((book) => (
                      <BookCard
                        key={book.id}
