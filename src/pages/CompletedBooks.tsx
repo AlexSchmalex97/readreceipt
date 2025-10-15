@@ -126,13 +126,12 @@ export default function CompletedBooks() {
       }
       setLoading(true);
 
-      // Get completed books for user
+      // Get all books for user
       const { data: books, error: booksError } = await supabase
         .from("books")
         .select(`id, title, author, total_pages, current_page, created_at, finished_at, status, user_id, cover_url`)
         .eq("user_id", userId)
-        .eq("status", "completed")
-        .order("finished_at", { ascending: false });
+        .order("created_at", { ascending: false });
 
       console.log("CompletedBooks - books query:", { books, booksError });
 
@@ -168,6 +167,7 @@ export default function CompletedBooks() {
       }
 
       const completed = (books ?? [])
+        .filter((b: any) => (b.status === 'completed') || ((b.current_page ?? 0) >= (b.total_pages ?? Number.MAX_SAFE_INTEGER)))
         .map((book: any) => {
           const review = reviewsData.find((r: any) => r.book_id === book.id);
           const computed_finished_at = latestFinishedByBookId[book.id] ?? book.finished_at ?? null;
