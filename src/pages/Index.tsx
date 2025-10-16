@@ -689,10 +689,10 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-soft">
       <Navigation />
 
-      <main className={isIOS ? "container mx-auto px-2 py-2" : "container mx-auto px-3 sm:px-4 py-6 sm:py-8"}>
+      <main className="container mx-auto px-2 sm:px-4 py-3 sm:py-8">
         {/* Header with Add Book button */}
-        <div className={isIOS ? "flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4" : "flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8"}>
-          <h1 className={isIOS ? "text-xl font-bold text-foreground" : "text-2xl sm:text-3xl font-bold text-foreground"}>Your Reading Journey</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-3 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">Your Reading Journey</h1>
           <AddBookDialog onAddBook={handleAddBook} />
         </div>
 
@@ -715,16 +715,12 @@ const Index = () => {
             <AddBookDialog onAddBook={handleAddBook} />
           </div>
         ) : (
-          <div className={isIOS ? "space-y-4" : "space-y-8"}>
+          <div className="space-y-4 sm:space-y-8">
             {/* Currently Reading Section - At the top */}
             {inProgressBooks.length > 0 && (
               <section>
-                <h2 className="text-xl font-semibold text-foreground mb-4">Currently Reading</h2>
-                 <div className={
-                   isIOS 
-                     ? 'grid grid-cols-2 gap-3' 
-                     : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6'
-                 }>
+                <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">Currently Reading</h2>
+                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                    {inProgressBooks.map((book) => (
                      <BookCard
                        key={book.id}
@@ -747,15 +743,15 @@ const Index = () => {
             <HomeReadingGoals userId={userId} completedBooksThisYear={completedBooksThisYear} />
 
             {/* Stats Grid - Now 2 columns */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-              <div className="bg-card rounded-lg p-3 shadow-soft border border-border self-start">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-                    <TrendingUp className="w-4 h-4 text-accent-foreground" />
+            <div className="grid grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4 items-start">
+              <div className="bg-card rounded-lg p-2.5 sm:p-3 shadow-soft border border-border self-start">
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 bg-accent rounded-lg flex items-center justify-center">
+                    <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-accent-foreground" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-xl font-bold text-foreground">{booksInProgress}</p>
-                    <p className="text-xs text-muted-foreground">In Progress</p>
+                    <p className="text-lg sm:text-xl font-bold text-foreground">{booksInProgress}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">In Progress</p>
                   </div>
                 </div>
                 {inProgressBooks.length > 0 && (
@@ -780,14 +776,14 @@ const Index = () => {
                 )}
               </div>
 
-              <Link to="/completed" className="bg-card rounded-lg p-3 shadow-soft border border-border hover:shadow-lg transition-shadow cursor-pointer self-start">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-                    <Target className="w-4 h-4 text-accent-foreground" />
+              <Link to="/completed" className="bg-card rounded-lg p-2.5 sm:p-3 shadow-soft border border-border hover:shadow-lg transition-shadow cursor-pointer self-start">
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 bg-accent rounded-lg flex items-center justify-center">
+                    <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-accent-foreground" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-xl font-bold text-foreground">{completedBooks}</p>
-                    <p className="text-xs text-muted-foreground">Completed</p>
+                    <p className="text-lg sm:text-xl font-bold text-foreground">{completedBooks}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">Completed</p>
                   </div>
                 </div>
                 {completedBookItems.length > 0 && (
@@ -814,7 +810,7 @@ const Index = () => {
             </div>
 
             {/* TBR and DNF Lists side by side */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 items-start">
               {/* TBR List */}
               <div>
                 {userId && (
@@ -828,9 +824,9 @@ const Index = () => {
               </div>
 
               {/* DNF Books Section */}
-              <div className="bg-card rounded-lg p-6 shadow-soft border border-border">
-                <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <XCircle className="w-5 h-5 text-orange-500" />
+              <div className="bg-card rounded-lg p-3 sm:p-6 shadow-soft border border-border">
+                <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
+                  <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
                   Did Not Finish ({dnfBooks})
                 </h2>
                 {dnfBookItems.length === 0 ? (
