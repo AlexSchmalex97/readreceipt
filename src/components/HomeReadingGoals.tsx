@@ -107,43 +107,42 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear }: HomeReading
 
   return (
     <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
-      <CardContent className="p-3 sm:p-4">
-        <div className="flex items-center justify-between mb-2 sm:mb-3">
-          <div className="flex items-center gap-2">
-            <Target className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-            <span className="text-sm sm:text-base font-semibold text-foreground">{currentYear} Reading Goal</span>
+      <CardContent className="p-2 sm:p-4">
+        <div className="flex items-center justify-between mb-1.5 sm:mb-3">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Target className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-primary" />
+            <span className="text-xs sm:text-base font-semibold text-foreground">{currentYear} Reading Goal</span>
           </div>
-          <div className="text-xs sm:text-sm text-muted-foreground">
+          <div className="text-[10px] sm:text-sm text-muted-foreground">
             {totalProgress} of {goal.goal_count} books
           </div>
         </div>
         
-        <Progress value={progressPercentage} className="h-2.5 sm:h-3 mb-2 sm:mb-3" />
+        <Progress value={progressPercentage} className="h-2 sm:h-3 mb-1.5 sm:mb-3" />
         
-        <div className="flex items-center justify-between text-xs sm:text-sm">
+        <div className="flex items-center justify-between text-[10px] sm:text-sm">
           <div className="text-muted-foreground">
             {booksRemaining > 0 ? `${booksRemaining} books to go!` : "Goal achieved! 🎉"}
           </div>
-          
           {goal.manual_count > 0 && (
             <div className="flex items-center gap-1">
-              <span className="text-xs text-muted-foreground">Manual:</span>
+              <span className="text-[9px] sm:text-xs text-muted-foreground">Manual:</span>
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={() => updateManualCount(false)}
-                className="h-6 w-6 p-0"
+                className="h-5 w-5 sm:h-6 sm:w-6 p-0"
               >
-                <Minus className="w-3 h-3" />
+                <Minus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               </Button>
-              <span className="text-xs font-medium w-4 text-center">{goal.manual_count}</span>
+              <span className="text-[10px] sm:text-xs font-medium w-3 sm:w-4 text-center">{goal.manual_count}</span>
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={() => updateManualCount(true)}
-                className="h-6 w-6 p-0"
+                className="h-5 w-5 sm:h-6 sm:w-6 p-0"
               >
-                <Plus className="w-3 h-3" />
+                <Plus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               </Button>
             </div>
           )}
@@ -153,9 +152,9 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear }: HomeReading
               size="sm"
               variant="ghost"
               onClick={() => updateManualCount(true)}
-              className="h-6 px-2 text-xs"
+              className="h-5 px-1.5 sm:h-6 sm:px-2 text-[10px] sm:text-xs"
             >
-              <Plus className="w-3 h-3 mr-1" />
+              <Plus className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
               Add manual
             </Button>
           )}

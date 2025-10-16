@@ -130,10 +130,10 @@ export const BookCard = ({
 
   return (
     <Card className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-card">
-      <CardHeader className="pb-2 sm:pb-3 pt-3 px-3 sm:px-6">
-        <div className="flex items-start gap-2 sm:gap-3">
+      <CardHeader className="pb-1.5 sm:pb-3 pt-2 sm:pt-6 px-2 sm:px-6">
+        <div className="flex items-start gap-1.5 sm:gap-3">
           {/* Book Cover */}
-          <div className="relative bg-muted rounded border flex-shrink-0 overflow-hidden w-12 sm:w-16 h-16 sm:h-20">
+          <div className="relative bg-muted rounded border flex-shrink-0 overflow-hidden w-10 sm:w-16 h-14 sm:h-20">
             {book.coverUrl ? (
               <img 
                 src={book.coverUrl} 
@@ -165,16 +165,16 @@ export const BookCard = ({
           
           {/* Book Info */}
           <div className="flex-1 min-w-0">
-            <CardTitle className="text-sm sm:text-lg font-semibold text-foreground line-clamp-2">
+            <CardTitle className="text-xs sm:text-lg font-semibold text-foreground line-clamp-2 leading-tight">
               {book.title}
             </CardTitle>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
+            <p className="text-[10px] sm:text-sm text-muted-foreground mt-0 sm:mt-1">
               {book.author}
             </p>
           </div>
           
           {/* Actions */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-0.5 sm:gap-2 flex-shrink-0">
             {onUpdateDates && (
               <BookDatesDialog
                 book={book}
@@ -196,24 +196,24 @@ export const BookCard = ({
                 size="sm"
                 variant="ghost"
                 onClick={handleDelete}
-                className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                className="h-6 w-6 sm:h-8 sm:w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
             )}
           </div>
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-2 sm:space-y-4 pt-2 px-3 sm:px-6 pb-3 sm:pb-6">
-        <div className="space-y-1 sm:space-y-2">
-          <div className="flex justify-between items-center text-sm">
+      <CardContent className="space-y-1.5 sm:space-y-4 pt-1.5 sm:pt-2 px-2 sm:px-6 pb-2 sm:pb-6">
+        <div className="space-y-0.5 sm:space-y-2">
+          <div className="flex justify-between items-center text-xs sm:text-sm">
             <span className="text-muted-foreground">Progress</span>
             <span className="font-medium text-primary">{percentage}%</span>
           </div>
           <Progress 
             value={percentage} 
-            className="h-2.5" 
+            className="h-1.5 sm:h-2.5" 
             style={{ "--progress-width": `${percentage}%` } as React.CSSProperties}
           />
         </div>
@@ -224,13 +224,13 @@ export const BookCard = ({
             </p>
           </div>
 
-        <div className="flex justify-between text-xs sm:text-sm text-muted-foreground">
+        <div className="flex justify-between text-[10px] sm:text-sm text-muted-foreground">
           <span>Pages read: {book.currentPage}</span>
           <span>Pages left: {pagesLeft}</span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Current {trackingMode === "page" ? "page" : "progress"}:</span>
+        <div className="flex items-center gap-1 sm:gap-2">
+          <span className="text-[10px] sm:text-sm text-muted-foreground">Current {trackingMode === "page" ? "page" : "progress"}:</span>
           {isEditing ? (
             <>
               <Input
@@ -239,7 +239,7 @@ export const BookCard = ({
                 onChange={(e) => trackingMode === "page" 
                   ? setCurrentPageInput(e.target.value)
                   : setPercentageInput(e.target.value)}
-                className="flex-1 h-8"
+                className="flex-1 h-6 sm:h-8 text-xs sm:text-sm"
                 min="0"
                 max={trackingMode === "page" ? book.totalPages : 100}
                 placeholder={trackingMode === "page" ? "Page" : "%"}
@@ -251,36 +251,36 @@ export const BookCard = ({
                 onClick={() => {
                   setTrackingMode(trackingMode === "page" ? "percentage" : "page");
                 }}
-                className="h-8 px-2 text-xs"
+                className="h-6 sm:h-8 px-1 sm:px-2 text-xs"
               >
                 {trackingMode === "page" ? "%" : "#"}
               </Button>
               <Button
                 size="sm"
                 onClick={handleSave}
-                className="h-8 w-8 p-0 bg-gradient-primary hover:opacity-90"
+                className="h-6 w-6 sm:h-8 sm:w-8 p-0 bg-gradient-primary hover:opacity-90"
               >
-                <Check className="w-4 h-4" />
+                <Check className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={handleCancel}
-                className="h-8 w-8 p-0"
+                className="h-6 w-6 sm:h-8 sm:w-8 p-0"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
             </>
           ) : (
             <>
-              <span className="flex-1 font-medium">{book.currentPage} / {book.totalPages}</span>
+              <span className="flex-1 font-medium text-xs sm:text-base">{book.currentPage} / {book.totalPages}</span>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => setIsEditing(true)}
-                className="h-8 w-8 p-0"
+                className="h-6 w-6 sm:h-8 sm:w-8 p-0"
               >
-                <Edit3 className="w-4 h-4" />
+                <Edit3 className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
             </>
           )}
