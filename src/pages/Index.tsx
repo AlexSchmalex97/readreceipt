@@ -837,7 +837,7 @@ const Index = () => {
                 ) : (
                   <div className="space-y-3 max-h-96 overflow-y-auto">
                     {dnfBookItems.map((book) => (
-                      <div key={book.id} className="border border-border rounded-lg p-3 hover:bg-accent/5 transition-colors relative">
+                      <div key={book.id} className="border border-border rounded-lg p-3 pr-10 hover:bg-accent/5 transition-colors relative">
                         <div className="flex items-start gap-3">
                           {/* Book Cover */}
                           <div className="flex-shrink-0">
@@ -871,7 +871,7 @@ const Index = () => {
                           </div>
                         </div>
                         {/* Actions: Move menu */}
-                        <div className="absolute top-2 right-2">
+                        <div className="absolute top-1 right-1">
                           <BookMoveMenu
                             bookId={book.id}
                             currentStatus={'dnf'}

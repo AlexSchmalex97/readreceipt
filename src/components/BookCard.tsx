@@ -174,7 +174,7 @@ export const BookCard = ({
           </div>
           
           {/* Actions */}
-          <div className="flex items-center gap-0.5 sm:gap-2 flex-shrink-0">
+          <div className="flex items-center gap-0.5 sm:gap-2 flex-shrink-0 flex-wrap">
             {onUpdateDates && (
               <BookDatesDialog
                 book={book}
@@ -193,10 +193,10 @@ export const BookCard = ({
             )}
             {onDeleteBook && (
               <Button
-                size="sm"
+                size="icon-xs"
                 variant="ghost"
                 onClick={handleDelete}
-                className="h-6 w-6 sm:h-8 sm:w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                className="sm:h-8 sm:w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
               >
                 <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>

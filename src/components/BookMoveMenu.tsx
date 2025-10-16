@@ -30,12 +30,12 @@ export function BookMoveMenu({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          size="sm"
+          size="icon-xs"
           variant="ghost"
-          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+          className="sm:h-8 sm:w-8 p-0 text-muted-foreground hover:text-foreground"
           title="Move to another list"
         >
-          <ArrowRightLeft className="w-4 h-4" />
+          <ArrowRightLeft className="w-3 h-3 sm:w-4 sm:h-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">

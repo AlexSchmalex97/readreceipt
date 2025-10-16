@@ -76,12 +76,12 @@ export const BookDatesDialog = ({ book, onUpdateDates }: BookDatesDialogProps) =
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button 
-          size="sm" 
+          size="icon-xs" 
           variant="outline" 
-          className="h-8 w-8 p-0"
+          className="sm:h-8 sm:w-8 p-0"
           title="Set reading dates"
         >
-          <Calendar className="w-4 h-4" />
+          <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] shadow-card">
