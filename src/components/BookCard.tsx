@@ -129,15 +129,11 @@ export const BookCard = ({
   };
 
   return (
-    <Card className={`shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-card ${
-      isIOS ? 'compact-card' : ''
-    }`}>
-      <CardHeader className={isIOS ? "pb-2 pt-3" : "pb-3"}>
-        <div className="flex items-start gap-3">
+    <Card className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-card">
+      <CardHeader className="pb-2 sm:pb-3 pt-3 px-3 sm:px-6">
+        <div className="flex items-start gap-2 sm:gap-3">
           {/* Book Cover */}
-          <div className={`relative bg-muted rounded border flex-shrink-0 overflow-hidden ${
-            isIOS ? 'w-12 h-16' : 'w-16 h-20'
-          }`}>
+          <div className="relative bg-muted rounded border flex-shrink-0 overflow-hidden w-12 sm:w-16 h-16 sm:h-20">
             {book.coverUrl ? (
               <img 
                 src={book.coverUrl} 
@@ -169,12 +165,10 @@ export const BookCard = ({
           
           {/* Book Info */}
           <div className="flex-1 min-w-0">
-            <CardTitle className={`font-semibold text-foreground line-clamp-2 ${
-              isIOS ? 'text-base' : 'text-lg'
-            }`}>
+            <CardTitle className="text-sm sm:text-lg font-semibold text-foreground line-clamp-2">
               {book.title}
             </CardTitle>
-            <p className={`text-muted-foreground ${isIOS ? 'text-xs mt-0.5' : 'text-sm mt-1'}`}>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
               {book.author}
             </p>
           </div>
@@ -211,8 +205,8 @@ export const BookCard = ({
         </div>
       </CardHeader>
       
-      <CardContent className={isIOS ? "space-y-2 pt-2" : "space-y-4"}>
-        <div className={isIOS ? "space-y-1" : "space-y-2"}>
+      <CardContent className="space-y-2 sm:space-y-4 pt-2 px-3 sm:px-6 pb-3 sm:pb-6">
+        <div className="space-y-1 sm:space-y-2">
           <div className="flex justify-between items-center text-sm">
             <span className="text-muted-foreground">Progress</span>
             <span className="font-medium text-primary">{percentage}%</span>
@@ -224,15 +218,13 @@ export const BookCard = ({
           />
         </div>
 
-        {!isIOS && (
-          <div className="bg-accent/50 rounded-lg p-3 text-center">
+        <div className="hidden sm:block bg-accent/50 rounded-lg p-3 text-center">
             <p className="text-sm font-medium text-accent-foreground animate-bounce-gentle">
               {getEncouragingMessage(percentage)}
             </p>
           </div>
-        )}
 
-        <div className="flex justify-between text-sm text-muted-foreground">
+        <div className="flex justify-between text-xs sm:text-sm text-muted-foreground">
           <span>Pages read: {book.currentPage}</span>
           <span>Pages left: {pagesLeft}</span>
         </div>

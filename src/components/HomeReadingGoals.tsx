@@ -107,20 +107,20 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear }: HomeReading
 
   return (
     <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-3">
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex items-center justify-between mb-2 sm:mb-3">
           <div className="flex items-center gap-2">
-            <Target className="w-5 h-5 text-primary" />
-            <span className="font-semibold text-foreground">{currentYear} Reading Goal</span>
+            <Target className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+            <span className="text-sm sm:text-base font-semibold text-foreground">{currentYear} Reading Goal</span>
           </div>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-xs sm:text-sm text-muted-foreground">
             {totalProgress} of {goal.goal_count} books
           </div>
         </div>
         
-        <Progress value={progressPercentage} className="h-3 mb-3" />
+        <Progress value={progressPercentage} className="h-2.5 sm:h-3 mb-2 sm:mb-3" />
         
-        <div className="flex items-center justify-between text-sm">
+        <div className="flex items-center justify-between text-xs sm:text-sm">
           <div className="text-muted-foreground">
             {booksRemaining > 0 ? `${booksRemaining} books to go!` : "Goal achieved! 🎉"}
           </div>
