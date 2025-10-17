@@ -473,9 +473,9 @@ export default function ProfileDisplay() {
         <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedBooks} />
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Card>
-            <CardContent className="p-4">
+            <CardContent className="p-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
                   <BookOpen className="w-5 h-5 text-primary" />
@@ -489,7 +489,7 @@ export default function ProfileDisplay() {
           </Card>
 
           <Card>
-            <CardContent className="p-4">
+            <CardContent className="p-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
                   <Star className="w-5 h-5 text-accent-foreground" />
@@ -503,7 +503,7 @@ export default function ProfileDisplay() {
           </Card>
 
           <Card>
-            <CardContent className="p-4">
+            <CardContent className="p-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
                   <BookOpen className="w-5 h-5 text-secondary-foreground" />
@@ -518,7 +518,7 @@ export default function ProfileDisplay() {
         </div>
 
         {/* Quick Actions */}
-        <div className="flex flex-wrap gap-4 mb-8 justify-center">
+        <div className="flex flex-wrap gap-4 mb-6 justify-center">
           <Link to="/">
             <Button variant="outline">
               <BookOpen className="w-4 h-4 mr-2" />
@@ -534,18 +534,18 @@ export default function ProfileDisplay() {
         </div>
 
         {/* Three Column Layout: Recent Reviews - Activity Feed - TBR List */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Recent Reviews */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
+            <CardHeader className="p-4 pb-3">
+              <CardTitle className="flex items-center justify-between text-base">
                 Recent Reviews
-                <Link to="/reviews" className="text-sm font-normal text-primary hover:underline">
-                  View all reviews
+                <Link to="/reviews" className="text-xs font-normal text-primary hover:underline">
+                  View all
                 </Link>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 pt-0">
               {recentReviews.length === 0 ? (
                 <div className="text-center py-8">
                   <Star className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -555,9 +555,9 @@ export default function ProfileDisplay() {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-4 max-h-96 overflow-y-auto">
+                <div className="space-y-3 max-h-80 overflow-y-auto">
                   {recentReviews.map((review) => (
-                    <div key={review.id} className="border-b border-border pb-4 last:border-b-0">
+                    <div key={review.id} className="border-b border-border pb-3 last:border-b-0">
                       <div className="flex gap-3">
                         {/* Book Cover */}
                         {review.books.cover_url ? (
@@ -603,13 +603,13 @@ export default function ProfileDisplay() {
 
           {/* Activity Feed */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5" />
+            <CardHeader className="p-4 pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <BookOpen className="w-4 h-4" />
                 Reading Activity
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 pt-0">
               {activityFeed.length === 0 ? (
                 <div className="text-center py-8">
                   <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -619,7 +619,7 @@ export default function ProfileDisplay() {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-3 max-h-96 overflow-y-auto">
+                <div className="space-y-3 max-h-80 overflow-y-auto">
                   {activityFeed.map((item) =>
                     item.kind === "progress" ? (
                       <div key={`p-${item.id}`} className="border border-border rounded-lg p-3">
@@ -689,13 +689,13 @@ export default function ProfileDisplay() {
 
           {/* TBR List */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5" />
+            <CardHeader className="p-4 pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <BookOpen className="w-4 h-4" />
                 To Be Read ({tbrBooks.length})
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 pt-0">
               {tbrBooks.length === 0 ? (
                 <div className="text-center py-8">
                   <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -705,7 +705,7 @@ export default function ProfileDisplay() {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-3 max-h-96 overflow-y-auto">
+                <div className="space-y-3 max-h-80 overflow-y-auto">
                   {tbrBooks.map((book) => (
                     <div key={book.id} className="border border-border rounded-lg p-3 hover:bg-accent/5 transition-colors">
                       <div className="flex gap-3">

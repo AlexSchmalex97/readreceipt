@@ -131,7 +131,7 @@ export const BookCard = ({
   return (
     <Card className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-card">
       <CardHeader className="pb-1.5 sm:pb-3 pt-2 sm:pt-6 px-2 sm:px-6">
-        <div className="flex items-start gap-1.5 sm:gap-3">
+        <div className="flex items-start gap-1.5 sm:gap-3 pr-24">
           {/* Book Cover */}
           <div className="relative bg-muted rounded border flex-shrink-0 overflow-hidden w-10 sm:w-16 h-14 sm:h-20">
             {book.coverUrl ? (
@@ -174,7 +174,7 @@ export const BookCard = ({
           </div>
           
           {/* Actions */}
-          <div className="flex items-center gap-0.5 sm:gap-2 flex-shrink-0 flex-wrap">
+          <div className="absolute top-2 right-2 flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
             {onUpdateDates && (
               <BookDatesDialog
                 book={book}
