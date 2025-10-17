@@ -337,7 +337,7 @@ export default function ProfileDisplay() {
     <div className="min-h-screen bg-gradient-soft">
       <Navigation />
       
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-3 sm:px-6 py-6 sm:py-8 max-w-6xl">
         {/* Header with Settings Button */}
         <div className="flex justify-between items-start mb-8">
           <div className="flex items-center gap-6">
