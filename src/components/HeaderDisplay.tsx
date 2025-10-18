@@ -82,9 +82,7 @@ export function HeaderDisplay() {
   } else if (displayPreference === 'both') {
     return (
       <div className="flex flex-col lg:flex-row items-center gap-2 lg:gap-6">
-        <div className="hidden md:block lg:block">
-          <TimeWeatherIcons />
-        </div>
+        <TimeWeatherIcons />
         <QuotesDisplay />
       </div>
     );
