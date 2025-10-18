@@ -130,7 +130,7 @@ export const BookCard = ({
 
   return (
     <Card className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-card">
-      <CardHeader className="relative pb-1.5 sm:pb-3 pt-2 sm:pt-6 px-2 sm:px-6">
+      <CardHeader className="pb-1.5 sm:pb-3 pt-2 sm:pt-6 px-2 sm:px-6">
         <div className="flex items-start gap-1.5 sm:gap-3">
           {/* Book Cover */}
           <div className="relative bg-muted rounded border flex-shrink-0 overflow-hidden w-10 sm:w-16 h-14 sm:h-20">
@@ -163,8 +163,8 @@ export const BookCard = ({
             </div>
           </div>
           
-          {/* Book Info - flexible width */}
-          <div className="flex-1 min-w-0 pr-1">
+          {/* Book Info */}
+          <div className="flex-1 min-w-0">
             <CardTitle className="text-xs sm:text-lg font-semibold text-foreground leading-tight">
               {book.title}
             </CardTitle>
@@ -174,8 +174,8 @@ export const BookCard = ({
           </div>
         </div>
         
-        {/* Actions - moved below on mobile, inline on larger screens */}
-        <div className="flex items-center gap-0.5 sm:gap-1 mt-2 sm:absolute sm:top-2 sm:right-2">
+        {/* Actions Row - below the book info */}
+        <div className="flex items-center justify-end gap-0.5 sm:gap-1 mt-2">
           {onUpdateDates && (
             <BookDatesDialog
               book={book}
