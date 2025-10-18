@@ -378,51 +378,53 @@ export default function ProfileDisplay() {
                 )}
               </div>
 
-              {/* Current Read and Favorite Book - Side by Side */}
-              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Current Read */}
-                {currentBook && (
-                  <div>
-                    <h3 className="text-xs font-medium text-muted-foreground mb-1.5">Currently Reading</h3>
-                    <div className="flex items-center gap-2 p-2 border rounded-lg">
-                      {currentBook.cover_url && (
-                        <img
-                          src={currentBook.cover_url}
-                          alt={currentBook.title}
-                          className="w-10 h-14 object-cover rounded"
-                        />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm truncate">{currentBook.title}</div>
-                        <div className="text-xs text-muted-foreground truncate">{currentBook.author}</div>
-                        <div className="text-xs text-muted-foreground mt-0.5">
-                          Page {currentBook.current_page} of {currentBook.total_pages}
+              {/* Current Read and Favorite Book - Always Side by Side when both exist */}
+              {(currentBook || favoriteBook) && (
+                <div className="mt-3 flex gap-3">
+                  {/* Current Read */}
+                  {currentBook && (
+                    <div className="flex-1">
+                      <h3 className="text-xs font-medium text-muted-foreground mb-1.5">Currently Reading</h3>
+                      <div className="flex items-center gap-2 p-2 border rounded-lg">
+                        {currentBook.cover_url && (
+                          <img
+                            src={currentBook.cover_url}
+                            alt={currentBook.title}
+                            className="w-10 h-14 object-cover rounded"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm truncate">{currentBook.title}</div>
+                          <div className="text-xs text-muted-foreground truncate">{currentBook.author}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            Page {currentBook.current_page} of {currentBook.total_pages}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Favorite Book */}
-                {favoriteBook && (
-                  <div>
-                    <h3 className="text-xs font-medium text-muted-foreground mb-1.5">Favorite Book</h3>
-                    <div className="flex items-center gap-2 p-2 border rounded-lg">
-                      {favoriteBook.cover_url && (
-                        <img
-                          src={favoriteBook.cover_url}
-                          alt={favoriteBook.title}
-                          className="w-10 h-14 object-cover rounded"
-                        />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm truncate">{favoriteBook.title}</div>
-                        <div className="text-xs text-muted-foreground truncate">{favoriteBook.author}</div>
+                  {/* Favorite Book */}
+                  {favoriteBook && (
+                    <div className="flex-1">
+                      <h3 className="text-xs font-medium text-muted-foreground mb-1.5">Favorite Book</h3>
+                      <div className="flex items-center gap-2 p-2 border rounded-lg">
+                        {favoriteBook.cover_url && (
+                          <img
+                            src={favoriteBook.cover_url}
+                            alt={favoriteBook.title}
+                            className="w-10 h-14 object-cover rounded"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm truncate">{favoriteBook.title}</div>
+                          <div className="text-xs text-muted-foreground truncate">{favoriteBook.author}</div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
 
               {/* Social Media & Website */}
               {(profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url ? (
