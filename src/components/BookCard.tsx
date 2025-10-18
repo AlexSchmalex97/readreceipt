@@ -131,7 +131,7 @@ export const BookCard = ({
   return (
     <Card className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-card">
       <CardHeader className="pb-1.5 sm:pb-3 pt-2 sm:pt-6 px-2 sm:px-6">
-        <div className="flex items-start gap-1.5 sm:gap-3 pr-24">
+        <div className="flex items-start gap-1.5 sm:gap-3">
           {/* Book Cover */}
           <div className="relative bg-muted rounded border flex-shrink-0 overflow-hidden w-10 sm:w-16 h-14 sm:h-20">
             {book.coverUrl ? (
@@ -163,45 +163,45 @@ export const BookCard = ({
             </div>
           </div>
           
-          {/* Book Info */}
-          <div className="flex-1 min-w-0">
-            <CardTitle className="text-xs sm:text-lg font-semibold text-foreground line-clamp-2 leading-tight">
+          {/* Book Info - flexible width */}
+          <div className="flex-1 min-w-0 pr-1">
+            <CardTitle className="text-xs sm:text-lg font-semibold text-foreground leading-tight">
               {book.title}
             </CardTitle>
-            <p className="text-[10px] sm:text-sm text-muted-foreground mt-0 sm:mt-1">
+            <p className="text-[10px] sm:text-sm text-muted-foreground mt-0 sm:mt-1 truncate">
               {book.author}
             </p>
           </div>
-          
-          {/* Actions */}
-          <div className="absolute top-2 right-2 flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
-            {onUpdateDates && (
-              <BookDatesDialog
-                book={book}
-                onUpdateDates={onUpdateDates}
-              />
-            )}
-            {onMoveToInProgress && onMoveToCompleted && onMoveToDNF && onMoveToTBR && book.status && (
-              <BookMoveMenu
-                bookId={book.id}
-                currentStatus={book.status}
-                onMoveToInProgress={onMoveToInProgress}
-                onMoveToCompleted={onMoveToCompleted}
-                onMoveToDNF={onMoveToDNF}
-                onMoveToTBR={onMoveToTBR}
-              />
-            )}
-            {onDeleteBook && (
-              <Button
-                size="icon-xs"
-                variant="ghost"
-                onClick={handleDelete}
-                className="sm:h-8 sm:w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-              >
-                <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
-              </Button>
-            )}
-          </div>
+        </div>
+        
+        {/* Actions - moved below on mobile, inline on larger screens */}
+        <div className="flex items-center gap-0.5 sm:gap-1 mt-2 sm:absolute sm:top-2 sm:right-2">
+          {onUpdateDates && (
+            <BookDatesDialog
+              book={book}
+              onUpdateDates={onUpdateDates}
+            />
+          )}
+          {onMoveToInProgress && onMoveToCompleted && onMoveToDNF && onMoveToTBR && book.status && (
+            <BookMoveMenu
+              bookId={book.id}
+              currentStatus={book.status}
+              onMoveToInProgress={onMoveToInProgress}
+              onMoveToCompleted={onMoveToCompleted}
+              onMoveToDNF={onMoveToDNF}
+              onMoveToTBR={onMoveToTBR}
+            />
+          )}
+          {onDeleteBook && (
+            <Button
+              size="icon-xs"
+              variant="ghost"
+              onClick={handleDelete}
+              className="sm:h-8 sm:w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+            </Button>
+          )}
         </div>
       </CardHeader>
       
