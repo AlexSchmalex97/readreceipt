@@ -20,6 +20,7 @@ export type Database = {
           cover_url: string | null
           created_at: string | null
           current_page: number
+          display_order: number | null
           dnf_type: string | null
           finished_at: string | null
           id: string
@@ -34,6 +35,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string | null
           current_page?: number
+          display_order?: number | null
           dnf_type?: string | null
           finished_at?: string | null
           id?: string
@@ -48,6 +50,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string | null
           current_page?: number
+          display_order?: number | null
           dnf_type?: string | null
           finished_at?: string | null
           id?: string

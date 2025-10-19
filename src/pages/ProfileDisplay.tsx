@@ -378,33 +378,10 @@ export default function ProfileDisplay() {
                 )}
               </div>
 
-              {/* Current Read and Favorite Book - Always Side by Side when both exist */}
+              {/* Favorite Book and Current Read - Swapped and Equal Size */}
               {(currentBook || favoriteBook) && (
                 <div className="mt-3 flex gap-3">
-                  {/* Current Read */}
-                  {currentBook && (
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-xs font-medium text-muted-foreground mb-1.5">Currently Reading</h3>
-                      <div className="flex items-center gap-2 p-2 border rounded-lg h-full">
-                        {currentBook.cover_url && (
-                          <img
-                            src={currentBook.cover_url}
-                            alt={currentBook.title}
-                            className="w-10 h-14 object-cover rounded flex-shrink-0"
-                          />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm truncate">{currentBook.title}</div>
-                          <div className="text-xs text-muted-foreground truncate">{currentBook.author}</div>
-                          <div className="text-xs text-muted-foreground mt-0.5">
-                            Page {currentBook.current_page} of {currentBook.total_pages}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Favorite Book */}
+                  {/* Favorite Book - First */}
                   {favoriteBook && (
                     <div className="flex-1 min-w-0">
                       <h3 className="text-xs font-medium text-muted-foreground mb-1.5">Favorite Book</h3>
@@ -416,9 +393,32 @@ export default function ProfileDisplay() {
                             className="w-10 h-14 object-cover rounded flex-shrink-0"
                           />
                         )}
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm truncate">{favoriteBook.title}</div>
-                          <div className="text-xs text-muted-foreground truncate">{favoriteBook.author}</div>
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <div className="font-medium text-xs leading-tight line-clamp-2">{favoriteBook.title}</div>
+                          <div className="text-[10px] text-muted-foreground truncate mt-0.5">{favoriteBook.author}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Current Read - Second */}
+                  {currentBook && (
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-xs font-medium text-muted-foreground mb-1.5">Currently Reading</h3>
+                      <div className="flex items-center gap-2 p-2 border rounded-lg h-full">
+                        {currentBook.cover_url && (
+                          <img
+                            src={currentBook.cover_url}
+                            alt={currentBook.title}
+                            className="w-10 h-14 object-cover rounded flex-shrink-0"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <div className="font-medium text-xs leading-tight line-clamp-2">{currentBook.title}</div>
+                          <div className="text-[10px] text-muted-foreground truncate mt-0.5">{currentBook.author}</div>
+                          <div className="text-[10px] text-muted-foreground mt-0.5">
+                            Page {currentBook.current_page} of {currentBook.total_pages}
+                          </div>
                         </div>
                       </div>
                     </div>

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { AddBookDialog } from "@/components/AddBookDialog";
 import { BookCard } from "@/components/BookCard";
 import { TBRList } from "@/components/TBRList";
-import { TrendingUp, Target, CheckCircle, XCircle } from "lucide-react";
+import { TrendingUp, Target, CheckCircle, XCircle, MoveUp, MoveDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ReviewDialog } from "@/components/ReviewDialog";
 import { Navigation } from "@/components/Navigation";
@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 import { searchGoogleBooks } from "@/lib/googleBooks";
 import { useToast } from "@/hooks/use-toast";
 import { usePlatform } from "@/hooks/usePlatform";
+import { Button } from "@/components/ui/button";
 
 interface Book {
   id: string;
@@ -27,6 +28,7 @@ interface Book {
   finished_at?: string;
   status?: 'in_progress' | 'completed' | 'dnf';
   dnf_type?: 'soft' | 'hard' | null;
+  display_order?: number;
 }
 
 const Index = () => {
@@ -65,8 +67,9 @@ const Index = () => {
       if (userId) {
         const { data, error } = await supabase
           .from("books")
-          .select("id,title,author,total_pages,current_page,cover_url,started_at,finished_at,created_at,status,dnf_type")
+          .select("id,title,author,total_pages,current_page,cover_url,started_at,finished_at,created_at,status,dnf_type,display_order")
           .eq("user_id", userId)  // Only fetch current user's books
+          .order("display_order", { ascending: true })
           .order("created_at", { ascending: true });
 
           if (error) throw error;
@@ -599,6 +602,33 @@ const Index = () => {
     }
   };
 
+  const handleReorderBook = async (bookId: string, direction: 'up' | 'down') => {
+    if (!userId) return;
+
+    const currentIndex = inProgressBooks.findIndex(b => b.id === bookId);
+    if (currentIndex === -1) return;
+
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= inProgressBooks.length) return;
+
+    const currentBook = inProgressBooks[currentIndex];
+    const targetBook = inProgressBooks[targetIndex];
+
+    // Swap display orders
+    const updates = [
+      supabase.from('books').update({ display_order: targetBook.display_order || targetIndex }).eq('id', currentBook.id),
+      supabase.from('books').update({ display_order: currentBook.display_order || currentIndex }).eq('id', targetBook.id)
+    ];
+
+    await Promise.all(updates);
+    loadBooks();
+
+    toast({
+      title: "Books reordered",
+      description: "Reading order updated",
+    });
+  };
+
   const handleMoveToTBR = async (id: string) => {
     try {
       const book = books.find(b => b.id === id);
@@ -726,19 +756,43 @@ const Index = () => {
                    inProgressBooks.length === 3 ? 'grid-cols-3 max-w-4xl' :
                    'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
                  }`}>
-                   {inProgressBooks.map((book) => (
-                     <BookCard
-                       key={book.id}
-                       book={book}
-                       onUpdateProgress={handleUpdateProgress}
-                       onDeleteBook={handleDeleteBook}
-                       onCoverUpdate={handleCoverUpdate}
-                       onUpdateDates={handleUpdateDates}
-                       onMoveToInProgress={handleMoveToInProgress}
-                       onMoveToCompleted={handleMoveToCompleted}
-                       onMoveToDNF={handleMoveToDNF}
-                       onMoveToTBR={handleMoveToTBR}
-                     />
+                   {inProgressBooks.map((book, index) => (
+                     <div key={book.id} className="relative">
+                       <BookCard
+                         book={book}
+                         onUpdateProgress={handleUpdateProgress}
+                         onDeleteBook={handleDeleteBook}
+                         onCoverUpdate={handleCoverUpdate}
+                         onUpdateDates={handleUpdateDates}
+                         onMoveToInProgress={handleMoveToInProgress}
+                         onMoveToCompleted={handleMoveToCompleted}
+                         onMoveToDNF={handleMoveToDNF}
+                         onMoveToTBR={handleMoveToTBR}
+                       />
+                       {/* Reorder buttons */}
+                       <div className="absolute -top-2 -left-2 flex gap-1">
+                         {index > 0 && (
+                           <Button
+                             size="icon"
+                             variant="secondary"
+                             className="h-6 w-6 rounded-full shadow-md"
+                             onClick={() => handleReorderBook(book.id, 'up')}
+                           >
+                             <MoveUp className="w-3 h-3" />
+                           </Button>
+                         )}
+                         {index < inProgressBooks.length - 1 && (
+                           <Button
+                             size="icon"
+                             variant="secondary"
+                             className="h-6 w-6 rounded-full shadow-md"
+                             onClick={() => handleReorderBook(book.id, 'down')}
+                           >
+                             <MoveDown className="w-3 h-3" />
+                           </Button>
+                         )}
+                       </div>
+                     </div>
                    ))}
                  </div>
               </section>
