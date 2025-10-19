@@ -68,32 +68,43 @@ export const BookCard = ({
   const pagesLeft = book.totalPages - book.currentPage;
 
   const handleSave = () => {
-    let newPage: number;
-    
+    let newPage: number | null = null;
+
     if (trackingMode === "page") {
-      newPage = parseInt(currentPageInput);
-      
-      if (isNaN(newPage) || newPage < 0 || newPage > book.totalPages) {
-        toast({
-          title: "Invalid page number",
-          description: `Please enter a number between 0 and ${book.totalPages}`,
-          variant: "destructive",
-        });
-        return;
+      if (currentPageInput.trim() === "") {
+        newPage = null;
+      } else {
+        const parsed = parseInt(currentPageInput, 10);
+        if (!Number.isFinite(parsed) || parsed < 0 || parsed > book.totalPages) {
+          toast({
+            title: "Invalid page number",
+            description: `Please enter a number between 0 and ${book.totalPages}`,
+            variant: "destructive",
+          });
+          return;
+        }
+        newPage = parsed;
       }
     } else {
-      const percentValue = parseInt(percentageInput);
-      
-      if (isNaN(percentValue) || percentValue < 0 || percentValue > 100) {
-        toast({
-          title: "Invalid percentage",
-          description: "Please enter a number between 0 and 100",
-          variant: "destructive",
-        });
-        return;
+      if (percentageInput.trim() === "") {
+        newPage = null;
+      } else {
+        const percentValue = parseInt(percentageInput, 10);
+        if (!Number.isFinite(percentValue) || percentValue < 0 || percentValue > 100) {
+          toast({
+            title: "Invalid percentage",
+            description: "Please enter a number between 0 and 100",
+            variant: "destructive",
+          });
+          return;
+        }
+        newPage = Math.round((percentValue / 100) * book.totalPages);
       }
-      
-      newPage = Math.round((percentValue / 100) * book.totalPages);
+    }
+
+    if (newPage === null) {
+      toast({ title: "Value required", description: "Please enter a value before saving", variant: "destructive" });
+      return;
     }
 
     onUpdateProgress(book.id, newPage);
@@ -237,12 +248,31 @@ export const BookCard = ({
                 type="number"
                 value={trackingMode === "page" ? currentPageInput : percentageInput}
                 onChange={(e) => {
+                  const val = e.target.value;
                   if (trackingMode === "page") {
-                    setCurrentPageInput(e.target.value);
-                    setPercentageInput(Math.round((parseInt(e.target.value) / book.totalPages) * 100).toString());
+                    setCurrentPageInput(val);
+                    if (val.trim() === "") {
+                      setPercentageInput("");
+                    } else {
+                      const v = parseInt(val, 10);
+                      if (Number.isFinite(v) && book.totalPages > 0) {
+                        setPercentageInput(Math.round((v / book.totalPages) * 100).toString());
+                      } else {
+                        setPercentageInput("");
+                      }
+                    }
                   } else {
-                    setPercentageInput(e.target.value);
-                    setCurrentPageInput(Math.round((parseInt(e.target.value) / 100) * book.totalPages).toString());
+                    setPercentageInput(val);
+                    if (val.trim() === "") {
+                      setCurrentPageInput("");
+                    } else {
+                      const v = parseInt(val, 10);
+                      if (Number.isFinite(v)) {
+                        setCurrentPageInput(Math.round((v / 100) * book.totalPages).toString());
+                      } else {
+                        setCurrentPageInput("");
+                      }
+                    }
                   }
                 }}
                 className="flex-1 h-6 sm:h-8 text-xs sm:text-sm"

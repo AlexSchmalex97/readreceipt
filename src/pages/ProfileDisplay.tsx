@@ -394,8 +394,12 @@ export default function ProfileDisplay() {
                           />
                         )}
                         <div className="flex-1 min-w-0 overflow-hidden">
-                          <div className="font-medium text-xs leading-tight line-clamp-2">{favoriteBook.title}</div>
-                          <div className="text-[10px] text-muted-foreground truncate mt-0.5">{favoriteBook.author}</div>
+                          <div className="font-medium text-[11px] leading-snug whitespace-normal break-words max-h-10 overflow-hidden">
+                            {favoriteBook.title}
+                          </div>
+                          <div className="text-[10px] text-muted-foreground whitespace-normal break-words mt-0.5">
+                            {favoriteBook.author}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -414,8 +418,8 @@ export default function ProfileDisplay() {
                           />
                         )}
                         <div className="flex-1 min-w-0 overflow-hidden">
-                          <div className="font-medium text-xs leading-tight line-clamp-2">{currentBook.title}</div>
-                          <div className="text-[10px] text-muted-foreground truncate mt-0.5">{currentBook.author}</div>
+                          <div className="font-medium text-[11px] leading-snug whitespace-normal break-words max-h-10 overflow-hidden">{currentBook.title}</div>
+                          <div className="text-[10px] text-muted-foreground whitespace-normal break-words mt-0.5">{currentBook.author}</div>
                           <div className="text-[10px] text-muted-foreground mt-0.5">
                             Page {currentBook.current_page} of {currentBook.total_pages}
                           </div>
