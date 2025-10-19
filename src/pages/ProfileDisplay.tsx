@@ -383,14 +383,14 @@ export default function ProfileDisplay() {
                 <div className="mt-3 flex gap-3">
                   {/* Current Read */}
                   {currentBook && (
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <h3 className="text-xs font-medium text-muted-foreground mb-1.5">Currently Reading</h3>
-                      <div className="flex items-center gap-2 p-2 border rounded-lg">
+                      <div className="flex items-center gap-2 p-2 border rounded-lg h-full">
                         {currentBook.cover_url && (
                           <img
                             src={currentBook.cover_url}
                             alt={currentBook.title}
-                            className="w-10 h-14 object-cover rounded"
+                            className="w-10 h-14 object-cover rounded flex-shrink-0"
                           />
                         )}
                         <div className="flex-1 min-w-0">
@@ -406,14 +406,14 @@ export default function ProfileDisplay() {
 
                   {/* Favorite Book */}
                   {favoriteBook && (
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <h3 className="text-xs font-medium text-muted-foreground mb-1.5">Favorite Book</h3>
-                      <div className="flex items-center gap-2 p-2 border rounded-lg">
+                      <div className="flex items-center gap-2 p-2 border rounded-lg h-full">
                         {favoriteBook.cover_url && (
                           <img
                             src={favoriteBook.cover_url}
                             alt={favoriteBook.title}
-                            className="w-10 h-14 object-cover rounded"
+                            className="w-10 h-14 object-cover rounded flex-shrink-0"
                           />
                         )}
                         <div className="flex-1 min-w-0">

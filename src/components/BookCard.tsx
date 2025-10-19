@@ -236,9 +236,15 @@ export const BookCard = ({
               <Input
                 type="number"
                 value={trackingMode === "page" ? currentPageInput : percentageInput}
-                onChange={(e) => trackingMode === "page" 
-                  ? setCurrentPageInput(e.target.value)
-                  : setPercentageInput(e.target.value)}
+                onChange={(e) => {
+                  if (trackingMode === "page") {
+                    setCurrentPageInput(e.target.value);
+                    setPercentageInput(Math.round((parseInt(e.target.value) / book.totalPages) * 100).toString());
+                  } else {
+                    setPercentageInput(e.target.value);
+                    setCurrentPageInput(Math.round((parseInt(e.target.value) / 100) * book.totalPages).toString());
+                  }
+                }}
                 className="flex-1 h-6 sm:h-8 text-xs sm:text-sm"
                 min="0"
                 max={trackingMode === "page" ? book.totalPages : 100}

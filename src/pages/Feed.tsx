@@ -3,6 +3,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
 import { BookOpen } from "lucide-react";
 
+type Post = {
+  kind: "post";
+  id: string;
+  created_at: string;
+  user_id: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  content: string;
+  book_id?: string | null;
+  book_title?: string | null;
+  book_author?: string | null;
+  book_cover_url?: string | null;
+};
+
 type ProgressItem = {
   kind: "progress";
   id: string;
@@ -31,7 +45,7 @@ type ReviewItem = {
   review: string | null;
 };
 
-type FeedItem = ProgressItem | ReviewItem;
+type FeedItem = Post | ProgressItem | ReviewItem;
 
 export default function Feed() {
   const [items, setItems] = useState<FeedItem[]>([]);
@@ -77,6 +91,33 @@ export default function Feed() {
 
       const profileMap = new Map(profiles?.map(p => [p.id, { display_name: p.display_name, avatar_url: p.avatar_url }]) || []);
 
+      // POSTS
+      const { data: posts, error: postsError } = await supabase
+        .from("posts")
+        .select(`
+          id, created_at, user_id, content, book_id,
+          books!posts_book_id_fkey ( title, author, cover_url )
+        `)
+        .in("user_id", targetIds)
+        .order("created_at", { ascending: false })
+        .limit(100);
+
+      console.log("Posts query:", { posts, postsError });
+
+      const postItems: Post[] = (posts ?? []).map((r: any) => ({
+        kind: "post",
+        id: r.id,
+        created_at: r.created_at,
+        user_id: r.user_id,
+        display_name: profileMap.get(r.user_id)?.display_name ?? null,
+        avatar_url: profileMap.get(r.user_id)?.avatar_url ?? null,
+        content: r.content,
+        book_id: r.book_id,
+        book_title: r.books?.title ?? null,
+        book_author: r.books?.author ?? null,
+        book_cover_url: r.books?.cover_url ?? null,
+      }));
+
       const pItems: ProgressItem[] = (progress ?? []).map((r: any) => ({
         kind: "progress",
         id: r.id,
@@ -119,7 +160,7 @@ export default function Feed() {
       }));
 
       // merge + sort newest-first
-      const merged = [...pItems, ...rItems].sort(
+      const merged = [...postItems, ...pItems, ...rItems].sort(
         (a, b) => +new Date(b.created_at) - +new Date(a.created_at)
       );
 
@@ -149,7 +190,34 @@ export default function Feed() {
       )}
 
       {items.map((it) =>
-        it.kind === "progress" ? (
+        it.kind === "post" ? (
+          <div key={`post-${it.id}`} className="bg-card p-4 rounded border">
+            <div className="flex items-start gap-3 mb-3">
+              <img
+                src={it.avatar_url || "/assets/readreceipt-logo.png"}
+                alt="Profile"
+                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+              />
+              <div className="flex-1 min-w-0">
+                <div className="font-medium">{it.display_name || "Reader"}</div>
+                <div className="text-sm text-muted-foreground">
+                  {new Date(it.created_at).toLocaleString()}
+                </div>
+              </div>
+            </div>
+            
+            {/* Post Content */}
+            <div className="mb-2">
+              {it.book_title && (
+                <div className="text-sm text-muted-foreground mb-2 flex items-center gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  About: <em>{it.book_title}</em> {it.book_author && `by ${it.book_author}`}
+                </div>
+              )}
+              <p className="whitespace-pre-wrap">{it.content}</p>
+            </div>
+          </div>
+        ) : it.kind === "progress" ? (
           <div key={`p-${it.id}`} className="bg-card p-4 rounded border">
             <div className="flex items-start gap-3 mb-3">
               <img

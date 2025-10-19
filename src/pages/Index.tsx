@@ -720,7 +720,12 @@ const Index = () => {
             {inProgressBooks.length > 0 && (
               <section>
                 <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">Currently Reading</h2>
-                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+                 <div className={`grid gap-3 sm:gap-6 ${
+                   inProgressBooks.length === 1 ? 'grid-cols-1 max-w-md' :
+                   inProgressBooks.length === 2 ? 'grid-cols-2 max-w-2xl' :
+                   inProgressBooks.length === 3 ? 'grid-cols-3 max-w-4xl' :
+                   'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+                 }`}>
                    {inProgressBooks.map((book) => (
                      <BookCard
                        key={book.id}
