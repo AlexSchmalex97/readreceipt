@@ -275,7 +275,7 @@ export const BookCard = ({
                     }
                   }
                 }}
-                className="flex-1 h-6 sm:h-8 text-xs sm:text-sm"
+                className="flex-1 h-8 sm:h-10 text-base sm:text-lg px-3"
                 min="0"
                 max={trackingMode === "page" ? book.totalPages : 100}
                 placeholder={trackingMode === "page" ? "Page" : "%"}
