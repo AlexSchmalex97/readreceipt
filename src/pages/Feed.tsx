@@ -95,28 +95,41 @@ export default function Feed() {
       const { data: posts, error: postsError } = await supabase
         .from("posts")
         .select(`
-          id, created_at, user_id, content, book_id,
-          books!posts_book_id_fkey ( title, author, cover_url )
+          id, created_at, user_id, content, book_id
         `)
         .in("user_id", targetIds)
         .order("created_at", { ascending: false })
         .limit(100);
+      
+      // Fetch book details separately for posts that have book_id
+      const postBookIds = (posts ?? []).filter((p: any) => p.book_id).map((p: any) => p.book_id);
+      const { data: postBooks } = postBookIds.length > 0 
+        ? await supabase.from("books").select("id, title, author, cover_url").in("id", postBookIds)
+        : { data: [] };
+      
+      const postBookMap = new Map<string, any>();
+      (postBooks || []).forEach((b: any) => {
+        postBookMap.set(b.id, b);
+      });
 
       console.log("Posts query:", { posts, postsError });
 
-      const postItems: Post[] = (posts ?? []).map((r: any) => ({
-        kind: "post",
-        id: r.id,
-        created_at: r.created_at,
-        user_id: r.user_id,
-        display_name: profileMap.get(r.user_id)?.display_name ?? null,
-        avatar_url: profileMap.get(r.user_id)?.avatar_url ?? null,
-        content: r.content,
-        book_id: r.book_id,
-        book_title: r.books?.title ?? null,
-        book_author: r.books?.author ?? null,
-        book_cover_url: r.books?.cover_url ?? null,
-      }));
+      const postItems: Post[] = (posts ?? []).map((r: any) => {
+        const book: any = r.book_id ? postBookMap.get(r.book_id) : null;
+        return {
+          kind: "post",
+          id: r.id,
+          created_at: r.created_at,
+          user_id: r.user_id,
+          display_name: profileMap.get(r.user_id)?.display_name ?? null,
+          avatar_url: profileMap.get(r.user_id)?.avatar_url ?? null,
+          content: r.content,
+          book_id: r.book_id,
+          book_title: book?.title ?? null,
+          book_author: book?.author ?? null,
+          book_cover_url: book?.cover_url ?? null,
+        };
+      });
 
       const pItems: ProgressItem[] = (progress ?? []).map((r: any) => ({
         kind: "progress",

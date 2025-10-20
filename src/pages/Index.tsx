@@ -784,12 +784,7 @@ const Index = () => {
                 <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">Currently Reading</h2>
                  <SortableBookGrid
                    items={inProgressBooks}
-                   className={`grid gap-3 sm:gap-6 ${
-                     inProgressBooks.length === 1 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' :
-                     inProgressBooks.length === 2 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' :
-                     inProgressBooks.length === 3 ? 'grid-cols-2 lg:grid-cols-3' :
-                     'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
-                   }`}
+                   className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6"
                    onReorder={handleReorderInProgress}
                    renderItem={(book) => (
                      <BookCard
