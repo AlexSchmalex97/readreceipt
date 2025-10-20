@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { AddBookDialog } from "@/components/AddBookDialog";
 import { BookCard } from "@/components/BookCard";
 import { TBRList } from "@/components/TBRList";
-import { TrendingUp, Target, CheckCircle, XCircle } from "lucide-react";
+import { TrendingUp, Target, CheckCircle, XCircle, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ReviewDialog } from "@/components/ReviewDialog";
 import { Navigation } from "@/components/Navigation";
@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { usePlatform } from "@/hooks/usePlatform";
 import { Button } from "@/components/ui/button";
 import { SortableBookGrid } from "@/components/SortableBookGrid";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 
 interface Book {
   id: string;
@@ -41,6 +42,17 @@ const Index = () => {
   const [dnfDialogFor, setDnfDialogFor] = useState<{ bookId: string; bookTitle: string } | null>(null);
   const [completedBooksThisYear, setCompletedBooksThisYear] = useState(0);
   const { toast } = useToast();
+
+  // Pull-to-refresh
+  const { scrollableRef, pullDistance, isRefreshing, showPullIndicator } = usePullToRefresh({
+    onRefresh: async () => {
+      await loadBooks();
+      toast({
+        title: "Refreshed!",
+        description: "Your books have been updated.",
+      });
+    },
+  });
 
   // Watch auth state
   useEffect(() => {
@@ -751,7 +763,37 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-soft">
       <Navigation />
 
-      <main className="container mx-auto px-2 sm:px-4 py-3 sm:py-8">
+      <div 
+        ref={scrollableRef}
+        className="relative overflow-y-auto"
+        style={{ height: 'calc(100vh - 64px)' }}
+      >
+        {/* Pull-to-refresh indicator */}
+        {showPullIndicator && (
+          <div 
+            className="absolute top-0 left-0 right-0 flex items-center justify-center transition-all duration-200"
+            style={{ 
+              height: `${pullDistance}px`,
+              opacity: Math.min(pullDistance / 80, 1),
+            }}
+          >
+            <div className="flex flex-col items-center gap-2">
+              <RefreshCw 
+                className={`w-6 h-6 text-primary ${isRefreshing ? 'animate-spin' : ''}`}
+                style={{
+                  transform: `rotate(${pullDistance * 3}deg)`,
+                }}
+              />
+              <span className="text-xs text-muted-foreground">
+                {isRefreshing ? 'Refreshing...' : pullDistance >= 80 ? 'Release to refresh' : 'Pull to refresh'}
+              </span>
+            </div>
+          </div>
+        )}
+
+      <main className="container mx-auto px-2 sm:px-4 py-3 sm:py-8"
+        style={{ paddingTop: showPullIndicator ? `${pullDistance + 12}px` : undefined }}
+      >
         {/* Header with Add Book button */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-3 sm:mb-8">
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">Your Reading Journey</h1>
@@ -966,6 +1008,7 @@ const Index = () => {
           </div>
         )}
       </main>
+      </div>
 
       {/* Review modal */}
       {reviewFor && userId && (
