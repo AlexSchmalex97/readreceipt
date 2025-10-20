@@ -81,7 +81,7 @@ export function HeaderDisplay() {
     return <TimeWeatherIcons />;
   } else if (displayPreference === 'both') {
     return (
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 lg:gap-6 w-full">
+      <div className="flex flex-row items-start gap-2 w-full">
         <div className="flex-shrink-0">
           <TimeWeatherIcons />
         </div>
