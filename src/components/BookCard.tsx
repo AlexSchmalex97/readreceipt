@@ -240,8 +240,8 @@ export const BookCard = ({
           <span>Pages left: {pagesLeft}</span>
         </div>
 
-        <div className="flex items-center gap-1 sm:gap-2">
-          <span className="text-[10px] sm:text-sm text-muted-foreground">Current {trackingMode === "page" ? "page" : "progress"}:</span>
+        <div className="flex flex-wrap items-center gap-1 sm:gap-2 w-full">
+          <span className="text-[10px] sm:text-sm text-muted-foreground flex-shrink-0 w-full sm:w-auto">Current {trackingMode === "page" ? "page" : "progress"}:</span>
           {isEditing ? (
             <>
               <Input
@@ -275,7 +275,9 @@ export const BookCard = ({
                     }
                   }
                 }}
-                className="flex-1 h-8 sm:h-10 text-base sm:text-lg px-3"
+                className="w-full sm:flex-1 min-w-[140px] h-9 sm:h-10 text-base sm:text-lg px-3 text-foreground"
+                inputMode="numeric"
+                aria-label={trackingMode === "page" ? "Enter current page" : "Enter percentage"}
                 min="0"
                 max={trackingMode === "page" ? book.totalPages : 100}
                 placeholder={trackingMode === "page" ? "Page" : "%"}
@@ -287,14 +289,14 @@ export const BookCard = ({
                 onClick={() => {
                   setTrackingMode(trackingMode === "page" ? "percentage" : "page");
                 }}
-                className="h-6 sm:h-8 px-1 sm:px-2 text-xs"
+                className="h-6 sm:h-8 px-1 sm:px-2 text-xs flex-shrink-0 mt-1 sm:mt-0"
               >
                 {trackingMode === "page" ? "%" : "#"}
               </Button>
               <Button
                 size="sm"
                 onClick={handleSave}
-                className="h-6 w-6 sm:h-8 sm:w-8 p-0 bg-gradient-primary hover:opacity-90"
+                className="h-6 w-6 sm:h-8 sm:w-8 p-0 bg-gradient-primary hover:opacity-90 flex-shrink-0 mt-1 sm:mt-0"
               >
                 <Check className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
@@ -302,7 +304,7 @@ export const BookCard = ({
                 size="sm"
                 variant="outline"
                 onClick={handleCancel}
-                className="h-6 w-6 sm:h-8 sm:w-8 p-0"
+                className="h-6 w-6 sm:h-8 sm:w-8 p-0 flex-shrink-0 mt-1 sm:mt-0"
               >
                 <X className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
