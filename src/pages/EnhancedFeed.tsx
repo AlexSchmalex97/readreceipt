@@ -136,38 +136,45 @@ export default function EnhancedFeed() {
       .in("id", targetIds);
     const profileMap = new Map(profiles?.map(p => [p.id, { display_name: p.display_name, avatar_url: p.avatar_url }]) || []);
 
-    // Load posts
+    // Load posts (no relational joins; we'll map books separately)
     const { data: posts } = await supabase
-      .from("posts")
-      .select(`
-        *, 
-        books!posts_book_id_fkey ( title, author, cover_url )
-      `)
-      .in("user_id", targetIds)
-      .order("created_at", { ascending: false })
+      .from('posts')
+      .select('id, created_at, updated_at, user_id, content, book_id')
+      .in('user_id', targetIds)
+      .order('created_at', { ascending: false })
       .limit(50);
 
     // Load reading progress
     const { data: progress } = await supabase
-      .from("reading_progress")
-      .select(`
-        id, created_at, user_id, from_page, to_page, book_id,
-        books!reading_progress_book_id_fkey ( title, author, cover_url )
-      `)
-      .in("user_id", targetIds)
-      .order("created_at", { ascending: false })
+      .from('reading_progress')
+      .select('id, created_at, user_id, from_page, to_page, book_id')
+      .in('user_id', targetIds)
+      .order('created_at', { ascending: false })
       .limit(50);
 
     // Load reviews
     const { data: reviews } = await supabase
-      .from("reviews")
-      .select(`
-        id, created_at, user_id, rating, review, book_id,
-        books!reviews_book_id_fkey ( title, author, cover_url )
-      `)
-      .in("user_id", targetIds)
-      .order("created_at", { ascending: false })
+      .from('reviews')
+      .select('id, created_at, user_id, rating, review, book_id')
+      .in('user_id', targetIds)
+      .order('created_at', { ascending: false })
       .limit(50);
+
+    // Fetch book details for all referenced book_ids
+    const bookIds = Array.from(new Set([
+      ...((posts || []).map((p: any) => p.book_id).filter(Boolean)),
+      ...((progress || []).map((r: any) => r.book_id).filter(Boolean)),
+      ...((reviews || []).map((r: any) => r.book_id).filter(Boolean)),
+    ])) as string[];
+
+    let bookMap = new Map<string, { id: string; title: string | null; author: string | null; cover_url: string | null }>();
+    if (bookIds.length) {
+      const { data: booksData } = await supabase
+        .from('books')
+        .select('id, title, author, cover_url')
+        .in('id', bookIds);
+      bookMap = new Map((booksData || []).map((b: any) => [b.id, b]));
+    }
 
     // Get likes and comments counts
     const allItemIds = [
@@ -213,57 +220,66 @@ export default function EnhancedFeed() {
     const commentsMap = new Map(commentsData.map(c => [`${c.type}-${c.id}`, c.comments_count]));
 
     // Transform data to feed items
-    const postItems: Post[] = (posts || []).map((p: any) => ({
-      kind: "post",
-      id: p.id,
-      created_at: p.created_at,
-      updated_at: p.updated_at,
-      user_id: p.user_id,
-      display_name: profileMap.get(p.user_id)?.display_name ?? null,
-      avatar_url: profileMap.get(p.user_id)?.avatar_url ?? null,
-      content: p.content,
-      book_id: p.book_id,
-      book_title: p.books?.title ?? null,
-      book_author: p.books?.author ?? null,
-      book_cover_url: p.books?.cover_url ?? null,
-      likes_count: likesMap.get(`post-${p.id}`)?.likes_count || 0,
-      comments_count: commentsMap.get(`post-${p.id}`) || 0,
-      user_liked: likesMap.get(`post-${p.id}`)?.user_liked || false,
-    }));
+    const postItems: Post[] = (posts || []).map((p: any) => {
+      const b = p.book_id ? bookMap.get(p.book_id) : undefined;
+      return {
+        kind: "post",
+        id: p.id,
+        created_at: p.created_at,
+        updated_at: p.updated_at,
+        user_id: p.user_id,
+        display_name: profileMap.get(p.user_id)?.display_name ?? null,
+        avatar_url: profileMap.get(p.user_id)?.avatar_url ?? null,
+        content: p.content,
+        book_id: p.book_id,
+        book_title: b?.title ?? null,
+        book_author: b?.author ?? null,
+        book_cover_url: b?.cover_url ?? null,
+        likes_count: likesMap.get(`post-${p.id}`)?.likes_count || 0,
+        comments_count: commentsMap.get(`post-${p.id}`) || 0,
+        user_liked: likesMap.get(`post-${p.id}`)?.user_liked || false,
+      } as Post;
+    });
 
-    const progressItems: ProgressItem[] = (progress || []).map((r: any) => ({
-      kind: "progress",
-      id: r.id,
-      created_at: r.created_at,
-      user_id: r.user_id,
-      display_name: profileMap.get(r.user_id)?.display_name ?? null,
-      avatar_url: profileMap.get(r.user_id)?.avatar_url ?? null,
-      book_title: r.books?.title ?? null,
-      book_author: r.books?.author ?? null,
-      book_cover_url: r.books?.cover_url ?? null,
-      from_page: r.from_page ?? null,
-      to_page: r.to_page,
-      likes_count: likesMap.get(`progress-${r.id}`)?.likes_count || 0,
-      comments_count: commentsMap.get(`progress-${r.id}`) || 0,
-      user_liked: likesMap.get(`progress-${r.id}`)?.user_liked || false,
-    }));
+    const progressItems: ProgressItem[] = (progress || []).map((r: any) => {
+      const b = r.book_id ? bookMap.get(r.book_id) : undefined;
+      return {
+        kind: "progress",
+        id: r.id,
+        created_at: r.created_at,
+        user_id: r.user_id,
+        display_name: profileMap.get(r.user_id)?.display_name ?? null,
+        avatar_url: profileMap.get(r.user_id)?.avatar_url ?? null,
+        book_title: b?.title ?? null,
+        book_author: b?.author ?? null,
+        book_cover_url: b?.cover_url ?? null,
+        from_page: r.from_page ?? null,
+        to_page: r.to_page,
+        likes_count: likesMap.get(`progress-${r.id}`)?.likes_count || 0,
+        comments_count: commentsMap.get(`progress-${r.id}`) || 0,
+        user_liked: likesMap.get(`progress-${r.id}`)?.user_liked || false,
+      } as ProgressItem;
+    });
 
-    const reviewItems: ReviewItem[] = (reviews || []).map((r: any) => ({
-      kind: "review",
-      id: r.id,
-      created_at: r.created_at,
-      user_id: r.user_id,
-      display_name: profileMap.get(r.user_id)?.display_name ?? null,
-      avatar_url: profileMap.get(r.user_id)?.avatar_url ?? null,
-      book_title: r.books?.title ?? null,
-      book_author: r.books?.author ?? null,
-      book_cover_url: r.books?.cover_url ?? null,
-      rating: r.rating,
-      review: r.review,
-      likes_count: likesMap.get(`review-${r.id}`)?.likes_count || 0,
-      comments_count: commentsMap.get(`review-${r.id}`) || 0,
-      user_liked: likesMap.get(`review-${r.id}`)?.user_liked || false,
-    }));
+    const reviewItems: ReviewItem[] = (reviews || []).map((r: any) => {
+      const b = r.book_id ? bookMap.get(r.book_id) : undefined;
+      return {
+        kind: "review",
+        id: r.id,
+        created_at: r.created_at,
+        user_id: r.user_id,
+        display_name: profileMap.get(r.user_id)?.display_name ?? null,
+        avatar_url: profileMap.get(r.user_id)?.avatar_url ?? null,
+        book_title: b?.title ?? null,
+        book_author: b?.author ?? null,
+        book_cover_url: b?.cover_url ?? null,
+        rating: r.rating,
+        review: r.review,
+        likes_count: likesMap.get(`review-${r.id}`)?.likes_count || 0,
+        comments_count: commentsMap.get(`review-${r.id}`) || 0,
+        user_liked: likesMap.get(`review-${r.id}`)?.user_liked || false,
+      } as ReviewItem;
+    });
 
     // Merge and sort by date, with Currently Reading before In Progress
     const currentlyReading = progressItems.filter(p => p.from_page === null);
