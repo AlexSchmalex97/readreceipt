@@ -552,9 +552,24 @@ export default function EnhancedFeed() {
             ) : (
               <div>
                 {item.book_title && (
-                  <div className="mb-2 text-sm text-muted-foreground flex items-center gap-2">
-                    <BookOpen className="w-4 h-4" />
-                    About: <em>{item.book_title}</em> {item.book_author && `by ${item.book_author}`}
+                  <div className="flex gap-3 mb-3">
+                    {item.book_cover_url ? (
+                      <img 
+                        src={item.book_cover_url} 
+                        alt={item.book_title}
+                        className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                        <BookOpen className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm text-muted-foreground flex items-center gap-2 mb-2">
+                        <BookOpen className="w-4 h-4" />
+                        About: <em>{item.book_title}</em> {item.book_author && `by ${item.book_author}`}
+                      </div>
+                    </div>
                   </div>
                 )}
                 <p className="whitespace-pre-wrap">{item.content}</p>
