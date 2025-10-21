@@ -380,24 +380,24 @@ export default function ProfileDisplay() {
 
               {/* Favorite Book and Current Read - Swapped and Equal Size */}
               {(currentBook || favoriteBook) && (
-                <div className="mt-3 flex gap-3">
+                <div className="mt-4 flex gap-3">
                   {/* Favorite Book - First */}
                   {favoriteBook && (
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-xs font-medium text-muted-foreground mb-1.5">Favorite Book</h3>
-                      <div className="flex items-center gap-2 p-2 border rounded-lg h-full">
+                      <h3 className="text-xs font-medium text-muted-foreground mb-2">Favorite Book</h3>
+                      <div className="flex items-center gap-2.5 p-3 border rounded-lg h-full">
                         {favoriteBook.cover_url && (
                           <img
                             src={favoriteBook.cover_url}
                             alt={favoriteBook.title}
-                            className="w-10 h-14 object-cover rounded flex-shrink-0"
+                            className="w-12 h-16 object-cover rounded flex-shrink-0"
                           />
                         )}
                         <div className="flex-1 min-w-0 overflow-hidden">
-                          <div className="font-medium text-[10px] sm:text-[11px] leading-tight line-clamp-2">
+                          <div className="font-medium text-xs leading-tight line-clamp-2">
                             {favoriteBook.title}
                           </div>
-                          <div className="text-[9px] sm:text-[10px] text-muted-foreground line-clamp-1 mt-0.5">
+                          <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">
                             {favoriteBook.author}
                           </div>
                         </div>
@@ -408,19 +408,19 @@ export default function ProfileDisplay() {
                   {/* Current Read - Second */}
                   {currentBook && (
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-xs font-medium text-muted-foreground mb-1.5">Currently Reading</h3>
-                      <div className="flex items-center gap-2 p-2 border rounded-lg h-full">
+                      <h3 className="text-xs font-medium text-muted-foreground mb-2">Currently Reading</h3>
+                      <div className="flex items-center gap-2.5 p-3 border rounded-lg h-full">
                         {currentBook.cover_url && (
                           <img
                             src={currentBook.cover_url}
                             alt={currentBook.title}
-                            className="w-10 h-14 object-cover rounded flex-shrink-0"
+                            className="w-12 h-16 object-cover rounded flex-shrink-0"
                           />
                         )}
                         <div className="flex-1 min-w-0 overflow-hidden">
-                          <div className="font-medium text-[10px] sm:text-[11px] leading-tight line-clamp-2">{currentBook.title}</div>
-                          <div className="text-[9px] sm:text-[10px] text-muted-foreground line-clamp-1 mt-0.5">{currentBook.author}</div>
-                          <div className="text-[9px] sm:text-[10px] text-muted-foreground mt-0.5">
+                          <div className="font-medium text-xs leading-tight line-clamp-2">{currentBook.title}</div>
+                          <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">{currentBook.author}</div>
+                          <div className="text-[10px] text-muted-foreground mt-1">
                             Page {currentBook.current_page} of {currentBook.total_pages}
                           </div>
                         </div>
@@ -432,8 +432,8 @@ export default function ProfileDisplay() {
 
               {/* Social Media & Website */}
               {(profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url ? (
-                <div className="mt-3">
-                  <h3 className="text-xs font-medium text-muted-foreground mb-1.5">Links</h3>
+                <div className="mt-5">
+                  <h3 className="text-xs font-medium text-muted-foreground mb-2">Links</h3>
                   <div className="flex flex-wrap gap-1.5">
                     {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
                       const Icon = getSocialMediaIcon(platform);
