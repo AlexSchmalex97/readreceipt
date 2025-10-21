@@ -340,8 +340,8 @@ export default function ProfileDisplay() {
         <div className="container mx-auto px-3 sm:px-6 py-4 sm:py-6 max-w-7xl">
         {/* Header with Settings Button */}
         <div className="flex justify-between items-start mb-4 sm:mb-6">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-muted border-2 border-border">
+          <div className="flex items-center gap-4 sm:gap-6">
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden bg-muted border-2 border-border flex-shrink-0">
               {profile.avatar_url ? (
                 <img 
                   src={profile.avatar_url} 
@@ -350,28 +350,28 @@ export default function ProfileDisplay() {
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <User className="w-8 h-8 text-muted-foreground" />
+                  <User className="w-12 h-12 text-muted-foreground" />
                 </div>
               )}
             </div>
             
-            <div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">
+            <div className="flex-1">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground">
                 {profile.display_name || "Reader"}
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-base sm:text-lg text-muted-foreground mt-1">
                 @{profile.username || profile.id.slice(0, 8)}
               </p>
               {profile.bio && (
-                <p className="text-sm text-foreground mt-1 max-w-md">{profile.bio}</p>
+                <p className="text-base text-foreground mt-2 max-w-2xl">{profile.bio}</p>
               )}
-              <div className="flex items-center gap-3 mt-1.5">
-                <p className="text-xs text-muted-foreground">
+              <div className="flex items-center gap-4 mt-3">
+                <p className="text-sm text-muted-foreground">
                   <Calendar className="w-4 h-4 inline mr-1" />
                   Member since {new Date(profile.created_at).toLocaleDateString()}
                 </p>
                 {zodiacSign && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     <Star className="w-4 h-4 inline mr-1" />
                     {zodiacSign}
                   </p>
@@ -380,24 +380,24 @@ export default function ProfileDisplay() {
 
               {/* Favorite Book and Current Read - Swapped and Equal Size */}
               {(currentBook || favoriteBook) && (
-                <div className="mt-4 flex gap-3">
+                <div className="mt-5 flex gap-4">
                   {/* Favorite Book - First */}
                   {favoriteBook && (
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-xs font-medium text-muted-foreground mb-2">Favorite Book</h3>
-                      <div className="flex items-center gap-2.5 p-3 border rounded-lg h-full">
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2.5">Favorite Book</h3>
+                      <div className="flex items-center gap-3 p-4 border rounded-lg h-full">
                         {favoriteBook.cover_url && (
                           <img
                             src={favoriteBook.cover_url}
                             alt={favoriteBook.title}
-                            className="w-12 h-16 object-cover rounded flex-shrink-0"
+                            className="w-16 h-20 object-cover rounded flex-shrink-0"
                           />
                         )}
                         <div className="flex-1 min-w-0 overflow-hidden">
-                          <div className="font-medium text-xs leading-tight line-clamp-2">
+                          <div className="font-medium text-sm leading-tight line-clamp-2">
                             {favoriteBook.title}
                           </div>
-                          <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">
+                          <div className="text-xs text-muted-foreground line-clamp-1 mt-1.5">
                             {favoriteBook.author}
                           </div>
                         </div>
@@ -408,19 +408,19 @@ export default function ProfileDisplay() {
                   {/* Current Read - Second */}
                   {currentBook && (
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-xs font-medium text-muted-foreground mb-2">Currently Reading</h3>
-                      <div className="flex items-center gap-2.5 p-3 border rounded-lg h-full">
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2.5">Currently Reading</h3>
+                      <div className="flex items-center gap-3 p-4 border rounded-lg h-full">
                         {currentBook.cover_url && (
                           <img
                             src={currentBook.cover_url}
                             alt={currentBook.title}
-                            className="w-12 h-16 object-cover rounded flex-shrink-0"
+                            className="w-16 h-20 object-cover rounded flex-shrink-0"
                           />
                         )}
                         <div className="flex-1 min-w-0 overflow-hidden">
-                          <div className="font-medium text-xs leading-tight line-clamp-2">{currentBook.title}</div>
-                          <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">{currentBook.author}</div>
-                          <div className="text-[10px] text-muted-foreground mt-1">
+                          <div className="font-medium text-sm leading-tight line-clamp-2">{currentBook.title}</div>
+                          <div className="text-xs text-muted-foreground line-clamp-1 mt-1.5">{currentBook.author}</div>
+                          <div className="text-xs text-muted-foreground mt-1.5">
                             Page {currentBook.current_page} of {currentBook.total_pages}
                           </div>
                         </div>
@@ -432,9 +432,9 @@ export default function ProfileDisplay() {
 
               {/* Social Media & Website */}
               {(profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url ? (
-                <div className="mt-5">
-                  <h3 className="text-xs font-medium text-muted-foreground mb-2">Links</h3>
-                  <div className="flex flex-wrap gap-1.5">
+                <div className="mt-6">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2.5">Links</h3>
+                  <div className="flex flex-wrap gap-2">
                     {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
                       const Icon = getSocialMediaIcon(platform);
                       return (
