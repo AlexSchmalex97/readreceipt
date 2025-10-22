@@ -337,12 +337,13 @@ export default function ProfileDisplay() {
     <div className="min-h-screen bg-gradient-soft">
       <Navigation />
       
-        <div className="container mx-auto px-3 sm:px-6 py-4 sm:py-6 max-w-7xl">
-        {/* Header with Settings Button */}
-        <div className="flex justify-between items-start mb-4 sm:mb-6">
-          <div className="flex items-center gap-6 flex-1">
-            {/* Profile Photo */}
-            <div className="w-32 h-32 rounded-full overflow-hidden bg-muted border-2 border-border flex-shrink-0">
+      <div className="container mx-auto px-3 sm:px-6 py-2 sm:py-6 max-w-7xl">
+        {/* Mobile Layout */}
+        <div className="md:hidden">
+          {/* Compact Header */}
+          <div className="flex items-start gap-3 mb-3">
+            {/* Profile Photo - Smaller */}
+            <div className="w-16 h-16 rounded-full overflow-hidden bg-muted border border-border flex-shrink-0">
               {profile.avatar_url ? (
                 <img 
                   src={profile.avatar_url} 
@@ -351,183 +352,272 @@ export default function ProfileDisplay() {
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <User className="w-16 h-16 text-muted-foreground" />
+                  <User className="w-8 h-8 text-muted-foreground" />
                 </div>
               )}
             </div>
             
-            {/* Left Column - Profile Info */}
+            {/* Profile Info - Condensed */}
             <div className="flex-1 min-w-0">
-              <h1 className="text-5xl font-bold text-foreground">
+              <h1 className="text-xl font-bold text-foreground truncate">
                 {profile.display_name || "Reader"}
               </h1>
-              <p className="text-lg text-muted-foreground mt-1">
+              <p className="text-sm text-muted-foreground truncate">
                 @{profile.username || profile.id.slice(0, 8)}
               </p>
-              {profile.bio && (
-                <p className="text-base text-foreground mt-2 max-w-2xl">{profile.bio}</p>
-              )}
-              <div className="flex items-center gap-4 mt-3">
-                <p className="text-sm text-muted-foreground">
-                  <Calendar className="w-4 h-4 inline mr-1" />
-                  Member since {new Date(profile.created_at).toLocaleDateString()}
+              {zodiacSign && (
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  <Star className="w-3 h-3 inline mr-1" />
+                  {zodiacSign}
                 </p>
-                {zodiacSign && (
-                  <p className="text-sm text-muted-foreground">
-                    <Star className="w-4 h-4 inline mr-1" />
-                    {zodiacSign}
-                  </p>
+              )}
+            </div>
+
+            {/* Settings Button - Icon Only */}
+            <Link to="/profile/settings">
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                <Settings className="w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
+
+          {/* Stats - Single Row */}
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            <Card>
+              <CardContent className="p-2 text-center">
+                <p className="text-lg font-bold text-foreground">{bookStats.inProgressBooks}</p>
+                <p className="text-[9px] text-muted-foreground">Reading</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-2 text-center">
+                <p className="text-lg font-bold text-foreground">{bookStats.completedBooks}</p>
+                <p className="text-[9px] text-muted-foreground">Done</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-2 text-center">
+                <p className="text-lg font-bold text-foreground">{bookStats.totalBooks}</p>
+                <p className="text-[9px] text-muted-foreground">Total</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Reading Goal - Compact */}
+          <div className="mb-3">
+            <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedBooks} />
+          </div>
+
+          {/* Quick Actions - Compact */}
+          <div className="grid grid-cols-2 gap-2">
+            <Link to="/">
+              <Button variant="outline" size="sm" className="w-full text-xs h-8">
+                <BookOpen className="w-3 h-3 mr-1" />
+                Books
+              </Button>
+            </Link>
+            <Link to="/completed">
+              <Button variant="outline" size="sm" className="w-full text-xs h-8">
+                <Star className="w-3 h-3 mr-1" />
+                Completed
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Desktop Layout */}
+        <div className="hidden md:block">
+          {/* Header with Settings Button */}
+          <div className="flex justify-between items-start mb-4 sm:mb-6">
+            <div className="flex items-center gap-6 flex-1">
+              {/* Profile Photo */}
+              <div className="w-32 h-32 rounded-full overflow-hidden bg-muted border-2 border-border flex-shrink-0">
+                {profile.avatar_url ? (
+                  <img 
+                    src={profile.avatar_url} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <User className="w-16 h-16 text-muted-foreground" />
+                  </div>
                 )}
               </div>
-
-              {/* Favorite Book and Current Read */}
-              {(currentBook || favoriteBook) && (
-                <div className="mt-4 flex gap-4">
-                  {/* Favorite Book */}
-                  {favoriteBook && (
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-xs font-medium text-muted-foreground mb-2">Favorite Book</h3>
-                      <div className="flex items-center gap-2 p-3 border rounded-lg h-full bg-card">
-                        {favoriteBook.cover_url && (
-                          <img
-                            src={favoriteBook.cover_url}
-                            alt={favoriteBook.title}
-                            className="w-12 h-16 object-cover rounded flex-shrink-0"
-                          />
-                        )}
-                        <div className="flex-1 min-w-0 overflow-hidden">
-                          <div className="font-medium text-xs leading-tight line-clamp-2">
-                            {favoriteBook.title}
-                          </div>
-                          <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">
-                            {favoriteBook.author}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Currently Reading */}
-                  {currentBook && (
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-xs font-medium text-muted-foreground mb-2">Currently Reading</h3>
-                      <div className="flex items-center gap-2 p-3 border rounded-lg h-full bg-card">
-                        {currentBook.cover_url && (
-                          <img
-                            src={currentBook.cover_url}
-                            alt={currentBook.title}
-                            className="w-12 h-16 object-cover rounded flex-shrink-0"
-                          />
-                        )}
-                        <div className="flex-1 min-w-0 overflow-hidden">
-                          <div className="font-medium text-xs leading-tight line-clamp-2">{currentBook.title}</div>
-                          <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">{currentBook.author}</div>
-                          <div className="text-[10px] text-muted-foreground mt-1">
-                            Page {currentBook.current_page} of {currentBook.total_pages}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+              
+              {/* Left Column - Profile Info */}
+              <div className="flex-1 min-w-0">
+                <h1 className="text-5xl font-bold text-foreground">
+                  {profile.display_name || "Reader"}
+                </h1>
+                <p className="text-lg text-muted-foreground mt-1">
+                  @{profile.username || profile.id.slice(0, 8)}
+                </p>
+                {profile.bio && (
+                  <p className="text-base text-foreground mt-2 max-w-2xl">{profile.bio}</p>
+                )}
+                <div className="flex items-center gap-4 mt-3">
+                  <p className="text-sm text-muted-foreground">
+                    <Calendar className="w-4 h-4 inline mr-1" />
+                    Member since {new Date(profile.created_at).toLocaleDateString()}
+                  </p>
+                  {zodiacSign && (
+                    <p className="text-sm text-muted-foreground">
+                      <Star className="w-4 h-4 inline mr-1" />
+                      {zodiacSign}
+                    </p>
                   )}
                 </div>
-              )}
 
-              {/* Links */}
-              {(profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url ? (
-                <div className="mt-6">
-                  <h3 className="text-xs font-medium text-muted-foreground mb-2">Links</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
-                      const Icon = getSocialMediaIcon(platform);
-                      return (
+                {/* Favorite Book and Current Read */}
+                {(currentBook || favoriteBook) && (
+                  <div className="mt-4 flex gap-4">
+                    {/* Favorite Book */}
+                    {favoriteBook && (
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xs font-medium text-muted-foreground mb-2">Favorite Book</h3>
+                        <div className="flex items-center gap-2 p-3 border rounded-lg h-full bg-card">
+                          {favoriteBook.cover_url && (
+                            <img
+                              src={favoriteBook.cover_url}
+                              alt={favoriteBook.title}
+                              className="w-12 h-16 object-cover rounded flex-shrink-0"
+                            />
+                          )}
+                          <div className="flex-1 min-w-0 overflow-hidden">
+                            <div className="font-medium text-xs leading-tight line-clamp-2">
+                              {favoriteBook.title}
+                            </div>
+                            <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">
+                              {favoriteBook.author}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Currently Reading */}
+                    {currentBook && (
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xs font-medium text-muted-foreground mb-2">Currently Reading</h3>
+                        <div className="flex items-center gap-2 p-3 border rounded-lg h-full bg-card">
+                          {currentBook.cover_url && (
+                            <img
+                              src={currentBook.cover_url}
+                              alt={currentBook.title}
+                              className="w-12 h-16 object-cover rounded flex-shrink-0"
+                            />
+                          )}
+                          <div className="flex-1 min-w-0 overflow-hidden">
+                            <div className="font-medium text-xs leading-tight line-clamp-2">{currentBook.title}</div>
+                            <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">{currentBook.author}</div>
+                            <div className="text-[10px] text-muted-foreground mt-1">
+                              Page {currentBook.current_page} of {currentBook.total_pages}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Links */}
+                {(profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url ? (
+                  <div className="mt-6">
+                    <h3 className="text-xs font-medium text-muted-foreground mb-2">Links</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
+                        const Icon = getSocialMediaIcon(platform);
+                        return (
+                          <a
+                            key={platform}
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 px-2 py-1 text-xs border rounded-full hover:bg-accent transition-colors"
+                          >
+                            <Icon className="w-3 h-3" />
+                            {platform}
+                          </a>
+                        );
+                      })}
+                      {profile.website_url && (
                         <a
-                          key={platform}
-                          href={url}
+                          href={profile.website_url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-1.5 px-2 py-1 text-xs border rounded-full hover:bg-accent transition-colors"
                         >
-                          <Icon className="w-3 h-3" />
-                          {platform}
+                          <ExternalLink className="w-3 h-3" />
+                          Website
                         </a>
-                      );
-                    })}
-                    {profile.website_url && (
-                      <a
-                        href={profile.website_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 px-2 py-1 text-xs border rounded-full hover:bg-accent transition-colors"
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                        Website
-                      </a>
-                    )}
+                      )}
+                    </div>
                   </div>
+                ) : null}
+              </div>
+
+              {/* Right Column - Reading Goal & Stats */}
+              <div className="w-80 flex-shrink-0">
+                {/* Reading Goals - Compact Version */}
+                <div className="mb-3">
+                  <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedBooks} />
                 </div>
-              ) : null}
-            </div>
 
-            {/* Right Column - Reading Goal & Stats */}
-            <div className="w-80 flex-shrink-0">
-              {/* Reading Goals - Compact Version */}
-              <div className="mb-3">
-                <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedBooks} />
-              </div>
-
-              {/* Stats - Horizontal Layout */}
-              <div className="grid grid-cols-3 gap-2">
-                <Card>
-                  <CardContent className="p-3 text-center">
-                    <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                    <p className="text-2xl font-bold text-foreground">{bookStats.inProgressBooks}</p>
-                    <p className="text-[10px] text-muted-foreground">In Progress</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-3 text-center">
-                    <Star className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                    <p className="text-2xl font-bold text-foreground">{bookStats.completedBooks}</p>
-                    <p className="text-[10px] text-muted-foreground">Completed</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-3 text-center">
-                    <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                    <p className="text-2xl font-bold text-foreground">{bookStats.totalBooks}</p>
-                    <p className="text-[10px] text-muted-foreground">Total Books</p>
-                  </CardContent>
-                </Card>
+                {/* Stats - Horizontal Layout */}
+                <div className="grid grid-cols-3 gap-2">
+                  <Card>
+                    <CardContent className="p-3 text-center">
+                      <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                      <p className="text-2xl font-bold text-foreground">{bookStats.inProgressBooks}</p>
+                      <p className="text-[10px] text-muted-foreground">In Progress</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-3 text-center">
+                      <Star className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                      <p className="text-2xl font-bold text-foreground">{bookStats.completedBooks}</p>
+                      <p className="text-[10px] text-muted-foreground">Completed</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-3 text-center">
+                      <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                      <p className="text-2xl font-bold text-foreground">{bookStats.totalBooks}</p>
+                      <p className="text-[10px] text-muted-foreground">Total Books</p>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </div>
+            
+            <Link to="/profile/settings" className="ml-4">
+              <Button variant="outline" className="gap-2">
+                <Settings className="w-4 h-4" />
+                Settings
+              </Button>
+            </Link>
           </div>
-          
-          <Link to="/profile/settings" className="ml-4">
-            <Button variant="outline" className="gap-2">
-              <Settings className="w-4 h-4" />
-              Settings
-            </Button>
-          </Link>
+
+          {/* Quick Actions */}
+          <div className="flex flex-wrap gap-3 mb-4 justify-center">
+            <Link to="/">
+              <Button variant="outline" size="sm">
+                <BookOpen className="w-4 h-4 mr-2" />
+                View Books
+              </Button>
+            </Link>
+            <Link to="/completed">
+              <Button variant="outline" size="sm">
+                <Star className="w-4 h-4 mr-2" />
+                Completed Books
+              </Button>
+            </Link>
+          </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="flex flex-wrap gap-3 mb-4 justify-center">
-          <Link to="/">
-            <Button variant="outline" size="sm">
-              <BookOpen className="w-4 h-4 mr-2" />
-              View Books
-            </Button>
-          </Link>
-          <Link to="/completed">
-            <Button variant="outline" size="sm">
-              <Star className="w-4 h-4 mr-2" />
-              Completed Books
-            </Button>
-          </Link>
-        </div>
-
-        {/* Three Column Layout: Recent Reviews - Activity Feed - TBR List */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {/* Three Column Layout: Recent Reviews - Activity Feed - TBR List (Hidden on Mobile) */}
+        <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-3">
           {/* Recent Reviews */}
           <Card>
             <CardHeader className="p-3 pb-2">
