@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BookOpen, Heart, MessageCircle, Edit2, Trash2, Send, Plus, MoreHorizontal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { usePlatform } from "@/hooks/usePlatform";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 
 type Post = {
   kind: "post";
