@@ -39,7 +39,7 @@ export default function Reviews() {
       setLoading(false);
       return;
     }
-    setLoading(true);
+    if (reviews.length === 0) setLoading(true);
 
       // Load all books for user and filter completed client-side
       const { data: allBooks, error: booksError } = await supabase

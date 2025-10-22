@@ -111,7 +111,7 @@ export default function ProfileDisplay() {
   const { isIOS, isReadReceiptApp } = usePlatform();
 
   const loadData = async () => {
-      setLoading(true);
+      if (!profile) setLoading(true);
       
       // Get current user
       const { data: sess } = await supabase.auth.getSession();

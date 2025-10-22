@@ -77,7 +77,7 @@ const Index = () => {
 
   // Load books: Supabase when logged in, otherwise localStorage
   const loadBooks = async () => {
-    setLoading(true);
+    if (books.length === 0) setLoading(true);
     try {
       if (userId) {
         const { data, error } = await supabase
@@ -180,24 +180,25 @@ const Index = () => {
       const start = `${y}-01-01`;
       const end = `${y}-12-31`;
 
-      // 1) Completed reading entries this year (re-reads supported)
-      const { data: entries, error: entriesError } = await supabase
-        .from('reading_entries')
-        .select('id, book_id')
-        .eq('user_id', userId)
-        .not('finished_at', 'is', null)
-        .gte('finished_at', start)
-        .lte('finished_at', end);
+      const [
+        { data: entries, error: entriesError },
+        { data: books, error: booksError }
+      ] = await Promise.all([
+        supabase
+          .from('reading_entries')
+          .select('id, book_id')
+          .eq('user_id', userId)
+          .not('finished_at', 'is', null)
+          .gte('finished_at', start)
+          .lte('finished_at', end),
+        supabase
+          .from('books')
+          .select('id, current_page, total_pages, finished_at, created_at, status')
+          .eq('user_id', userId)
+      ]);
 
       const entryCount = entries?.length ?? 0;
       const booksWithEntry = new Set((entries ?? []).map((e: any) => e.book_id));
-
-      // 2) Fallback: completed books this year that have NO entry this year (avoid double count)
-      const { data: books, error: booksError } = await supabase
-        .from('books')
-        .select('id, current_page, total_pages, finished_at, created_at, status')
-        .eq('user_id', userId);
-
       let extra = 0;
       if (books) {
         extra = books.filter((b: any) => {
