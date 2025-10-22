@@ -63,14 +63,8 @@ export function Navigation() {
             <img
               src="/assets/readreceipt-logo.png"
               alt="ReadReceipt logo"
-              className="w-10 h-10 sm:w-14 sm:h-14"
+              className="h-8 sm:h-10"
             />
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-primary">ReadReceipt</h1>
-              <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                Track your reading progress and stay motivated
-              </p>
-            </div>
           </div>
           
           <AuthButtons />
