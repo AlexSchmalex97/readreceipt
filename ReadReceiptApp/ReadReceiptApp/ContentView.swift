@@ -49,99 +49,136 @@ struct ContentView: View {
     }
 }
 
-// Book-like page flipping animation inspired by provided GIF
+// Open book with fluttering pages animation
 struct BookLoadingAnimation: View {
-    @State private var flip: Double = 0
+    @State private var pageFlutter: Double = 0
     @State private var bounce: CGFloat = 0
     
     var body: some View {
         VStack(spacing: 20) {
             ZStack {
-                // Subtle base shadow
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.black.opacity(0.05))
-                    .frame(width: 180, height: 120)
-                    .blur(radius: 10)
-                    .offset(y: 30)
-                
-                // Book base with pages
+                // Open book with orange cover
                 ZStack {
-                    // Back cover
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(red: 0.28, green: 0.20, blue: 0.14))
-                        .frame(width: 160, height: 110)
-                        .shadow(color: Color.black.opacity(0.2), radius: 12, x: 0, y: 8)
+                    // Left cover (orange)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color(red: 1.0, green: 0.65, blue: 0.0),
+                                    Color(red: 1.0, green: 0.55, blue: 0.0)
+                                ]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .frame(width: 90, height: 110)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(Color(red: 0.9, green: 0.5, blue: 0.0), lineWidth: 3)
+                        )
+                        .rotation3DEffect(
+                            .degrees(-35),
+                            axis: (x: 0, y: 1, z: 0),
+                            anchor: .trailing,
+                            perspective: 0.4
+                        )
+                        .offset(x: -20, y: 2)
                     
-                    // Right static pages
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(Color(red: 0.94, green: 0.92, blue: 0.88))
-                        .frame(width: 140, height: 100)
-                        .offset(x: 18)
+                    // Right cover (orange)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color(red: 1.0, green: 0.55, blue: 0.0),
+                                    Color(red: 1.0, green: 0.65, blue: 0.0)
+                                ]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .frame(width: 90, height: 110)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(Color(red: 0.9, green: 0.5, blue: 0.0), lineWidth: 3)
+                        )
+                        .rotation3DEffect(
+                            .degrees(35),
+                            axis: (x: 0, y: 1, z: 0),
+                            anchor: .leading,
+                            perspective: 0.4
+                        )
+                        .offset(x: 20, y: 2)
                     
-                    // Left static pages
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(Color(red: 0.96, green: 0.94, blue: 0.90))
-                        .frame(width: 140, height: 100)
+                    // Center binding/spine
+                    Rectangle()
+                        .fill(Color(red: 0.9, green: 0.5, blue: 0.0))
+                        .frame(width: 8, height: 110)
+                        .offset(y: 2)
+                    
+                    // Left white pages
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color(red: 0.98, green: 0.98, blue: 0.96))
+                        .frame(width: 80, height: 100)
+                        .overlay(
+                            VStack(spacing: 4) {
+                                ForEach(0..<8) { _ in
+                                    RoundedRectangle(cornerRadius: 0.5)
+                                        .fill(Color.gray.opacity(0.15))
+                                        .frame(width: 60, height: 2)
+                                }
+                            }
+                        )
+                        .rotation3DEffect(
+                            .degrees(-30),
+                            axis: (x: 0, y: 1, z: 0),
+                            anchor: .trailing,
+                            perspective: 0.4
+                        )
                         .offset(x: -18)
                     
-                    // Flipping page with lines
-                    FlippingPage(flip: flip)
-                        .frame(width: 140, height: 100)
-                        .offset(x: -8)
+                    // Right white pages (fluttering)
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color(red: 0.98, green: 0.98, blue: 0.96))
+                        .frame(width: 80, height: 100)
+                        .overlay(
+                            VStack(spacing: 4) {
+                                ForEach(0..<8) { _ in
+                                    RoundedRectangle(cornerRadius: 0.5)
+                                        .fill(Color.gray.opacity(0.15))
+                                        .frame(width: 60, height: 2)
+                                }
+                            }
+                        )
+                        .rotation3DEffect(
+                            .degrees(30 + pageFlutter),
+                            axis: (x: 0, y: 1, z: 0),
+                            anchor: .leading,
+                            perspective: 0.4
+                        )
+                        .offset(x: 18)
                 }
-                .rotation3DEffect(.degrees(8), axis: (x: 1, y: 0, z: 0))
+                .shadow(color: Color.black.opacity(0.25), radius: 20, x: 0, y: 10)
                 .offset(y: bounce)
             }
             
             Text("Loading...")
-                .font(.system(size: 16, weight: .medium))
+                .font(.system(size: 18, weight: .medium))
                 .foregroundColor(Color(red: 0.45, green: 0.35, blue: 0.25))
         }
         .onAppear {
-            withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: false)) {
-                flip = 360
+            // Gentle page flutter
+            withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
+                pageFlutter = 8
             }
-            withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) {
-                bounce = -8
+            
+            // Subtle bounce
+            withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
+                bounce = -6
             }
         }
     }
 }
 
-struct FlippingPage: View {
-    var flip: Double
-    
-    var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 6)
-                .fill(Color(red: 0.98, green: 0.97, blue: 0.94))
-                .overlay(
-                    VStack(spacing: 6) {
-                        ForEach(0..<6) { _ in
-                            RoundedRectangle(cornerRadius: 1)
-                                .fill(Color.black.opacity(0.08))
-                                .frame(height: 3)
-                        }
-                    }
-                    .padding(.horizontal, 24)
-                )
-                .rotation3DEffect(
-                    .degrees(flip),
-                    axis: (x: 0, y: 1, z: 0),
-                    anchor: .leading,
-                    perspective: 0.7
-                )
-                .shadow(color: Color.black.opacity(0.18), radius: 10, x: 0, y: 6)
-                .mask(
-                    LinearGradient(
-                        gradient: Gradient(colors: [Color.black, Color.black, Color.clear]),
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-        }
-    }
-}
 
 
 class WebViewState: ObservableObject {
