@@ -265,16 +265,40 @@ struct WebView: UIViewRepresentable {
             self.state = state
         }
         
+        // Compute and apply safe content insets dynamically
+        func updateInsets(isHome: Bool) {
+            guard let webView = self.webView else { return }
+            let safeTop = webView.safeAreaInsets.top
+            let safeBottom = webView.safeAreaInsets.bottom
+            let headerHeight: CGFloat = 68
+            let bottomInsetForTabBar: CGFloat = 80
+            let insetTop = safeTop + (isHome ? headerHeight : 0)
+            let insetBottom = bottomInsetForTabBar + safeBottom
+            var inset = webView.scrollView.contentInset
+            inset.top = insetTop
+            inset.bottom = insetBottom
+            webView.scrollView.contentInset = inset
+            var indicatorInset = webView.scrollView.scrollIndicatorInsets
+            indicatorInset.top = insetTop
+            indicatorInset.bottom = insetBottom
+            webView.scrollView.scrollIndicatorInsets = indicatorInset
+        }
+        
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
             // Account for content inset when calculating scroll offset
             let offset = scrollView.contentOffset.y + scrollView.contentInset.top
             state.updateScrollOffset(offset)
         }
         
+        func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+            DispatchQueue.main.async { self.state.isLoading = true }
+        }
+        
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             // Hide loading animation after content loads
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                 self.state.finishLoading()
+                self.updateInsets(isHome: self.state.isHomePage)
             }
         }
         
@@ -283,22 +307,14 @@ struct WebView: UIViewRepresentable {
                 DispatchQueue.main.async {
                     let isHome = (path == "/" || path == "")
                     self.state.isHomePage = isHome
-                    if let webView = self.webView {
-                        let safeAreaTop: CGFloat = 44
-                        let headerHeight: CGFloat = 68
-                        let bottomInsetForTabBar: CGFloat = 80
-                        // Home page: full header + safe area, Other pages: just safe area
-                        let insetTop: CGFloat = isHome ? headerHeight : safeAreaTop
-                        var inset = webView.scrollView.contentInset
-                        inset.top = insetTop
-                        inset.bottom = bottomInsetForTabBar
-                        webView.scrollView.contentInset = inset
-                        var indicatorInset = webView.scrollView.scrollIndicatorInsets
-                        indicatorInset.top = insetTop
-                        indicatorInset.bottom = bottomInsetForTabBar
-                        webView.scrollView.scrollIndicatorInsets = indicatorInset
-                    }
+                    self.updateInsets(isHome: isHome)
                     if isHome { self.state.headerOpacity = 1.0 }
+                    // Show loading overlay during SPA route transitions
+                    self.state.isLoading = true
+                }
+            } else if message.name == "loadingState", let loading = message.body as? Bool {
+                DispatchQueue.main.async {
+                    self.state.isLoading = loading
                 }
             }
         }
