@@ -23,6 +23,7 @@ import Contact from "./pages/Contact";
 import Integrations from "./pages/Integrations";
 import Auth from "./pages/Auth";
 import TBR from "./pages/TBR";
+import More from "./pages/More";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +68,7 @@ const App = () => {
           <Route path="/profile" element={<IOSProtectedRoute><Profile /></IOSProtectedRoute>} />
           <Route path="/settings" element={<IOSProtectedRoute><Settings /></IOSProtectedRoute>} />
           <Route path="/tbr" element={<IOSProtectedRoute><TBR /></IOSProtectedRoute>} />
+          <Route path="/more" element={<IOSProtectedRoute><More /></IOSProtectedRoute>} />
           <Route path="/profile/settings" element={<ProtectedRoute><IOSProtectedRoute><ProfileSettings /></IOSProtectedRoute></ProtectedRoute>} />
           <Route path="/completed" element={<ProtectedRoute><IOSProtectedRoute><CompletedBooks /></IOSProtectedRoute></ProtectedRoute>} />
           <Route path="/integrations" element={<ProtectedRoute><IOSProtectedRoute><Integrations /></IOSProtectedRoute></ProtectedRoute>} />

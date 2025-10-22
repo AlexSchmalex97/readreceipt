@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthButtons from "@/components/AuthButtons";
 import { HeaderDisplay } from "@/components/HeaderDisplay";
 import { usePlatform } from "@/hooks/usePlatform";
-import { Home, Users, Rss, Star, User, Mail } from "lucide-react";
+import { Home, Rss, User, Mail, BookOpen, MoreHorizontal } from "lucide-react";
 
 export function Navigation() {
   const { pathname } = useLocation();
@@ -15,11 +15,10 @@ export function Navigation() {
 
   const navItems = [
     { path: "/", label: "Home", icon: Home },
-    { path: "/people", label: "People", icon: Users },
     { path: "/feed", label: "Feed", icon: Rss },
-    { path: "/reviews", label: "Reviews", icon: Star },
     { path: "/profile", label: "Profile", icon: User },
-    { path: "/contact", label: "Contact", icon: Mail },
+    { path: "/tbr", label: "TBR", icon: BookOpen },
+    { path: "/more", label: "More", icon: MoreHorizontal },
   ];
 
   // ReadReceipt iOS App: No header, only bottom tab bar
