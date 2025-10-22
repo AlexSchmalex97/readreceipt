@@ -88,9 +88,9 @@ export function Navigation() {
           pointerEvents: isHomePage && headerOpacity < 0.1 ? 'none' : 'auto'
         }}
       >
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        <div className="container mx-auto px-3 sm:px-4 py-2 sm:py-3">
         {/* First Row: Logo + Title + Auth */}
-        <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="flex items-center justify-between gap-4 mb-3">\
           <Link to="/" className="flex items-center gap-3">
             <img
               src="/assets/readreceipt-logo.png"
