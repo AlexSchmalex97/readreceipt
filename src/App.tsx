@@ -20,6 +20,7 @@ import UserProfile from "./pages/UserProfile";
 import Contact from "./pages/Contact";
 import Integrations from "./pages/Integrations";
 import Auth from "./pages/Auth";
+import TBR from "./pages/TBR";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const App = () => {
           <Route path="/reviews" element={<Reviews />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/tbr" element={<TBR />} />
           <Route path="/profile/settings" element={<ProfileSettings />} />
           <Route path="/completed" element={<CompletedBooks />} />
           <Route path="/contact" element={<Contact />} />
