@@ -130,33 +130,30 @@ export function QuotesDisplay({ compact = false }: QuotesDisplayProps) {
       <Tooltip>
         <TooltipTrigger asChild>
           <div 
-            className={`flex items-center gap-2 px-2 sm:px-3 py-2 cursor-pointer hover:bg-accent/10 rounded-lg transition-colors ${
+            className={`flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-accent/10 rounded-lg transition-colors ${
               compact 
                 ? 'max-w-full' 
                 : 'max-w-full sm:max-w-md'
             }`}
             onClick={handleQuoteChange}
           >
-            <Quote className={`${compact ? 'w-4 h-4' : 'w-5 h-5'} text-primary flex-shrink-0`} />
+            <Quote className={`${compact ? 'w-3 h-3' : 'w-5 h-5'} text-primary flex-shrink-0`} />
             
             <div className="flex-1 min-w-0">
               <div className={`${
                 compact 
-                  ? 'text-[10px] sm:text-xs' 
+                  ? 'text-[10px]' 
                   : 'text-xs sm:text-sm'
-              } text-foreground font-medium italic leading-tight line-clamp-2`}>
+              } text-foreground font-medium italic leading-tight line-clamp-1`}>
                 "{currentQuote.text}"
               </div>
-              <div className={`${compact ? 'text-[9px] sm:text-[10px]' : 'text-xs'} text-muted-foreground mt-0.5 sm:mt-1`}>
+              <div className={`${compact ? 'text-[9px]' : 'text-xs'} text-muted-foreground mt-0.5`}>
                 — {currentQuote.author}
-                {currentQuote.source && (
-                  <span className="text-primary"> ({currentQuote.source})</span>
-                )}
               </div>
             </div>
             
             <RefreshCw 
-              className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} text-muted-foreground flex-shrink-0 transition-transform ${
+              className={`${compact ? 'w-2.5 h-2.5' : 'w-4 h-4'} text-muted-foreground flex-shrink-0 transition-transform ${
                 isRefreshing ? 'animate-spin' : 'hover:rotate-180'
               }`} 
             />

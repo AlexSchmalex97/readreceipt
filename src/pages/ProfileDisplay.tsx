@@ -337,9 +337,61 @@ export default function ProfileDisplay() {
     <div className="min-h-screen bg-gradient-soft">
       <Navigation />
       
-      <div className="container mx-auto px-3 sm:px-6 py-2 sm:py-6 max-w-7xl">
-        {/* Mobile Layout */}
-        <div className="md:hidden">
+      <div className="container mx-auto px-3 sm:px-6 py-2 sm:py-6 max-w-4xl">
+        {/* Unified Layout - Centered */}
+        <div>
+          {/* Settings Button - Top Right */}
+          <div className="flex justify-end mb-3">
+            <Link to="/profile/settings">
+              <Button variant="outline" size="sm" className="h-9 px-4">
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </Button>
+            </Link>
+          </div>
+
+          {/* Header - Centered */}
+          <div className="flex flex-col items-center text-center mb-4">
+            {/* Profile Photo */}
+            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-muted border-2 border-border mb-3">
+              {profile.avatar_url ? (
+                <img 
+                  src={profile.avatar_url} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <User className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+            
+            {/* Profile Info */}
+            <h1 className="text-2xl sm:text-4xl font-bold text-foreground">
+              {profile.display_name || "Reader"}
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
+              @{profile.username || profile.id.slice(0, 8)}
+            </p>
+            <div className="flex items-center justify-center gap-4 mt-2 text-xs sm:text-sm text-muted-foreground">
+              <span>
+                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />
+                Member since {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+              </span>
+              {zodiacSign && (
+                <span>
+                  <Star className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />
+                  {zodiacSign}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Bio */}
+          {profile.bio && (
+            <p className="text-sm text-foreground text-center mb-4 max-w-2xl mx-auto">{profile.bio}</p>
+          )}
           {/* Settings Button - Top Right */}
           <div className="flex justify-end mb-2">
             <Link to="/profile/settings">
@@ -393,43 +445,44 @@ export default function ProfileDisplay() {
             <p className="text-xs text-foreground text-center mb-2 line-clamp-2">{profile.bio}</p>
           )}
 
-          {/* Current Book & Favorite Book - Compact Side by Side */}
+          {/* Current Book & Favorite Book - Side by Side */}
           {(currentBook || favoriteBook) && (
-            <div className="grid grid-cols-2 gap-2 mb-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 max-w-2xl mx-auto">
               {currentBook && (
-                <div className="border rounded p-1.5 bg-card">
-                  <p className="text-[9px] text-muted-foreground mb-1">Reading</p>
-                  <div className="flex gap-1.5">
+                <div className="border rounded-lg p-3 bg-card">
+                  <p className="text-xs text-muted-foreground mb-2">Currently Reading</p>
+                  <div className="flex gap-2">
                     {currentBook.cover_url && (
                       <img
                         src={currentBook.cover_url}
                         alt={currentBook.title}
-                        className="w-8 h-11 object-cover rounded flex-shrink-0"
+                        className="w-12 h-16 object-cover rounded flex-shrink-0"
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-medium line-clamp-2 leading-tight">{currentBook.title}</p>
-                      <p className="text-[9px] text-muted-foreground mt-0.5">
-                        {currentBook.current_page}/{currentBook.total_pages}
+                      <p className="text-sm font-medium line-clamp-2 leading-tight">{currentBook.title}</p>
+                      <p className="text-xs text-muted-foreground truncate mt-1">{currentBook.author}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Page {currentBook.current_page} of {currentBook.total_pages}
                       </p>
                     </div>
                   </div>
                 </div>
               )}
               {favoriteBook && (
-                <div className="border rounded p-1.5 bg-card">
-                  <p className="text-[9px] text-muted-foreground mb-1">Favorite</p>
-                  <div className="flex gap-1.5">
+                <div className="border rounded-lg p-3 bg-card">
+                  <p className="text-xs text-muted-foreground mb-2">Favorite Book</p>
+                  <div className="flex gap-2">
                     {favoriteBook.cover_url && (
                       <img
                         src={favoriteBook.cover_url}
                         alt={favoriteBook.title}
-                        className="w-8 h-11 object-cover rounded flex-shrink-0"
+                        className="w-12 h-16 object-cover rounded flex-shrink-0"
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-medium line-clamp-2 leading-tight">{favoriteBook.title}</p>
-                      <p className="text-[9px] text-muted-foreground truncate mt-0.5">{favoriteBook.author}</p>
+                      <p className="text-sm font-medium line-clamp-2 leading-tight">{favoriteBook.title}</p>
+                      <p className="text-xs text-muted-foreground truncate mt-1">{favoriteBook.author}</p>
                     </div>
                   </div>
                 </div>
@@ -437,9 +490,9 @@ export default function ProfileDisplay() {
             </div>
           )}
 
-          {/* Links - Compact */}
+          {/* Links */}
           {((profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url) && (
-            <div className="flex flex-wrap gap-1 mb-2">
+            <div className="flex flex-wrap justify-center gap-2 mb-4">
               {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
                 const Icon = getSocialMediaIcon(platform);
                 return (
@@ -448,9 +501,9 @@ export default function ProfileDisplay() {
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] border rounded-full hover:bg-accent transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs border rounded-full hover:bg-accent transition-colors"
                   >
-                    <Icon className="w-2.5 h-2.5" />
+                    <Icon className="w-3 h-3" />
                     {platform}
                   </a>
                 );
@@ -460,471 +513,269 @@ export default function ProfileDisplay() {
                   href={profile.website_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] border rounded-full hover:bg-accent transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs border rounded-full hover:bg-accent transition-colors"
                 >
-                  <ExternalLink className="w-2.5 h-2.5" />
-                  Site
+                  <ExternalLink className="w-3 h-3" />
+                  Website
                 </a>
               )}
             </div>
           )}
 
           {/* Stats - Single Row */}
-          <div className="grid grid-cols-3 gap-2 mb-3">
+          <div className="grid grid-cols-3 gap-3 mb-4 max-w-md mx-auto">
             <Card>
-              <CardContent className="p-2 text-center">
-                <p className="text-lg font-bold text-foreground">{bookStats.inProgressBooks}</p>
-                <p className="text-[9px] text-muted-foreground">Reading</p>
+              <CardContent className="p-3 text-center">
+                <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                <p className="text-2xl font-bold text-foreground">{bookStats.inProgressBooks}</p>
+                <p className="text-xs text-muted-foreground">Reading</p>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-2 text-center">
-                <p className="text-lg font-bold text-foreground">{bookStats.completedBooks}</p>
-                <p className="text-[9px] text-muted-foreground">Done</p>
+              <CardContent className="p-3 text-center">
+                <Star className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                <p className="text-2xl font-bold text-foreground">{bookStats.completedBooks}</p>
+                <p className="text-xs text-muted-foreground">Completed</p>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-2 text-center">
-                <p className="text-lg font-bold text-foreground">{bookStats.totalBooks}</p>
-                <p className="text-[9px] text-muted-foreground">Total</p>
+              <CardContent className="p-3 text-center">
+                <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                <p className="text-2xl font-bold text-foreground">{bookStats.totalBooks}</p>
+                <p className="text-xs text-muted-foreground">Total</p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Reading Goal - Compact */}
-          <div className="mb-3">
+          {/* Reading Goal */}
+          <div className="mb-4 max-w-md mx-auto">
             <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedBooks} />
           </div>
 
-          {/* Quick Actions - Compact */}
-          <div className="grid grid-cols-2 gap-2">
+          {/* Quick Actions */}
+          <div className="grid grid-cols-2 gap-3 mb-6 max-w-sm mx-auto">
             <Link to="/">
-              <Button variant="outline" size="sm" className="w-full text-xs h-8">
-                <BookOpen className="w-3 h-3 mr-1" />
+              <Button variant="outline" size="sm" className="w-full">
+                <BookOpen className="w-4 h-4 mr-2" />
                 Books
               </Button>
             </Link>
             <Link to="/completed">
-              <Button variant="outline" size="sm" className="w-full text-xs h-8">
-                <Star className="w-3 h-3 mr-1" />
+              <Button variant="outline" size="sm" className="w-full">
+                <Star className="w-4 h-4 mr-2" />
                 Completed
               </Button>
             </Link>
           </div>
-        </div>
 
-        {/* Desktop Layout */}
-        <div className="hidden md:block">
-          {/* Header with Settings Button */}
-          <div className="flex justify-between items-start mb-4 sm:mb-6">
-            <div className="flex items-center gap-6 flex-1">
-              {/* Profile Photo */}
-              <div className="w-32 h-32 rounded-full overflow-hidden bg-muted border-2 border-border flex-shrink-0">
-                {profile.avatar_url ? (
-                  <img 
-                    src={profile.avatar_url} 
-                    alt="Profile" 
-                    className="w-full h-full object-cover"
-                  />
+          {/* Three Column Layout: Recent Reviews - Activity Feed - TBR List */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Recent Reviews */}
+            <Card>
+              <CardHeader className="p-4 pb-2">
+                <CardTitle className="flex items-center justify-between text-base">
+                  Recent Reviews
+                  <Link to="/reviews" className="text-xs font-normal text-primary hover:underline">
+                    View all
+                  </Link>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 pt-0">
+                {recentReviews.length === 0 ? (
+                  <div className="text-center py-6">
+                    <Star className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">No reviews yet</p>
+                  </div>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <User className="w-16 h-16 text-muted-foreground" />
-                  </div>
-                )}
-              </div>
-              
-              {/* Left Column - Profile Info */}
-              <div className="flex-1 min-w-0">
-                <h1 className="text-5xl font-bold text-foreground">
-                  {profile.display_name || "Reader"}
-                </h1>
-                <p className="text-lg text-muted-foreground mt-1">
-                  @{profile.username || profile.id.slice(0, 8)}
-                </p>
-                {profile.bio && (
-                  <p className="text-base text-foreground mt-2 max-w-2xl">{profile.bio}</p>
-                )}
-                <div className="flex items-center gap-4 mt-3">
-                  <p className="text-sm text-muted-foreground">
-                    <Calendar className="w-4 h-4 inline mr-1" />
-                    Member since {new Date(profile.created_at).toLocaleDateString()}
-                  </p>
-                  {zodiacSign && (
-                    <p className="text-sm text-muted-foreground">
-                      <Star className="w-4 h-4 inline mr-1" />
-                      {zodiacSign}
-                    </p>
-                  )}
-                </div>
-
-                {/* Favorite Book and Current Read */}
-                {(currentBook || favoriteBook) && (
-                  <div className="mt-4 flex gap-4">
-                    {/* Favorite Book */}
-                    {favoriteBook && (
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-xs font-medium text-muted-foreground mb-2">Favorite Book</h3>
-                        <div className="flex items-center gap-2 p-3 border rounded-lg h-full bg-card">
-                          {favoriteBook.cover_url && (
-                            <img
-                              src={favoriteBook.cover_url}
-                              alt={favoriteBook.title}
-                              className="w-12 h-16 object-cover rounded flex-shrink-0"
-                            />
-                          )}
-                          <div className="flex-1 min-w-0 overflow-hidden">
-                            <div className="font-medium text-xs leading-tight line-clamp-2">
-                              {favoriteBook.title}
-                            </div>
-                            <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">
-                              {favoriteBook.author}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Currently Reading */}
-                    {currentBook && (
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-xs font-medium text-muted-foreground mb-2">Currently Reading</h3>
-                        <div className="flex items-center gap-2 p-3 border rounded-lg h-full bg-card">
-                          {currentBook.cover_url && (
-                            <img
-                              src={currentBook.cover_url}
-                              alt={currentBook.title}
-                              className="w-12 h-16 object-cover rounded flex-shrink-0"
-                            />
-                          )}
-                          <div className="flex-1 min-w-0 overflow-hidden">
-                            <div className="font-medium text-xs leading-tight line-clamp-2">{currentBook.title}</div>
-                            <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">{currentBook.author}</div>
-                            <div className="text-[10px] text-muted-foreground mt-1">
-                              Page {currentBook.current_page} of {currentBook.total_pages}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Links */}
-                {(profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url ? (
-                  <div className="mt-6">
-                    <h3 className="text-xs font-medium text-muted-foreground mb-2">Links</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
-                        const Icon = getSocialMediaIcon(platform);
-                        return (
-                          <a
-                            key={platform}
-                            href={url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 px-2 py-1 text-xs border rounded-full hover:bg-accent transition-colors"
-                          >
-                            <Icon className="w-3 h-3" />
-                            {platform}
-                          </a>
-                        );
-                      })}
-                      {profile.website_url && (
-                        <a
-                          href={profile.website_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 px-2 py-1 text-xs border rounded-full hover:bg-accent transition-colors"
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                          Website
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-
-              {/* Right Column - Reading Goal & Stats */}
-              <div className="w-80 flex-shrink-0">
-                {/* Reading Goals - Compact Version */}
-                <div className="mb-3">
-                  <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedBooks} />
-                </div>
-
-                {/* Stats - Horizontal Layout */}
-                <div className="grid grid-cols-3 gap-2">
-                  <Card>
-                    <CardContent className="p-3 text-center">
-                      <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                      <p className="text-2xl font-bold text-foreground">{bookStats.inProgressBooks}</p>
-                      <p className="text-[10px] text-muted-foreground">In Progress</p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-3 text-center">
-                      <Star className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                      <p className="text-2xl font-bold text-foreground">{bookStats.completedBooks}</p>
-                      <p className="text-[10px] text-muted-foreground">Completed</p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-3 text-center">
-                      <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                      <p className="text-2xl font-bold text-foreground">{bookStats.totalBooks}</p>
-                      <p className="text-[10px] text-muted-foreground">Total Books</p>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </div>
-            
-            <Link to="/profile/settings" className="ml-4">
-              <Button variant="outline" className="gap-2">
-                <Settings className="w-4 h-4" />
-                Settings
-              </Button>
-            </Link>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="flex flex-wrap gap-3 mb-4 justify-center">
-            <Link to="/">
-              <Button variant="outline" size="sm">
-                <BookOpen className="w-4 h-4 mr-2" />
-                View Books
-              </Button>
-            </Link>
-            <Link to="/completed">
-              <Button variant="outline" size="sm">
-                <Star className="w-4 h-4 mr-2" />
-                Completed Books
-              </Button>
-            </Link>
-          </div>
-        </div>
-
-        {/* Three Column Layout: Recent Reviews - Activity Feed - TBR List (Hidden on Mobile) */}
-        <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-3">
-          {/* Recent Reviews */}
-          <Card>
-            <CardHeader className="p-3 pb-2">
-              <CardTitle className="flex items-center justify-between text-sm">
-                Recent Reviews
-                <Link to="/reviews" className="text-xs font-normal text-primary hover:underline">
-                  View all
-                </Link>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-3 pt-0">
-              {recentReviews.length === 0 ? (
-                <div className="text-center py-8">
-                  <Star className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No reviews yet</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Complete a book to leave your first review!
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2.5 max-h-72 overflow-y-auto">
-                  {recentReviews.map((review) => (
-                    <div key={review.id} className="border-b border-border pb-2.5 last:border-b-0">
-                      <div className="flex gap-2">
-                        {/* Book Cover */}
-                        {review.books.cover_url ? (
-                          <img 
-                            src={review.books.cover_url} 
-                            alt={review.books.title}
-                            className="w-10 h-14 object-cover rounded shadow-sm flex-shrink-0"
-                          />
-                        ) : (
-                          <div className="w-10 h-14 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
-                            <BookOpen className="w-3 h-3 text-muted-foreground" />
-                          </div>
-                        )}
-                        
-                        {/* Review Info */}
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-sm text-foreground truncate">{review.books.title}</h4>
-                          <p className="text-xs text-muted-foreground truncate">by {review.books.author}</p>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <div className="flex">
-                              {[...Array(5)].map((_, i) => (
-                                <Star 
-                                  key={i} 
-                                  className={`w-3 h-3 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'}`}
-                                />
-                              ))}
-                            </div>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(review.created_at).toLocaleDateString()}
-                            </span>
-                          </div>
-                          {review.review && (
-                            <p className="text-xs text-foreground mt-1 line-clamp-2">{review.review}</p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Activity Feed */}
-          <Card>
-            <CardHeader className="p-3 pb-2">
-              <CardTitle className="flex items-center gap-1.5 text-sm">
-                <BookOpen className="w-4 h-4" />
-                Reading Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-3 pt-0">
-              {activityFeed.length === 0 ? (
-                <div className="text-center py-8">
-                  <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No activity yet</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Start reading to see your activity!
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2.5 max-h-72 overflow-y-auto">
-                  {activityFeed.map((item) =>
-                    item.kind === "progress" ? (
-                      <div key={`p-${item.id}`} className="border border-border rounded-lg p-2">
-                        <div className="text-xs text-muted-foreground mb-1.5">
-                          {new Date(item.created_at).toLocaleString()}
-                        </div>
+                  <div className="space-y-3 max-h-80 overflow-y-auto">
+                    {recentReviews.map((review) => (
+                      <div key={review.id} className="border-b border-border pb-3 last:border-b-0">
                         <div className="flex gap-2">
-                          {item.book_cover_url ? (
+                          {review.books.cover_url ? (
                             <img 
-                              src={item.book_cover_url} 
-                              alt={item.book_title || "Book cover"}
-                              className="w-8 h-12 object-cover rounded shadow-sm flex-shrink-0"
+                              src={review.books.cover_url} 
+                              alt={review.books.title}
+                              className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
                             />
                           ) : (
-                            <div className="w-8 h-12 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
-                              <BookOpen className="w-3 h-3 text-muted-foreground" />
+                            <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                              <BookOpen className="w-4 h-4 text-muted-foreground" />
                             </div>
                           )}
+                          
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-xs mb-0.5">Reading Progress</div>
-                            <div className="text-xs text-muted-foreground">
-                              Page {item.to_page}
-                              {typeof item.from_page === "number" && item.from_page >= 0
-                                ? ` (from ${item.from_page})`
-                                : ""}{" "}
-                              of <span className="truncate">{item.book_title ?? "Untitled"}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div key={`r-${item.id}`} className="border border-border rounded-lg p-2">
-                        <div className="text-xs text-muted-foreground mb-1.5">
-                          {new Date(item.created_at).toLocaleString()}
-                        </div>
-                        <div className="flex gap-2">
-                          {item.book_cover_url ? (
-                            <img 
-                              src={item.book_cover_url} 
-                              alt={item.book_title || "Book cover"}
-                              className="w-8 h-12 object-cover rounded shadow-sm flex-shrink-0"
-                            />
-                          ) : (
-                            <div className="w-8 h-12 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
-                              <BookOpen className="w-3 h-3 text-muted-foreground" />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-xs mb-0.5">
-                              Reviewed: ⭐ {item.rating}/5
-                            </div>
-                            <div className="text-xs text-muted-foreground truncate">
-                              {item.book_title ?? "Untitled"}
-                            </div>
-                            {item.review && (
-                              <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{item.review}</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* TBR List */}
-          <Card>
-            <CardHeader className="p-3 pb-2">
-              <CardTitle className="flex items-center gap-1.5 text-sm">
-                <BookOpen className="w-4 h-4" />
-                To Be Read ({tbrBooks.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-3 pt-0">
-              {tbrBooks.length === 0 ? (
-                <div className="text-center py-8">
-                  <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Your TBR list is empty</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Add books to your To Be Read list from the home page!
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2.5 max-h-72 overflow-y-auto">
-                  {tbrBooks.map((book) => (
-                    <div key={book.id} className="border border-border rounded-lg p-2 hover:bg-accent/5 transition-colors">
-                      <div className="flex gap-2">
-                        {/* Book Cover */}
-                        {book.cover_url ? (
-                          <img 
-                            src={book.cover_url} 
-                            alt={book.title}
-                            className="w-10 h-14 object-cover rounded shadow-sm flex-shrink-0"
-                          />
-                        ) : (
-                          <div className="w-10 h-14 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
-                            <BookOpen className="w-3 h-3 text-muted-foreground" />
-                          </div>
-                        )}
-                        
-                        {/* Book Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5 mb-0.5">
-                            <h3 className="font-medium text-sm text-foreground truncate">{book.title}</h3>
-                            {book.priority > 0 && (
+                            <h4 className="font-medium text-sm text-foreground truncate">{review.books.title}</h4>
+                            <p className="text-xs text-muted-foreground truncate">by {review.books.author}</p>
+                            <div className="flex items-center gap-2 mt-1">
                               <div className="flex">
-                                {Array(book.priority).fill(0).map((_, i) => (
-                                  <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                {[...Array(5)].map((_, i) => (
+                                  <Star 
+                                    key={i} 
+                                    className={`w-3 h-3 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'}`}
+                                  />
                                 ))}
                               </div>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(review.created_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                            {review.review && (
+                              <p className="text-xs text-foreground mt-1 line-clamp-2">{review.review}</p>
                             )}
                           </div>
-                          <p className="text-xs text-muted-foreground mb-0.5 truncate">by {book.author}</p>
-                          {book.total_pages && (
-                            <p className="text-xs text-muted-foreground mb-0.5">{book.total_pages} pages</p>
-                          )}
-                          {book.notes && (
-                            <p className="text-xs text-muted-foreground line-clamp-2 mb-0.5">{book.notes}</p>
-                          )}
-                          <p className="text-xs text-muted-foreground">
-                            Added {new Date(book.created_at).toLocaleDateString()}
-                          </p>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
+            {/* Activity Feed */}
+            <Card>
+              <CardHeader className="p-4 pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <BookOpen className="w-4 h-4" />
+                  Reading Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 pt-0">
+                {activityFeed.length === 0 ? (
+                  <div className="text-center py-6">
+                    <BookOpen className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">No activity yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-80 overflow-y-auto">
+                    {activityFeed.map((item) =>
+                      item.kind === "progress" ? (
+                        <div key={`p-${item.id}`} className="border border-border rounded-lg p-2">
+                          <div className="text-xs text-muted-foreground mb-2">
+                            {new Date(item.created_at).toLocaleString()}
+                          </div>
+                          <div className="flex gap-2">
+                            {item.book_cover_url ? (
+                              <img 
+                                src={item.book_cover_url} 
+                                alt={item.book_title || "Book cover"}
+                                className="w-10 h-14 object-cover rounded shadow-sm flex-shrink-0"
+                              />
+                            ) : (
+                              <div className="w-10 h-14 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                                <BookOpen className="w-4 h-4 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-xs mb-1">Reading Progress</div>
+                              <div className="text-xs text-muted-foreground">
+                                Page {item.to_page}
+                                {typeof item.from_page === "number" && item.from_page >= 0
+                                  ? ` (from ${item.from_page})`
+                                  : ""}{" "}
+                                of <span className="truncate">{item.book_title ?? "Untitled"}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div key={`r-${item.id}`} className="border border-border rounded-lg p-2">
+                          <div className="text-xs text-muted-foreground mb-2">
+                            {new Date(item.created_at).toLocaleString()}
+                          </div>
+                          <div className="flex gap-2">
+                            {item.book_cover_url ? (
+                              <img 
+                                src={item.book_cover_url} 
+                                alt={item.book_title || "Book cover"}
+                                className="w-10 h-14 object-cover rounded shadow-sm flex-shrink-0"
+                              />
+                            ) : (
+                              <div className="w-10 h-14 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                                <BookOpen className="w-4 h-4 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-xs mb-1">
+                                Reviewed: ⭐ {item.rating}/5
+                              </div>
+                              <div className="text-xs text-muted-foreground truncate">
+                                {item.book_title ?? "Untitled"}
+                              </div>
+                              {item.review && (
+                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.review}</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* TBR List */}
+            <Card>
+              <CardHeader className="p-4 pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <BookOpen className="w-4 h-4" />
+                  To Be Read ({tbrBooks.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 pt-0">
+                {tbrBooks.length === 0 ? (
+                  <div className="text-center py-6">
+                    <BookOpen className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">Your TBR list is empty</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-80 overflow-y-auto">
+                    {tbrBooks.map((book) => (
+                      <div key={book.id} className="border border-border rounded-lg p-2 hover:bg-accent/5 transition-colors">
+                        <div className="flex gap-2">
+                          {book.cover_url ? (
+                            <img 
+                              src={book.cover_url} 
+                              alt={book.title}
+                              className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                              <BookOpen className="w-4 h-4 text-muted-foreground" />
+                            </div>
+                          )}
+                          
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-medium text-sm text-foreground truncate">{book.title}</h3>
+                              {book.priority > 0 && (
+                                <div className="flex">
+                                  {Array(book.priority).fill(0).map((_, i) => (
+                                    <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground mb-1 truncate">by {book.author}</p>
+                            {book.total_pages && (
+                              <p className="text-xs text-muted-foreground mb-1">{book.total_pages} pages</p>
+                            )}
+                            {book.notes && (
+                              <p className="text-xs text-muted-foreground line-clamp-2 mb-1">{book.notes}</p>
+                            )}
+                            <p className="text-xs text-muted-foreground">
+                              Added {new Date(book.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
