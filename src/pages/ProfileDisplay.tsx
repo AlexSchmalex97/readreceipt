@@ -217,8 +217,7 @@ export default function ProfileDisplay() {
           books:book_id (title, author, cover_url)
         `)
         .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(3);
+        .order("created_at", { ascending: false });
 
       if (!reviewsError && reviews) {
         setRecentReviews(reviews as Review[]);
