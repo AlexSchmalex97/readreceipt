@@ -81,8 +81,8 @@ ${formData.message}
   };
 
   return (
-    <div className="min-h-screen bg-gradient-soft">
-      {!isIOS && !isReadReceiptApp && <Navigation />}
+    <div className="min-h-screen bg-gradient-soft pb-20">
+      <Navigation />
       
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="text-center mb-8">
