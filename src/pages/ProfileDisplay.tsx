@@ -434,7 +434,7 @@ export default function ProfileDisplay() {
 
               {/* Links */}
               {(profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url ? (
-                <div className="mt-4">
+                <div className="mt-6">
                   <h3 className="text-xs font-medium text-muted-foreground mb-2">Links</h3>
                   <div className="flex flex-wrap gap-2">
                     {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
