@@ -90,14 +90,14 @@ export function Navigation() {
       >
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
         {/* First Row: Logo + Title + Auth */}
-        <div className="flex items-center justify-between gap-4 mb-4">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <Link to="/" className="flex items-center gap-3">
             <img
               src="/assets/readreceipt-logo.png"
               alt="ReadReceipt logo"
-              className="h-16 sm:h-20"
+              className="h-14 sm:h-16"
             />
-          </div>
+          </Link>
           
           <AuthButtons />
         </div>
