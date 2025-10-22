@@ -7,7 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import { BookEditionSelector } from "@/components/BookEditionSelector";
 import { ReadingEntriesDialog } from "@/components/ReadingEntriesDialog";
 import { usePlatform } from "@/hooks/usePlatform";
-import { useSwipeBack } from "@/hooks/useSwipeBack";
 
 type CompletedBook = {
   id: string;
@@ -36,9 +35,6 @@ export default function CompletedBooks() {
   const { toast } = useToast();
   const [reloadCounter, setReloadCounter] = useState(0);
   const { isIOS, isReadReceiptApp } = usePlatform();
-  
-  // Enable swipe-back gesture on iOS
-  useSwipeBack(isIOS || isReadReceiptApp);
 
   // Format Supabase date-only (YYYY-MM-DD) as local date to avoid timezone shift
   const toLocalDateString = (dateLike?: string | null) => {

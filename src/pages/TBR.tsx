@@ -5,7 +5,6 @@ import { Navigation } from "@/components/Navigation";
 import { TBRList } from "@/components/TBRList";
 import { useToast } from "@/hooks/use-toast";
 import { usePlatform } from "@/hooks/usePlatform";
-import { useSwipeBack } from "@/hooks/useSwipeBack";
 
 const TBR = () => {
   const [loading, setLoading] = useState(true);
@@ -14,9 +13,6 @@ const TBR = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isIOS, isReadReceiptApp } = usePlatform();
-  
-  // Enable swipe-back gesture on iOS
-  useSwipeBack(isIOS || isReadReceiptApp);
 
   useEffect(() => {
     // Check authentication status

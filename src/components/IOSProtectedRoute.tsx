@@ -2,6 +2,7 @@ import { useEffect, useState, ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlatform } from "@/hooks/usePlatform";
+import { useSwipeBack } from "@/hooks/useSwipeBack";
 
 interface IOSProtectedRouteProps {
   children: ReactNode;
@@ -13,6 +14,9 @@ export const IOSProtectedRoute = ({ children }: IOSProtectedRouteProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isIOS, isReadReceiptApp } = usePlatform();
+
+  // Enable swipe-back gesture on iOS
+  useSwipeBack(isIOS || isReadReceiptApp);
 
   // Allow /contact without authentication
   const isPublicRoute = location.pathname === "/contact";
