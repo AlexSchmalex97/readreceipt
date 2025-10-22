@@ -14,6 +14,7 @@ import People from "./pages/People";
 import Reviews from "./pages/Reviews";
 import Profile from "./pages/Profile";
 import ProfileSettings from "./pages/ProfileSettings";
+import Settings from "./pages/Settings";
 import CompletedBooks from "./pages/CompletedBooks";
 import UserProfile from "./pages/UserProfile";
 import Contact from "./pages/Contact";
@@ -49,6 +50,7 @@ const App = () => {
           <Route path="/user/:userId" element={<UserProfile />} />
           <Route path="/reviews" element={<Reviews />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/profile/settings" element={<ProfileSettings />} />
           <Route path="/completed" element={<CompletedBooks />} />
           <Route path="/contact" element={<Contact />} />
