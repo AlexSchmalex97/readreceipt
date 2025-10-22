@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AddBookDialog } from "@/components/AddBookDialog";
 import { BookCard } from "@/components/BookCard";
 import { TBRList } from "@/components/TBRList";
@@ -41,7 +41,9 @@ const Index = () => {
   const [reviewFor, setReviewFor] = useState<{ bookId: string } | null>(null);
   const [dnfDialogFor, setDnfDialogFor] = useState<{ bookId: string; bookTitle: string } | null>(null);
   const [completedBooksThisYear, setCompletedBooksThisYear] = useState(0);
+  const [headerOpacity, setHeaderOpacity] = useState(1);
   const { toast } = useToast();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Pull-to-refresh
   const { scrollableRef, pullDistance, isRefreshing, showPullIndicator } = usePullToRefresh({
@@ -55,6 +57,36 @@ const Index = () => {
       loadBooks();
     },
   });
+
+  // Scroll detection for header fade effect (iOS only)
+  useEffect(() => {
+    const isIOSPlatform = isIOS || isReadReceiptApp || (typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent));
+    if (!isIOSPlatform) return;
+
+    const handleScroll = () => {
+      const container = scrollContainerRef.current;
+      if (!container) return;
+      
+      const scrollY = container.scrollTop;
+      const fadeStart = 0;
+      const fadeEnd = 150;
+      
+      if (scrollY <= fadeStart) {
+        setHeaderOpacity(1);
+      } else if (scrollY >= fadeEnd) {
+        setHeaderOpacity(0);
+      } else {
+        const opacity = 1 - (scrollY - fadeStart) / (fadeEnd - fadeStart);
+        setHeaderOpacity(opacity);
+      }
+    };
+
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, [isIOS, isReadReceiptApp]);
 
   // Watch auth state
   useEffect(() => {
@@ -762,12 +794,36 @@ const Index = () => {
     );
   }
 
+  const isIOSPlatform = isIOS || isReadReceiptApp || (typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent));
+
   return (
     <div className="min-h-screen bg-gradient-soft">
       <Navigation />
 
+      {/* iOS Header - Only on Home page */}
+      {isIOSPlatform && (
+        <header 
+          className="bg-card border-b border-border transition-opacity duration-300 px-4 py-3"
+          style={{ 
+            opacity: headerOpacity,
+            pointerEvents: headerOpacity < 0.1 ? 'none' : 'auto'
+          }}
+        >
+          <div className="flex items-center justify-center">
+            <img
+              src="/assets/readreceipt-logo.png"
+              alt="ReadReceipt logo"
+              className="h-12"
+            />
+          </div>
+        </header>
+      )}
+
       <div 
-        ref={scrollableRef}
+        ref={(el) => {
+          if (scrollableRef) scrollableRef.current = el;
+          scrollContainerRef.current = el;
+        }}
         className="relative overflow-y-auto"
         style={{ height: (isIOS || isReadReceiptApp) ? 'calc(100dvh - 64px)' : 'calc(100dvh - 64px)' }}
       >
