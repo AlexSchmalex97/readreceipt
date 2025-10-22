@@ -7,12 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Camera, User, ArrowLeft, Link2 } from "lucide-react";
+import { Camera, User, ArrowLeft, Link2, LogOut } from "lucide-react";
 import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { SocialMediaInput } from "@/components/SocialMediaInput";
 import { FavoriteBookSelector } from "@/components/FavoriteBookSelector";
 import { ReadingGoals } from "@/components/ReadingGoals";
+import { usePlatform } from "@/hooks/usePlatform";
+import { useNavigate } from "react-router-dom";
 
 
 function normalizeUsername(raw: string) {
@@ -34,6 +36,8 @@ export default function ProfileSettings() {
   const [loading, setLoading] = useState(true);
   const [uid, setUid] = useState<string | null>(null);
   const [completedBooksThisYear, setCompletedBooksThisYear] = useState(0);
+  const { isIOS, isReadReceiptApp } = usePlatform();
+  const navigate = useNavigate();
 
   // profile fields
   const [displayName, setDisplayName] = useState("");
@@ -474,6 +478,20 @@ export default function ProfileSettings() {
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({ title: "Signed out successfully" });
+      navigate("/");
+    } catch (e: any) {
+      toast({ 
+        title: "Error signing out", 
+        description: e?.message,
+        variant: "destructive" 
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-soft">
       <Navigation />
@@ -752,7 +770,7 @@ export default function ProfileSettings() {
         </div>
       </section>
 
-      <section className="bg-card border rounded p-4">
+      <section className="bg-card border rounded p-4 mb-6">
         <h2 className="font-semibold mb-3">Integrations</h2>
         <p className="text-sm text-muted-foreground mb-4">
           Connect with other reading platforms to sync your library
@@ -764,6 +782,23 @@ export default function ProfileSettings() {
           </Button>
         </Link>
       </section>
+
+      {(isIOS || isReadReceiptApp) && (
+        <section className="bg-card border rounded p-4">
+          <h2 className="font-semibold mb-3">Sign Out</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Sign out of your account
+          </p>
+          <Button 
+            variant="destructive" 
+            className="gap-2"
+            onClick={handleSignOut}
+          >
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </Button>
+        </section>
+      )}
       </div>
 
       {/* Crop Modal */}
