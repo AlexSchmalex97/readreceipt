@@ -27,16 +27,26 @@ import TBR from "./pages/TBR";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const { isIOS } = usePlatform();
+  const { isIOS, isNative, isReadReceiptApp } = usePlatform();
 
   useEffect(() => {
     // Add iOS-specific class to body for bottom tab bar spacing
+    const body = document.body;
+    const isIOSWebView = typeof window !== 'undefined' && (window as any).webkit && (window as any).webkit.messageHandlers;
+
     if (isIOS) {
-      document.body.classList.add('ios-app');
+      body.classList.add('ios-app');
     } else {
-      document.body.classList.remove('ios-app');
+      body.classList.remove('ios-app');
     }
-  }, [isIOS]);
+
+    // Mark native/webview app on iOS to hide web header entirely
+    if (isNative || isReadReceiptApp || isIOSWebView) {
+      body.classList.add('ios-native-app');
+    } else {
+      body.classList.remove('ios-native-app');
+    }
+  }, [isIOS, isNative, isReadReceiptApp]);
 
   return (
     <QueryClientProvider client={queryClient}>

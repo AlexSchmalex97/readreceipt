@@ -161,3 +161,9 @@ body.ios-app > div > div {
   .shadow-soft         { box-shadow: var(--shadow-soft); }
   .shadow-card         { box-shadow: var(--shadow-card); }
 }
+
+/* Hide top web header in native iOS app or WKWebView */
+.ios-native-app header.bg-card {
+  display: none !important;
+}
+
