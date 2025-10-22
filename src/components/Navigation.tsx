@@ -3,6 +3,7 @@ import AuthButtons from "@/components/AuthButtons";
 import { HeaderDisplay } from "@/components/HeaderDisplay";
 import { usePlatform } from "@/hooks/usePlatform";
 import { Home, Rss, User, Mail, BookOpen, MoreHorizontal } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export function Navigation() {
   const { pathname } = useLocation();
@@ -10,8 +11,10 @@ export function Navigation() {
   const { isIOS, isNative, isReadReceiptApp, isWeb } = usePlatform();
   const isIOSWebView = typeof window !== 'undefined' && !!(window as any).webkit && !!(window as any).webkit.messageHandlers;
   const isStandalonePWA = typeof window !== 'undefined' && (("standalone" in navigator && (navigator as any).standalone) || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches));
+  const [headerOpacity, setHeaderOpacity] = useState(1);
 
   const isActive = (path: string) => pathname === path;
+  const isHomePage = pathname === "/";
 
   const navItems = [
     { path: "/", label: "Home", icon: Home },
@@ -20,6 +23,29 @@ export function Navigation() {
     { path: "/tbr", label: "TBR", icon: BookOpen },
     { path: "/more", label: "More", icon: MoreHorizontal },
   ];
+
+  // Scroll detection for header fade effect (only on home page)
+  useEffect(() => {
+    if (!isHomePage || !isWeb) return;
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const fadeStart = 0;
+      const fadeEnd = 150;
+      
+      if (scrollY <= fadeStart) {
+        setHeaderOpacity(1);
+      } else if (scrollY >= fadeEnd) {
+        setHeaderOpacity(0);
+      } else {
+        const opacity = 1 - (scrollY - fadeStart) / (fadeEnd - fadeStart);
+        setHeaderOpacity(opacity);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isHomePage, isWeb]);
 
   // ReadReceipt iOS App: No header, only bottom tab bar
   if (isReadReceiptApp || isNative || isIOS || isIOSWebView || isStandalonePWA || (typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent) && (window as any)?.Capacitor)) {
@@ -55,20 +81,28 @@ export function Navigation() {
   // Web: Original navigation layout - but ONLY if truly web (not iOS, not native, not WKWebView, not PWA)
   if (isWeb && !isIOS && !isNative && !isReadReceiptApp && !isIOSWebView && !isStandalonePWA && !(typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent) && (window as any)?.Capacitor)) {
     return (
-      <header className="bg-card shadow-soft border-b border-border">
+      <header 
+        className="bg-card shadow-soft border-b border-border transition-opacity duration-300"
+        style={{ 
+          opacity: isHomePage ? headerOpacity : 1,
+          pointerEvents: isHomePage && headerOpacity < 0.1 ? 'none' : 'auto'
+        }}
+      >
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
-        {/* First Row: Logo + Title + Auth */}
-        <div className="flex items-center justify-between gap-4 mb-4">
-          <div className="flex items-center gap-3">
-            <img
-              src="/assets/readreceipt-logo.png"
-              alt="ReadReceipt logo"
-              className="h-12 sm:h-16"
-            />
+        {/* First Row: Logo + Title + Auth - Only show on home page */}
+        {isHomePage && (
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-3">
+              <img
+                src="/assets/readreceipt-logo.png"
+                alt="ReadReceipt logo"
+                className="h-12 sm:h-16"
+              />
+            </div>
+            
+            <AuthButtons />
           </div>
-          
-          <AuthButtons />
-        </div>
+        )}
 
         {/* Second Row: Navigation + Dynamic Display */}
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
