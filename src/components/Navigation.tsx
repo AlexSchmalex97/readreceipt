@@ -9,6 +9,7 @@ export function Navigation() {
   const navigate = useNavigate();
   const { isIOS, isNative, isReadReceiptApp } = usePlatform();
   const isIOSWebView = typeof window !== 'undefined' && !!(window as any).webkit && !!(window as any).webkit.messageHandlers;
+  const isStandalonePWA = typeof window !== 'undefined' && (("standalone" in navigator && (navigator as any).standalone) || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches));
 
   const isActive = (path: string) => pathname === path;
 
@@ -22,9 +23,10 @@ export function Navigation() {
   ];
 
   // ReadReceipt iOS App: No header, only bottom tab bar
-  if (isReadReceiptApp || isNative || isIOSWebView) {
+  if (isReadReceiptApp || isNative || isIOSWebView || isStandalonePWA) {
     return (
       <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border pb-safe-bottom z-50">
+
 
         <div className="flex justify-around items-center h-16">
           {navItems.map((item) => {

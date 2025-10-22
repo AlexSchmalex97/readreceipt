@@ -33,6 +33,7 @@ const App = () => {
     // Add iOS-specific class to body for bottom tab bar spacing
     const body = document.body;
     const isIOSWebView = typeof window !== 'undefined' && (window as any).webkit && (window as any).webkit.messageHandlers;
+    const isStandalonePWA = typeof window !== 'undefined' && (("standalone" in navigator && (navigator as any).standalone) || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches));
 
     if (isIOS) {
       body.classList.add('ios-app');
@@ -40,8 +41,8 @@ const App = () => {
       body.classList.remove('ios-app');
     }
 
-    // Mark native/webview app on iOS to hide web header entirely
-    if (isNative || isReadReceiptApp || isIOSWebView) {
+    // Mark native/webview app or standalone PWA on iOS to hide web header entirely
+    if (isNative || isReadReceiptApp || isIOSWebView || isStandalonePWA) {
       body.classList.add('ios-native-app');
     } else {
       body.classList.remove('ios-native-app');
