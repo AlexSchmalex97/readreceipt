@@ -338,8 +338,8 @@ export default function ProfileDisplay() {
       <Navigation />
       
       <div className="container mx-auto px-3 sm:px-6 py-2 sm:py-6 max-w-7xl">
-        {/* Mobile Layout - Centered */}
-        <div className="md:hidden">
+        {/* Mobile & Tablet Layout - Centered */}
+        <div className="lg:hidden">
           {/* Settings Button - Top Right */}
           <div className="flex justify-end mb-3">
             <Link to="/profile/settings">
@@ -516,8 +516,8 @@ export default function ProfileDisplay() {
           </div>
         </div>
 
-        {/* Desktop/Tablet Layout - Original Format */}
-        <div className="hidden md:block">
+        {/* Desktop Layout - Original Format */}
+        <div className="hidden lg:block">
           {/* Header with Settings Button */}
           <div className="flex justify-between items-start mb-4 sm:mb-6">
             <div className="flex items-center gap-6 flex-1">
