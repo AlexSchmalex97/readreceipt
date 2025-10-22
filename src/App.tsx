@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
 import { usePlatform } from "@/hooks/usePlatform";
 import { useEffect } from "react";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -46,17 +47,17 @@ const App = () => {
           <Route path="/" element={<Index />} />
           <Route path="/home" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/feed" element={<Feed />} />
-          <Route path="/people" element={<People />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/user/:userId" element={<UserProfile />} />
-          <Route path="/reviews" element={<Reviews />} />
+          <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
+          <Route path="/people" element={<ProtectedRoute><People /></ProtectedRoute>} />
+          <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/tbr" element={<TBR />} />
-          <Route path="/profile/settings" element={<ProfileSettings />} />
-          <Route path="/completed" element={<CompletedBooks />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/integrations" element={<Integrations />} />
+          <Route path="/profile/settings" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
+          <Route path="/completed" element={<ProtectedRoute><CompletedBooks /></ProtectedRoute>} />
+          <Route path="/integrations" element={<ProtectedRoute><Integrations /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
