@@ -81,11 +81,11 @@ export function HeaderDisplay() {
     return <TimeWeatherIcons />;
   } else if (displayPreference === 'both') {
     return (
-      <div className="flex flex-col sm:flex-row items-start gap-3 w-full">
-        <div className="flex-shrink-0 w-full sm:w-auto">
+      <div className="flex items-center gap-2 w-full">
+        <div className="flex-shrink-0">
           <TimeWeatherIcons />
         </div>
-        <div className="flex-1 min-w-0 w-full">
+        <div className="flex-1 min-w-0">
           <QuotesDisplay compact={true} />
         </div>
       </div>
