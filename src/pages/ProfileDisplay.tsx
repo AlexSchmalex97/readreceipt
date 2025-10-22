@@ -337,9 +337,9 @@ export default function ProfileDisplay() {
     <div className="min-h-screen bg-gradient-soft">
       <Navigation />
       
-      <div className="container mx-auto px-3 sm:px-6 py-2 sm:py-6 max-w-4xl">
-        {/* Unified Layout - Centered */}
-        <div>
+      <div className="container mx-auto px-3 sm:px-6 py-2 sm:py-6 max-w-7xl">
+        {/* Mobile Layout - Centered */}
+        <div className="md:hidden">
           {/* Settings Button - Top Right */}
           <div className="flex justify-end mb-3">
             <Link to="/profile/settings">
@@ -353,7 +353,7 @@ export default function ProfileDisplay() {
           {/* Header - Centered */}
           <div className="flex flex-col items-center text-center mb-4">
             {/* Profile Photo */}
-            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-muted border-2 border-border mb-3">
+            <div className="w-24 h-24 rounded-full overflow-hidden bg-muted border-2 border-border mb-3">
               {profile.avatar_url ? (
                 <img 
                   src={profile.avatar_url} 
@@ -362,26 +362,26 @@ export default function ProfileDisplay() {
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <User className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground" />
+                  <User className="w-12 h-12 text-muted-foreground" />
                 </div>
               )}
             </div>
             
             {/* Profile Info */}
-            <h1 className="text-2xl sm:text-4xl font-bold text-foreground">
+            <h1 className="text-2xl font-bold text-foreground">
               {profile.display_name || "Reader"}
             </h1>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               @{profile.username || profile.id.slice(0, 8)}
             </p>
-            <div className="flex items-center justify-center gap-4 mt-2 text-xs sm:text-sm text-muted-foreground">
+            <div className="flex items-center justify-center gap-4 mt-2 text-xs text-muted-foreground">
               <span>
-                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />
+                <Calendar className="w-3 h-3 inline mr-1" />
                 Member since {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
               </span>
               {zodiacSign && (
                 <span>
-                  <Star className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />
+                  <Star className="w-3 h-3 inline mr-1" />
                   {zodiacSign}
                 </span>
               )}
@@ -516,7 +516,7 @@ export default function ProfileDisplay() {
           </div>
 
           {/* Three Column Layout: Recent Reviews - Activity Feed - TBR List */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* Recent Reviews */}
             <Card>
               <CardHeader className="p-4 pb-2">
