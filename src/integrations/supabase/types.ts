@@ -444,10 +444,7 @@ export type Database = {
           username: string
         }[]
       }
-      get_zodiac_sign: {
-        Args: { birth_date: string }
-        Returns: string
-      }
+      get_zodiac_sign: { Args: { birth_date: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
