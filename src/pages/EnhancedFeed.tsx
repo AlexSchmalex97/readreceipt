@@ -92,6 +92,13 @@ export default function EnhancedFeed() {
   const [editingComment, setEditingComment] = useState<string | null>(null);
   const [editCommentContent, setEditCommentContent] = useState("");
   const { toast } = useToast();
+  const { isIOS, isReadReceiptApp } = usePlatform();
+
+  const { scrollableRef, pullDistance, isRefreshing, showPullIndicator } = usePullToRefresh({
+    onRefresh: async () => {
+      await loadFeed();
+    }
+  });
 
   useEffect(() => {
     loadFeed();
@@ -715,72 +722,94 @@ export default function EnhancedFeed() {
   return (
     <div className="min-h-screen bg-gradient-soft">
       <Navigation />
-      <div className="container mx-auto px-4 py-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Your Feed</h1>
-          
-          {currentUserId && (
-            <Dialog open={showNewPostDialog} onOpenChange={setShowNewPostDialog}>
-              <DialogTrigger asChild>
-                <Button className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  New Post
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Create a new post</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <Select value={selectedBookId} onValueChange={setSelectedBookId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a book (optional)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">General post (no book)</SelectItem>
-                      {userBooks.map((book) => (
-                        <SelectItem key={book.id} value={book.id}>
-                          {book.title} by {book.author}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Textarea
-                    placeholder="What's on your mind about reading?"
-                    value={newPostContent}
-                    onChange={(e) => setNewPostContent(e.target.value)}
-                    rows={4}
-                  />
-                  <div className="flex gap-2 justify-end">
-                    <Button variant="outline" onClick={() => {
-                      setShowNewPostDialog(false);
-                      setNewPostContent("");
-                      setSelectedBookId("none");
-                    }}>
-                      Cancel
-                    </Button>
-                    <Button 
-                      onClick={handleCreatePost}
-                      disabled={!newPostContent.trim()}
-                    >
-                      Post
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
-        </div>
-
-        {items.length === 0 ? (
-          <div className="text-muted-foreground text-center py-8">
-            No activity yet. Follow readers in the <a href="/people" className="underline">People</a> tab or create your first post!
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {items.map(renderFeedItem)}
+      <div 
+        ref={scrollableRef}
+        className="relative overflow-y-auto"
+        style={{ height: (isIOS || isReadReceiptApp) ? 'calc(100dvh - 64px)' : 'calc(100dvh - 64px)' }}
+      >
+        {/* Pull-to-refresh indicator */}
+        {showPullIndicator && (
+          <div 
+            className="absolute top-0 left-0 right-0 flex justify-center items-center text-muted-foreground"
+            style={{ transform: `translateY(${pullDistance}px)` }}
+          >
+            <div className="bg-card rounded-full p-2 shadow-lg">
+              {isRefreshing ? (
+                <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full" />
+              ) : (
+                <div className="h-5 w-5 flex items-center justify-center">↓</div>
+              )}
+            </div>
           </div>
         )}
+
+        <div className="container mx-auto px-4 py-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold">Your Feed</h1>
+            
+            {currentUserId && (
+              <Dialog open={showNewPostDialog} onOpenChange={setShowNewPostDialog}>
+                <DialogTrigger asChild>
+                  <Button className="gap-2">
+                    <Plus className="w-4 h-4" />
+                    New Post
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create a new post</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <Select value={selectedBookId} onValueChange={setSelectedBookId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a book (optional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">General post (no book)</SelectItem>
+                        {userBooks.map((book) => (
+                          <SelectItem key={book.id} value={book.id}>
+                            {book.title} by {book.author}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Textarea
+                      placeholder="What's on your mind about reading?"
+                      value={newPostContent}
+                      onChange={(e) => setNewPostContent(e.target.value)}
+                      rows={4}
+                    />
+                    <div className="flex gap-2 justify-end">
+                      <Button variant="outline" onClick={() => {
+                        setShowNewPostDialog(false);
+                        setNewPostContent("");
+                        setSelectedBookId("none");
+                      }}>
+                        Cancel
+                      </Button>
+                      <Button 
+                        onClick={handleCreatePost}
+                        disabled={!newPostContent.trim()}
+                      >
+                        Post
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
+
+          {items.length === 0 ? (
+            <div className="text-muted-foreground text-center py-8">
+              No activity yet. Follow readers in the <a href="/people" className="underline">People</a> tab or create your first post!
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {items.map(renderFeedItem)}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

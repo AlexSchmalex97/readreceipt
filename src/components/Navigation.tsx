@@ -52,8 +52,8 @@ export function Navigation() {
   }
 
 
-  // Web: Original navigation layout (only on real web)
-  if (isWeb) {
+  // Web: Original navigation layout - but ONLY if truly web (not iOS, not native, not WKWebView, not PWA)
+  if (isWeb && !isIOS && !isNative && !isReadReceiptApp && !isIOSWebView && !isStandalonePWA) {
     return (
       <header className="bg-card shadow-soft border-b border-border">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
