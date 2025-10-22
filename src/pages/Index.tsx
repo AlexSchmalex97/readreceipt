@@ -811,8 +811,8 @@ const Index = () => {
         >
           <div className="flex items-center justify-center">
             <img
-              src="/assets/readreceipt-logo.png"
-              alt="ReadReceipt logo"
+              src="/assets/readreceipt-header-ios.png"
+              alt="ReadReceipt"
               className="h-12"
             />
           </div>
