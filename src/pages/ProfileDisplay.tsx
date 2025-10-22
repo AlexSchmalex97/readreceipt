@@ -340,8 +340,9 @@ export default function ProfileDisplay() {
         <div className="container mx-auto px-3 sm:px-6 py-4 sm:py-6 max-w-7xl">
         {/* Header with Settings Button */}
         <div className="flex justify-between items-start mb-4 sm:mb-6">
-          <div className="flex items-center gap-4 sm:gap-6">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden bg-muted border-2 border-border flex-shrink-0">
+          <div className="flex items-center gap-6 flex-1">
+            {/* Profile Photo */}
+            <div className="w-32 h-32 rounded-full overflow-hidden bg-muted border-2 border-border flex-shrink-0">
               {profile.avatar_url ? (
                 <img 
                   src={profile.avatar_url} 
@@ -350,16 +351,17 @@ export default function ProfileDisplay() {
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <User className="w-12 h-12 text-muted-foreground" />
+                  <User className="w-16 h-16 text-muted-foreground" />
                 </div>
               )}
             </div>
             
-            <div className="flex-1">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground">
+            {/* Left Column - Profile Info */}
+            <div className="flex-1 min-w-0">
+              <h1 className="text-5xl font-bold text-foreground">
                 {profile.display_name || "Reader"}
               </h1>
-              <p className="text-base sm:text-lg text-muted-foreground mt-1">
+              <p className="text-lg text-muted-foreground mt-1">
                 @{profile.username || profile.id.slice(0, 8)}
               </p>
               {profile.bio && (
@@ -378,26 +380,26 @@ export default function ProfileDisplay() {
                 )}
               </div>
 
-              {/* Favorite Book and Current Read - Swapped and Equal Size */}
+              {/* Favorite Book and Current Read */}
               {(currentBook || favoriteBook) && (
-                <div className="mt-5 flex gap-4">
-                  {/* Favorite Book - First */}
+                <div className="mt-4 flex gap-4">
+                  {/* Favorite Book */}
                   {favoriteBook && (
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2.5">Favorite Book</h3>
-                      <div className="flex items-center gap-3 p-4 border rounded-lg h-full">
+                      <h3 className="text-xs font-medium text-muted-foreground mb-2">Favorite Book</h3>
+                      <div className="flex items-center gap-2 p-3 border rounded-lg h-full bg-card">
                         {favoriteBook.cover_url && (
                           <img
                             src={favoriteBook.cover_url}
                             alt={favoriteBook.title}
-                            className="w-16 h-20 object-cover rounded flex-shrink-0"
+                            className="w-12 h-16 object-cover rounded flex-shrink-0"
                           />
                         )}
                         <div className="flex-1 min-w-0 overflow-hidden">
-                          <div className="font-medium text-sm leading-tight line-clamp-2">
+                          <div className="font-medium text-xs leading-tight line-clamp-2">
                             {favoriteBook.title}
                           </div>
-                          <div className="text-xs text-muted-foreground line-clamp-1 mt-1.5">
+                          <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">
                             {favoriteBook.author}
                           </div>
                         </div>
@@ -405,22 +407,22 @@ export default function ProfileDisplay() {
                     </div>
                   )}
 
-                  {/* Current Read - Second */}
+                  {/* Currently Reading */}
                   {currentBook && (
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2.5">Currently Reading</h3>
-                      <div className="flex items-center gap-3 p-4 border rounded-lg h-full">
+                      <h3 className="text-xs font-medium text-muted-foreground mb-2">Currently Reading</h3>
+                      <div className="flex items-center gap-2 p-3 border rounded-lg h-full bg-card">
                         {currentBook.cover_url && (
                           <img
                             src={currentBook.cover_url}
                             alt={currentBook.title}
-                            className="w-16 h-20 object-cover rounded flex-shrink-0"
+                            className="w-12 h-16 object-cover rounded flex-shrink-0"
                           />
                         )}
                         <div className="flex-1 min-w-0 overflow-hidden">
-                          <div className="font-medium text-sm leading-tight line-clamp-2">{currentBook.title}</div>
-                          <div className="text-xs text-muted-foreground line-clamp-1 mt-1.5">{currentBook.author}</div>
-                          <div className="text-xs text-muted-foreground mt-1.5">
+                          <div className="font-medium text-xs leading-tight line-clamp-2">{currentBook.title}</div>
+                          <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">{currentBook.author}</div>
+                          <div className="text-[10px] text-muted-foreground mt-1">
                             Page {currentBook.current_page} of {currentBook.total_pages}
                           </div>
                         </div>
@@ -430,10 +432,10 @@ export default function ProfileDisplay() {
                 </div>
               )}
 
-              {/* Social Media & Website */}
+              {/* Links */}
               {(profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url ? (
-                <div className="mt-6">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-2.5">Links</h3>
+                <div className="mt-4">
+                  <h3 className="text-xs font-medium text-muted-foreground mb-2">Links</h3>
                   <div className="flex flex-wrap gap-2">
                     {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
                       const Icon = getSocialMediaIcon(platform);
@@ -443,9 +445,9 @@ export default function ProfileDisplay() {
                           href={url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 px-2 py-0.5 text-xs border rounded-full hover:bg-accent transition-colors"
+                          className="flex items-center gap-1.5 px-2 py-1 text-xs border rounded-full hover:bg-accent transition-colors"
                         >
-                          <Icon className="w-4 h-4" />
+                          <Icon className="w-3 h-3" />
                           {platform}
                         </a>
                       );
@@ -455,9 +457,9 @@ export default function ProfileDisplay() {
                         href={profile.website_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 px-2 py-0.5 text-xs border rounded-full hover:bg-accent transition-colors"
+                        className="flex items-center gap-1.5 px-2 py-1 text-xs border rounded-full hover:bg-accent transition-colors"
                       >
-                        <ExternalLink className="w-4 h-4" />
+                        <ExternalLink className="w-3 h-3" />
                         Website
                       </a>
                     )}
@@ -465,62 +467,47 @@ export default function ProfileDisplay() {
                 </div>
               ) : null}
             </div>
+
+            {/* Right Column - Reading Goal & Stats */}
+            <div className="w-80 flex-shrink-0">
+              {/* Reading Goals - Compact Version */}
+              <div className="mb-3">
+                <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedBooks} />
+              </div>
+
+              {/* Stats - Horizontal Layout */}
+              <div className="grid grid-cols-3 gap-2">
+                <Card>
+                  <CardContent className="p-3 text-center">
+                    <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                    <p className="text-2xl font-bold text-foreground">{bookStats.inProgressBooks}</p>
+                    <p className="text-[10px] text-muted-foreground">In Progress</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3 text-center">
+                    <Star className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                    <p className="text-2xl font-bold text-foreground">{bookStats.completedBooks}</p>
+                    <p className="text-[10px] text-muted-foreground">Completed</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3 text-center">
+                    <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                    <p className="text-2xl font-bold text-foreground">{bookStats.totalBooks}</p>
+                    <p className="text-[10px] text-muted-foreground">Total Books</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
           
-          <Link to="/profile/settings">
+          <Link to="/profile/settings" className="ml-4">
             <Button variant="outline" className="gap-2">
               <Settings className="w-4 h-4" />
               Settings
             </Button>
           </Link>
-        </div>
-
-        {/* Reading Goals Section */}
-        <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedBooks} />
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          <Card>
-            <CardContent className="p-2.5 sm:p-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <BookOpen className="w-4 h-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-lg sm:text-xl font-bold text-foreground">{bookStats.totalBooks}</p>
-                  <p className="text-xs text-muted-foreground">Total Books</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-2.5 sm:p-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-                  <Star className="w-4 h-4 text-accent-foreground" />
-                </div>
-                <div>
-                  <p className="text-lg sm:text-xl font-bold text-foreground">{bookStats.completedBooks}</p>
-                  <p className="text-xs text-muted-foreground">Completed</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-2.5 sm:p-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-secondary rounded-lg flex items-center justify-center">
-                  <BookOpen className="w-4 h-4 text-secondary-foreground" />
-                </div>
-                <div>
-                  <p className="text-lg sm:text-xl font-bold text-foreground">{bookStats.inProgressBooks}</p>
-                  <p className="text-xs text-muted-foreground">In Progress</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Quick Actions */}
