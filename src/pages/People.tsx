@@ -18,7 +18,12 @@ export default function People() {
 
   const { scrollableRef, pullDistance, isRefreshing, showPullIndicator } = usePullToRefresh({
     onRefresh: async () => {
-      // Re-run search if there's a query
+      // Show success immediately
+      toast({
+        title: "Refreshed!",
+        description: "Search results updated.",
+      });
+      // Re-run search in background if there's a query
       if (q.trim()) {
         setLoading(true);
         try {
@@ -35,10 +40,6 @@ export default function People() {
         }
         setLoading(false);
       }
-      toast({
-        title: "Refreshed!",
-        description: "Search results updated.",
-      });
     },
   });
 

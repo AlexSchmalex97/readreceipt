@@ -291,11 +291,13 @@ export default function ProfileDisplay() {
 
   const { scrollableRef, pullDistance, isRefreshing, showPullIndicator } = usePullToRefresh({
     onRefresh: async () => {
-      await loadData();
+      // Show success immediately
       toast({
         title: "Refreshed!",
-        description: "Your profile has been updated.",
+        description: "Updating your profile...",
       });
+      // Load in background
+      loadData();
     },
   });
 

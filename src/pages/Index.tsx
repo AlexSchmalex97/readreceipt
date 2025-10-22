@@ -46,11 +46,13 @@ const Index = () => {
   // Pull-to-refresh
   const { scrollableRef, pullDistance, isRefreshing, showPullIndicator } = usePullToRefresh({
     onRefresh: async () => {
-      await loadBooks();
+      // Show success immediately for better UX
       toast({
         title: "Refreshed!",
-        description: "Your books have been updated.",
+        description: "Updating your books...",
       });
+      // Load in background
+      loadBooks();
     },
   });
 

@@ -105,11 +105,13 @@ export default function Reviews() {
 
   const { scrollableRef, pullDistance, isRefreshing, showPullIndicator } = usePullToRefresh({
     onRefresh: async () => {
-      await loadReviews();
+      // Show success immediately
       toast({
         title: "Refreshed!",
-        description: "Your reviews have been updated.",
+        description: "Updating your reviews...",
       });
+      // Load in background
+      loadReviews();
     },
   });
 

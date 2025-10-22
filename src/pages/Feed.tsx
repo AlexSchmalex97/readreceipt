@@ -189,11 +189,13 @@ export default function Feed() {
 
   const { scrollableRef, pullDistance, isRefreshing, showPullIndicator } = usePullToRefresh({
     onRefresh: async () => {
-      await loadFeed();
+      // Show success immediately
       toast({
         title: "Refreshed!",
-        description: "Your feed has been updated.",
+        description: "Updating your feed...",
       });
+      // Load in background
+      loadFeed();
     },
   });
 
