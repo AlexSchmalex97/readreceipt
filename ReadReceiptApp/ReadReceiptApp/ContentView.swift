@@ -220,6 +220,24 @@ struct WebView: UIViewRepresentable {
         webView.configuration.userContentController.addUserScript(networkTrackingScript)
         webView.configuration.userContentController.add(context.coordinator, name: "loadingState")
         
+        // Expose a robust native-app flag to the web code
+        let nativeFlagScript = WKUserScript(
+            source: """
+            (function(){
+              try {
+                window.__RR_NATIVE_APP = true;
+                document.documentElement.setAttribute('data-rr-native','1');
+                document.addEventListener('DOMContentLoaded', function(){
+                  try { document.body.classList.add('rr-native-app'); } catch(e){}
+                });
+              } catch(e) {}
+            })();
+            """,
+            injectionTime: .atDocumentStart,
+            forMainFrameOnly: true
+        )
+        webView.configuration.userContentController.addUserScript(nativeFlagScript)
+        
         // Ensure proper insets after initial layout
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             context.coordinator.updateInsets(isHome: true)
