@@ -341,7 +341,7 @@ export default function ProfileDisplay() {
         {/* Mobile Layout */}
         <div className="md:hidden">
           {/* Compact Header */}
-          <div className="flex items-start gap-3 mb-3">
+          <div className="flex items-start gap-3 mb-2">
             {/* Profile Photo - Smaller */}
             <div className="w-16 h-16 rounded-full overflow-hidden bg-muted border border-border flex-shrink-0">
               {profile.avatar_url ? (
@@ -365,12 +365,18 @@ export default function ProfileDisplay() {
               <p className="text-sm text-muted-foreground truncate">
                 @{profile.username || profile.id.slice(0, 8)}
               </p>
-              {zodiacSign && (
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  <Star className="w-3 h-3 inline mr-1" />
-                  {zodiacSign}
-                </p>
-              )}
+              <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
+                <span className="truncate">
+                  <Calendar className="w-3 h-3 inline mr-0.5" />
+                  {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                </span>
+                {zodiacSign && (
+                  <span>
+                    <Star className="w-3 h-3 inline mr-0.5" />
+                    {zodiacSign}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Settings Button - Icon Only */}
@@ -380,6 +386,87 @@ export default function ProfileDisplay() {
               </Button>
             </Link>
           </div>
+
+          {/* Bio */}
+          {profile.bio && (
+            <p className="text-xs text-foreground mb-2 line-clamp-2">{profile.bio}</p>
+          )}
+
+          {/* Current Book & Favorite Book - Compact Side by Side */}
+          {(currentBook || favoriteBook) && (
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              {currentBook && (
+                <div className="border rounded p-1.5 bg-card">
+                  <p className="text-[9px] text-muted-foreground mb-1">Reading</p>
+                  <div className="flex gap-1.5">
+                    {currentBook.cover_url && (
+                      <img
+                        src={currentBook.cover_url}
+                        alt={currentBook.title}
+                        className="w-8 h-11 object-cover rounded flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-medium line-clamp-2 leading-tight">{currentBook.title}</p>
+                      <p className="text-[9px] text-muted-foreground mt-0.5">
+                        {currentBook.current_page}/{currentBook.total_pages}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {favoriteBook && (
+                <div className="border rounded p-1.5 bg-card">
+                  <p className="text-[9px] text-muted-foreground mb-1">Favorite</p>
+                  <div className="flex gap-1.5">
+                    {favoriteBook.cover_url && (
+                      <img
+                        src={favoriteBook.cover_url}
+                        alt={favoriteBook.title}
+                        className="w-8 h-11 object-cover rounded flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-medium line-clamp-2 leading-tight">{favoriteBook.title}</p>
+                      <p className="text-[9px] text-muted-foreground truncate mt-0.5">{favoriteBook.author}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Links - Compact */}
+          {((profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url) && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
+                const Icon = getSocialMediaIcon(platform);
+                return (
+                  <a
+                    key={platform}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] border rounded-full hover:bg-accent transition-colors"
+                  >
+                    <Icon className="w-2.5 h-2.5" />
+                    {platform}
+                  </a>
+                );
+              })}
+              {profile.website_url && (
+                <a
+                  href={profile.website_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] border rounded-full hover:bg-accent transition-colors"
+                >
+                  <ExternalLink className="w-2.5 h-2.5" />
+                  Site
+                </a>
+              )}
+            </div>
+          )}
 
           {/* Stats - Single Row */}
           <div className="grid grid-cols-3 gap-2 mb-3">
