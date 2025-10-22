@@ -49,93 +49,48 @@ struct ContentView: View {
     }
 }
 
-// Cute 3D rotating open book animation
+// Book-like page flipping animation inspired by provided GIF
 struct BookLoadingAnimation: View {
-    @State private var rotationAngle: Double = 0
-    @State private var floatOffset: CGFloat = 0
+    @State private var flip: Double = 0
+    @State private var bounce: CGFloat = 0
     
     var body: some View {
         VStack(spacing: 20) {
             ZStack {
-                // Open book with 3D rotation
+                // Subtle base shadow
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.black.opacity(0.05))
+                    .frame(width: 180, height: 120)
+                    .blur(radius: 10)
+                    .offset(y: 30)
+                
+                // Book base with pages
                 ZStack {
-                    // Left page
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
-                                    Color(red: 0.82, green: 0.76, blue: 0.68),
-                                    Color(red: 0.88, green: 0.84, blue: 0.78)
-                                ]),
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .frame(width: 70, height: 90)
-                        .overlay(
-                            VStack(spacing: 5) {
-                                ForEach(0..<6) { _ in
-                                    RoundedRectangle(cornerRadius: 0.5)
-                                        .fill(Color(red: 0.55, green: 0.45, blue: 0.35).opacity(0.3))
-                                        .frame(width: 50, height: 2)
-                                }
-                            }
-                        )
-                        .rotation3DEffect(
-                            .degrees(-20),
-                            axis: (x: 0, y: 1, z: 0),
-                            anchor: .trailing,
-                            perspective: 0.3
-                        )
-                        .offset(x: -8)
-                    
-                    // Book spine (dark brown)
-                    Rectangle()
+                    // Back cover
+                    RoundedRectangle(cornerRadius: 8)
                         .fill(Color(red: 0.28, green: 0.20, blue: 0.14))
-                        .frame(width: 12, height: 90)
-                        .overlay(
-                            Rectangle()
-                                .fill(Color(red: 0.20, green: 0.14, blue: 0.10))
-                                .frame(width: 2, height: 90)
-                        )
+                        .frame(width: 160, height: 110)
+                        .shadow(color: Color.black.opacity(0.2), radius: 12, x: 0, y: 8)
                     
-                    // Right page
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
-                                    Color(red: 0.88, green: 0.84, blue: 0.78),
-                                    Color(red: 0.82, green: 0.76, blue: 0.68)
-                                ]),
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .frame(width: 70, height: 90)
-                        .overlay(
-                            VStack(spacing: 5) {
-                                ForEach(0..<6) { _ in
-                                    RoundedRectangle(cornerRadius: 0.5)
-                                        .fill(Color(red: 0.55, green: 0.45, blue: 0.35).opacity(0.3))
-                                        .frame(width: 50, height: 2)
-                                }
-                            }
-                        )
-                        .rotation3DEffect(
-                            .degrees(20),
-                            axis: (x: 0, y: 1, z: 0),
-                            anchor: .leading,
-                            perspective: 0.3
-                        )
-                        .offset(x: 8)
+                    // Right static pages
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color(red: 0.94, green: 0.92, blue: 0.88))
+                        .frame(width: 140, height: 100)
+                        .offset(x: 18)
+                    
+                    // Left static pages
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color(red: 0.96, green: 0.94, blue: 0.90))
+                        .frame(width: 140, height: 100)
+                        .offset(x: -18)
+                    
+                    // Flipping page with lines
+                    FlippingPage(flip: flip)
+                        .frame(width: 140, height: 100)
+                        .offset(x: -8)
                 }
-                .shadow(color: Color.black.opacity(0.3), radius: 15, x: 0, y: 8)
-                .rotation3DEffect(
-                    .degrees(rotationAngle),
-                    axis: (x: 0.3, y: 1, z: 0),
-                    perspective: 0.6
-                )
-                .offset(y: floatOffset)
+                .rotation3DEffect(.degrees(8), axis: (x: 1, y: 0, z: 0))
+                .offset(y: bounce)
             }
             
             Text("Loading...")
@@ -143,18 +98,51 @@ struct BookLoadingAnimation: View {
                 .foregroundColor(Color(red: 0.45, green: 0.35, blue: 0.25))
         }
         .onAppear {
-            // Continuous gentle rotation
-            withAnimation(Animation.easeInOut(duration: 3.0).repeatForever(autoreverses: true)) {
-                rotationAngle = 15
+            withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: false)) {
+                flip = 360
             }
-            
-            // Gentle floating motion
-            withAnimation(Animation.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
-                floatOffset = -10
+            withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) {
+                bounce = -8
             }
         }
     }
 }
+
+struct FlippingPage: View {
+    var flip: Double
+    
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 6)
+                .fill(Color(red: 0.98, green: 0.97, blue: 0.94))
+                .overlay(
+                    VStack(spacing: 6) {
+                        ForEach(0..<6) { _ in
+                            RoundedRectangle(cornerRadius: 1)
+                                .fill(Color.black.opacity(0.08))
+                                .frame(height: 3)
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                )
+                .rotation3DEffect(
+                    .degrees(flip),
+                    axis: (x: 0, y: 1, z: 0),
+                    anchor: .leading,
+                    perspective: 0.7
+                )
+                .shadow(color: Color.black.opacity(0.18), radius: 10, x: 0, y: 6)
+                .mask(
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color.black, Color.black, Color.clear]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+        }
+    }
+}
+
 
 class WebViewState: ObservableObject {
     @Published var isHomePage = true
@@ -236,9 +224,11 @@ struct WebView: UIViewRepresentable {
         webView.configuration.userContentController.addUserScript(routeTrackingScript)
         webView.configuration.userContentController.add(context.coordinator, name: "routeChange")
         
-        // Inject CSS to adjust spacing (do not hide tab bar)
+        // Inject CSS to adjust spacing and ensure bottom tab bar visibility
         let paddingCSS = """
         body { padding-top: 0 !important; }
+        html, body { min-height: 100vh; }
+        [data-mobile-tabbar] { bottom: env(safe-area-inset-bottom) !important; }
         """
         let cssScript = WKUserScript(
             source: "var style = document.createElement('style'); style.innerHTML = '\(paddingCSS)'; document.head.appendChild(style);",
@@ -246,6 +236,28 @@ struct WebView: UIViewRepresentable {
             forMainFrameOnly: true
         )
         webView.configuration.userContentController.addUserScript(cssScript)
+        
+        // Ensure viewport-fit=cover so safe area insets apply
+        let viewportPatch = WKUserScript(
+            source: """
+            (function(){
+              var meta = document.querySelector('meta[name=viewport]');
+              if (!meta) { 
+                meta = document.createElement('meta'); 
+                meta.name = 'viewport'; 
+                document.head.appendChild(meta);
+              }
+              var content = meta.getAttribute('content') || '';
+              if (!/viewport-fit=cover/.test(content)) {
+                content = (content ? content + ', ' : '') + 'viewport-fit=cover';
+                meta.setAttribute('content', content);
+              }
+            })();
+            """,
+            injectionTime: .atDocumentEnd,
+            forMainFrameOnly: true
+        )
+        webView.configuration.userContentController.addUserScript(viewportPatch)
         
         // Inject network tracking to show loading for SPA and API calls
         let networkTrackingScript = WKUserScript(
@@ -342,8 +354,13 @@ struct WebView: UIViewRepresentable {
                     self.state.isHomePage = isHome
                     self.updateInsets(isHome: isHome)
                     if isHome { self.state.headerOpacity = 1.0 }
-                    // Show loading overlay during SPA route transitions
+                    // Show loading overlay during SPA route transitions with fail-safe auto-hide
                     self.state.isLoading = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        if self.state.isLoading {
+                            self.state.isLoading = false
+                        }
+                    }
                 }
             } else if message.name == "loadingState", let loading = message.body as? Bool {
                 DispatchQueue.main.async {
