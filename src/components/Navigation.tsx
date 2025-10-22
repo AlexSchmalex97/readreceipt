@@ -25,7 +25,7 @@ export function Navigation() {
   // ReadReceipt iOS App: No header, only bottom tab bar
   if (isReadReceiptApp || isNative || isIOS || isIOSWebView || isStandalonePWA) {
     return (
-      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border pb-safe-bottom z-50">
+      <nav data-mobile-tabbar className="fixed bottom-0 left-0 right-0 bg-card border-t border-border pb-safe-bottom z-50">
 
 
 

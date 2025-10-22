@@ -168,4 +168,6 @@ body.ios-app > div > div {
 @media (display-mode: standalone) {
   header.bg-card { display: none !important; }
 }
+/* If the mobile tabbar exists, hide the header (robust fallback) */
+body:has(nav[data-mobile-tabbar]) header.bg-card { display: none !important; }
 

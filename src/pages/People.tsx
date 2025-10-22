@@ -88,7 +88,7 @@ export default function People() {
       <div 
         ref={scrollableRef}
         className="relative overflow-y-auto"
-        style={{ height: isReadReceiptApp ? '100dvh' : isIOS ? 'calc(100dvh - 64px - 64px)' : 'calc(100dvh - 64px)' }}
+        style={{ height: (isIOS || isReadReceiptApp) ? 'calc(100dvh - 64px)' : 'calc(100dvh - 64px)' }}
       >
         {/* Pull-to-refresh indicator */}
         {showPullIndicator && (
