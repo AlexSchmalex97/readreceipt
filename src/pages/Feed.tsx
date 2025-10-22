@@ -4,6 +4,7 @@ import { Navigation } from "@/components/Navigation";
 import { BookOpen, RefreshCw } from "lucide-react";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { useToast } from "@/hooks/use-toast";
+import { usePlatform } from "@/hooks/usePlatform";
 
 type Post = {
   kind: "post";
@@ -53,6 +54,7 @@ export default function Feed() {
   const [items, setItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { isIOS } = usePlatform();
 
   const loadFeed = async () => {
       
@@ -212,7 +214,7 @@ export default function Feed() {
       <div 
         ref={scrollableRef}
         className="relative overflow-y-auto"
-        style={{ height: 'calc(100vh - 64px)' }}
+        style={{ height: isIOS ? 'calc(100vh - 64px - 64px)' : 'calc(100vh - 64px)' }}
       >
         {/* Pull-to-refresh indicator */}
         {showPullIndicator && (

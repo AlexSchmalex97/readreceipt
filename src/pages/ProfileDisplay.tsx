@@ -9,6 +9,7 @@ import { Settings, User, BookOpen, Star, Calendar, Globe, Facebook, Twitter, Ins
 import { useToast } from "@/hooks/use-toast";
 import { HomeReadingGoals } from "@/components/HomeReadingGoals";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { usePlatform } from "@/hooks/usePlatform";
 
 type UserProfile = {
   id: string;
@@ -107,6 +108,7 @@ export default function ProfileDisplay() {
   const [currentBook, setCurrentBook] = useState<CurrentBook | null>(null);
   const [zodiacSign, setZodiacSign] = useState<string | null>(null);
   const { toast } = useToast();
+  const { isIOS } = usePlatform();
 
   const loadData = async () => {
       setLoading(true);
@@ -353,7 +355,7 @@ export default function ProfileDisplay() {
       <div 
         ref={scrollableRef}
         className="relative overflow-y-auto"
-        style={{ height: 'calc(100vh - 64px)' }}
+        style={{ height: isIOS ? 'calc(100vh - 64px - 64px)' : 'calc(100vh - 64px)' }}
       >
         {/* Pull-to-refresh indicator */}
         {showPullIndicator && (

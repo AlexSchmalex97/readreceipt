@@ -766,7 +766,7 @@ const Index = () => {
       <div 
         ref={scrollableRef}
         className="relative overflow-y-auto"
-        style={{ height: 'calc(100vh - 64px)' }}
+        style={{ height: isIOS ? 'calc(100vh - 64px - 64px)' : 'calc(100vh - 64px)' }}
       >
         {/* Pull-to-refresh indicator */}
         {showPullIndicator && (
