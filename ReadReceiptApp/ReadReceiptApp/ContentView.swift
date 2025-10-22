@@ -82,6 +82,7 @@ struct BookLoadingAnimation: View {
 }
 
 
+class WebViewState: ObservableObject {
     @Published var isHomePage = true
     @Published var headerOpacity: Double = 1.0
     @Published var scrollOffset: CGFloat = 0
