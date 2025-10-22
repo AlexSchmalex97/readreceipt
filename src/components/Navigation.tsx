@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthButtons from "@/components/AuthButtons";
 import { HeaderDisplay } from "@/components/HeaderDisplay";
 import { usePlatform } from "@/hooks/usePlatform";
@@ -6,6 +6,7 @@ import { Home, Users, Rss, Star, User, Mail } from "lucide-react";
 
 export function Navigation() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const { isIOS, isReadReceiptApp } = usePlatform();
 
   const isActive = (path: string) => pathname === path;
@@ -52,16 +53,16 @@ export function Navigation() {
               const Icon = item.icon;
               const active = isActive(item.path);
               return (
-                <Link
+                <button
                   key={item.path}
-                  to={item.path}
+                  onClick={() => navigate(item.path)}
                   className={`flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors ${
                     active ? "text-primary" : "text-muted-foreground"
                   }`}
                 >
                   <Icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{item.label}</span>
-                </Link>
+                </button>
               );
             })}
           </div>
