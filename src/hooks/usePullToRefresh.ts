@@ -20,7 +20,9 @@ export function usePullToRefresh({
   const touchStartY = useRef(0);
   const scrollableRef = useRef<HTMLDivElement>(null);
 
-  const isMobile = isIOS || isAndroid;
+  const isMobile = isIOS || isAndroid ||
+    (typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) ||
+    (typeof document !== 'undefined' && (document.body.classList.contains('ios-app') || document.body.classList.contains('ios-native-app')));
 
   useEffect(() => {
     if (!isMobile) return;

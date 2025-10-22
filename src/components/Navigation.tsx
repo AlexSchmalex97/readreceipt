@@ -23,9 +23,10 @@ export function Navigation() {
   ];
 
   // ReadReceipt iOS App: No header, only bottom tab bar
-  if (isReadReceiptApp || isNative || isIOS || isIOSWebView || isStandalonePWA) {
+  if (isReadReceiptApp || isNative || isIOS || isIOSWebView || isStandalonePWA || (typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent) && (window as any)?.Capacitor)) {
     return (
       <nav data-mobile-tabbar className="fixed bottom-0 left-0 right-0 bg-card border-t border-border pb-safe-bottom z-50">
+
 
 
 
@@ -53,7 +54,7 @@ export function Navigation() {
 
 
   // Web: Original navigation layout - but ONLY if truly web (not iOS, not native, not WKWebView, not PWA)
-  if (isWeb && !isIOS && !isNative && !isReadReceiptApp && !isIOSWebView && !isStandalonePWA) {
+  if (isWeb && !isIOS && !isNative && !isReadReceiptApp && !isIOSWebView && !isStandalonePWA && !(typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent) && (window as any)?.Capacitor)) {
     return (
       <header className="bg-card shadow-soft border-b border-border">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
