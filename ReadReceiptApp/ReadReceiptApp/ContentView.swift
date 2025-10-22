@@ -10,7 +10,7 @@ import WebKit
 
 struct ContentView: View {
     var body: some View {
-        WebView(url: URL(string: "https://cee96301-737a-4542-a6bb-93de6bf7e75c.lovableproject.com?forceHideBadge=true")!)
+        WebView(url: URL(string: "https://readreceiptapp.com")!)
             .edgesIgnoringSafeArea(.all)
     }
 }
