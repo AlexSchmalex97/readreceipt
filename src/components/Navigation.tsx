@@ -63,7 +63,7 @@ export function Navigation() {
             <img
               src="/assets/readreceipt-logo.png"
               alt="ReadReceipt logo"
-              className="h-8 sm:h-10"
+              className="h-12 sm:h-16"
             />
           </div>
           

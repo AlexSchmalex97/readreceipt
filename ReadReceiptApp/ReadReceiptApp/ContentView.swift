@@ -17,7 +17,7 @@ struct ContentView: View {
                 Image("ReadReceiptHeader")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(height: 40)
+                    .frame(height: 60)
                 Spacer()
             }
             .padding(.vertical, 8)
