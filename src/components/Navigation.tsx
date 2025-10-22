@@ -95,7 +95,7 @@ export function Navigation() {
             <img
               src="/assets/readreceipt-logo.png"
               alt="ReadReceipt logo"
-              className="h-12 sm:h-16 md:h-20"
+              className="h-24 sm:h-28 md:h-32 lg:h-36 xl:h-40"
             />
           </Link>
           
