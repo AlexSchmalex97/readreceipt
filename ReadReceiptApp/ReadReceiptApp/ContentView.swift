@@ -10,8 +10,23 @@ import WebKit
 
 struct ContentView: View {
     var body: some View {
-        WebView(url: URL(string: "https://readreceiptapp.com")!)
-            .edgesIgnoringSafeArea(.all)
+        VStack(spacing: 0) {
+            // Thin header with logo
+            HStack {
+                Image("ReadReceiptHeader")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: 40)
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(Color(red: 0.96, green: 0.95, blue: 0.94))
+            
+            // WebView
+            WebView(url: URL(string: "https://readreceiptapp.com")!)
+        }
+        .edgesIgnoringSafeArea(.bottom)
     }
 }
 
@@ -23,6 +38,15 @@ struct WebView: UIViewRepresentable {
         let webView = WKWebView(frame: .zero, configuration: config)
         webView.customUserAgent = "ReadReceiptApp iOS"
         webView.scrollView.contentInsetAdjustmentBehavior = .never
+        
+        // Inject CSS to add top padding to the web content
+        let paddingCSS = """
+        body { padding-top: 0 !important; }
+        [data-mobile-tabbar] { display: none !important; }
+        """
+        let cssScript = WKUserScript(source: "var style = document.createElement('style'); style.innerHTML = '\(paddingCSS)'; document.head.appendChild(style);", injectionTime: .atDocumentEnd, forMainFrameOnly: true)
+        webView.configuration.userContentController.addUserScript(cssScript)
+        
         return webView
     }
     
