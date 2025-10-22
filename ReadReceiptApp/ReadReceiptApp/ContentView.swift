@@ -49,87 +49,93 @@ struct ContentView: View {
     }
 }
 
-// Cute book loading animation with flipping pages
+// Cute 3D rotating open book animation
 struct BookLoadingAnimation: View {
-    @State private var pageFlipAngle: Double = 0
-    @State private var bookBounce: CGFloat = 0
-    @State private var glowOpacity: Double = 0.3
+    @State private var rotationAngle: Double = 0
+    @State private var floatOffset: CGFloat = 0
     
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 20) {
             ZStack {
-                // Glow effect
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            gradient: Gradient(colors: [
-                                Color(red: 0.55, green: 0.45, blue: 0.35).opacity(glowOpacity),
-                                Color.clear
-                            ]),
-                            center: .center,
-                            startRadius: 5,
-                            endRadius: 80
-                        )
-                    )
-                    .frame(width: 160, height: 160)
-                
-                // Book with animated pages
+                // Open book with 3D rotation
                 ZStack {
-                    // Book base/cover
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(red: 0.55, green: 0.45, blue: 0.35))
-                        .frame(width: 100, height: 120)
-                        .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
-                    
-                    // Book spine
-                    Rectangle()
-                        .fill(Color(red: 0.35, green: 0.25, blue: 0.15))
-                        .frame(width: 6, height: 120)
-                    
-                    // Left page (static)
+                    // Left page
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(Color(red: 0.98, green: 0.96, blue: 0.93))
-                        .frame(width: 42, height: 100)
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color(red: 0.82, green: 0.76, blue: 0.68),
+                                    Color(red: 0.88, green: 0.84, blue: 0.78)
+                                ]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: 70, height: 90)
                         .overlay(
-                            VStack(spacing: 6) {
-                                ForEach(0..<3) { _ in
-                                    RoundedRectangle(cornerRadius: 1)
-                                        .fill(Color(red: 0.45, green: 0.35, blue: 0.25).opacity(0.5))
-                                        .frame(width: 32, height: 2.5)
+                            VStack(spacing: 5) {
+                                ForEach(0..<6) { _ in
+                                    RoundedRectangle(cornerRadius: 0.5)
+                                        .fill(Color(red: 0.55, green: 0.45, blue: 0.35).opacity(0.3))
+                                        .frame(width: 50, height: 2)
                                 }
                             }
                         )
-                        .offset(x: -26)
-                    
-                    // Right page (animated - flipping)
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color(red: 0.98, green: 0.96, blue: 0.93))
-                        .frame(width: 42, height: 100)
-                        .overlay(
-                            VStack(spacing: 6) {
-                                ForEach(0..<3) { _ in
-                                    RoundedRectangle(cornerRadius: 1)
-                                        .fill(Color(red: 0.45, green: 0.35, blue: 0.25).opacity(0.5))
-                                        .frame(width: 32, height: 2.5)
-                                }
-                            }
-                        )
-                        .offset(x: 26)
                         .rotation3DEffect(
-                            .degrees(pageFlipAngle),
+                            .degrees(-20),
+                            axis: (x: 0, y: 1, z: 0),
+                            anchor: .trailing,
+                            perspective: 0.3
+                        )
+                        .offset(x: -8)
+                    
+                    // Book spine (dark brown)
+                    Rectangle()
+                        .fill(Color(red: 0.28, green: 0.20, blue: 0.14))
+                        .frame(width: 12, height: 90)
+                        .overlay(
+                            Rectangle()
+                                .fill(Color(red: 0.20, green: 0.14, blue: 0.10))
+                                .frame(width: 2, height: 90)
+                        )
+                    
+                    // Right page
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color(red: 0.88, green: 0.84, blue: 0.78),
+                                    Color(red: 0.82, green: 0.76, blue: 0.68)
+                                ]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: 70, height: 90)
+                        .overlay(
+                            VStack(spacing: 5) {
+                                ForEach(0..<6) { _ in
+                                    RoundedRectangle(cornerRadius: 0.5)
+                                        .fill(Color(red: 0.55, green: 0.45, blue: 0.35).opacity(0.3))
+                                        .frame(width: 50, height: 2)
+                                }
+                            }
+                        )
+                        .rotation3DEffect(
+                            .degrees(20),
                             axis: (x: 0, y: 1, z: 0),
                             anchor: .leading,
-                            perspective: 0.5
+                            perspective: 0.3
                         )
-                    
-                    // Checkmark overlay (appears during flip)
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(Color(red: 0.45, green: 0.35, blue: 0.25))
-                        .offset(x: 26)
-                        .opacity(pageFlipAngle > 90 ? 1 : 0)
+                        .offset(x: 8)
                 }
-                .offset(y: bookBounce)
+                .shadow(color: Color.black.opacity(0.3), radius: 15, x: 0, y: 8)
+                .rotation3DEffect(
+                    .degrees(rotationAngle),
+                    axis: (x: 0.3, y: 1, z: 0),
+                    perspective: 0.6
+                )
+                .offset(y: floatOffset)
             }
             
             Text("Loading...")
@@ -137,19 +143,14 @@ struct BookLoadingAnimation: View {
                 .foregroundColor(Color(red: 0.45, green: 0.35, blue: 0.25))
         }
         .onAppear {
-            // Page flip animation
-            withAnimation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
-                pageFlipAngle = 180
+            // Continuous gentle rotation
+            withAnimation(Animation.easeInOut(duration: 3.0).repeatForever(autoreverses: true)) {
+                rotationAngle = 15
             }
             
-            // Gentle bounce
-            withAnimation(Animation.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
-                bookBounce = -8
-            }
-            
-            // Glow pulse
-            withAnimation(Animation.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
-                glowOpacity = 0.6
+            // Gentle floating motion
+            withAnimation(Animation.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
+                floatOffset = -10
             }
         }
     }
@@ -204,12 +205,11 @@ struct WebView: UIViewRepresentable {
         // Keep a reference for adjusting insets on route changes
         context.coordinator.webView = webView
         
-        // Add padding: safe area (44) + header on home (68 total), just safe area on other pages (44)
-        let safeAreaTop: CGFloat = 44
+        // Initial insets - will be updated dynamically based on safe areas
         let headerHeight: CGFloat = 68
-        let bottomInsetForTabBar: CGFloat = 80
-        webView.scrollView.contentInset = UIEdgeInsets(top: headerHeight, left: 0, bottom: bottomInsetForTabBar, right: 0)
-        webView.scrollView.scrollIndicatorInsets = UIEdgeInsets(top: headerHeight, left: 0, bottom: bottomInsetForTabBar, right: 0)
+        let webTabBarHeight: CGFloat = 60  // Height of the web app's tab bar
+        webView.scrollView.contentInset = UIEdgeInsets(top: headerHeight, left: 0, bottom: webTabBarHeight, right: 0)
+        webView.scrollView.scrollIndicatorInsets = UIEdgeInsets(top: headerHeight, left: 0, bottom: webTabBarHeight, right: 0)
         
         // Inject JavaScript to robustly track route changes (React Router)
         let routeTrackingScript = WKUserScript(
@@ -247,6 +247,33 @@ struct WebView: UIViewRepresentable {
         )
         webView.configuration.userContentController.addUserScript(cssScript)
         
+        // Inject network tracking to show loading for SPA and API calls
+        let networkTrackingScript = WKUserScript(
+            source: """
+            (function(){
+              if (window.__rrLoadingPatched) return; window.__rrLoadingPatched = true;
+              var active = 0; var t;
+              function post(){ try{ window.webkit.messageHandlers.loadingState.postMessage(active > 0); }catch(e){} }
+              function onChange(){ if(active>0){ post(); } else { clearTimeout(t); t = setTimeout(post, 150); } }
+              var origFetch = window.fetch;
+              if (origFetch) {
+                window.fetch = function(){ active++; onChange(); return origFetch.apply(this, arguments).finally(function(){ active--; onChange(); }); };
+              }
+              var origSend = XMLHttpRequest.prototype.send;
+              XMLHttpRequest.prototype.send = function(){ active++; onChange(); this.addEventListener('loadend', function(){ active--; onChange(); }, { once: true }); return origSend.apply(this, arguments); };
+            })();
+            """,
+            injectionTime: .atDocumentStart,
+            forMainFrameOnly: true
+        )
+        webView.configuration.userContentController.addUserScript(networkTrackingScript)
+        webView.configuration.userContentController.add(context.coordinator, name: "loadingState")
+        
+        // Ensure proper insets after initial layout
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            context.coordinator.updateInsets(isHome: true)
+        }
+        
         return webView
     }
     
@@ -268,16 +295,22 @@ struct WebView: UIViewRepresentable {
         // Compute and apply safe content insets dynamically
         func updateInsets(isHome: Bool) {
             guard let webView = self.webView else { return }
-            let safeTop = webView.safeAreaInsets.top
-            let safeBottom = webView.safeAreaInsets.bottom
+            let window = webView.window
+            let safeTop = window?.safeAreaInsets.top ?? 44
+            let safeBottom = window?.safeAreaInsets.bottom ?? 34
             let headerHeight: CGFloat = 68
-            let bottomInsetForTabBar: CGFloat = 80
+            let webTabBarHeight: CGFloat = 60
+            
+            // Top: safe area + header (on home only)
             let insetTop = safeTop + (isHome ? headerHeight : 0)
-            let insetBottom = bottomInsetForTabBar + safeBottom
+            // Bottom: safe area + web app's tab bar
+            let insetBottom = safeBottom + webTabBarHeight
+            
             var inset = webView.scrollView.contentInset
             inset.top = insetTop
             inset.bottom = insetBottom
             webView.scrollView.contentInset = inset
+            
             var indicatorInset = webView.scrollView.scrollIndicatorInsets
             indicatorInset.top = insetTop
             indicatorInset.bottom = insetBottom
