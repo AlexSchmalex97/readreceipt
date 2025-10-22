@@ -20,12 +20,33 @@ export function Navigation() {
     { path: "/contact", label: "Contact", icon: Mail },
   ];
 
-  // ReadReceipt iOS App: No header, only content
+  // ReadReceipt iOS App: No header, only bottom tab bar
   if (isReadReceiptApp) {
-    return null;
+    return (
+      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border pb-safe-bottom z-50">
+        <div className="flex justify-around items-center h-16">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.path);
+            return (
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className={`flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors ${
+                  active ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+                <span className="text-xs font-medium">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+    );
   }
 
-  // iOS: Bottom tab bar navigation
+  // iOS: Bottom tab bar navigation with simplified header
   if (isIOS) {
     return (
       <>
