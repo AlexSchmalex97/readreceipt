@@ -23,9 +23,10 @@ export function Navigation() {
   ];
 
   // ReadReceipt iOS App: No header, only bottom tab bar
-  if (isReadReceiptApp || isNative || isIOSWebView || isStandalonePWA) {
+  if (isReadReceiptApp || isNative || isIOS || isIOSWebView || isStandalonePWA) {
     return (
       <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border pb-safe-bottom z-50">
+
 
 
         <div className="flex justify-around items-center h-16">
