@@ -7,6 +7,7 @@
 
 import SwiftUI
 import WebKit
+import Combine
 
 struct ContentView: View {
     @StateObject private var webViewState = WebViewState()
