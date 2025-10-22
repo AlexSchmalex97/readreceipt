@@ -394,7 +394,7 @@ export default function ProfileDisplay() {
           )}
           {/* Current Book & Favorite Book - Side by Side */}
           {(currentBook || favoriteBook) && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 max-w-2xl mx-auto">
+            <div className="grid grid-cols-2 gap-2 mb-4">
               {currentBook && (
                 <div className="border rounded-lg p-3 bg-card">
                   <p className="text-xs text-muted-foreground mb-2">Currently Reading</p>
