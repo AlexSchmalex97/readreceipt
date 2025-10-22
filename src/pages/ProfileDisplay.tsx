@@ -533,8 +533,8 @@ export default function ProfileDisplay() {
                     <p className="text-xs text-muted-foreground">No reviews yet</p>
                   </div>
                 ) : (
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
-                    {recentReviews.slice(0, 5).map((review) => (
+                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {recentReviews.map((review) => (
                       <div key={review.id} className="border-b border-border pb-2 last:border-b-0">
                         <div className="flex gap-2">
                           {review.books.cover_url ? (
@@ -591,8 +591,8 @@ export default function ProfileDisplay() {
                     <p className="text-xs text-muted-foreground">No activity yet</p>
                   </div>
                 ) : (
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
-                    {activityFeed.slice(0, 5).map((item) =>
+                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {activityFeed.map((item) =>
                       item.kind === "progress" ? (
                         <div key={`p-${item.id}`} className="border border-border rounded-lg p-2">
                           <div className="text-[9px] text-muted-foreground mb-1">
@@ -667,8 +667,8 @@ export default function ProfileDisplay() {
                     <p className="text-xs text-muted-foreground">Your TBR list is empty</p>
                   </div>
                 ) : (
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
-                    {tbrBooks.slice(0, 5).map((book) => (
+                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {tbrBooks.map((book) => (
                       <div key={book.id} className="border border-border rounded-lg p-2">
                         <div className="flex gap-1.5">
                           {book.cover_url ? (
