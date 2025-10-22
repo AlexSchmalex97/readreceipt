@@ -7,7 +7,7 @@ import { Home, Users, Rss, Star, User, Mail } from "lucide-react";
 export function Navigation() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { isIOS, isReadReceiptApp } = usePlatform();
+  const { isIOS, isNative, isReadReceiptApp } = usePlatform();
 
   const isActive = (path: string) => pathname === path;
 
@@ -21,7 +21,7 @@ export function Navigation() {
   ];
 
   // ReadReceipt iOS App: No header, only bottom tab bar
-  if (isReadReceiptApp) {
+  if (isReadReceiptApp || (isIOS && isNative)) {
     return (
       <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border pb-safe-bottom z-50">
         <div className="flex justify-around items-center h-16">
