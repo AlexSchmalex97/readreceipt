@@ -7,7 +7,7 @@ import { Home, Users, Rss, Star, User, Mail } from "lucide-react";
 export function Navigation() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { isIOS, isNative, isReadReceiptApp } = usePlatform();
+  const { isIOS, isNative, isReadReceiptApp, isWeb } = usePlatform();
   const isIOSWebView = typeof window !== 'undefined' && !!(window as any).webkit && !!(window as any).webkit.messageHandlers;
   const isStandalonePWA = typeof window !== 'undefined' && (("standalone" in navigator && (navigator as any).standalone) || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches));
 
@@ -97,10 +97,11 @@ export function Navigation() {
     );
   }
 
-  // Web: Original navigation layout
-  return (
-    <header className="bg-card shadow-soft border-b border-border">
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+  // Web: Original navigation layout (only on real web)
+  if (isWeb) {
+    return (
+      <header className="bg-card shadow-soft border-b border-border">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
         {/* First Row: Logo + Title + Auth */}
         <div className="flex items-center justify-between gap-4 mb-4">
           <div className="flex items-center gap-3">
@@ -193,5 +194,9 @@ export function Navigation() {
         </div>
       </div>
     </header>
-  );
+    );
+  }
+
+  // Non-web environments: no top header
+  return null;
 }
