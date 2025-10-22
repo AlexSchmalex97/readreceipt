@@ -1,5 +1,5 @@
 import { useEffect, useState, ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlatform } from "@/hooks/usePlatform";
 
@@ -11,9 +11,20 @@ export const IOSProtectedRoute = ({ children }: IOSProtectedRouteProps) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { isIOS, isReadReceiptApp } = usePlatform();
 
+  // Allow /contact without authentication
+  const isPublicRoute = location.pathname === "/contact";
+
   useEffect(() => {
+    // Allow public routes without authentication
+    if (isPublicRoute) {
+      setLoading(false);
+      setIsAuthenticated(true);
+      return;
+    }
+
     // Only enforce authentication on iOS
     if (!isIOS && !isReadReceiptApp) {
       setLoading(false);
@@ -40,7 +51,7 @@ export const IOSProtectedRoute = ({ children }: IOSProtectedRouteProps) => {
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate, isIOS, isReadReceiptApp]);
+  }, [navigate, isIOS, isReadReceiptApp, isPublicRoute]);
 
   if (loading) {
     return (
