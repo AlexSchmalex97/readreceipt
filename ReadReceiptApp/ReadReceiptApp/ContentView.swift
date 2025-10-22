@@ -204,11 +204,12 @@ struct WebView: UIViewRepresentable {
         // Keep a reference for adjusting insets on route changes
         context.coordinator.webView = webView
         
-        // Add top padding to web content (matches header height + safe area)
-        let headerInsetTop: CGFloat = 68
+        // Add padding: safe area (44) + header on home (68 total), just safe area on other pages (44)
+        let safeAreaTop: CGFloat = 44
+        let headerHeight: CGFloat = 68
         let bottomInsetForTabBar: CGFloat = 80
-        webView.scrollView.contentInset = UIEdgeInsets(top: headerInsetTop, left: 0, bottom: bottomInsetForTabBar, right: 0)
-        webView.scrollView.scrollIndicatorInsets = UIEdgeInsets(top: headerInsetTop, left: 0, bottom: bottomInsetForTabBar, right: 0)
+        webView.scrollView.contentInset = UIEdgeInsets(top: headerHeight, left: 0, bottom: bottomInsetForTabBar, right: 0)
+        webView.scrollView.scrollIndicatorInsets = UIEdgeInsets(top: headerHeight, left: 0, bottom: bottomInsetForTabBar, right: 0)
         
         // Inject JavaScript to robustly track route changes (React Router)
         let routeTrackingScript = WKUserScript(
@@ -283,9 +284,11 @@ struct WebView: UIViewRepresentable {
                     let isHome = (path == "/" || path == "")
                     self.state.isHomePage = isHome
                     if let webView = self.webView {
-                        let headerInsetTop: CGFloat = 68
+                        let safeAreaTop: CGFloat = 44
+                        let headerHeight: CGFloat = 68
                         let bottomInsetForTabBar: CGFloat = 80
-                        let insetTop: CGFloat = isHome ? headerInsetTop : 0
+                        // Home page: full header + safe area, Other pages: just safe area
+                        let insetTop: CGFloat = isHome ? headerHeight : safeAreaTop
                         var inset = webView.scrollView.contentInset
                         inset.top = insetTop
                         inset.bottom = bottomInsetForTabBar
