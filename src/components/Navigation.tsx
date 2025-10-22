@@ -95,7 +95,7 @@ export function Navigation() {
             <img
               src="/assets/readreceipt-logo-tight.png?v=2"
               alt="ReadReceipt logo wordmark"
-              className="block h-24 sm:h-28 md:h-32 lg:h-36 xl:h-40"
+              className="block h-12 sm:h-14 md:h-16"
             />
           </Link>
           
