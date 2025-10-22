@@ -51,31 +51,6 @@ export function Navigation() {
     );
   }
 
-  // iOS: Bottom tab bar navigation with simplified header
-  if (isIOS) {
-    return (
-      <>
-        {/* Top header - simplified for iOS */}
-        <header className="bg-card shadow-soft border-b border-border pb-safe-top">
-          <div className="container mx-auto px-3 py-3">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <img
-                  src="/assets/readreceipt-logo.png"
-                  alt="ReadReceipt logo"
-                  className="w-10 h-10"
-                />
-                <h1 className="text-xl font-bold text-primary">ReadReceipt</h1>
-              </div>
-              <AuthButtons />
-            </div>
-          </div>
-        </header>
-
-        {/* Bottom tab bar navigation for iOS */}
-        <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border pb-safe-bottom z-50">
-          <div className="flex justify-around items-center h-16">
-            {navItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.path);
               return (
