@@ -11,15 +11,15 @@ import WebKit
 struct ContentView: View {
     var body: some View {
         VStack(spacing: 0) {
-            // Thin header with logo
+            // Thin header with centered logo
             HStack {
+                Spacer()
                 Image("ReadReceiptHeader")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(height: 40)
                 Spacer()
             }
-            .padding(.horizontal, 16)
             .padding(.vertical, 8)
             .background(Color(red: 0.96, green: 0.95, blue: 0.94))
             
