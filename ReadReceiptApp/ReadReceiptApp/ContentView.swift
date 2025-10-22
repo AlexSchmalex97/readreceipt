@@ -49,139 +49,39 @@ struct ContentView: View {
     }
 }
 
-// Open book with fluttering pages animation
-struct BookLoadingAnimation: View {
-    @State private var pageFlutter: Double = 0
-    @State private var bounce: CGFloat = 0
+// Simple GIF loader using WKWebView so GIF animates reliably
+struct GIFLoaderView: UIViewRepresentable {
+    let urlString: String
     
+    func makeUIView(context: Context) -> WKWebView {
+        let wv = WKWebView()
+        wv.isOpaque = false
+        wv.backgroundColor = .clear
+        wv.scrollView.isScrollEnabled = false
+        wv.scrollView.backgroundColor = .clear
+        let html = """
+        <html><head><meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover'></head>
+        <body style='margin:0;background:transparent;display:flex;align-items:center;justify-content:center;height:100vh;'>
+          <img src='\(urlString)' style='width:160px;height:160px;object-fit:contain;' alt='Loading book animation' />
+        </body></html>
+        """
+        wv.loadHTMLString(html, baseURL: nil)
+        return wv
+    }
+    
+    func updateUIView(_ uiView: WKWebView, context: Context) {}
+}
+
+// Use the provided GIF as the loading animation
+struct BookLoadingAnimation: View {
     var body: some View {
-        VStack(spacing: 20) {
-            ZStack {
-                // Open book with orange cover
-                ZStack {
-                    // Left cover (orange)
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
-                                    Color(red: 1.0, green: 0.65, blue: 0.0),
-                                    Color(red: 1.0, green: 0.55, blue: 0.0)
-                                ]),
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .frame(width: 90, height: 110)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 4)
-                                .stroke(Color(red: 0.9, green: 0.5, blue: 0.0), lineWidth: 3)
-                        )
-                        .rotation3DEffect(
-                            .degrees(-35),
-                            axis: (x: 0, y: 1, z: 0),
-                            anchor: .trailing,
-                            perspective: 0.4
-                        )
-                        .offset(x: -20, y: 2)
-                    
-                    // Right cover (orange)
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
-                                    Color(red: 1.0, green: 0.55, blue: 0.0),
-                                    Color(red: 1.0, green: 0.65, blue: 0.0)
-                                ]),
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .frame(width: 90, height: 110)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 4)
-                                .stroke(Color(red: 0.9, green: 0.5, blue: 0.0), lineWidth: 3)
-                        )
-                        .rotation3DEffect(
-                            .degrees(35),
-                            axis: (x: 0, y: 1, z: 0),
-                            anchor: .leading,
-                            perspective: 0.4
-                        )
-                        .offset(x: 20, y: 2)
-                    
-                    // Center binding/spine
-                    Rectangle()
-                        .fill(Color(red: 0.9, green: 0.5, blue: 0.0))
-                        .frame(width: 8, height: 110)
-                        .offset(y: 2)
-                    
-                    // Left white pages
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(Color(red: 0.98, green: 0.98, blue: 0.96))
-                        .frame(width: 80, height: 100)
-                        .overlay(
-                            VStack(spacing: 4) {
-                                ForEach(0..<8) { _ in
-                                    RoundedRectangle(cornerRadius: 0.5)
-                                        .fill(Color.gray.opacity(0.15))
-                                        .frame(width: 60, height: 2)
-                                }
-                            }
-                        )
-                        .rotation3DEffect(
-                            .degrees(-30),
-                            axis: (x: 0, y: 1, z: 0),
-                            anchor: .trailing,
-                            perspective: 0.4
-                        )
-                        .offset(x: -18)
-                    
-                    // Right white pages (fluttering)
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(Color(red: 0.98, green: 0.98, blue: 0.96))
-                        .frame(width: 80, height: 100)
-                        .overlay(
-                            VStack(spacing: 4) {
-                                ForEach(0..<8) { _ in
-                                    RoundedRectangle(cornerRadius: 0.5)
-                                        .fill(Color.gray.opacity(0.15))
-                                        .frame(width: 60, height: 2)
-                                }
-                            }
-                        )
-                        .rotation3DEffect(
-                            .degrees(30 + pageFlutter),
-                            axis: (x: 0, y: 1, z: 0),
-                            anchor: .leading,
-                            perspective: 0.4
-                        )
-                        .offset(x: 18)
-                }
-                .shadow(color: Color.black.opacity(0.25), radius: 20, x: 0, y: 10)
-                .offset(y: bounce)
-            }
-            
-            Text("Loading...")
-                .font(.system(size: 18, weight: .medium))
-                .foregroundColor(Color(red: 0.45, green: 0.35, blue: 0.25))
-        }
-        .onAppear {
-            // Gentle page flutter
-            withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
-                pageFlutter = 8
-            }
-            
-            // Subtle bounce
-            withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
-                bounce = -6
-            }
-        }
+        GIFLoaderView(urlString: "https://readreceiptapp.com/assets/loading-book.gif")
+            .frame(width: 160, height: 160)
+            .accessibilityLabel("Loading")
     }
 }
 
 
-
-class WebViewState: ObservableObject {
     @Published var isHomePage = true
     @Published var headerOpacity: Double = 1.0
     @Published var scrollOffset: CGFloat = 0
@@ -265,7 +165,7 @@ struct WebView: UIViewRepresentable {
         let paddingCSS = """
         body { padding-top: 0 !important; }
         html, body { min-height: 100vh; }
-        [data-mobile-tabbar] { bottom: env(safe-area-inset-bottom) !important; }
+        [data-mobile-tabbar] { bottom: 0 !important; padding-bottom: env(safe-area-inset-bottom) !important; }
         """
         let cssScript = WKUserScript(
             source: "var style = document.createElement('style'); style.innerHTML = '\(paddingCSS)'; document.head.appendChild(style);",
