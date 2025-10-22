@@ -135,7 +135,8 @@ struct WebView: UIViewRepresentable {
         let headerHeight: CGFloat = 68
         let webTabBarHeight: CGFloat = 60  // Height of the web app's tab bar
         webView.scrollView.contentInset = UIEdgeInsets(top: headerHeight, left: 0, bottom: webTabBarHeight, right: 0)
-        webView.scrollView.scrollIndicatorInsets = UIEdgeInsets(top: headerHeight, left: 0, bottom: webTabBarHeight, right: 0)
+        webView.scrollView.verticalScrollIndicatorInsets = UIEdgeInsets(top: headerHeight, left: 0, bottom: webTabBarHeight, right: 0)
+        webView.scrollView.horizontalScrollIndicatorInsets = UIEdgeInsets(top: headerHeight, left: 0, bottom: webTabBarHeight, right: 0)
         
         // Inject JavaScript to robustly track route changes (React Router)
         let routeTrackingScript = WKUserScript(
@@ -261,10 +262,18 @@ struct WebView: UIViewRepresentable {
             inset.bottom = insetBottom
             webView.scrollView.contentInset = inset
             
-            var indicatorInset = webView.scrollView.scrollIndicatorInsets
-            indicatorInset.top = insetTop
-            indicatorInset.bottom = insetBottom
-            webView.scrollView.scrollIndicatorInsets = indicatorInset
+            webView.scrollView.verticalScrollIndicatorInsets = UIEdgeInsets(
+                top: insetTop,
+                left: 0,
+                bottom: insetBottom,
+                right: 0
+            )
+            webView.scrollView.horizontalScrollIndicatorInsets = UIEdgeInsets(
+                top: insetTop,
+                left: 0,
+                bottom: insetBottom,
+                right: 0
+            )
         }
         
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
