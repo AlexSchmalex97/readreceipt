@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
-import { BookOpen } from "lucide-react";
+import { BookOpen, RefreshCw } from "lucide-react";
 import { BookEditionSelector } from "@/components/BookEditionSelector";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { useToast } from "@/hooks/use-toast";
 
 type FinishedBook = {
   id: string;
@@ -28,18 +30,14 @@ export default function Reviews() {
   const [finished, setFinished] = useState<FinishedBook[]>([]);
   const [reviews, setReviews] = useState<MyReview[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      if (!userId) {
-        setLoading(false);
-        return;
-      }
-      setLoading(true);
+  const loadReviews = async () => {
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
 
       // Load all books for user and filter completed client-side
       const { data: allBooks, error: booksError } = await supabase
@@ -101,7 +99,24 @@ export default function Reviews() {
       
       setReviews(processedReviews);
       setLoading(false);
-    })();
+  };
+
+  const { scrollableRef, pullDistance, isRefreshing, showPullIndicator } = usePullToRefresh({
+    onRefresh: async () => {
+      await loadReviews();
+      toast({
+        title: "Refreshed!",
+        description: "Your reviews have been updated.",
+      });
+    },
+  });
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+  }, []);
+
+  useEffect(() => {
+    loadReviews();
   }, [userId]);
 
   if (loading) return (
@@ -121,7 +136,37 @@ export default function Reviews() {
   return (
     <div className="min-h-screen bg-gradient-soft">
       <Navigation />
-      <div className="container mx-auto px-4 py-8 space-y-10">
+      <div 
+        ref={scrollableRef}
+        className="relative overflow-y-auto"
+        style={{ height: 'calc(100vh - 64px)' }}
+      >
+        {/* Pull-to-refresh indicator */}
+        {showPullIndicator && (
+          <div 
+            className="absolute top-0 left-0 right-0 flex items-center justify-center transition-all duration-200 z-10"
+            style={{ 
+              height: `${pullDistance}px`,
+              opacity: Math.min(pullDistance / 80, 1),
+            }}
+          >
+            <div className="flex flex-col items-center gap-2">
+              <RefreshCw 
+                className={`w-6 h-6 text-primary ${isRefreshing ? 'animate-spin' : ''}`}
+                style={{
+                  transform: `rotate(${pullDistance * 3}deg)`,
+                }}
+              />
+              <span className="text-xs text-muted-foreground">
+                {isRefreshing ? 'Refreshing...' : pullDistance >= 80 ? 'Release to refresh' : 'Pull to refresh'}
+              </span>
+            </div>
+          </div>
+        )}
+
+      <div className="container mx-auto px-4 py-8 space-y-10"
+        style={{ paddingTop: showPullIndicator ? `${pullDistance + 32}px` : undefined }}
+      >
         
         <section>
           <h1 className="text-2xl font-bold mb-6">Your Reviews</h1>
@@ -196,6 +241,7 @@ export default function Reviews() {
             </div>
           )}
         </section>
+      </div>
       </div>
     </div>
   );

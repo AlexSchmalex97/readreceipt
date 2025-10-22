@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
-import { BookOpen } from "lucide-react";
+import { BookOpen, RefreshCw } from "lucide-react";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { useToast } from "@/hooks/use-toast";
 
 type Post = {
   kind: "post";
@@ -50,9 +52,9 @@ type FeedItem = Post | ProgressItem | ReviewItem;
 export default function Feed() {
   const [items, setItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  useEffect(() => {
-    (async () => {
+  const loadFeed = async () => {
       
 
       // who am I
@@ -181,7 +183,20 @@ export default function Feed() {
 
       setItems(merged);
       setLoading(false);
-    })();
+  };
+
+  const { scrollableRef, pullDistance, isRefreshing, showPullIndicator } = usePullToRefresh({
+    onRefresh: async () => {
+      await loadFeed();
+      toast({
+        title: "Refreshed!",
+        description: "Your feed has been updated.",
+      });
+    },
+  });
+
+  useEffect(() => {
+    loadFeed();
   }, []);
 
   if (loading) return (
@@ -194,7 +209,37 @@ export default function Feed() {
   return (
     <div className="min-h-screen bg-gradient-soft">
       <Navigation />
-      <div className="container mx-auto px-4 py-6 space-y-3">
+      <div 
+        ref={scrollableRef}
+        className="relative overflow-y-auto"
+        style={{ height: 'calc(100vh - 64px)' }}
+      >
+        {/* Pull-to-refresh indicator */}
+        {showPullIndicator && (
+          <div 
+            className="absolute top-0 left-0 right-0 flex items-center justify-center transition-all duration-200 z-10"
+            style={{ 
+              height: `${pullDistance}px`,
+              opacity: Math.min(pullDistance / 80, 1),
+            }}
+          >
+            <div className="flex flex-col items-center gap-2">
+              <RefreshCw 
+                className={`w-6 h-6 text-primary ${isRefreshing ? 'animate-spin' : ''}`}
+                style={{
+                  transform: `rotate(${pullDistance * 3}deg)`,
+                }}
+              />
+              <span className="text-xs text-muted-foreground">
+                {isRefreshing ? 'Refreshing...' : pullDistance >= 80 ? 'Release to refresh' : 'Pull to refresh'}
+              </span>
+            </div>
+          </div>
+        )}
+
+      <div className="container mx-auto px-4 py-6 space-y-3"
+        style={{ paddingTop: showPullIndicator ? `${pullDistance + 24}px` : undefined }}
+      >
       <h1 className="text-2xl font-bold mb-2">Your Feed</h1>
       {items.length === 0 && (
         <div className="text-muted-foreground">
@@ -314,6 +359,7 @@ export default function Feed() {
           </div>
         )
       )}
+      </div>
       </div>
     </div>
   );

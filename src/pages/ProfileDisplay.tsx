@@ -5,9 +5,10 @@ import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Settings, User, BookOpen, Star, Calendar, Globe, Facebook, Twitter, Instagram, Linkedin, Youtube, ExternalLink } from "lucide-react";
+import { Settings, User, BookOpen, Star, Calendar, Globe, Facebook, Twitter, Instagram, Linkedin, Youtube, ExternalLink, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { HomeReadingGoals } from "@/components/HomeReadingGoals";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 
 type UserProfile = {
   id: string;
@@ -107,8 +108,7 @@ export default function ProfileDisplay() {
   const [zodiacSign, setZodiacSign] = useState<string | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    (async () => {
+  const loadData = async () => {
       setLoading(true);
       
       // Get current user
@@ -285,7 +285,20 @@ export default function ProfileDisplay() {
       setActivityFeed(merged);
 
       setLoading(false);
-    })();
+  };
+
+  const { scrollableRef, pullDistance, isRefreshing, showPullIndicator } = usePullToRefresh({
+    onRefresh: async () => {
+      await loadData();
+      toast({
+        title: "Refreshed!",
+        description: "Your profile has been updated.",
+      });
+    },
+  });
+
+  useEffect(() => {
+    loadData();
   }, []);
 
   const getSocialMediaIcon = (platform: string) => {
@@ -337,7 +350,37 @@ export default function ProfileDisplay() {
     <div className="min-h-screen bg-gradient-soft">
       <Navigation />
       
-      <div className="container mx-auto px-3 sm:px-6 py-2 sm:py-6 max-w-7xl">
+      <div 
+        ref={scrollableRef}
+        className="relative overflow-y-auto"
+        style={{ height: 'calc(100vh - 64px)' }}
+      >
+        {/* Pull-to-refresh indicator */}
+        {showPullIndicator && (
+          <div 
+            className="absolute top-0 left-0 right-0 flex items-center justify-center transition-all duration-200 z-10"
+            style={{ 
+              height: `${pullDistance}px`,
+              opacity: Math.min(pullDistance / 80, 1),
+            }}
+          >
+            <div className="flex flex-col items-center gap-2">
+              <RefreshCw 
+                className={`w-6 h-6 text-primary ${isRefreshing ? 'animate-spin' : ''}`}
+                style={{
+                  transform: `rotate(${pullDistance * 3}deg)`,
+                }}
+              />
+              <span className="text-xs text-muted-foreground">
+                {isRefreshing ? 'Refreshing...' : pullDistance >= 80 ? 'Release to refresh' : 'Pull to refresh'}
+              </span>
+            </div>
+          </div>
+        )}
+
+      <div className="container mx-auto px-3 sm:px-6 py-2 sm:py-6 max-w-7xl"
+        style={{ paddingTop: showPullIndicator ? `${pullDistance + 8}px` : undefined }}
+      >
         {/* Mobile & Tablet Layout - Centered */}
         <div className="lg:hidden">
           {/* Settings Button - Top Right */}
@@ -1092,6 +1135,7 @@ export default function ProfileDisplay() {
             </Card>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
