@@ -49,38 +49,82 @@ struct ContentView: View {
     }
 }
 
-// Simple GIF loader using WKWebView so GIF animates reliably
-struct GIFLoaderView: UIViewRepresentable {
-    let urlString: String
-    
-    func makeUIView(context: Context) -> WKWebView {
-        let wv = WKWebView()
-        wv.isOpaque = false
-        wv.backgroundColor = .clear
-        wv.scrollView.isScrollEnabled = false
-        wv.scrollView.backgroundColor = .clear
-        let html = """
-        <html><head><meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover'></head>
-        <body style='margin:0;background:transparent;display:flex;align-items:center;justify-content:center;height:100vh;'>
-          <img src='\(urlString)' style='width:160px;height:160px;object-fit:contain;' alt='Loading book animation' />
-        </body></html>
-        """
-        wv.loadHTMLString(html, baseURL: nil)
-        return wv
-    }
-    
-    func updateUIView(_ uiView: WKWebView, context: Context) {}
-}
-
-// Use the provided GIF as the loading animation
+// Book loading animation component matching the website logo
 struct BookLoadingAnimation: View {
+    @State private var checkmarkScale: CGFloat = 0.5
+    @State private var checkmarkOpacity: Double = 0.3
+    
     var body: some View {
-        GIFLoaderView(urlString: "https://readreceiptapp.com/assets/loading-book.gif")
-            .frame(width: 160, height: 160)
-            .accessibilityLabel("Loading")
+        ZStack {
+            // Book base with spine
+            ZStack {
+                // Left page
+                RoundedRectangle(cornerRadius: 0)
+                    .fill(Color(red: 0.98, green: 0.96, blue: 0.93))
+                    .frame(width: 70, height: 100)
+                    .offset(x: -35)
+                    .overlay(
+                        VStack(spacing: 8) {
+                            // Text lines on left page
+                            ForEach(0..<4) { _ in
+                                RoundedRectangle(cornerRadius: 1)
+                                    .fill(Color(red: 0.45, green: 0.35, blue: 0.25))
+                                    .frame(width: 50, height: 3)
+                            }
+                        }
+                        .offset(x: -35)
+                    )
+                
+                // Right page
+                RoundedRectangle(cornerRadius: 0)
+                    .fill(Color(red: 0.98, green: 0.96, blue: 0.93))
+                    .frame(width: 70, height: 100)
+                    .offset(x: 35)
+                    .overlay(
+                        // Checkmark on right page
+                        Path { path in
+                            path.move(to: CGPoint(x: 15, y: 50))
+                            path.addLine(to: CGPoint(x: 30, y: 65))
+                            path.addLine(to: CGPoint(x: 55, y: 35))
+                        }
+                        .stroke(Color(red: 0.45, green: 0.35, blue: 0.25), lineWidth: 4)
+                        .scaleEffect(checkmarkScale)
+                        .opacity(checkmarkOpacity)
+                        .offset(x: 35, y: 0)
+                    )
+                
+                // Book spine
+                Rectangle()
+                    .fill(Color(red: 0.35, green: 0.25, blue: 0.15))
+                    .frame(width: 4, height: 100)
+            }
+            .overlay(
+                // Book outline
+                RoundedRectangle(cornerRadius: 4)
+                    .stroke(Color(red: 0.35, green: 0.25, blue: 0.15), lineWidth: 3)
+                    .frame(width: 144, height: 104)
+            )
+            .overlay(
+                // Bottom tab/bookmark
+                Path { path in
+                    path.move(to: CGPoint(x: -10, y: 52))
+                    path.addLine(to: CGPoint(x: -10, y: 60))
+                    path.addLine(to: CGPoint(x: 0, y: 56))
+                    path.addLine(to: CGPoint(x: 10, y: 60))
+                    path.addLine(to: CGPoint(x: 10, y: 52))
+                }
+                .fill(Color(red: 0.55, green: 0.45, blue: 0.35))
+                .offset(y: 0)
+            )
+        }
+        .onAppear {
+            withAnimation(Animation.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
+                checkmarkScale = 1.0
+                checkmarkOpacity = 1.0
+            }
+        }
     }
 }
-
 
 class WebViewState: ObservableObject {
     @Published var isHomePage = true
@@ -131,12 +175,10 @@ struct WebView: UIViewRepresentable {
         // Keep a reference for adjusting insets on route changes
         context.coordinator.webView = webView
         
-        // Initial insets - will be updated dynamically based on safe areas
-        let headerHeight: CGFloat = 68
-        let webTabBarHeight: CGFloat = 60  // Height of the web app's tab bar
-        webView.scrollView.contentInset = UIEdgeInsets(top: headerHeight, left: 0, bottom: webTabBarHeight, right: 0)
-        webView.scrollView.verticalScrollIndicatorInsets = UIEdgeInsets(top: headerHeight, left: 0, bottom: webTabBarHeight, right: 0)
-        webView.scrollView.horizontalScrollIndicatorInsets = UIEdgeInsets(top: headerHeight, left: 0, bottom: webTabBarHeight, right: 0)
+        // Add top padding to web content (matches header height)
+        let headerInsetTop: CGFloat = 44
+        webView.scrollView.contentInset = UIEdgeInsets(top: headerInsetTop, left: 0, bottom: 0, right: 0)
+        webView.scrollView.scrollIndicatorInsets = UIEdgeInsets(top: headerInsetTop, left: 0, bottom: 0, right: 0)
         
         // Inject JavaScript to robustly track route changes (React Router)
         let routeTrackingScript = WKUserScript(
@@ -163,11 +205,9 @@ struct WebView: UIViewRepresentable {
         webView.configuration.userContentController.addUserScript(routeTrackingScript)
         webView.configuration.userContentController.add(context.coordinator, name: "routeChange")
         
-        // Inject CSS to adjust spacing and ensure bottom tab bar visibility
+        // Inject CSS to adjust spacing (do not hide tab bar)
         let paddingCSS = """
         body { padding-top: 0 !important; }
-        html, body { min-height: 100vh; }
-        [data-mobile-tabbar] { bottom: 0 !important; padding-bottom: env(safe-area-inset-bottom) !important; }
         """
         let cssScript = WKUserScript(
             source: "var style = document.createElement('style'); style.innerHTML = '\(paddingCSS)'; document.head.appendChild(style);",
@@ -175,73 +215,6 @@ struct WebView: UIViewRepresentable {
             forMainFrameOnly: true
         )
         webView.configuration.userContentController.addUserScript(cssScript)
-        
-        // Ensure viewport-fit=cover so safe area insets apply
-        let viewportPatch = WKUserScript(
-            source: """
-            (function(){
-              var meta = document.querySelector('meta[name=viewport]');
-              if (!meta) { 
-                meta = document.createElement('meta'); 
-                meta.name = 'viewport'; 
-                document.head.appendChild(meta);
-              }
-              var content = meta.getAttribute('content') || '';
-              if (!/viewport-fit=cover/.test(content)) {
-                content = (content ? content + ', ' : '') + 'viewport-fit=cover';
-                meta.setAttribute('content', content);
-              }
-            })();
-            """,
-            injectionTime: .atDocumentEnd,
-            forMainFrameOnly: true
-        )
-        webView.configuration.userContentController.addUserScript(viewportPatch)
-        
-        // Inject network tracking to show loading for SPA and API calls
-        let networkTrackingScript = WKUserScript(
-            source: """
-            (function(){
-              if (window.__rrLoadingPatched) return; window.__rrLoadingPatched = true;
-              var active = 0; var t;
-              function post(){ try{ window.webkit.messageHandlers.loadingState.postMessage(active > 0); }catch(e){} }
-              function onChange(){ if(active>0){ post(); } else { clearTimeout(t); t = setTimeout(post, 150); } }
-              var origFetch = window.fetch;
-              if (origFetch) {
-                window.fetch = function(){ active++; onChange(); return origFetch.apply(this, arguments).finally(function(){ active--; onChange(); }); };
-              }
-              var origSend = XMLHttpRequest.prototype.send;
-              XMLHttpRequest.prototype.send = function(){ active++; onChange(); this.addEventListener('loadend', function(){ active--; onChange(); }, { once: true }); return origSend.apply(this, arguments); };
-            })();
-            """,
-            injectionTime: .atDocumentStart,
-            forMainFrameOnly: true
-        )
-        webView.configuration.userContentController.addUserScript(networkTrackingScript)
-        webView.configuration.userContentController.add(context.coordinator, name: "loadingState")
-        
-        // Expose a robust native-app flag to the web code
-        let nativeFlagScript = WKUserScript(
-            source: """
-            (function(){
-              try {
-                window.__RR_NATIVE_APP = true;
-                document.documentElement.setAttribute('data-rr-native','1');
-                document.addEventListener('DOMContentLoaded', function(){
-                  try { document.body.classList.add('rr-native-app'); } catch(e){}
-                });
-              } catch(e) {}
-            })();
-            """,
-            injectionTime: .atDocumentStart,
-            forMainFrameOnly: true
-        )
-        webView.configuration.userContentController.addUserScript(nativeFlagScript)
-        
-        // Ensure proper insets after initial layout
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            context.coordinator.updateInsets(isHome: true)
-        }
         
         return webView
     }
@@ -261,45 +234,16 @@ struct WebView: UIViewRepresentable {
             self.state = state
         }
         
-        // Compute and apply safe content insets dynamically
-        func updateInsets(isHome: Bool) {
-            guard let webView = self.webView else { return }
-            let window = webView.window
-            let safeTop = window?.safeAreaInsets.top ?? 44
-            let safeBottom = window?.safeAreaInsets.bottom ?? 34
-            let headerHeight: CGFloat = 68
-            let webTabBarHeight: CGFloat = 60
-            
-            // Top: safe area + header (on home only)
-            let insetTop = safeTop + (isHome ? headerHeight : 0)
-            // Bottom: safe area + web app's tab bar
-            let insetBottom = safeBottom + webTabBarHeight
-            
-            var inset = webView.scrollView.contentInset
-            inset.top = insetTop
-            inset.bottom = insetBottom
-            webView.scrollView.contentInset = inset
-            
-            let scrollInsets = UIEdgeInsets(top: insetTop, left: 0, bottom: insetBottom, right: 0)
-            webView.scrollView.verticalScrollIndicatorInsets = scrollInsets
-            webView.scrollView.horizontalScrollIndicatorInsets = scrollInsets
-        }
-        
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
             // Account for content inset when calculating scroll offset
             let offset = scrollView.contentOffset.y + scrollView.contentInset.top
             state.updateScrollOffset(offset)
         }
         
-        func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-            DispatchQueue.main.async { self.state.isLoading = true }
-        }
-        
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             // Hide loading animation after content loads
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                 self.state.finishLoading()
-                self.updateInsets(isHome: self.state.isHomePage)
             }
         }
         
@@ -308,19 +252,17 @@ struct WebView: UIViewRepresentable {
                 DispatchQueue.main.async {
                     let isHome = (path == "/" || path == "")
                     self.state.isHomePage = isHome
-                    self.updateInsets(isHome: isHome)
-                    if isHome { self.state.headerOpacity = 1.0 }
-                    // Show loading overlay during SPA route transitions with fail-safe auto-hide
-                    self.state.isLoading = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                        if self.state.isLoading {
-                            self.state.isLoading = false
-                        }
+                    if let webView = self.webView {
+                        let headerInsetTop: CGFloat = 56
+                        let insetTop: CGFloat = isHome ? headerInsetTop : 0
+                        var inset = webView.scrollView.contentInset
+                        inset.top = insetTop
+                        webView.scrollView.contentInset = inset
+                        var indicatorInset = webView.scrollView.scrollIndicatorInsets
+                        indicatorInset.top = insetTop
+                        webView.scrollView.scrollIndicatorInsets = indicatorInset
                     }
-                }
-            } else if message.name == "loadingState", let loading = message.body as? Bool {
-                DispatchQueue.main.async {
-                    self.state.isLoading = loading
+                    if isHome { self.state.headerOpacity = 1.0 }
                 }
             }
         }
