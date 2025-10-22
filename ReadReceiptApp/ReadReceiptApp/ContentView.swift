@@ -17,9 +17,21 @@ struct ContentView: View {
             // WebView
             WebView(url: URL(string: "https://readreceiptapp.com")!, state: webViewState)
                 .edgesIgnoringSafeArea(.all)
+                .opacity(webViewState.isLoading ? 0 : 1)
+            
+            // Loading animation
+            if webViewState.isLoading {
+                VStack {
+                    Spacer()
+                    BookLoadingAnimation()
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(red: 0.96, green: 0.95, blue: 0.94))
+            }
             
             // Header that fades based on scroll (only on home page)
-            if webViewState.isHomePage {
+            if webViewState.isHomePage && !webViewState.isLoading {
                 HStack {
                     Spacer()
                     Image("ReadReceiptHeader")
@@ -29,8 +41,54 @@ struct ContentView: View {
                     Spacer()
                 }
                 .padding(.vertical, 8)
+                .padding(.top, 40) // Safe area padding
                 .background(Color(red: 0.96, green: 0.95, blue: 0.94))
                 .opacity(webViewState.headerOpacity)
+            }
+        }
+    }
+}
+
+// Book loading animation component
+struct BookLoadingAnimation: View {
+    @State private var isAnimating = false
+    @State private var pageFlip = 0
+    
+    var body: some View {
+        ZStack {
+            // Book cover/base
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color(red: 0.55, green: 0.45, blue: 0.35))
+                .frame(width: 120, height: 160)
+                .shadow(radius: 10)
+            
+            // Left page
+            RoundedRectangle(cornerRadius: 6)
+                .fill(Color.white)
+                .frame(width: 50, height: 140)
+                .offset(x: -25)
+                .opacity(0.9)
+            
+            // Right page (animated)
+            RoundedRectangle(cornerRadius: 6)
+                .fill(Color.white)
+                .frame(width: 50, height: 140)
+                .offset(x: 25)
+                .rotation3DEffect(
+                    .degrees(isAnimating ? -180 : 0),
+                    axis: (x: 0, y: 1, z: 0),
+                    anchor: .leading
+                )
+                .opacity(0.9)
+            
+            // Book spine line
+            Rectangle()
+                .fill(Color(red: 0.45, green: 0.35, blue: 0.25))
+                .frame(width: 3, height: 150)
+        }
+        .onAppear {
+            withAnimation(Animation.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
+                isAnimating = true
             }
         }
     }
@@ -40,6 +98,7 @@ class WebViewState: ObservableObject {
     @Published var isHomePage = true
     @Published var headerOpacity: Double = 1.0
     @Published var scrollOffset: CGFloat = 0
+    @Published var isLoading = true
     
     func updateScrollOffset(_ offset: CGFloat) {
         scrollOffset = offset
@@ -54,6 +113,12 @@ class WebViewState: ObservableObject {
             headerOpacity = 0.0
         } else {
             headerOpacity = 1.0 - Double((offset - fadeStart) / (fadeEnd - fadeStart))
+        }
+    }
+    
+    func finishLoading() {
+        DispatchQueue.main.async {
+            self.isLoading = false
         }
     }
 }
@@ -73,8 +138,13 @@ struct WebView: UIViewRepresentable {
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.scrollView.delegate = context.coordinator
         webView.navigationDelegate = context.coordinator
+        webView.scrollView.bounces = true
         
-        // Inject JavaScript to track route changes
+        // Add top padding to web content
+        webView.scrollView.contentInset = UIEdgeInsets(top: 76, left: 0, bottom: 0, right: 0)
+        webView.scrollView.scrollIndicatorInsets = UIEdgeInsets(top: 76, left: 0, bottom: 0, right: 0)
+        
+        // Inject JavaScript to track route changes and scroll
         let routeTrackingScript = WKUserScript(
             source: """
             window.addEventListener('popstate', function() {
@@ -129,8 +199,16 @@ struct WebView: UIViewRepresentable {
         }
         
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
-            let offset = scrollView.contentOffset.y
+            // Account for content inset when calculating scroll offset
+            let offset = scrollView.contentOffset.y + scrollView.contentInset.top
             state.updateScrollOffset(offset)
+        }
+        
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            // Hide loading animation after content loads
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.state.finishLoading()
+            }
         }
         
         func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
