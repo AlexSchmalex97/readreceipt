@@ -28,14 +28,29 @@ export const usePlatform = () => {
     
     // Detect custom ReadReceipt iOS app user agent
     const isReadReceiptApp = ua.includes('ReadReceiptApp iOS');
-    
-    setPlatform({
+
+    const computed = {
       isIOS: platformName === 'ios' || (isNative && isIOSUA) || isIosAppWebView,
       isAndroid: platformName === 'android',
       isWeb: platformName === 'web' && !isIosAppWebView && !isReadReceiptApp,
       isNative: isNative || isIosAppWebView,
       isReadReceiptApp,
-    });
+    };
+
+    // Debug log to diagnose iOS header rendering in native app
+    try {
+      console.log('[usePlatform]', {
+        ua,
+        platformName,
+        capIsNative: isNative,
+        isIOSUA,
+        isWKWebView,
+        isIosAppWebView,
+        ...computed,
+      });
+    } catch {}
+    
+    setPlatform(computed);
   }, []);
 
   return platform;
