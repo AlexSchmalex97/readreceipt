@@ -51,26 +51,6 @@ export function Navigation() {
     );
   }
 
-              const Icon = item.icon;
-              const active = isActive(item.path);
-              return (
-                <button
-                  key={item.path}
-                  onClick={() => navigate(item.path)}
-                  className={`flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors ${
-                    active ? "text-primary" : "text-muted-foreground"
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </nav>
-      </>
-    );
-  }
 
   // Web: Original navigation layout (only on real web)
   if (isWeb) {
