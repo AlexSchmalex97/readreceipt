@@ -262,18 +262,9 @@ struct WebView: UIViewRepresentable {
             inset.bottom = insetBottom
             webView.scrollView.contentInset = inset
             
-            webView.scrollView.verticalScrollIndicatorInsets = UIEdgeInsets(
-                top: insetTop,
-                left: 0,
-                bottom: insetBottom,
-                right: 0
-            )
-            webView.scrollView.horizontalScrollIndicatorInsets = UIEdgeInsets(
-                top: insetTop,
-                left: 0,
-                bottom: insetBottom,
-                right: 0
-            )
+            let scrollInsets = UIEdgeInsets(top: insetTop, left: 0, bottom: insetBottom, right: 0)
+            webView.scrollView.verticalScrollIndicatorInsets = scrollInsets
+            webView.scrollView.horizontalScrollIndicatorInsets = scrollInsets
         }
         
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
