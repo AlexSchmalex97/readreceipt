@@ -7,6 +7,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { usePlatform } from "@/hooks/usePlatform";
 import { useEffect } from "react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { IOSProtectedRoute } from "@/components/IOSProtectedRoute";
 
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -44,21 +45,21 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/home" element={<Index />} />
+          <Route path="/" element={<IOSProtectedRoute><Index /></IOSProtectedRoute>} />
+          <Route path="/home" element={<IOSProtectedRoute><Index /></IOSProtectedRoute>} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/user/:userId" element={<UserProfile />} />
-          <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
-          <Route path="/people" element={<ProtectedRoute><People /></ProtectedRoute>} />
-          <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/tbr" element={<TBR />} />
-          <Route path="/profile/settings" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
-          <Route path="/completed" element={<ProtectedRoute><CompletedBooks /></ProtectedRoute>} />
-          <Route path="/integrations" element={<ProtectedRoute><Integrations /></ProtectedRoute>} />
-          <Route path="*" element={<NotFound />} />
+          <Route path="/contact" element={<IOSProtectedRoute><Contact /></IOSProtectedRoute>} />
+          <Route path="/user/:userId" element={<IOSProtectedRoute><UserProfile /></IOSProtectedRoute>} />
+          <Route path="/feed" element={<ProtectedRoute><IOSProtectedRoute><Feed /></IOSProtectedRoute></ProtectedRoute>} />
+          <Route path="/people" element={<ProtectedRoute><IOSProtectedRoute><People /></IOSProtectedRoute></ProtectedRoute>} />
+          <Route path="/reviews" element={<ProtectedRoute><IOSProtectedRoute><Reviews /></IOSProtectedRoute></ProtectedRoute>} />
+          <Route path="/profile" element={<IOSProtectedRoute><Profile /></IOSProtectedRoute>} />
+          <Route path="/settings" element={<IOSProtectedRoute><Settings /></IOSProtectedRoute>} />
+          <Route path="/tbr" element={<IOSProtectedRoute><TBR /></IOSProtectedRoute>} />
+          <Route path="/profile/settings" element={<ProtectedRoute><IOSProtectedRoute><ProfileSettings /></IOSProtectedRoute></ProtectedRoute>} />
+          <Route path="/completed" element={<ProtectedRoute><IOSProtectedRoute><CompletedBooks /></IOSProtectedRoute></ProtectedRoute>} />
+          <Route path="/integrations" element={<ProtectedRoute><IOSProtectedRoute><Integrations /></IOSProtectedRoute></ProtectedRoute>} />
+          <Route path="*" element={<IOSProtectedRoute><NotFound /></IOSProtectedRoute>} />
         </Routes>
       </BrowserRouter>
 
