@@ -18,6 +18,7 @@ import CompletedBooks from "./pages/CompletedBooks";
 import UserProfile from "./pages/UserProfile";
 import Contact from "./pages/Contact";
 import Integrations from "./pages/Integrations";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => {
           <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/home" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/feed" element={<Feed />} />
           <Route path="/people" element={<People />} />
           <Route path="/user/:userId" element={<UserProfile />} />
