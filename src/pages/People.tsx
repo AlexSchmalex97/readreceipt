@@ -14,7 +14,7 @@ export default function People() {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const { toast } = useToast();
-  const { isIOS } = usePlatform();
+  const { isIOS, isReadReceiptApp } = usePlatform();
 
   const { scrollableRef, pullDistance, isRefreshing, showPullIndicator } = usePullToRefresh({
     onRefresh: async () => {
@@ -87,7 +87,7 @@ export default function People() {
       <div 
         ref={scrollableRef}
         className="relative overflow-y-auto"
-        style={{ height: isIOS ? 'calc(100vh - 64px - 64px)' : 'calc(100vh - 64px)' }}
+        style={{ height: isReadReceiptApp ? '100dvh' : isIOS ? 'calc(100dvh - 64px - 64px)' : 'calc(100dvh - 64px)' }}
       >
         {/* Pull-to-refresh indicator */}
         {showPullIndicator && (

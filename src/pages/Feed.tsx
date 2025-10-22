@@ -54,7 +54,7 @@ export default function Feed() {
   const [items, setItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const { isIOS } = usePlatform();
+  const { isIOS, isReadReceiptApp } = usePlatform();
 
   const loadFeed = async () => {
       
@@ -214,7 +214,7 @@ export default function Feed() {
       <div 
         ref={scrollableRef}
         className="relative overflow-y-auto"
-        style={{ height: isIOS ? 'calc(100vh - 64px - 64px)' : 'calc(100vh - 64px)' }}
+        style={{ height: isReadReceiptApp ? '100dvh' : isIOS ? 'calc(100dvh - 64px - 64px)' : 'calc(100dvh - 64px)' }}
       >
         {/* Pull-to-refresh indicator */}
         {showPullIndicator && (
