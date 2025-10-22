@@ -514,46 +514,235 @@ export default function ProfileDisplay() {
               </Button>
             </Link>
           </div>
+        </div>
+
+        {/* Desktop/Tablet Layout - Original Format */}
+        <div className="hidden md:block">
+          {/* Header with Settings Button */}
+          <div className="flex justify-between items-start mb-4 sm:mb-6">
+            <div className="flex items-center gap-6 flex-1">
+              {/* Profile Photo */}
+              <div className="w-32 h-32 rounded-full overflow-hidden bg-muted border-2 border-border flex-shrink-0">
+                {profile.avatar_url ? (
+                  <img 
+                    src={profile.avatar_url} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <User className="w-16 h-16 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+              
+              {/* Left Column - Profile Info */}
+              <div className="flex-1 min-w-0">
+                <h1 className="text-5xl font-bold text-foreground">
+                  {profile.display_name || "Reader"}
+                </h1>
+                <p className="text-lg text-muted-foreground mt-1">
+                  @{profile.username || profile.id.slice(0, 8)}
+                </p>
+                {profile.bio && (
+                  <p className="text-base text-foreground mt-2 max-w-2xl">{profile.bio}</p>
+                )}
+                <div className="flex items-center gap-4 mt-3">
+                  <p className="text-sm text-muted-foreground">
+                    <Calendar className="w-4 h-4 inline mr-1" />
+                    Member since {new Date(profile.created_at).toLocaleDateString()}
+                  </p>
+                  {zodiacSign && (
+                    <p className="text-sm text-muted-foreground">
+                      <Star className="w-4 h-4 inline mr-1" />
+                      {zodiacSign}
+                    </p>
+                  )}
+                </div>
+
+                {/* Favorite Book and Current Read */}
+                {(currentBook || favoriteBook) && (
+                  <div className="mt-4 flex gap-4">
+                    {favoriteBook && (
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xs font-medium text-muted-foreground mb-2">Favorite Book</h3>
+                        <div className="flex items-center gap-2 p-3 border rounded-lg h-full bg-card">
+                          {favoriteBook.cover_url && (
+                            <img
+                              src={favoriteBook.cover_url}
+                              alt={favoriteBook.title}
+                              className="w-12 h-16 object-cover rounded flex-shrink-0"
+                            />
+                          )}
+                          <div className="flex-1 min-w-0 overflow-hidden">
+                            <div className="font-medium text-xs leading-tight line-clamp-2">
+                              {favoriteBook.title}
+                            </div>
+                            <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">
+                              {favoriteBook.author}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {currentBook && (
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xs font-medium text-muted-foreground mb-2">Currently Reading</h3>
+                        <div className="flex items-center gap-2 p-3 border rounded-lg h-full bg-card">
+                          {currentBook.cover_url && (
+                            <img
+                              src={currentBook.cover_url}
+                              alt={currentBook.title}
+                              className="w-12 h-16 object-cover rounded flex-shrink-0"
+                            />
+                          )}
+                          <div className="flex-1 min-w-0 overflow-hidden">
+                            <div className="font-medium text-xs leading-tight line-clamp-2">{currentBook.title}</div>
+                            <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">{currentBook.author}</div>
+                            <div className="text-[10px] text-muted-foreground mt-1">
+                              Page {currentBook.current_page} of {currentBook.total_pages}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Links */}
+                {(profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url ? (
+                  <div className="mt-6">
+                    <h3 className="text-xs font-medium text-muted-foreground mb-2">Links</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
+                        const Icon = getSocialMediaIcon(platform);
+                        return (
+                          <a
+                            key={platform}
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 px-2 py-1 text-xs border rounded-full hover:bg-accent transition-colors"
+                          >
+                            <Icon className="w-3 h-3" />
+                            {platform}
+                          </a>
+                        );
+                      })}
+                      {profile.website_url && (
+                        <a
+                          href={profile.website_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 px-2 py-1 text-xs border rounded-full hover:bg-accent transition-colors"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          Website
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+
+              {/* Right Column - Reading Goal & Stats */}
+              <div className="w-80 flex-shrink-0">
+                {/* Reading Goals */}
+                <div className="mb-3">
+                  <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedBooks} />
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-2">
+                  <Card>
+                    <CardContent className="p-3 text-center">
+                      <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                      <p className="text-2xl font-bold text-foreground">{bookStats.inProgressBooks}</p>
+                      <p className="text-[10px] text-muted-foreground">In Progress</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-3 text-center">
+                      <Star className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                      <p className="text-2xl font-bold text-foreground">{bookStats.completedBooks}</p>
+                      <p className="text-[10px] text-muted-foreground">Completed</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-3 text-center">
+                      <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                      <p className="text-2xl font-bold text-foreground">{bookStats.totalBooks}</p>
+                      <p className="text-[10px] text-muted-foreground">Total Books</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </div>
+            
+            <Link to="/profile/settings" className="ml-4">
+              <Button variant="outline" className="gap-2">
+                <Settings className="w-4 h-4" />
+                Settings
+              </Button>
+            </Link>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="flex flex-wrap gap-3 mb-4 justify-center">
+            <Link to="/">
+              <Button variant="outline" size="sm">
+                <BookOpen className="w-4 h-4 mr-2" />
+                View Books
+              </Button>
+            </Link>
+            <Link to="/completed">
+              <Button variant="outline" size="sm">
+                <Star className="w-4 h-4 mr-2" />
+                Completed Books
+              </Button>
+            </Link>
+          </div>
 
           {/* Three Column Layout: Recent Reviews - Activity Feed - TBR List */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* Recent Reviews */}
             <Card>
-              <CardHeader className="p-4 pb-2">
-                <CardTitle className="flex items-center justify-between text-base">
+              <CardHeader className="p-3 pb-2">
+                <CardTitle className="flex items-center justify-between text-sm">
                   Recent Reviews
                   <Link to="/reviews" className="text-xs font-normal text-primary hover:underline">
                     View all
                   </Link>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-4 pt-0">
+              <CardContent className="p-3 pt-0">
                 {recentReviews.length === 0 ? (
-                  <div className="text-center py-6">
-                    <Star className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                    <p className="text-sm text-muted-foreground">No reviews yet</p>
+                  <div className="text-center py-8">
+                    <Star className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No reviews yet</p>
                   </div>
                 ) : (
-                  <div className="space-y-3 max-h-80 overflow-y-auto">
+                  <div className="space-y-2.5 max-h-72 overflow-y-auto">
                     {recentReviews.map((review) => (
-                      <div key={review.id} className="border-b border-border pb-3 last:border-b-0">
+                      <div key={review.id} className="border-b border-border pb-2.5 last:border-b-0">
                         <div className="flex gap-2">
                           {review.books.cover_url ? (
                             <img 
                               src={review.books.cover_url} 
                               alt={review.books.title}
-                              className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
+                              className="w-10 h-14 object-cover rounded shadow-sm flex-shrink-0"
                             />
                           ) : (
-                            <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
-                              <BookOpen className="w-4 h-4 text-muted-foreground" />
+                            <div className="w-10 h-14 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                              <BookOpen className="w-3 h-3 text-muted-foreground" />
                             </div>
                           )}
                           
                           <div className="flex-1 min-w-0">
                             <h4 className="font-medium text-sm text-foreground truncate">{review.books.title}</h4>
                             <p className="text-xs text-muted-foreground truncate">by {review.books.author}</p>
-                            <div className="flex items-center gap-2 mt-1">
+                            <div className="flex items-center gap-1.5 mt-0.5">
                               <div className="flex">
                                 {[...Array(5)].map((_, i) => (
                                   <Star 
@@ -580,24 +769,24 @@ export default function ProfileDisplay() {
 
             {/* Activity Feed */}
             <Card>
-              <CardHeader className="p-4 pb-2">
-                <CardTitle className="flex items-center gap-2 text-base">
+              <CardHeader className="p-3 pb-2">
+                <CardTitle className="flex items-center gap-1.5 text-sm">
                   <BookOpen className="w-4 h-4" />
                   Reading Activity
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-4 pt-0">
+              <CardContent className="p-3 pt-0">
                 {activityFeed.length === 0 ? (
-                  <div className="text-center py-6">
-                    <BookOpen className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                    <p className="text-sm text-muted-foreground">No activity yet</p>
+                  <div className="text-center py-8">
+                    <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No activity yet</p>
                   </div>
                 ) : (
-                  <div className="space-y-3 max-h-80 overflow-y-auto">
+                  <div className="space-y-2.5 max-h-72 overflow-y-auto">
                     {activityFeed.map((item) =>
                       item.kind === "progress" ? (
                         <div key={`p-${item.id}`} className="border border-border rounded-lg p-2">
-                          <div className="text-xs text-muted-foreground mb-2">
+                          <div className="text-xs text-muted-foreground mb-1.5">
                             {new Date(item.created_at).toLocaleString()}
                           </div>
                           <div className="flex gap-2">
@@ -605,15 +794,15 @@ export default function ProfileDisplay() {
                               <img 
                                 src={item.book_cover_url} 
                                 alt={item.book_title || "Book cover"}
-                                className="w-10 h-14 object-cover rounded shadow-sm flex-shrink-0"
+                                className="w-8 h-12 object-cover rounded shadow-sm flex-shrink-0"
                               />
                             ) : (
-                              <div className="w-10 h-14 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
-                                <BookOpen className="w-4 h-4 text-muted-foreground" />
+                              <div className="w-8 h-12 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                                <BookOpen className="w-3 h-3 text-muted-foreground" />
                               </div>
                             )}
                             <div className="flex-1 min-w-0">
-                              <div className="font-medium text-xs mb-1">Reading Progress</div>
+                              <div className="font-medium text-xs mb-0.5">Reading Progress</div>
                               <div className="text-xs text-muted-foreground">
                                 Page {item.to_page}
                                 {typeof item.from_page === "number" && item.from_page >= 0
@@ -626,7 +815,7 @@ export default function ProfileDisplay() {
                         </div>
                       ) : (
                         <div key={`r-${item.id}`} className="border border-border rounded-lg p-2">
-                          <div className="text-xs text-muted-foreground mb-2">
+                          <div className="text-xs text-muted-foreground mb-1.5">
                             {new Date(item.created_at).toLocaleString()}
                           </div>
                           <div className="flex gap-2">
@@ -634,22 +823,22 @@ export default function ProfileDisplay() {
                               <img 
                                 src={item.book_cover_url} 
                                 alt={item.book_title || "Book cover"}
-                                className="w-10 h-14 object-cover rounded shadow-sm flex-shrink-0"
+                                className="w-8 h-12 object-cover rounded shadow-sm flex-shrink-0"
                               />
                             ) : (
-                              <div className="w-10 h-14 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
-                                <BookOpen className="w-4 h-4 text-muted-foreground" />
+                              <div className="w-8 h-12 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                                <BookOpen className="w-3 h-3 text-muted-foreground" />
                               </div>
                             )}
                             <div className="flex-1 min-w-0">
-                              <div className="font-medium text-xs mb-1">
+                              <div className="font-medium text-xs mb-0.5">
                                 Reviewed: ⭐ {item.rating}/5
                               </div>
                               <div className="text-xs text-muted-foreground truncate">
                                 {item.book_title ?? "Untitled"}
                               </div>
                               {item.review && (
-                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.review}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{item.review}</p>
                               )}
                             </div>
                           </div>
@@ -663,20 +852,20 @@ export default function ProfileDisplay() {
 
             {/* TBR List */}
             <Card>
-              <CardHeader className="p-4 pb-2">
-                <CardTitle className="flex items-center gap-2 text-base">
+              <CardHeader className="p-3 pb-2">
+                <CardTitle className="flex items-center gap-1.5 text-sm">
                   <BookOpen className="w-4 h-4" />
                   To Be Read ({tbrBooks.length})
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-4 pt-0">
+              <CardContent className="p-3 pt-0">
                 {tbrBooks.length === 0 ? (
-                  <div className="text-center py-6">
-                    <BookOpen className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                    <p className="text-sm text-muted-foreground">Your TBR list is empty</p>
+                  <div className="text-center py-8">
+                    <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">Your TBR list is empty</p>
                   </div>
                 ) : (
-                  <div className="space-y-3 max-h-80 overflow-y-auto">
+                  <div className="space-y-2.5 max-h-72 overflow-y-auto">
                     {tbrBooks.map((book) => (
                       <div key={book.id} className="border border-border rounded-lg p-2 hover:bg-accent/5 transition-colors">
                         <div className="flex gap-2">
@@ -684,16 +873,16 @@ export default function ProfileDisplay() {
                             <img 
                               src={book.cover_url} 
                               alt={book.title}
-                              className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
+                              className="w-10 h-14 object-cover rounded shadow-sm flex-shrink-0"
                             />
                           ) : (
-                            <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
-                              <BookOpen className="w-4 h-4 text-muted-foreground" />
+                            <div className="w-10 h-14 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                              <BookOpen className="w-3 h-3 text-muted-foreground" />
                             </div>
                           )}
                           
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
+                            <div className="flex items-center gap-1.5 mb-0.5">
                               <h3 className="font-medium text-sm text-foreground truncate">{book.title}</h3>
                               {book.priority > 0 && (
                                 <div className="flex">
@@ -703,12 +892,12 @@ export default function ProfileDisplay() {
                                 </div>
                               )}
                             </div>
-                            <p className="text-xs text-muted-foreground mb-1 truncate">by {book.author}</p>
+                            <p className="text-xs text-muted-foreground mb-0.5 truncate">by {book.author}</p>
                             {book.total_pages && (
-                              <p className="text-xs text-muted-foreground mb-1">{book.total_pages} pages</p>
+                              <p className="text-xs text-muted-foreground mb-0.5">{book.total_pages} pages</p>
                             )}
                             {book.notes && (
-                              <p className="text-xs text-muted-foreground line-clamp-2 mb-1">{book.notes}</p>
+                              <p className="text-xs text-muted-foreground line-clamp-2 mb-0.5">{book.notes}</p>
                             )}
                             <p className="text-xs text-muted-foreground">
                               Added {new Date(book.created_at).toLocaleDateString()}
