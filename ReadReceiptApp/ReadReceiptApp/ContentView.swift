@@ -49,46 +49,78 @@ struct ContentView: View {
     }
 }
 
-// Book loading animation component
+// Book loading animation component matching the website logo
 struct BookLoadingAnimation: View {
-    @State private var isAnimating = false
-    @State private var pageFlip = 0
+    @State private var checkmarkScale: CGFloat = 0.5
+    @State private var checkmarkOpacity: Double = 0.3
     
     var body: some View {
         ZStack {
-            // Book cover/base
-            RoundedRectangle(cornerRadius: 8)
+            // Book base with spine
+            ZStack {
+                // Left page
+                RoundedRectangle(cornerRadius: 0)
+                    .fill(Color(red: 0.98, green: 0.96, blue: 0.93))
+                    .frame(width: 70, height: 100)
+                    .offset(x: -35)
+                    .overlay(
+                        VStack(spacing: 8) {
+                            // Text lines on left page
+                            ForEach(0..<4) { _ in
+                                RoundedRectangle(cornerRadius: 1)
+                                    .fill(Color(red: 0.45, green: 0.35, blue: 0.25))
+                                    .frame(width: 50, height: 3)
+                            }
+                        }
+                        .offset(x: -35)
+                    )
+                
+                // Right page
+                RoundedRectangle(cornerRadius: 0)
+                    .fill(Color(red: 0.98, green: 0.96, blue: 0.93))
+                    .frame(width: 70, height: 100)
+                    .offset(x: 35)
+                    .overlay(
+                        // Checkmark on right page
+                        Path { path in
+                            path.move(to: CGPoint(x: 15, y: 50))
+                            path.addLine(to: CGPoint(x: 30, y: 65))
+                            path.addLine(to: CGPoint(x: 55, y: 35))
+                        }
+                        .stroke(Color(red: 0.45, green: 0.35, blue: 0.25), lineWidth: 4)
+                        .scaleEffect(checkmarkScale)
+                        .opacity(checkmarkOpacity)
+                        .offset(x: 35, y: 0)
+                    )
+                
+                // Book spine
+                Rectangle()
+                    .fill(Color(red: 0.35, green: 0.25, blue: 0.15))
+                    .frame(width: 4, height: 100)
+            }
+            .overlay(
+                // Book outline
+                RoundedRectangle(cornerRadius: 4)
+                    .stroke(Color(red: 0.35, green: 0.25, blue: 0.15), lineWidth: 3)
+                    .frame(width: 144, height: 104)
+            )
+            .overlay(
+                // Bottom tab/bookmark
+                Path { path in
+                    path.move(to: CGPoint(x: -10, y: 52))
+                    path.addLine(to: CGPoint(x: -10, y: 60))
+                    path.addLine(to: CGPoint(x: 0, y: 56))
+                    path.addLine(to: CGPoint(x: 10, y: 60))
+                    path.addLine(to: CGPoint(x: 10, y: 52))
+                }
                 .fill(Color(red: 0.55, green: 0.45, blue: 0.35))
-                .frame(width: 120, height: 160)
-                .shadow(radius: 10)
-            
-            // Left page
-            RoundedRectangle(cornerRadius: 6)
-                .fill(Color.white)
-                .frame(width: 50, height: 140)
-                .offset(x: -25)
-                .opacity(0.9)
-            
-            // Right page (animated)
-            RoundedRectangle(cornerRadius: 6)
-                .fill(Color.white)
-                .frame(width: 50, height: 140)
-                .offset(x: 25)
-                .rotation3DEffect(
-                    .degrees(isAnimating ? -180 : 0),
-                    axis: (x: 0, y: 1, z: 0),
-                    anchor: .leading
-                )
-                .opacity(0.9)
-            
-            // Book spine line
-            Rectangle()
-                .fill(Color(red: 0.45, green: 0.35, blue: 0.25))
-                .frame(width: 3, height: 150)
+                .offset(y: 0)
+            )
         }
         .onAppear {
-            withAnimation(Animation.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
-                isAnimating = true
+            withAnimation(Animation.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
+                checkmarkScale = 1.0
+                checkmarkOpacity = 1.0
             }
         }
     }
