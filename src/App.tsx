@@ -45,8 +45,8 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-          <Route path="/" element={<IOSProtectedRoute><Index /></IOSProtectedRoute>} />
-          <Route path="/home" element={<IOSProtectedRoute><Index /></IOSProtectedRoute>} />
+          <Route path="/" element={<ProtectedRoute><IOSProtectedRoute><Index /></IOSProtectedRoute></ProtectedRoute>} />
+          <Route path="/home" element={<ProtectedRoute><IOSProtectedRoute><Index /></IOSProtectedRoute></ProtectedRoute>} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/contact" element={<IOSProtectedRoute><Contact /></IOSProtectedRoute>} />
           <Route path="/user/:userId" element={<IOSProtectedRoute><UserProfile /></IOSProtectedRoute>} />
