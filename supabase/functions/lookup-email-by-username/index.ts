@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
     const { data: profile, error } = await supabase
       .from('profiles')
       .select('email')
-      .eq('username', username)
+      .ilike('username', username)
       .maybeSingle();
 
     if (error) {
