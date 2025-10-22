@@ -49,78 +49,107 @@ struct ContentView: View {
     }
 }
 
-// Book loading animation component matching the website logo
+// Cute book loading animation with flipping pages
 struct BookLoadingAnimation: View {
-    @State private var checkmarkScale: CGFloat = 0.5
-    @State private var checkmarkOpacity: Double = 0.3
+    @State private var pageFlipAngle: Double = 0
+    @State private var bookBounce: CGFloat = 0
+    @State private var glowOpacity: Double = 0.3
     
     var body: some View {
-        ZStack {
-            // Book base with spine
+        VStack(spacing: 12) {
             ZStack {
-                // Left page
-                RoundedRectangle(cornerRadius: 0)
-                    .fill(Color(red: 0.98, green: 0.96, blue: 0.93))
-                    .frame(width: 70, height: 100)
-                    .offset(x: -35)
-                    .overlay(
-                        VStack(spacing: 8) {
-                            // Text lines on left page
-                            ForEach(0..<4) { _ in
-                                RoundedRectangle(cornerRadius: 1)
-                                    .fill(Color(red: 0.45, green: 0.35, blue: 0.25))
-                                    .frame(width: 50, height: 3)
+                // Glow effect
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 0.55, green: 0.45, blue: 0.35).opacity(glowOpacity),
+                                Color.clear
+                            ]),
+                            center: .center,
+                            startRadius: 5,
+                            endRadius: 80
+                        )
+                    )
+                    .frame(width: 160, height: 160)
+                
+                // Book with animated pages
+                ZStack {
+                    // Book base/cover
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color(red: 0.55, green: 0.45, blue: 0.35))
+                        .frame(width: 100, height: 120)
+                        .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
+                    
+                    // Book spine
+                    Rectangle()
+                        .fill(Color(red: 0.35, green: 0.25, blue: 0.15))
+                        .frame(width: 6, height: 120)
+                    
+                    // Left page (static)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color(red: 0.98, green: 0.96, blue: 0.93))
+                        .frame(width: 42, height: 100)
+                        .overlay(
+                            VStack(spacing: 6) {
+                                ForEach(0..<3) { _ in
+                                    RoundedRectangle(cornerRadius: 1)
+                                        .fill(Color(red: 0.45, green: 0.35, blue: 0.25).opacity(0.5))
+                                        .frame(width: 32, height: 2.5)
+                                }
                             }
-                        }
-                        .offset(x: -35)
-                    )
-                
-                // Right page
-                RoundedRectangle(cornerRadius: 0)
-                    .fill(Color(red: 0.98, green: 0.96, blue: 0.93))
-                    .frame(width: 70, height: 100)
-                    .offset(x: 35)
-                    .overlay(
-                        // Checkmark on right page
-                        Path { path in
-                            path.move(to: CGPoint(x: 15, y: 50))
-                            path.addLine(to: CGPoint(x: 30, y: 65))
-                            path.addLine(to: CGPoint(x: 55, y: 35))
-                        }
-                        .stroke(Color(red: 0.45, green: 0.35, blue: 0.25), lineWidth: 4)
-                        .scaleEffect(checkmarkScale)
-                        .opacity(checkmarkOpacity)
-                        .offset(x: 35, y: 0)
-                    )
-                
-                // Book spine
-                Rectangle()
-                    .fill(Color(red: 0.35, green: 0.25, blue: 0.15))
-                    .frame(width: 4, height: 100)
-            }
-            .overlay(
-                // Book outline
-                RoundedRectangle(cornerRadius: 4)
-                    .stroke(Color(red: 0.35, green: 0.25, blue: 0.15), lineWidth: 3)
-                    .frame(width: 144, height: 104)
-            )
-            .overlay(
-                // Bottom tab/bookmark
-                Path { path in
-                    path.move(to: CGPoint(x: -10, y: 52))
-                    path.addLine(to: CGPoint(x: -10, y: 60))
-                    path.addLine(to: CGPoint(x: 0, y: 56))
-                    path.addLine(to: CGPoint(x: 10, y: 60))
-                    path.addLine(to: CGPoint(x: 10, y: 52))
+                        )
+                        .offset(x: -26)
+                    
+                    // Right page (animated - flipping)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color(red: 0.98, green: 0.96, blue: 0.93))
+                        .frame(width: 42, height: 100)
+                        .overlay(
+                            VStack(spacing: 6) {
+                                ForEach(0..<3) { _ in
+                                    RoundedRectangle(cornerRadius: 1)
+                                        .fill(Color(red: 0.45, green: 0.35, blue: 0.25).opacity(0.5))
+                                        .frame(width: 32, height: 2.5)
+                                }
+                            }
+                        )
+                        .offset(x: 26)
+                        .rotation3DEffect(
+                            .degrees(pageFlipAngle),
+                            axis: (x: 0, y: 1, z: 0),
+                            anchor: .leading,
+                            perspective: 0.5
+                        )
+                    
+                    // Checkmark overlay (appears during flip)
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(Color(red: 0.45, green: 0.35, blue: 0.25))
+                        .offset(x: 26)
+                        .opacity(pageFlipAngle > 90 ? 1 : 0)
                 }
-                .fill(Color(red: 0.55, green: 0.45, blue: 0.35))
-                .offset(y: 0)
-            )
+                .offset(y: bookBounce)
+            }
+            
+            Text("Loading...")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(Color(red: 0.45, green: 0.35, blue: 0.25))
         }
         .onAppear {
+            // Page flip animation
+            withAnimation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
+                pageFlipAngle = 180
+            }
+            
+            // Gentle bounce
             withAnimation(Animation.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
-                checkmarkScale = 1.0
-                checkmarkOpacity = 1.0
+                bookBounce = -8
+            }
+            
+            // Glow pulse
+            withAnimation(Animation.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
+                glowOpacity = 0.6
             }
         }
     }
@@ -175,10 +204,11 @@ struct WebView: UIViewRepresentable {
         // Keep a reference for adjusting insets on route changes
         context.coordinator.webView = webView
         
-        // Add top padding to web content (matches header height)
-        let headerInsetTop: CGFloat = 44
-        webView.scrollView.contentInset = UIEdgeInsets(top: headerInsetTop, left: 0, bottom: 0, right: 0)
-        webView.scrollView.scrollIndicatorInsets = UIEdgeInsets(top: headerInsetTop, left: 0, bottom: 0, right: 0)
+        // Add top padding to web content (matches header height + safe area)
+        let headerInsetTop: CGFloat = 68
+        let bottomInsetForTabBar: CGFloat = 80
+        webView.scrollView.contentInset = UIEdgeInsets(top: headerInsetTop, left: 0, bottom: bottomInsetForTabBar, right: 0)
+        webView.scrollView.scrollIndicatorInsets = UIEdgeInsets(top: headerInsetTop, left: 0, bottom: bottomInsetForTabBar, right: 0)
         
         // Inject JavaScript to robustly track route changes (React Router)
         let routeTrackingScript = WKUserScript(
@@ -253,13 +283,16 @@ struct WebView: UIViewRepresentable {
                     let isHome = (path == "/" || path == "")
                     self.state.isHomePage = isHome
                     if let webView = self.webView {
-                        let headerInsetTop: CGFloat = 56
+                        let headerInsetTop: CGFloat = 68
+                        let bottomInsetForTabBar: CGFloat = 80
                         let insetTop: CGFloat = isHome ? headerInsetTop : 0
                         var inset = webView.scrollView.contentInset
                         inset.top = insetTop
+                        inset.bottom = bottomInsetForTabBar
                         webView.scrollView.contentInset = inset
                         var indicatorInset = webView.scrollView.scrollIndicatorInsets
                         indicatorInset.top = insetTop
+                        indicatorInset.bottom = bottomInsetForTabBar
                         webView.scrollView.scrollIndicatorInsets = indicatorInset
                     }
                     if isHome { self.state.headerOpacity = 1.0 }
