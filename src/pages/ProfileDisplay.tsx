@@ -499,22 +499,6 @@ export default function ProfileDisplay() {
             <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedBooks} />
           </div>
 
-          {/* Quick Actions */}
-          <div className="grid grid-cols-2 gap-3 mb-6 max-w-sm mx-auto">
-            <Link to="/">
-              <Button variant="outline" size="sm" className="w-full">
-                <BookOpen className="w-4 h-4 mr-2" />
-                Books
-              </Button>
-            </Link>
-            <Link to="/completed">
-              <Button variant="outline" size="sm" className="w-full">
-                <Star className="w-4 h-4 mr-2" />
-                Completed
-              </Button>
-            </Link>
-          </div>
-
           {/* Collapsible Activity Sections - Mobile/Tablet */}
           <Accordion type="multiple" className="w-full space-y-2">
             {/* Recent Reviews */}
