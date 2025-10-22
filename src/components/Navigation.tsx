@@ -89,20 +89,18 @@ export function Navigation() {
         }}
       >
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
-        {/* First Row: Logo + Title + Auth - Only show on home page */}
-        {isHomePage && (
-          <div className="flex items-center justify-between gap-4 mb-4">
-            <div className="flex items-center gap-3">
-              <img
-                src="/assets/readreceipt-logo.png"
-                alt="ReadReceipt logo"
-                className="h-12 sm:h-16"
-              />
-            </div>
-            
-            <AuthButtons />
+        {/* First Row: Logo + Title + Auth */}
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <div className="flex items-center gap-3">
+            <img
+              src="/assets/readreceipt-logo.png"
+              alt="ReadReceipt logo"
+              className="h-12 sm:h-16"
+            />
           </div>
-        )}
+          
+          <AuthButtons />
+        </div>
 
         {/* Second Row: Navigation + Dynamic Display */}
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
