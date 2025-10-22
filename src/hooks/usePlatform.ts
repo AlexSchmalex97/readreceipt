@@ -7,11 +7,13 @@ export const usePlatform = () => {
     isAndroid: boolean;
     isWeb: boolean;
     isNative: boolean;
+    isReadReceiptApp: boolean;
   }>({
     isIOS: false,
     isAndroid: false,
     isWeb: true,
     isNative: false,
+    isReadReceiptApp: false,
   });
 
   useEffect(() => {
@@ -24,11 +26,15 @@ export const usePlatform = () => {
     const isWKWebView = typeof window !== 'undefined' && !!(window as any).webkit && !!(window as any).webkit.messageHandlers;
     const isIosAppWebView = isIOSUA && isWKWebView;
     
+    // Detect custom ReadReceipt iOS app user agent
+    const isReadReceiptApp = ua.includes('ReadReceiptApp iOS');
+    
     setPlatform({
       isIOS: platformName === 'ios' || (isNative && isIOSUA) || isIosAppWebView,
       isAndroid: platformName === 'android',
-      isWeb: platformName === 'web' && !isIosAppWebView,
+      isWeb: platformName === 'web' && !isIosAppWebView && !isReadReceiptApp,
       isNative: isNative || isIosAppWebView,
+      isReadReceiptApp,
     });
   }, []);
 

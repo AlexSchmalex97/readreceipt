@@ -6,7 +6,7 @@ import { Home, Users, Rss, Star, User, Mail } from "lucide-react";
 
 export function Navigation() {
   const { pathname } = useLocation();
-  const { isIOS } = usePlatform();
+  const { isIOS, isReadReceiptApp } = usePlatform();
 
   const isActive = (path: string) => pathname === path;
 
@@ -18,6 +18,11 @@ export function Navigation() {
     { path: "/profile", label: "Profile", icon: User },
     { path: "/contact", label: "Contact", icon: Mail },
   ];
+
+  // ReadReceipt iOS App: No header, only content
+  if (isReadReceiptApp) {
+    return null;
+  }
 
   // iOS: Bottom tab bar navigation
   if (isIOS) {
