@@ -37,13 +37,13 @@ struct ContentView: View {
                     Image("ReadReceiptHeader")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(height: 60)
+                        .frame(height: 56)
                     Spacer()
                 }
-                .padding(.vertical, 8)
-                .padding(.top, 40) // Safe area padding
+                .padding(.vertical, 6)
                 .background(Color(red: 0.96, green: 0.95, blue: 0.94))
                 .opacity(webViewState.headerOpacity)
+                .allowsHitTesting(false)
             }
         }
     }
@@ -140,28 +140,32 @@ struct WebView: UIViewRepresentable {
         webView.navigationDelegate = context.coordinator
         webView.scrollView.bounces = true
         
-        // Add top padding to web content
-        webView.scrollView.contentInset = UIEdgeInsets(top: 76, left: 0, bottom: 0, right: 0)
-        webView.scrollView.scrollIndicatorInsets = UIEdgeInsets(top: 76, left: 0, bottom: 0, right: 0)
+        // Keep a reference for adjusting insets on route changes
+        context.coordinator.webView = webView
         
-        // Inject JavaScript to track route changes and scroll
+        // Add top padding to web content (matches header height)
+        let headerInsetTop: CGFloat = 44
+        webView.scrollView.contentInset = UIEdgeInsets(top: headerInsetTop, left: 0, bottom: 0, right: 0)
+        webView.scrollView.scrollIndicatorInsets = UIEdgeInsets(top: headerInsetTop, left: 0, bottom: 0, right: 0)
+        
+        // Inject JavaScript to robustly track route changes (React Router)
         let routeTrackingScript = WKUserScript(
             source: """
-            window.addEventListener('popstate', function() {
-                window.webkit.messageHandlers.routeChange.postMessage(window.location.pathname);
-            });
-            
-            // Also track initial route
-            setTimeout(() => {
-                window.webkit.messageHandlers.routeChange.postMessage(window.location.pathname);
-            }, 500);
-            
-            // Intercept navigation clicks
-            document.addEventListener('click', function(e) {
-                setTimeout(() => {
-                    window.webkit.messageHandlers.routeChange.postMessage(window.location.pathname);
-                }, 100);
-            });
+            (function() {
+              function notify() {
+                try { window.webkit.messageHandlers.routeChange.postMessage(window.location.pathname); } catch(e) {}
+              }
+              // Patch history methods
+              var pushState = history.pushState;
+              history.pushState = function(){ pushState.apply(this, arguments); notify(); };
+              var replaceState = history.replaceState;
+              history.replaceState = function(){ replaceState.apply(this, arguments); notify(); };
+              // Listen to back/forward and hash
+              window.addEventListener('popstate', notify);
+              window.addEventListener('hashchange', notify);
+              // Initial
+              setTimeout(notify, 200);
+            })();
             """,
             injectionTime: .atDocumentEnd,
             forMainFrameOnly: true
@@ -169,10 +173,9 @@ struct WebView: UIViewRepresentable {
         webView.configuration.userContentController.addUserScript(routeTrackingScript)
         webView.configuration.userContentController.add(context.coordinator, name: "routeChange")
         
-        // Inject CSS to hide web header and adjust spacing
+        // Inject CSS to adjust spacing (do not hide tab bar)
         let paddingCSS = """
         body { padding-top: 0 !important; }
-        [data-mobile-tabbar] { display: none !important; }
         """
         let cssScript = WKUserScript(
             source: "var style = document.createElement('style'); style.innerHTML = '\(paddingCSS)'; document.head.appendChild(style);",
@@ -193,6 +196,7 @@ struct WebView: UIViewRepresentable {
     
     class Coordinator: NSObject, UIScrollViewDelegate, WKNavigationDelegate, WKScriptMessageHandler {
         var state: WebViewState
+        weak var webView: WKWebView?
         
         init(state: WebViewState) {
             self.state = state
@@ -206,7 +210,7 @@ struct WebView: UIViewRepresentable {
         
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             // Hide loading animation after content loads
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                 self.state.finishLoading()
             }
         }
@@ -214,7 +218,19 @@ struct WebView: UIViewRepresentable {
         func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
             if message.name == "routeChange", let path = message.body as? String {
                 DispatchQueue.main.async {
-                    self.state.isHomePage = (path == "/" || path == "")
+                    let isHome = (path == "/" || path == "")
+                    self.state.isHomePage = isHome
+                    if let webView = self.webView {
+                        let headerInsetTop: CGFloat = 56
+                        let insetTop: CGFloat = isHome ? headerInsetTop : 0
+                        var inset = webView.scrollView.contentInset
+                        inset.top = insetTop
+                        webView.scrollView.contentInset = inset
+                        var indicatorInset = webView.scrollView.scrollIndicatorInsets
+                        indicatorInset.top = insetTop
+                        webView.scrollView.scrollIndicatorInsets = indicatorInset
+                    }
+                    if isHome { self.state.headerOpacity = 1.0 }
                 }
             }
         }
