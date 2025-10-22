@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, MessageSquare, HelpCircle, Send, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { usePlatform } from "@/hooks/usePlatform";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -19,6 +20,7 @@ export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubscribing, setIsSubscribing] = useState(false);
   const { toast } = useToast();
+  const { isIOS, isReadReceiptApp } = usePlatform();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +82,7 @@ ${formData.message}
 
   return (
     <div className="min-h-screen bg-gradient-soft">
-      <Navigation />
+      {!isIOS && !isReadReceiptApp && <Navigation />}
       
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="text-center mb-8">
