@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { HomeReadingGoals } from "@/components/HomeReadingGoals";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { usePlatform } from "@/hooks/usePlatform";
+import { FollowersDialog } from "@/components/FollowersDialog";
 
 type UserProfile = {
   id: string;
@@ -107,6 +108,8 @@ export default function ProfileDisplay() {
   const [favoriteBook, setFavoriteBook] = useState<FavoriteBook | null>(null);
   const [currentBook, setCurrentBook] = useState<CurrentBook | null>(null);
   const [zodiacSign, setZodiacSign] = useState<string | null>(null);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
   const { toast } = useToast();
   const { isIOS, isReadReceiptApp } = usePlatform();
 
@@ -236,6 +239,20 @@ export default function ProfileDisplay() {
       if (!tbrError && tbrData) {
         setTbrBooks(tbrData);
       }
+
+      // Load followers and following counts
+      const { count: followersCount } = await supabase
+        .from("follows")
+        .select("*", { count: "exact", head: true })
+        .eq("following_id", user.id);
+      
+      const { count: followingCount } = await supabase
+        .from("follows")
+        .select("*", { count: "exact", head: true })
+        .eq("follower_id", user.id);
+
+      setFollowersCount(followersCount || 0);
+      setFollowingCount(followingCount || 0);
 
       // Load activity feed (progress + reviews for activity section)
       const { data: progressData } = await supabase
@@ -433,6 +450,14 @@ export default function ProfileDisplay() {
                 </span>
               )}
             </div>
+
+            {/* Followers/Following */}
+            {uid && (
+              <div className="flex gap-2 mt-3 justify-center">
+                <FollowersDialog userId={uid} type="followers" count={followersCount} />
+                <FollowersDialog userId={uid} type="following" count={followingCount} />
+              </div>
+            )}
           </div>
 
           {/* Bio */}
@@ -786,6 +811,14 @@ export default function ProfileDisplay() {
                     </p>
                   )}
                 </div>
+
+                {/* Followers/Following */}
+                {uid && (
+                  <div className="flex gap-2 mt-3">
+                    <FollowersDialog userId={uid} type="followers" count={followersCount} />
+                    <FollowersDialog userId={uid} type="following" count={followingCount} />
+                  </div>
+                )}
 
                 {/* Favorite Book and Current Read */}
                 {(currentBook || favoriteBook) && (

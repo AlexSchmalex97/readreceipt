@@ -6,6 +6,7 @@ import { FollowButton } from "@/components/FollowButton";
 import { UserColorProvider } from "@/components/UserColorProvider";
 import { ArrowLeft, BookOpen, Star, Calendar, Globe, Facebook, Twitter, Instagram, Linkedin, Youtube, ExternalLink, XCircle } from "lucide-react";
 import { HomeReadingGoals } from "@/components/HomeReadingGoals";
+import { FollowersDialog } from "@/components/FollowersDialog";
 
 type ProgressItem = {
   kind: "progress";
@@ -87,6 +88,8 @@ export default function UserProfile() {
   const [canSeeProgress, setCanSeeProgress] = useState<boolean>(true);
   const [favoriteBook, setFavoriteBook] = useState<FavoriteBook | null>(null);
   const [zodiacSign, setZodiacSign] = useState<string | null>(null);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
 
   useEffect(() => {
     if (!userId) return;
@@ -190,6 +193,20 @@ export default function UserProfile() {
         } else {
           setTbrBooks(tbrData || []);
         }
+
+        // Load followers and following counts
+        const { count: followersCount } = await supabase
+          .from("follows")
+          .select("*", { count: "exact", head: true })
+          .eq("following_id", userId);
+        
+        const { count: followingCount } = await supabase
+          .from("follows")
+          .select("*", { count: "exact", head: true })
+          .eq("follower_id", userId);
+
+        setFollowersCount(followersCount || 0);
+        setFollowingCount(followingCount || 0);
 
         // Get user's DNF books (public)
         const { data: dnfData, error: dnfError } = await supabase
@@ -312,6 +329,12 @@ export default function UserProfile() {
                 <p className="text-xs text-muted-foreground mt-1">
                   Member since {new Date(profile.created_at).toLocaleDateString()}
                 </p>
+                
+                {/* Followers/Following */}
+                <div className="flex gap-2 mt-2">
+                  <FollowersDialog userId={profile.id} type="followers" count={followersCount} />
+                  <FollowersDialog userId={profile.id} type="following" count={followingCount} />
+                </div>
               </div>
             </div>
             {myId && myId !== profile.id && (
