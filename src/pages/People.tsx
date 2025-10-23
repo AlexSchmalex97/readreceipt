@@ -143,7 +143,7 @@ export default function People() {
                 className="flex items-center gap-3 flex-1 hover:text-primary transition-colors"
               >
                 <img
-                  src={p.avatar_url || "/assets/readreceipt-logo.png"}
+                  src={p.avatar_url || "/assets/default-avatar.png"}
                   className="w-9 h-9 rounded-full"
                   alt="Profile"
                 />

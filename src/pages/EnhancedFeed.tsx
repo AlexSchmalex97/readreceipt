@@ -492,7 +492,7 @@ export default function EnhancedFeed() {
       <div key={`${item.kind}-${item.id}`} className="bg-card p-4 rounded border">
         <div className="flex items-start gap-3 mb-3">
           <img
-            src={item.avatar_url || "/assets/readreceipt-logo.png"}
+            src={item.avatar_url || "/assets/default-avatar.png"}
             alt="Profile"
             className="w-8 h-8 rounded-full object-cover flex-shrink-0"
           />
@@ -681,7 +681,7 @@ export default function EnhancedFeed() {
             {itemComments.map((comment) => (
               <div key={comment.id} className="flex gap-2">
                 <img
-                  src={comment.avatar_url || "/assets/readreceipt-logo.png"}
+                  src={comment.avatar_url || "/assets/default-avatar.png"}
                   alt="Profile"
                   className="w-6 h-6 rounded-full object-cover flex-shrink-0"
                 />

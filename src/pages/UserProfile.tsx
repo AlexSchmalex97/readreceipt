@@ -293,7 +293,7 @@ export default function UserProfile() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <img
-                src={profile.avatar_url || "/assets/readreceipt-logo.png"}
+                src={profile.avatar_url || "/assets/default-avatar.png"}
                 alt="Profile"
                 className="w-16 h-16 rounded-full object-cover"
               />
