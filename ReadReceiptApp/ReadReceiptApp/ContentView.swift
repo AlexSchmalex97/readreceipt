@@ -205,6 +205,14 @@ struct WebView: UIViewRepresentable {
         webView.configuration.userContentController.addUserScript(routeTrackingScript)
         webView.configuration.userContentController.add(context.coordinator, name: "routeChange")
         
+        // Inject flag so web app knows it's running in native iOS app
+        let nativeFlagScript = WKUserScript(
+            source: "window.__RR_NATIVE_IOS_APP = true;",
+            injectionTime: .atDocumentStart,
+            forMainFrameOnly: true
+        )
+        webView.configuration.userContentController.addUserScript(nativeFlagScript)
+        
         // Inject CSS to adjust spacing (do not hide tab bar)
         let paddingCSS = """
         body { padding-top: 0 !important; }

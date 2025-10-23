@@ -47,14 +47,13 @@ export function Navigation() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isHomePage, isWeb]);
 
+  // Check if running in ReadReceipt iOS native app
+  const isNativeIOSApp = typeof window !== 'undefined' && (window as any).__RR_NATIVE_IOS_APP;
+  
   // ReadReceipt iOS App: No header, only bottom tab bar
-  if (isReadReceiptApp || isNative || isIOS || isIOSWebView || isStandalonePWA || (typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent) && (window as any)?.Capacitor)) {
+  if (isNativeIOSApp || isReadReceiptApp || isNative || isIOS || isIOSWebView || isStandalonePWA || (typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent) && (window as any)?.Capacitor)) {
     return (
       <nav data-mobile-tabbar className="fixed bottom-0 left-0 right-0 bg-card border-t border-border pb-safe-bottom z-50">
-
-
-
-
         <div className="flex justify-around items-center h-16">
           {navItems.map((item) => {
             const Icon = item.icon;
