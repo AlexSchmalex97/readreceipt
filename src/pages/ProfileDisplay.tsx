@@ -952,21 +952,6 @@ export default function ProfileDisplay() {
             </Link>
           </div>
 
-          {/* Quick Actions */}
-          <div className="flex flex-wrap gap-3 mb-4 justify-center">
-            <Link to="/">
-              <Button variant="outline" size="sm">
-                <BookOpen className="w-4 h-4 mr-2" />
-                View Books
-              </Button>
-            </Link>
-            <Link to="/completed">
-              <Button variant="outline" size="sm">
-                <Star className="w-4 h-4 mr-2" />
-                Completed Books
-              </Button>
-            </Link>
-          </div>
 
           {/* Three Column Layout: Recent Reviews - Activity Feed - TBR List */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
