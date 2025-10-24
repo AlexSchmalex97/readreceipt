@@ -915,20 +915,24 @@ export default function ProfileDisplay() {
 
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-2">
-                  <Card>
-                    <CardContent className="p-3 text-center">
-                      <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                      <p className="text-2xl font-bold text-foreground">{bookStats.inProgressBooks}</p>
-                      <p className="text-[10px] text-muted-foreground">In Progress</p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-3 text-center">
-                      <Star className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                      <p className="text-2xl font-bold text-foreground">{bookStats.completedBooks}</p>
-                      <p className="text-[10px] text-muted-foreground">Completed</p>
-                    </CardContent>
-                  </Card>
+                  <Link to="/">
+                    <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
+                      <CardContent className="p-3 text-center">
+                        <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                        <p className="text-2xl font-bold text-foreground">{bookStats.inProgressBooks}</p>
+                        <p className="text-[10px] text-muted-foreground">In Progress</p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                  <Link to="/completed">
+                    <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
+                      <CardContent className="p-3 text-center">
+                        <Star className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                        <p className="text-2xl font-bold text-foreground">{bookStats.completedBooks}</p>
+                        <p className="text-[10px] text-muted-foreground">Completed</p>
+                      </CardContent>
+                    </Card>
+                  </Link>
                   <Card>
                     <CardContent className="p-3 text-center">
                       <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
