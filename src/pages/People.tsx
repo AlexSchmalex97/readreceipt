@@ -11,10 +11,26 @@ import { usePlatform } from "@/hooks/usePlatform";
 export default function People() {
   const [q, setQ] = useState("");
   const [results, setResults] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const { toast } = useToast();
   const { isIOS, isReadReceiptApp } = usePlatform();
+
+  // Load Alex as a suggestion on mount
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, display_name, username, avatar_url, created_at')
+        .eq('username', 'Alex')
+        .single();
+      
+      if (data) {
+        setSuggestions([data]);
+      }
+    })();
+  }, []);
 
   const { scrollableRef, pullDistance, isRefreshing, showPullIndicator } = usePullToRefresh({
     onRefresh: async () => {
@@ -128,7 +144,40 @@ export default function People() {
       {loading ? (
         <div className="text-muted-foreground">Searching…</div>
       ) : !hasSearched ? (
-        <div className="text-muted-foreground">Enter a username or display name to find readers.</div>
+        <>
+          {suggestions.length > 0 && (
+            <div className="space-y-3">
+              <h2 className="text-lg font-semibold text-foreground">Suggested readers</h2>
+              <div className="grid gap-3">
+                {suggestions.map((p) => (
+                  <div
+                    key={p.id}
+                    className="flex items-center justify-between bg-card p-3 rounded border hover:shadow-md transition-shadow"
+                  >
+                    <Link
+                      to={`/user/${p.id}`}
+                      className="flex items-center gap-3 flex-1 hover:text-primary transition-colors"
+                    >
+                      <img
+                        src={p.avatar_url || "/assets/default-avatar.png"}
+                        className="w-9 h-9 rounded-full"
+                        alt="Profile"
+                      />
+                      <div>
+                        <div className="font-medium">{p.display_name || "Reader"}</div>
+                        <div className="text-xs text-muted-foreground">
+                          @{p.username || p.id.slice(0, 6)}
+                        </div>
+                      </div>
+                    </Link>
+                    <FollowButton targetUserId={p.id} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="text-muted-foreground mt-4">Enter a username or display name to find readers.</div>
+        </>
       ) : results.length === 0 ? (
         <div className="text-muted-foreground">No users found for "{q.trim()}".</div>
       ) : (
