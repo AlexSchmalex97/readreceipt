@@ -10,12 +10,20 @@
   .pb-safe-top {
     padding-top: env(safe-area-inset-top);
   }
+  .pt-safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
 }
 
-/* iOS app - add bottom padding to main content for tab bar */
-body.ios-app main,
-body.ios-app > div > div {
-  padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+/* iOS app - proper spacing for notch and home indicator */
+body.ios-app {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Content wrapper needs bottom padding for tab bar + home indicator */
+body.ios-app .ios-content-wrapper {
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+  min-height: 100dvh;
 }
 
 /* Design system: all colors in HSL numeric form (no hsl() wrapper here). */

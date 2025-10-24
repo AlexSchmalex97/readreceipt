@@ -53,7 +53,13 @@ export function Navigation() {
   // ReadReceipt iOS App: No header, only bottom tab bar
   if (isNativeIOSApp || isReadReceiptApp || isNative || isIOS || isIOSWebView || isStandalonePWA || (typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent) && (window as any)?.Capacitor)) {
     return (
-      <nav data-mobile-tabbar className="fixed bottom-0 left-0 right-0 bg-card border-t border-border pb-safe-bottom z-50">
+      <nav 
+        data-mobile-tabbar 
+        className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50"
+        style={{
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+        }}
+      >
         <div className="flex justify-around items-center h-16">
           {navItems.map((item) => {
             const Icon = item.icon;

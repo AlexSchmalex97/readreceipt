@@ -824,8 +824,11 @@ const Index = () => {
           if (scrollableRef) scrollableRef.current = el;
           scrollContainerRef.current = el;
         }}
-        className="relative overflow-y-auto"
-        style={{ height: (isIOS || isReadReceiptApp) ? 'calc(100dvh - 64px)' : 'calc(100dvh - 64px)' }}
+        className="relative overflow-y-auto ios-content-wrapper"
+        style={{ 
+          height: isIOSPlatform ? `calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 4rem)` : 'auto',
+          paddingTop: showPullIndicator ? `${pullDistance}px` : undefined
+        }}
       >
         {/* Pull-to-refresh indicator */}
         {showPullIndicator && (
