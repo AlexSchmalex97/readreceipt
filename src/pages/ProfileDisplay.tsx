@@ -541,35 +541,6 @@ export default function ProfileDisplay() {
             </div>
           )}
 
-          {/* Stats - Single Row */}
-          <div className="grid grid-cols-3 gap-3 mb-4 max-w-md mx-auto">
-            <Link to="/">
-              <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
-                <CardContent className="p-3 text-center">
-                  <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                  <p className="text-2xl font-bold text-foreground">{bookStats.inProgressBooks}</p>
-                  <p className="text-xs text-muted-foreground">Reading</p>
-                </CardContent>
-              </Card>
-            </Link>
-            <Link to="/completed">
-              <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
-                <CardContent className="p-3 text-center">
-                  <Star className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                  <p className="text-2xl font-bold text-foreground">{bookStats.completedBooks}</p>
-                  <p className="text-xs text-muted-foreground">Completed</p>
-                </CardContent>
-              </Card>
-            </Link>
-            <Card>
-              <CardContent className="p-3 text-center">
-                <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                <p className="text-2xl font-bold text-foreground">{bookStats.totalBooks}</p>
-                <p className="text-xs text-muted-foreground">Total</p>
-              </CardContent>
-            </Card>
-          </div>
-
           {/* Reading Goal */}
           <div className="mb-4 max-w-md mx-auto">
             <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedBooks} />
