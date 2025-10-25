@@ -827,8 +827,8 @@ const Index = () => {
         className="relative overflow-y-auto"
         style={{ 
           height: isIOSPlatform ? 'calc(100dvh - 4rem)' : 'auto',
-          paddingTop: isIOSPlatform ? 'env(safe-area-inset-top, 0px)' : undefined,
-          paddingBottom: isIOSPlatform ? 'calc(4rem + env(safe-area-inset-bottom, 0px))' : undefined,
+          paddingTop: isIOSPlatform ? 'calc(env(safe-area-inset-top, 0px) + 12px)' : undefined,
+          paddingBottom: isIOSPlatform ? 'calc(4rem + env(safe-area-inset-bottom, 0px) + 16px)' : undefined,
           marginTop: showPullIndicator ? `${pullDistance}px` : undefined
         }}
       >
