@@ -374,7 +374,11 @@ export default function ProfileDisplay() {
       <div 
         ref={scrollableRef}
         className="relative overflow-y-auto"
-        style={{ height: (isIOS || isReadReceiptApp) ? 'calc(100dvh - 64px)' : 'calc(100dvh - 64px)' }}
+        style={{ 
+          height: (isIOS || isReadReceiptApp) ? 'calc(100dvh - 4rem)' : 'auto',
+          paddingTop: (isIOS || isReadReceiptApp) ? 'env(safe-area-inset-top, 0px)' : undefined,
+          paddingBottom: (isIOS || isReadReceiptApp) ? 'calc(4rem + env(safe-area-inset-bottom, 0px))' : undefined,
+        }}
       >
         {/* Pull-to-refresh indicator */}
         {showPullIndicator && (

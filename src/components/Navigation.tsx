@@ -57,10 +57,11 @@ export function Navigation() {
         data-mobile-tabbar 
         className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50"
         style={{
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+          height: 'calc(4rem + env(safe-area-inset-bottom, 0px))'
         }}
       >
-        <div className="flex justify-around items-center h-16">
+        <div className="flex justify-around items-center h-16 absolute inset-x-0" 
+             style={{ bottom: 'env(safe-area-inset-bottom, 0px)' }}>
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
