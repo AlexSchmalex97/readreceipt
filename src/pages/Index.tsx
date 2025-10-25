@@ -824,10 +824,12 @@ const Index = () => {
           if (scrollableRef) scrollableRef.current = el;
           scrollContainerRef.current = el;
         }}
-        className="relative overflow-y-auto ios-content-wrapper"
+        className="relative overflow-y-auto"
         style={{ 
-          height: isIOSPlatform ? `calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 4rem)` : 'auto',
-          paddingTop: showPullIndicator ? `${pullDistance}px` : undefined
+          height: isIOSPlatform ? 'calc(100dvh - 4rem)' : 'auto',
+          paddingTop: isIOSPlatform ? 'env(safe-area-inset-top, 0px)' : undefined,
+          paddingBottom: isIOSPlatform ? 'calc(4rem + env(safe-area-inset-bottom, 0px))' : undefined,
+          marginTop: showPullIndicator ? `${pullDistance}px` : undefined
         }}
       >
         {/* Pull-to-refresh indicator */}
