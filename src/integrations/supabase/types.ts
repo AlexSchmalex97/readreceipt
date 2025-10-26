@@ -437,6 +437,16 @@ export type Database = {
           username: string
         }[]
       }
+      get_reading_goal_public: {
+        Args: { p_user_id: string; p_year: number }
+        Returns: {
+          goal_count: number
+          id: string
+          manual_count: number
+          user_id: string
+          year: number
+        }[]
+      }
       get_safe_public_profiles: {
         Args: { limit_count?: number; search?: string }
         Returns: {

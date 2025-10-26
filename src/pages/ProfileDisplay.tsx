@@ -167,6 +167,21 @@ export default function ProfileDisplay() {
           if (currentBookData) {
             setCurrentBook(currentBookData);
           }
+        } else {
+          // Fallback: find most recent in-progress book if current_book_id is null
+          const { data: fallbackBooks } = await supabase
+            .from('books')
+            .select('id, title, author, cover_url, current_page, total_pages')
+            .eq('user_id', user.id)
+            .eq('status', 'in_progress')
+            .order('updated_at', { ascending: false })
+            .limit(10);
+          
+          // Filter client-side for books where current_page < total_pages
+          const inProgressBook = fallbackBooks?.find(b => b.current_page < b.total_pages);
+          if (inProgressBook) {
+            setCurrentBook(inProgressBook);
+          }
         }
 
         // Calculate zodiac sign if birthday exists

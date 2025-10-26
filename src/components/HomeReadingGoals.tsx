@@ -16,9 +16,10 @@ interface ReadingGoal {
 interface HomeReadingGoalsProps {
   userId: string | null;
   completedBooksThisYear: number;
+  isOwnProfile?: boolean;
 }
 
-export const HomeReadingGoals = ({ userId, completedBooksThisYear }: HomeReadingGoalsProps) => {
+export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile = true }: HomeReadingGoalsProps) => {
   const [goal, setGoal] = useState<ReadingGoal | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -36,35 +37,56 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear }: HomeReading
     
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from("reading_goals")
-        .select("*")
-        .eq("user_id", userId)
-        .eq("year", currentYear)
-        .maybeSingle();
-
-      if (error) throw error;
-
-      if (!data) {
-        // Create default goal for current year
-        const { data: newGoal, error: createError } = await supabase
+      if (isOwnProfile) {
+        // Own profile: try to read from reading_goals table
+        const { data, error } = await supabase
           .from("reading_goals")
-          .insert({
-            user_id: userId,
-            year: currentYear,
-            goal_count: 12,
-            manual_count: 0
-          })
-          .select()
-          .single();
+          .select("*")
+          .eq("user_id", userId)
+          .eq("year", currentYear)
+          .maybeSingle();
 
-        if (createError) throw createError;
-        setGoal(newGoal);
+        if (error) throw error;
+
+        if (!data) {
+          // Create default goal for current year
+          const { data: newGoal, error: createError } = await supabase
+            .from("reading_goals")
+            .insert({
+              user_id: userId,
+              year: currentYear,
+              goal_count: 12,
+              manual_count: 0
+            })
+            .select()
+            .single();
+
+          if (createError) throw createError;
+          setGoal(newGoal);
+        } else {
+          setGoal(data);
+        }
       } else {
-        setGoal(data);
+        // Other user's profile: use public RPC function
+        const { data, error } = await supabase
+          .rpc('get_reading_goal_public', {
+            p_user_id: userId,
+            p_year: currentYear
+          });
+
+        if (error) {
+          console.error("Error loading reading goal via RPC:", error);
+          // If no goal exists, show a default
+          setGoal(null);
+        } else if (data && data.length > 0) {
+          setGoal(data[0]);
+        } else {
+          setGoal(null);
+        }
       }
     } catch (error: any) {
       console.error("Error loading reading goal:", error);
+      setGoal(null);
     } finally {
       setLoading(false);
     }
@@ -99,9 +121,26 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear }: HomeReading
     }
   };
 
-  if (loading || !goal) return null;
+  if (loading) return null;
 
-  const totalProgress = completedBooksThisYear + goal.manual_count;
+  // If no goal exists for other users, show a message
+  if (!goal && !isOwnProfile) {
+    return (
+      <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
+        <CardContent className="p-2 sm:p-4">
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-2">
+            <Target className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-primary" />
+            <span className="text-xs sm:text-base font-semibold text-foreground">{currentYear} Reading Goal</span>
+          </div>
+          <p className="text-[10px] sm:text-sm text-muted-foreground">No goal set yet.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!goal) return null;
+
+  const totalProgress = completedBooksThisYear + (goal.manual_count || 0);
   const progressPercentage = Math.min((totalProgress / goal.goal_count) * 100, 100);
   const booksRemaining = Math.max(goal.goal_count - totalProgress, 0);
 
@@ -124,7 +163,7 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear }: HomeReading
           <div className="text-muted-foreground">
             {booksRemaining > 0 ? `${booksRemaining} books to go!` : "Goal achieved! 🎉"}
           </div>
-          {goal.manual_count > 0 && (
+          {isOwnProfile && goal.manual_count > 0 && (
             <div className="flex items-center gap-1">
               <span className="text-[9px] sm:text-xs text-muted-foreground">Manual:</span>
               <Button
@@ -147,7 +186,7 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear }: HomeReading
             </div>
           )}
           
-          {goal.manual_count === 0 && (
+          {isOwnProfile && goal.manual_count === 0 && (
             <Button
               size="sm"
               variant="ghost"

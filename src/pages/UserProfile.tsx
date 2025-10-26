@@ -225,6 +225,21 @@ export default function UserProfile() {
           if (currentBookData) {
             setCurrentBook(currentBookData);
           }
+        } else {
+          // Fallback: find most recent in-progress book if current_book_id is null
+          const { data: fallbackBooks } = await supabase
+            .from('books')
+            .select('id, title, author, cover_url, current_page, total_pages')
+            .eq('user_id', userId)
+            .eq('status', 'in_progress')
+            .order('updated_at', { ascending: false })
+            .limit(10);
+          
+          // Filter client-side for books where current_page < total_pages
+          const inProgressBook = fallbackBooks?.find(b => b.current_page < b.total_pages);
+          if (inProgressBook) {
+            setCurrentBook(inProgressBook);
+          }
         }
 
         // Load book statistics
@@ -478,7 +493,7 @@ export default function UserProfile() {
 
             {/* Reading Goals */}
             <div className="mb-4">
-              <HomeReadingGoals userId={profile.id} completedBooksThisYear={completedBooksThisYear} />
+              <HomeReadingGoals userId={profile.id} completedBooksThisYear={completedBooksThisYear} isOwnProfile={false} />
             </div>
 
             {/* Stats Cards */}
@@ -660,7 +675,7 @@ export default function UserProfile() {
             {/* Main Content Area */}
             <div className="space-y-6">
               {/* Reading Goals */}
-              <HomeReadingGoals userId={profile.id} completedBooksThisYear={completedBooksThisYear} />
+              <HomeReadingGoals userId={profile.id} completedBooksThisYear={completedBooksThisYear} isOwnProfile={false} />
 
               {/* Recent Reviews */}
               {recentReviews.length > 0 && (
