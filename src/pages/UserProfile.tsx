@@ -7,6 +7,7 @@ import { UserColorProvider } from "@/components/UserColorProvider";
 import { ArrowLeft, BookOpen, Star, Calendar, Globe, Facebook, Twitter, Instagram, Linkedin, Youtube, ExternalLink, XCircle } from "lucide-react";
 import { HomeReadingGoals } from "@/components/HomeReadingGoals";
 import { FollowersDialog } from "@/components/FollowersDialog";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 
 type ProgressItem = {
   kind: "progress";
@@ -492,27 +493,37 @@ export default function UserProfile() {
             )}
 
             {/* Reading Goals */}
-            <div className="mb-4">
+            <div className="mb-4 max-w-md mx-auto">
               <HomeReadingGoals userId={profile.id} completedBooksThisYear={completedBooksThisYear} isOwnProfile={false} />
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-3 gap-2 mb-6">
-              <div className="bg-card border rounded-lg p-3 text-center">
-                <BookOpen className="w-5 h-5 mx-auto mb-1 text-primary" />
-                <div className="text-2xl font-bold">{bookStats.inProgressBooks}</div>
-                <div className="text-xs text-muted-foreground">In Progress</div>
-              </div>
-              <div className="bg-card border rounded-lg p-3 text-center">
-                <Star className="w-5 h-5 mx-auto mb-1 text-primary" />
-                <div className="text-2xl font-bold">{bookStats.completedBooks}</div>
-                <div className="text-xs text-muted-foreground">Completed</div>
-              </div>
-              <div className="bg-card border rounded-lg p-3 text-center">
-                <BookOpen className="w-5 h-5 mx-auto mb-1 text-primary" />
-                <div className="text-2xl font-bold">{bookStats.totalBooks}</div>
-                <div className="text-xs text-muted-foreground">Total Books</div>
-              </div>
+            <div className="grid grid-cols-3 gap-3 mb-4 max-w-md mx-auto">
+              <Link to="/">
+                <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
+                  <CardContent className="p-3 text-center">
+                    <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                    <p className="text-2xl font-bold text-foreground">{bookStats.inProgressBooks}</p>
+                    <p className="text-xs text-muted-foreground">Reading</p>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link to="/completed">
+                <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
+                  <CardContent className="p-3 text-center">
+                    <Star className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                    <p className="text-2xl font-bold text-foreground">{bookStats.completedBooks}</p>
+                    <p className="text-xs text-muted-foreground">Completed</p>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Card>
+                <CardContent className="p-3 text-center">
+                  <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                  <p className="text-2xl font-bold text-foreground">{bookStats.totalBooks}</p>
+                  <p className="text-xs text-muted-foreground">Total</p>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Recent Reviews Section */}
@@ -609,23 +620,33 @@ export default function UserProfile() {
                 )}
               </div>
 
-              {/* Stats Card */}
-              <div className="bg-card border rounded-lg p-4">
-                <h3 className="font-semibold mb-3 text-sm">Reading Stats</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">In Progress</span>
-                    <span className="font-bold">{bookStats.inProgressBooks}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Completed</span>
-                    <span className="font-bold">{bookStats.completedBooks}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Total Books</span>
-                    <span className="font-bold">{bookStats.totalBooks}</span>
-                  </div>
-                </div>
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-2">
+                <Link to="/">
+                  <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
+                    <CardContent className="p-3 text-center">
+                      <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                      <p className="text-2xl font-bold text-foreground">{bookStats.inProgressBooks}</p>
+                      <p className="text-[10px] text-muted-foreground">In Progress</p>
+                    </CardContent>
+                  </Card>
+                </Link>
+                <Link to="/completed">
+                  <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
+                    <CardContent className="p-3 text-center">
+                      <Star className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                      <p className="text-2xl font-bold text-foreground">{bookStats.completedBooks}</p>
+                      <p className="text-[10px] text-muted-foreground">Completed</p>
+                    </CardContent>
+                  </Card>
+                </Link>
+                <Card>
+                  <CardContent className="p-3 text-center">
+                    <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                    <p className="text-2xl font-bold text-foreground">{bookStats.totalBooks}</p>
+                    <p className="text-[10px] text-muted-foreground">Total Books</p>
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Favorite Book */}
