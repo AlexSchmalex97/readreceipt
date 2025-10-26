@@ -238,7 +238,7 @@ export default function UserProfile() {
           const completed = allBooks.filter(book => 
             book.status === 'completed' || book.current_page >= book.total_pages
           );
-          const completedThisYear = allBooks.filter(book => {
+          const completedThisYearBooks = allBooks.filter(book => {
             if (book.status !== 'completed' && book.current_page < book.total_pages) return false;
             if (book.finished_at) {
               return new Date(book.finished_at).getFullYear() === currentYear;
@@ -256,9 +256,15 @@ export default function UserProfile() {
             completedBooks: completed.length, 
             inProgressBooks: inProgress.length 
           });
-          setCompletedBooksThisYear(completedThisYear.length);
+          setCompletedBooksThisYear(completedThisYearBooks.length);
           setInProgressBooks(inProgress);
           setCompletedBooks(completed);
+        } else {
+          // Set defaults if no books
+          setBookStats({ totalBooks: 0, completedBooks: 0, inProgressBooks: 0 });
+          setCompletedBooksThisYear(0);
+          setInProgressBooks([]);
+          setCompletedBooks([]);
         }
 
         // Load recent reviews (limit to 3 for display)
