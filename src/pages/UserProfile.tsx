@@ -8,6 +8,7 @@ import { ArrowLeft, BookOpen, Star, Calendar, Globe, Facebook, Twitter, Instagra
 import { HomeReadingGoals } from "@/components/HomeReadingGoals";
 import { FollowersDialog } from "@/components/FollowersDialog";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 type ProgressItem = {
   kind: "progress";
