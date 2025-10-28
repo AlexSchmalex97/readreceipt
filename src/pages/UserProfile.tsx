@@ -765,7 +765,7 @@ export default function UserProfile() {
 
           {/* Desktop Layout - Match Alex format */}
           <div className="hidden lg:block">
-            <div className="flex justify-between items-start mb-4 sm:mb-6">
+            <div className="flex justify-between items-start mb-6 sm:mb-8">
               <div className="flex items-center gap-6 flex-1">
                 {/* Profile Photo */}
                 <div className="w-32 h-32 rounded-full overflow-hidden bg-muted border-2 border-border flex-shrink-0">
@@ -815,7 +815,7 @@ export default function UserProfile() {
                   {(currentBook || favoriteBook) && (
                     <div className="mt-4 flex gap-4">
                       {favoriteBook && (
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 max-w-sm">
                           <h3 className="text-xs font-medium text-muted-foreground mb-2">Favorite Book</h3>
                           <div className="flex items-center gap-2 p-3 border rounded-lg h-full bg-card">
                             {favoriteBook.cover_url && (
@@ -838,7 +838,7 @@ export default function UserProfile() {
                       )}
 
                       {currentBook && (
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 max-w-sm">
                           <h3 className="text-xs font-medium text-muted-foreground mb-2">Currently Reading</h3>
                           <div className="flex items-center gap-2 p-3 border rounded-lg h-full bg-card">
                             {currentBook.cover_url && (
