@@ -155,7 +155,7 @@ export default function People() {
                     className="flex items-center justify-between bg-card p-3 rounded border hover:shadow-md transition-shadow"
                   >
                     <Link
-                      to={`/user/${p.id}`}
+                      to={`/${p.username || p.id}`}
                       className="flex items-center gap-3 flex-1 hover:text-primary transition-colors"
                     >
                       <img
@@ -188,7 +188,7 @@ export default function People() {
               className="flex items-center justify-between bg-card p-3 rounded border hover:shadow-md transition-shadow"
             >
               <Link
-                to={`/user/${p.id}`}
+                to={`/${p.username || p.id}`}
                 className="flex items-center gap-3 flex-1 hover:text-primary transition-colors"
               >
                 <img

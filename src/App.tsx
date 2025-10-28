@@ -61,7 +61,6 @@ const App = () => {
           <Route path="/home" element={<ProtectedRoute><IOSProtectedRoute><Index /></IOSProtectedRoute></ProtectedRoute>} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/contact" element={<IOSProtectedRoute><Contact /></IOSProtectedRoute>} />
-          <Route path="/user/:userId" element={<IOSProtectedRoute><UserProfile /></IOSProtectedRoute>} />
           <Route path="/feed" element={<ProtectedRoute><IOSProtectedRoute><Feed /></IOSProtectedRoute></ProtectedRoute>} />
           <Route path="/people" element={<ProtectedRoute><IOSProtectedRoute><People /></IOSProtectedRoute></ProtectedRoute>} />
           <Route path="/reviews" element={<ProtectedRoute><IOSProtectedRoute><Reviews /></IOSProtectedRoute></ProtectedRoute>} />
@@ -72,6 +71,7 @@ const App = () => {
           <Route path="/profile/settings" element={<ProtectedRoute><IOSProtectedRoute><ProfileSettings /></IOSProtectedRoute></ProtectedRoute>} />
           <Route path="/completed" element={<ProtectedRoute><IOSProtectedRoute><CompletedBooks /></IOSProtectedRoute></ProtectedRoute>} />
           <Route path="/integrations" element={<ProtectedRoute><IOSProtectedRoute><Integrations /></IOSProtectedRoute></ProtectedRoute>} />
+          <Route path="/:username" element={<IOSProtectedRoute><UserProfile /></IOSProtectedRoute>} />
           <Route path="*" element={<IOSProtectedRoute><NotFound /></IOSProtectedRoute>} />
         </Routes>
       </BrowserRouter>

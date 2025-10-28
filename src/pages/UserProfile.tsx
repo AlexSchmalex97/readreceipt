@@ -80,7 +80,7 @@ interface FavoriteBook {
 }
 
 export default function UserProfile() {
-  const { userId } = useParams<{ userId: string }>();
+  const { username } = useParams<{ username: string }>();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [tbrBooks, setTbrBooks] = useState<TBRBook[]>([]);
@@ -100,7 +100,7 @@ export default function UserProfile() {
   const [recentReviews, setRecentReviews] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!username) return;
 
     (async () => {
       try {
@@ -108,15 +108,17 @@ export default function UserProfile() {
         const { data: me } = await supabase.auth.getUser();
         setMyId(me?.user?.id || null);
 
-        // Get user profile
+        // Get user profile by username
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("*")
-          .eq("id", userId)
+          .eq("username", username)
           .single();
 
         if (profileError) throw profileError;
         setProfile(profileData);
+
+        const userId = profileData.id;
 
         // Fetch favorite book if exists
         if (profileData.favorite_book_id) {
@@ -356,7 +358,7 @@ export default function UserProfile() {
         setLoading(false);
       }
     })();
-  }, [userId]);
+  }, [username]);
 
   const getSocialMediaIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
@@ -943,7 +945,7 @@ export default function UserProfile() {
                 <CardHeader className="p-3 pb-2">
                   <CardTitle className="flex items-center justify-between text-sm">
                     Recent Reviews
-                    <Link to={`/user/${profile.id}#reviews`} className="text-xs font-normal text-primary hover:underline">
+                    <Link to={`/${profile.username || profile.id}#reviews`} className="text-xs font-normal text-primary hover:underline">
                       View all
                     </Link>
                   </CardTitle>

@@ -101,7 +101,7 @@ export function FollowersDialog({ userId, type, count }: FollowersDialogProps) {
             {profiles.map((profile) => (
               <Link
                 key={profile.id}
-                to={`/user/${profile.id}`}
+                to={`/${profile.username || profile.id}`}
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
               >
