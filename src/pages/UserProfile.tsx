@@ -461,22 +461,22 @@ export default function UserProfile() {
 
             {/* Current Book & Favorite Book - Side by Side */}
             {(currentBook || favoriteBook) && (
-              <div className="grid grid-cols-2 gap-2 mb-4">
+              <div className="grid grid-cols-2 gap-2 mb-3">
                 {currentBook && (
-                  <div className="border rounded-lg p-3 bg-card">
-                    <p className="text-xs text-muted-foreground mb-2">Currently Reading</p>
+                  <div className="border rounded-lg p-2.5 bg-card">
+                    <p className="text-xs text-muted-foreground mb-1.5">Currently Reading</p>
                     <div className="flex gap-2">
                       {currentBook.cover_url && (
                         <img
                           src={currentBook.cover_url}
                           alt={currentBook.title}
-                          className="w-12 h-16 object-cover rounded flex-shrink-0"
+                          className="w-10 h-14 object-cover rounded flex-shrink-0"
                         />
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium line-clamp-2 leading-tight">{currentBook.title}</p>
-                        <p className="text-xs text-muted-foreground truncate mt-1">{currentBook.author}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-xs font-medium line-clamp-2 leading-tight">{currentBook.title}</p>
+                        <p className="text-[10px] text-muted-foreground truncate mt-0.5">{currentBook.author}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
                           Page {currentBook.current_page} of {currentBook.total_pages}
                         </p>
                       </div>
@@ -484,19 +484,19 @@ export default function UserProfile() {
                   </div>
                 )}
                 {favoriteBook && (
-                  <div className="border rounded-lg p-3 bg-card">
-                    <p className="text-xs text-muted-foreground mb-2">Favorite Book</p>
+                  <div className="border rounded-lg p-2.5 bg-card">
+                    <p className="text-xs text-muted-foreground mb-1.5">Favorite Book</p>
                     <div className="flex gap-2">
                       {favoriteBook.cover_url && (
                         <img
                           src={favoriteBook.cover_url}
                           alt={favoriteBook.title}
-                          className="w-12 h-16 object-cover rounded flex-shrink-0"
+                          className="w-10 h-14 object-cover rounded flex-shrink-0"
                         />
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium line-clamp-2 leading-tight">{favoriteBook.title}</p>
-                        <p className="text-xs text-muted-foreground truncate mt-1">{favoriteBook.author}</p>
+                        <p className="text-xs font-medium line-clamp-2 leading-tight">{favoriteBook.title}</p>
+                        <p className="text-[10px] text-muted-foreground truncate mt-0.5">{favoriteBook.author}</p>
                       </div>
                     </div>
                   </div>
@@ -506,7 +506,7 @@ export default function UserProfile() {
 
             {/* Links */}
             {((profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url) && (
-              <div className="flex flex-wrap justify-center gap-2 mb-4">
+              <div className="flex flex-wrap justify-center gap-2 mb-3">
                 {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
                   const Icon = getSocialMediaIcon(platform);
                   return (
@@ -537,7 +537,7 @@ export default function UserProfile() {
             )}
 
             {/* Stats - Single Row */}
-            <div className="grid grid-cols-3 gap-3 mb-4 max-w-md mx-auto">
+            <div className="grid grid-cols-3 gap-3 mb-3 max-w-md mx-auto">
               <Link to="/">
                 <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
                   <CardContent className="p-3 text-center">
@@ -566,7 +566,7 @@ export default function UserProfile() {
             </div>
 
             {/* Reading Goal */}
-            <div className="mb-4 max-w-md mx-auto">
+            <div className="mb-3 max-w-md mx-auto">
               <HomeReadingGoals userId={profile.id} completedBooksThisYear={completedBooksThisYear} isOwnProfile={false} />
             </div>
 
