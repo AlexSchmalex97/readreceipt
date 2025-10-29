@@ -29,7 +29,19 @@ export default function People() {
         .select("following_id")
         .eq("follower_id", user.id);
 
-      if (!followData || followData.length === 0) return;
+      if (!followData || followData.length === 0) {
+        // If not following anyone, just show Alex
+        const { data: alexProfile } = await supabase
+          .from('profiles')
+          .select('id, display_name, username, avatar_url, created_at')
+          .eq('username', 'Alex')
+          .single();
+        
+        if (alexProfile) {
+          setFollowedUsers([alexProfile]);
+        }
+        return;
+      }
 
       const followingIds = followData.map(f => f.following_id);
 
@@ -83,7 +95,19 @@ export default function People() {
           .select("following_id")
           .eq("follower_id", user.id);
 
-        if (!followData || followData.length === 0) return;
+        if (!followData || followData.length === 0) {
+          // If not following anyone, just show Alex
+          const { data: alexProfile } = await supabase
+            .from('profiles')
+            .select('id, display_name, username, avatar_url, created_at')
+            .eq('username', 'Alex')
+            .single();
+          
+          if (alexProfile) {
+            setFollowedUsers([alexProfile]);
+          }
+          return;
+        }
 
         const followingIds = followData.map(f => f.following_id);
 
@@ -220,7 +244,7 @@ export default function People() {
               </div>
             </div>
           ) : (
-            <div className="text-muted-foreground">You're not following anyone yet. Search above to find readers!</div>
+            <div className="text-muted-foreground">Search above to find more readers!</div>
           )}
         </>
       ) : results.length === 0 ? (
