@@ -11,23 +11,41 @@ import { usePlatform } from "@/hooks/usePlatform";
 export default function People() {
   const [q, setQ] = useState("");
   const [results, setResults] = useState<any[]>([]);
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [followedUsers, setFollowedUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const { toast } = useToast();
   const { isIOS, isReadReceiptApp } = usePlatform();
 
-  // Load Alex as a suggestion on mount
+  // Load followed users on mount
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from('profiles')
-        .select('id, display_name, username, avatar_url, created_at')
-        .eq('username', 'Alex')
-        .single();
-      
-      if (data) {
-        setSuggestions([data]);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Get the list of users this user is following
+      const { data: followData } = await supabase
+        .from("follows")
+        .select("following_id")
+        .eq("follower_id", user.id);
+
+      if (!followData || followData.length === 0) return;
+
+      const followingIds = followData.map(f => f.following_id);
+
+      // Get profile data for followed users
+      const { data: profiles } = await supabase.rpc("get_public_profiles_by_ids", {
+        ids: followingIds
+      });
+
+      if (profiles) {
+        // Sort to put Alex at the top
+        const sorted = [...profiles].sort((a, b) => {
+          if (a.username === "Alex") return -1;
+          if (b.username === "Alex") return 1;
+          return 0;
+        });
+        setFollowedUsers(sorted);
       }
     })();
   }, []);
@@ -55,6 +73,32 @@ export default function People() {
           console.error('Error:', error);
         }
         setLoading(false);
+      } else {
+        // If no search query, refresh the followed users list
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: followData } = await supabase
+          .from("follows")
+          .select("following_id")
+          .eq("follower_id", user.id);
+
+        if (!followData || followData.length === 0) return;
+
+        const followingIds = followData.map(f => f.following_id);
+
+        const { data: profiles } = await supabase.rpc("get_public_profiles_by_ids", {
+          ids: followingIds
+        });
+
+        if (profiles) {
+          const sorted = [...profiles].sort((a, b) => {
+            if (a.username === "Alex") return -1;
+            if (b.username === "Alex") return 1;
+            return 0;
+          });
+          setFollowedUsers(sorted);
+        }
       }
     },
   });
@@ -145,11 +189,11 @@ export default function People() {
         <div className="text-muted-foreground">Searching…</div>
       ) : !hasSearched ? (
         <>
-          {suggestions.length > 0 && (
+          {followedUsers.length > 0 ? (
             <div className="space-y-3">
-              <h2 className="text-lg font-semibold text-foreground">Suggested readers</h2>
+              <h2 className="text-lg font-semibold text-foreground">Following</h2>
               <div className="grid gap-3">
-                {suggestions.map((p) => (
+                {followedUsers.map((p) => (
                   <div
                     key={p.id}
                     className="flex items-center justify-between bg-card p-3 rounded border hover:shadow-md transition-shadow"
@@ -175,8 +219,9 @@ export default function People() {
                 ))}
               </div>
             </div>
+          ) : (
+            <div className="text-muted-foreground">You're not following anyone yet. Search above to find readers!</div>
           )}
-          <div className="text-muted-foreground mt-4">Enter a username or display name to find readers.</div>
         </>
       ) : results.length === 0 ? (
         <div className="text-muted-foreground">No users found for "{q.trim()}".</div>
