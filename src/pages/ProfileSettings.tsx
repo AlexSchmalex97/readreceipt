@@ -51,6 +51,8 @@ export default function ProfileSettings() {
   const [currentBookId, setCurrentBookId] = useState<string | undefined>();
   const [socialMediaLinks, setSocialMediaLinks] = useState<{platform: string, url: string}[]>([]);
   const [websiteUrl, setWebsiteUrl] = useState("");
+  const [backgroundColor, setBackgroundColor] = useState("#F5F1E8");
+  const [customHex, setCustomHex] = useState("");
   
   const [uploading, setUploading] = useState(false);
   const normUsername = useMemo(() => normalizeUsername(username), [username]);
@@ -119,6 +121,7 @@ export default function ProfileSettings() {
       setCurrentBookId(prof?.current_book_id ?? undefined);
       setSocialMediaLinks(prof?.social_media_links ? Object.entries(prof.social_media_links).map(([platform, url]) => ({ platform, url: url as string })) : []);
       setWebsiteUrl(prof?.website_url ?? "");
+      setBackgroundColor((prof as any)?.background_color ?? "#F5F1E8");
       
       // Completed reads this year: entries count + books without entries fallback
       const computeCompletedCount = async () => {
@@ -369,6 +372,7 @@ export default function ProfileSettings() {
           current_book_id: currentBookId || null,
           social_media_links: socialMediaObject,
           website_url: websiteUrl || null,
+          background_color: backgroundColor,
         })
         .eq("id", uid)
         .select();
@@ -393,6 +397,7 @@ export default function ProfileSettings() {
               favorite_book_id: favoriteBookId || null,
               social_media_links: socialMediaObject,
               website_url: websiteUrl || null,
+              background_color: backgroundColor,
             }
           ])
           .select();
@@ -690,6 +695,68 @@ export default function ProfileSettings() {
               Choose your preferred temperature unit for weather display.
             </div>
           </label>
+
+          <div className="grid gap-1">
+            <span className="text-sm text-muted-foreground">Profile Background Color</span>
+            <div className="grid gap-3">
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { name: 'Beige', value: '#F5F1E8' },
+                  { name: 'Red', value: '#FEE2E2' },
+                  { name: 'Blue', value: '#DBEAFE' },
+                  { name: 'Pink', value: '#FCE7F3' },
+                  { name: 'Black', value: '#1F2937' },
+                  { name: 'Green', value: '#D1FAE5' },
+                  { name: 'Orange', value: '#FED7AA' },
+                  { name: 'Yellow', value: '#FEF3C7' },
+                ].map((color) => (
+                  <button
+                    key={color.value}
+                    type="button"
+                    onClick={() => setBackgroundColor(color.value)}
+                    className={`h-12 rounded border-2 transition-all ${
+                      backgroundColor === color.value 
+                        ? 'border-primary ring-2 ring-primary/20' 
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                    style={{ backgroundColor: color.value }}
+                    title={color.name}
+                  />
+                ))}
+              </div>
+              <div className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  className="border rounded px-3 py-2 bg-background flex-1"
+                  value={customHex}
+                  onChange={(e) => setCustomHex(e.target.value)}
+                  placeholder="#FFFFFF"
+                  maxLength={7}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (/^#[0-9A-F]{6}$/i.test(customHex)) {
+                      setBackgroundColor(customHex);
+                      toast({ title: "Custom color applied!" });
+                    } else {
+                      toast({ 
+                        title: "Invalid hex code", 
+                        description: "Please enter a valid hex code (e.g., #FF5733)",
+                        variant: "destructive" 
+                      });
+                    }
+                  }}
+                  className="px-3 py-2 rounded border hover:bg-accent"
+                >
+                  Apply
+                </button>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Choose a preset color or enter a custom hex code. This will be visible on your public profile.
+              </div>
+            </div>
+          </div>
 
           <div className="flex gap-2">
             <button

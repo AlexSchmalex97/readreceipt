@@ -98,6 +98,7 @@ export default function UserProfile() {
   const [inProgressBooks, setInProgressBooks] = useState<any[]>([]);
   const [completedBooks, setCompletedBooks] = useState<any[]>([]);
   const [recentReviews, setRecentReviews] = useState<any[]>([]);
+  const [backgroundColor, setBackgroundColor] = useState<string>('#F5F1E8');
 
   useEffect(() => {
     if (!username) return;
@@ -117,6 +118,7 @@ export default function UserProfile() {
 
         if (profileError) throw profileError;
         setProfile(profileData);
+        setBackgroundColor((profileData as any).background_color || '#F5F1E8');
 
         const userId = profileData.id;
 
@@ -395,7 +397,7 @@ export default function UserProfile() {
 
   return (
     <UserColorProvider userColorPalette={profile?.color_palette}>
-      <div className="min-h-screen bg-gradient-soft">
+      <div className="min-h-screen" style={{ backgroundColor }}>
         <Navigation />
         <div className="container mx-auto px-4 py-6 max-w-7xl">
           {/* Header with back button */}

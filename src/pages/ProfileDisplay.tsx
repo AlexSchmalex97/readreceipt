@@ -110,6 +110,7 @@ export default function ProfileDisplay() {
   const [zodiacSign, setZodiacSign] = useState<string | null>(null);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
+  const [backgroundColor, setBackgroundColor] = useState<string>('#F5F1E8');
   const { toast } = useToast();
   const { isIOS, isReadReceiptApp } = usePlatform();
 
@@ -142,6 +143,7 @@ export default function ProfileDisplay() {
           ...profileData,
           email: user.email
         });
+        setBackgroundColor((profileData as any).background_color || '#F5F1E8');
 
         // Fetch favorite book if exists
         if (profileData.favorite_book_id) {
@@ -383,7 +385,7 @@ export default function ProfileDisplay() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-soft">
+    <div className="min-h-screen" style={{ backgroundColor }}>
       <Navigation />
       
       <div 
