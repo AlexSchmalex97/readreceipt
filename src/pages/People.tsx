@@ -34,7 +34,7 @@ export default function People() {
         const { data: alexProfile } = await supabase
           .from('profiles')
           .select('id, display_name, username, avatar_url, created_at')
-          .eq('username', 'Alex')
+          .ilike('username', 'alex')
           .single();
         
         if (alexProfile) {
@@ -51,10 +51,10 @@ export default function People() {
       });
 
       if (profiles) {
-        // Sort to put Alex at the top
+        // Sort to put Alex at the top (case-insensitive)
         const sorted = [...profiles].sort((a, b) => {
-          if (a.username === "Alex") return -1;
-          if (b.username === "Alex") return 1;
+          if (a.username && a.username.toLowerCase() === "alex") return -1;
+          if (b.username && b.username.toLowerCase() === "alex") return 1;
           return 0;
         });
         setFollowedUsers(sorted);
@@ -100,7 +100,7 @@ export default function People() {
           const { data: alexProfile } = await supabase
             .from('profiles')
             .select('id, display_name, username, avatar_url, created_at')
-            .eq('username', 'Alex')
+            .ilike('username', 'alex')
             .single();
           
           if (alexProfile) {
@@ -117,8 +117,8 @@ export default function People() {
 
         if (profiles) {
           const sorted = [...profiles].sort((a, b) => {
-            if (a.username === "Alex") return -1;
-            if (b.username === "Alex") return 1;
+            if (a.username && a.username.toLowerCase() === "alex") return -1;
+            if (b.username && b.username.toLowerCase() === "alex") return 1;
             return 0;
           });
           setFollowedUsers(sorted);
@@ -251,7 +251,11 @@ export default function People() {
         <div className="text-muted-foreground">No users found for "{q.trim()}".</div>
       ) : (
         <div className="grid gap-3">
-          {results.map((p) => (
+          {results.sort((a, b) => {
+            if (a.username && a.username.toLowerCase() === "alex") return -1;
+            if (b.username && b.username.toLowerCase() === "alex") return 1;
+            return 0;
+          }).map((p) => (
             <div
               key={p.id}
               className="flex items-center justify-between bg-card p-3 rounded border hover:shadow-md transition-shadow"

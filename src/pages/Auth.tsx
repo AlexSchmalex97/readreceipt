@@ -15,6 +15,7 @@ const Auth = () => {
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -122,6 +123,7 @@ const Auth = () => {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
             username,
+            display_name: displayName,
           },
         },
       });
@@ -301,11 +303,22 @@ const Auth = () => {
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
+                  <Label htmlFor="signup-display-name">Display Name</Label>
+                  <Input
+                    id="signup-display-name"
+                    type="text"
+                    placeholder="Your display name"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="signup-username">Username</Label>
                   <Input
                     id="signup-username"
                     type="text"
-                    placeholder="username"
+                    placeholder="@username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required

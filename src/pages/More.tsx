@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
-import { Users, Mail, Settings, Star, ChevronRight, LogOut } from "lucide-react";
+import { Users, Mail, Settings, Star, ChevronRight, LogOut, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -22,6 +22,7 @@ export default function More() {
   const menuItems = [
     { path: "/people", label: "People", icon: Users, description: "Find and follow readers" },
     { path: "/reviews", label: "Reviews", icon: Star, description: "Read and write reviews" },
+    { path: "/notifications", label: "Notifications", icon: Bell, description: "View your notifications" },
     { path: "/contact", label: "Contact", icon: Mail, description: "Get in touch with us" },
     { path: "/settings", label: "Settings", icon: Settings, description: "Manage your preferences" },
   ];

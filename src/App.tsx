@@ -24,6 +24,7 @@ import Integrations from "./pages/Integrations";
 import Auth from "./pages/Auth";
 import TBR from "./pages/TBR";
 import More from "./pages/More";
+import Notifications from "./pages/Notifications";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +72,7 @@ const App = () => {
           <Route path="/profile/settings" element={<ProtectedRoute><IOSProtectedRoute><ProfileSettings /></IOSProtectedRoute></ProtectedRoute>} />
           <Route path="/completed" element={<ProtectedRoute><IOSProtectedRoute><CompletedBooks /></IOSProtectedRoute></ProtectedRoute>} />
           <Route path="/integrations" element={<ProtectedRoute><IOSProtectedRoute><Integrations /></IOSProtectedRoute></ProtectedRoute>} />
+          <Route path="/notifications" element={<ProtectedRoute><IOSProtectedRoute><Notifications /></IOSProtectedRoute></ProtectedRoute>} />
           <Route path="/:username" element={<IOSProtectedRoute><UserProfile /></IOSProtectedRoute>} />
           <Route path="*" element={<IOSProtectedRoute><NotFound /></IOSProtectedRoute>} />
         </Routes>
