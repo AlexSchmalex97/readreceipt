@@ -385,9 +385,50 @@ export default function ProfileDisplay() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor }}>
+    <div
+      className="min-h-screen"
+      style={{
+        backgroundColor,
+        ...(function () {
+          const hexToHSL = (hex: string) => {
+            const r = parseInt(hex.slice(1,3),16)/255;
+            const g = parseInt(hex.slice(3,5),16)/255;
+            const b = parseInt(hex.slice(5,7),16)/255;
+            const max = Math.max(r,g,b), min = Math.min(r,g,b);
+            let h = 0, s = 0; const l = (max+min)/2;
+            if (max !== min) {
+              const d = max - min;
+              s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+              switch(max){
+                case r: h = (g-b)/d + (g<b?6:0); break;
+                case g: h = (b-r)/d + 2; break;
+                case b: h = (r-g)/d + 4; break;
+              }
+              h /= 6;
+            }
+            return `${Math.round(h*360)} ${Math.round(s*100)}% ${Math.round(l*100)}%`;
+          };
+          const isDarkHex = (hex: string) => {
+            const r = parseInt(hex.slice(1,3),16);
+            const g = parseInt(hex.slice(3,5),16);
+            const b = parseInt(hex.slice(5,7),16);
+            const lum = 0.2126*r + 0.7152*g + 0.0722*b;
+            return lum < 128;
+          };
+          const textHex = (profile as any)?.color_palette?.text_color as string | undefined;
+          const autoText = isDarkHex(backgroundColor) ? "#FFFFFF" : "#1A1A1A";
+          const hsl = hexToHSL(textHex || autoText);
+          return {
+            ["--foreground" as any]: hsl,
+            ["--muted-foreground" as any]: hsl,
+            ["--card-foreground" as any]: hsl,
+            ["--accent-foreground" as any]: hsl,
+            ["--popover-foreground" as any]: hsl,
+          } as any;
+        })(),
+      }}
+    >
       <Navigation />
-      
       <div 
         ref={scrollableRef}
         className="relative overflow-y-auto"

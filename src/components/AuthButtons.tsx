@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
-
+import NotificationsPopover from "@/components/NotificationsPopover";
 export default function AuthButtons() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
@@ -209,6 +209,7 @@ export default function AuthButtons() {
             <div>Happy reading,</div>
             <div>{userName || "Reader"}!</div>
           </div>
+          <NotificationsPopover />
           <button
             onClick={signOut}
             className="px-3 py-2 rounded bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"

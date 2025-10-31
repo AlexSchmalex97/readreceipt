@@ -7,6 +7,22 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
   const [palette, setPalette] = useState<any | null>(null);
   const applyGlobally = useMemo(() => Boolean(palette?.apply_globally), [palette]);
 
+  // Build a safe, complete palette with fallbacks to current CSS tokens
+  const effectivePalette = useMemo(() => {
+    if (!palette) return null;
+    const cs = getComputedStyle(document.documentElement);
+    const read = (k: string) => cs.getPropertyValue(`--${k}`).trim();
+    return {
+      name: palette.name || "custom",
+      primary: palette.primary || read("primary"),
+      secondary: palette.secondary || read("secondary"),
+      accent: palette.accent || read("accent"),
+      background: palette.background || read("background"),
+      foreground: palette.foreground || read("foreground"),
+      // Provide foreground fallbacks if only background provided
+    };
+  }, [palette]);
+
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -51,8 +67,8 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
     };
   }, []);
 
-  if (applyGlobally && palette) {
-    return <UserColorProvider userColorPalette={palette}>{children}</UserColorProvider>;
+  if (applyGlobally && (effectivePalette || palette)) {
+    return <UserColorProvider userColorPalette={effectivePalette || palette}>{children}</UserColorProvider>;
   }
   return <>{children}</>;
 }

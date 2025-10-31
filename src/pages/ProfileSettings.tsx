@@ -53,7 +53,10 @@ export default function ProfileSettings() {
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [backgroundColor, setBackgroundColor] = useState("#F5F1E8");
   const [customHex, setCustomHex] = useState("");
-  
+  const [textColor, setTextColor] = useState<string>("");
+  const [textHex, setTextHex] = useState<string>("");
+  const [applyGlobally, setApplyGlobally] = useState<boolean>(false);
+  const [savedCustomColors, setSavedCustomColors] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const normUsername = useMemo(() => normalizeUsername(username), [username]);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
@@ -122,6 +125,14 @@ export default function ProfileSettings() {
       setSocialMediaLinks(prof?.social_media_links ? Object.entries(prof.social_media_links).map(([platform, url]) => ({ platform, url: url as string })) : []);
       setWebsiteUrl(prof?.website_url ?? "");
       setBackgroundColor((prof as any)?.background_color ?? "#F5F1E8");
+      const cp = (prof as any)?.color_palette || {};
+      setApplyGlobally(Boolean(cp?.apply_globally));
+      setSavedCustomColors(Array.isArray(cp?.custom_colors) ? cp.custom_colors : []);
+      setTextColor(cp?.text_color || "");
+      const cp = (prof as any)?.color_palette || {};
+      setApplyGlobally(Boolean(cp?.apply_globally));
+      setSavedCustomColors(Array.isArray(cp?.custom_colors) ? cp.custom_colors : []);
+      setTextColor(cp?.text_color || "");
       
       // Completed reads this year: entries count + books without entries fallback
       const computeCompletedCount = async () => {
@@ -358,6 +369,44 @@ export default function ProfileSettings() {
         return acc;
       }, {} as Record<string, string>);
 
+      // Build color palette from selections
+      const hexToHSL = (hex: string) => {
+        const r = parseInt(hex.slice(1, 3), 16) / 255;
+        const g = parseInt(hex.slice(3, 5), 16) / 255;
+        const b = parseInt(hex.slice(5, 7), 16) / 255;
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        let h = 0, s = 0; const l = (max + min) / 2;
+        if (max !== min) {
+          const d = max - min;
+          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+          switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+          }
+          h = h / 6;
+        }
+        return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+      };
+      const isDarkHex = (hex: string) => {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        return lum < 128;
+      };
+      const chosenTextHex = textColor || (isDarkHex(backgroundColor) ? "#FFFFFF" : "#1A1A1A");
+      const newColorPalette: any = {
+        apply_globally: applyGlobally,
+        custom_colors: savedCustomColors,
+        text_color: textColor || null,
+      };
+      if (applyGlobally) {
+        newColorPalette.background = hexToHSL(backgroundColor);
+        newColorPalette.foreground = hexToHSL(chosenTextHex);
+      }
+
       // Try to update existing profile
       const { data: updateData, error: updateError } = await supabase
         .from("profiles")
@@ -373,6 +422,7 @@ export default function ProfileSettings() {
           social_media_links: socialMediaObject,
           website_url: websiteUrl || null,
           background_color: backgroundColor,
+          color_palette: newColorPalette,
         })
         .eq("id", uid)
         .select();
@@ -398,6 +448,7 @@ export default function ProfileSettings() {
               social_media_links: socialMediaObject,
               website_url: websiteUrl || null,
               background_color: backgroundColor,
+              color_palette: newColorPalette,
             }
           ])
           .select();
@@ -751,11 +802,85 @@ export default function ProfileSettings() {
                 >
                   Apply
                 </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!/^#[0-9A-F]{6}$/i.test(customHex)) {
+                      toast({ title: "Invalid hex code", description: "Please enter a valid hex code", variant: "destructive" });
+                      return;
+                    }
+                    try {
+                      const { data: user } = await supabase.auth.getUser();
+                      if (!user.user) return;
+                      const newColors = [...new Set([...savedCustomColors, customHex])].slice(0, 8);
+                      const { error } = await supabase
+                        .from('profiles')
+                        .update({ color_palette: { ...( (await supabase.from('profiles').select('color_palette').eq('id', user.user.id).single()).data?.color_palette || {} ), custom_colors: newColors } })
+                        .eq('id', user.user.id);
+                      if (error) throw error;
+                      setSavedCustomColors(newColors);
+                      toast({ title: 'Custom color saved!' });
+                    } catch (e:any) {
+                      toast({ title: 'Error saving color', description: e?.message || 'Try again', variant: 'destructive' });
+                    }
+                  }}
+                  className="px-3 py-2 rounded border hover:bg-accent"
+                >
+                  Save
+                </button>
               </div>
+
+              {savedCustomColors.length > 0 && (
+                <div className="grid grid-cols-6 gap-2">
+                  {savedCustomColors.map((hex, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setBackgroundColor(hex)}
+                      className={`h-8 rounded border-2 ${backgroundColor === hex ? 'border-primary' : 'border-border'}`}
+                      style={{ backgroundColor: hex }}
+                      title={hex}
+                    />
+                  ))}
+                </div>
+              )}
+
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={applyGlobally} onChange={(e) => setApplyGlobally(e.target.checked)} />
+                <span>Apply this color to all pages (only you will see it)</span>
+              </label>
+
               <div className="text-xs text-muted-foreground">
-                Choose a preset color or enter a custom hex code. This will be visible on your public profile.
+                Choose a preset color or enter a custom hex code. Public visitors see your profile background only. If applied globally, your app uses your palette while logged in.
               </div>
             </div>
+          </div>
+
+          <div className="grid gap-1">
+            <span className="text-sm text-muted-foreground">Profile Text Color</span>
+            <div className="flex gap-2 items-center">
+              <input
+                type="text"
+                className="border rounded px-3 py-2 bg-background flex-1"
+                value={textHex}
+                onChange={(e) => setTextHex(e.target.value)}
+                placeholder="#FFFFFF (leave empty for auto)"
+                maxLength={7}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (!textHex) { setTextColor(""); toast({ title: 'Using auto contrast' }); return; }
+                  if (/^#[0-9A-F]{6}$/i.test(textHex)) { setTextColor(textHex); toast({ title: 'Text color applied!' }); }
+                  else { toast({ title: 'Invalid hex code', variant: 'destructive' }); }
+                }}
+                className="px-3 py-2 rounded border hover:bg-accent"
+              >
+                Apply
+              </button>
+              <button type="button" onClick={() => { setTextHex(""); setTextColor(""); }} className="px-3 py-2 rounded border hover:bg-accent">Auto</button>
+            </div>
+            <div className="text-xs text-muted-foreground">This affects text in your profile (name, username, bio, etc). Leave empty to auto-adjust based on background.</div>
           </div>
 
           <div className="flex gap-2">
