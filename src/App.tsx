@@ -25,6 +25,7 @@ import Auth from "./pages/Auth";
 import TBR from "./pages/TBR";
 import More from "./pages/More";
 import Notifications from "./pages/Notifications";
+import GlobalUserColors from "@/components/GlobalUserColors";
 
 const queryClient = new QueryClient();
 
@@ -56,29 +57,31 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          <Routes>
-          <Route path="/" element={<ProtectedRoute><IOSProtectedRoute><Index /></IOSProtectedRoute></ProtectedRoute>} />
-          <Route path="/home" element={<ProtectedRoute><IOSProtectedRoute><Index /></IOSProtectedRoute></ProtectedRoute>} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/contact" element={<IOSProtectedRoute><Contact /></IOSProtectedRoute>} />
-          <Route path="/feed" element={<ProtectedRoute><IOSProtectedRoute><Feed /></IOSProtectedRoute></ProtectedRoute>} />
-          <Route path="/people" element={<ProtectedRoute><IOSProtectedRoute><People /></IOSProtectedRoute></ProtectedRoute>} />
-          <Route path="/reviews" element={<ProtectedRoute><IOSProtectedRoute><Reviews /></IOSProtectedRoute></ProtectedRoute>} />
-          <Route path="/profile" element={<IOSProtectedRoute><Profile /></IOSProtectedRoute>} />
-          <Route path="/settings" element={<IOSProtectedRoute><Settings /></IOSProtectedRoute>} />
-          <Route path="/tbr" element={<IOSProtectedRoute><TBR /></IOSProtectedRoute>} />
-          <Route path="/more" element={<IOSProtectedRoute><More /></IOSProtectedRoute>} />
-          <Route path="/profile/settings" element={<ProtectedRoute><IOSProtectedRoute><ProfileSettings /></IOSProtectedRoute></ProtectedRoute>} />
-          <Route path="/completed" element={<ProtectedRoute><IOSProtectedRoute><CompletedBooks /></IOSProtectedRoute></ProtectedRoute>} />
-          <Route path="/integrations" element={<ProtectedRoute><IOSProtectedRoute><Integrations /></IOSProtectedRoute></ProtectedRoute>} />
-          <Route path="/notifications" element={<ProtectedRoute><IOSProtectedRoute><Notifications /></IOSProtectedRoute></ProtectedRoute>} />
-          <Route path="/:username" element={<IOSProtectedRoute><UserProfile /></IOSProtectedRoute>} />
-          <Route path="*" element={<IOSProtectedRoute><NotFound /></IOSProtectedRoute>} />
-        </Routes>
-      </BrowserRouter>
+        <GlobalUserColors>
+          <BrowserRouter>
+            <Routes>
+            <Route path="/" element={<ProtectedRoute><IOSProtectedRoute><Index /></IOSProtectedRoute></ProtectedRoute>} />
+            <Route path="/home" element={<ProtectedRoute><IOSProtectedRoute><Index /></IOSProtectedRoute></ProtectedRoute>} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/contact" element={<IOSProtectedRoute><Contact /></IOSProtectedRoute>} />
+            <Route path="/feed" element={<ProtectedRoute><IOSProtectedRoute><Feed /></IOSProtectedRoute></ProtectedRoute>} />
+            <Route path="/people" element={<ProtectedRoute><IOSProtectedRoute><People /></IOSProtectedRoute></ProtectedRoute>} />
+            <Route path="/reviews" element={<ProtectedRoute><IOSProtectedRoute><Reviews /></IOSProtectedRoute></ProtectedRoute>} />
+            <Route path="/profile" element={<IOSProtectedRoute><Profile /></IOSProtectedRoute>} />
+            <Route path="/settings" element={<IOSProtectedRoute><Settings /></IOSProtectedRoute>} />
+            <Route path="/tbr" element={<IOSProtectedRoute><TBR /></IOSProtectedRoute>} />
+            <Route path="/more" element={<IOSProtectedRoute><More /></IOSProtectedRoute>} />
+            <Route path="/profile/settings" element={<ProtectedRoute><IOSProtectedRoute><ProfileSettings /></IOSProtectedRoute></ProtectedRoute>} />
+            <Route path="/completed" element={<ProtectedRoute><IOSProtectedRoute><CompletedBooks /></IOSProtectedRoute></ProtectedRoute>} />
+            <Route path="/integrations" element={<ProtectedRoute><IOSProtectedRoute><Integrations /></IOSProtectedRoute></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute><IOSProtectedRoute><Notifications /></IOSProtectedRoute></ProtectedRoute>} />
+            <Route path="/:username" element={<IOSProtectedRoute><UserProfile /></IOSProtectedRoute>} />
+            <Route path="*" element={<IOSProtectedRoute><NotFound /></IOSProtectedRoute>} />
+          </Routes>
+        </BrowserRouter>
 
-      <Analytics />
+        <Analytics />
+        </GlobalUserColors>
     </TooltipProvider>
   </QueryClientProvider>
   );
