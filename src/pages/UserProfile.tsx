@@ -395,50 +395,23 @@ export default function UserProfile() {
     );
   }
 
+  // Compute text color for header only
+  const headerTextColor = (() => {
+    const textHex = (profile as any)?.color_palette?.text_color as string | undefined;
+    if (textHex) return textHex;
+    // Auto contrast
+    const r = parseInt(backgroundColor.slice(1,3),16);
+    const g = parseInt(backgroundColor.slice(3,5),16);
+    const b = parseInt(backgroundColor.slice(5,7),16);
+    const lum = 0.2126*r + 0.7152*g + 0.0722*b;
+    return lum < 128 ? "#FFFFFF" : "#1A1A1A";
+  })();
+
   return (
     <UserColorProvider userColorPalette={profile?.color_palette}>
       <div
         className="min-h-screen"
-        style={{
-          backgroundColor,
-          ...(function () {
-            const hexToHSL = (hex: string) => {
-              const r = parseInt(hex.slice(1,3),16)/255;
-              const g = parseInt(hex.slice(3,5),16)/255;
-              const b = parseInt(hex.slice(5,7),16)/255;
-              const max = Math.max(r,g,b), min = Math.min(r,g,b);
-              let h = 0, s = 0; const l = (max+min)/2;
-              if (max !== min) {
-                const d = max - min;
-                s = l > 0.5 ? d/(2-max-min) : d/(max+min);
-                switch(max){
-                  case r: h = (g-b)/d + (g<b?6:0); break;
-                  case g: h = (b-r)/d + 2; break;
-                  case b: h = (r-g)/d + 4; break;
-                }
-                h /= 6;
-              }
-              return `${Math.round(h*360)} ${Math.round(s*100)}% ${Math.round(l*100)}%`;
-            };
-            const isDarkHex = (hex: string) => {
-              const r = parseInt(hex.slice(1,3),16);
-              const g = parseInt(hex.slice(3,5),16);
-              const b = parseInt(hex.slice(5,7),16);
-              const lum = 0.2126*r + 0.7152*g + 0.0722*b;
-              return lum < 128;
-            };
-            const textHex = (profile as any)?.color_palette?.text_color as string | undefined;
-            const autoText = isDarkHex(backgroundColor) ? "#FFFFFF" : "#1A1A1A";
-            const hsl = hexToHSL(textHex || autoText);
-            return {
-              ["--foreground" as any]: hsl,
-              ["--muted-foreground" as any]: hsl,
-              ["--card-foreground" as any]: hsl,
-              ["--accent-foreground" as any]: hsl,
-              ["--popover-foreground" as any]: hsl,
-            } as any;
-          })(),
-        }}
+        style={{ backgroundColor }}
       >
         <div className="container mx-auto px-4 py-6 max-w-7xl">
           {/* Header with back button */}
@@ -466,13 +439,13 @@ export default function UserProfile() {
               </div>
               
               {/* Profile Info */}
-              <h1 className="text-2xl font-bold text-foreground">
+              <h1 className="text-2xl font-bold" style={{ color: headerTextColor }}>
                 {profile.display_name || "Reader"}
               </h1>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-sm mt-1" style={{ color: headerTextColor }}>
                 @{profile.username || profile.id.slice(0, 8)}
               </p>
-              <div className="flex items-center justify-center gap-4 mt-2 text-xs text-muted-foreground">
+              <div className="flex items-center justify-center gap-4 mt-2 text-xs" style={{ color: headerTextColor }}>
                 <span>
                   <Calendar className="w-3 h-3 inline mr-1" />
                   Member since {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
@@ -501,7 +474,7 @@ export default function UserProfile() {
 
             {/* Bio */}
             {profile.bio && (
-              <p className="text-sm text-foreground text-center mb-4 max-w-2xl mx-auto">{profile.bio}</p>
+              <p className="text-sm text-center mb-4 max-w-2xl mx-auto" style={{ color: headerTextColor }}>{profile.bio}</p>
             )}
 
             {/* Current Book & Favorite Book - Side by Side */}
@@ -823,22 +796,22 @@ export default function UserProfile() {
                 
                 {/* Left Column - Profile Info */}
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-5xl font-bold text-foreground">
+                  <h1 className="text-5xl font-bold" style={{ color: headerTextColor }}>
                     {profile.display_name || "Reader"}
                   </h1>
-                  <p className="text-lg text-muted-foreground mt-1">
+                  <p className="text-lg mt-1" style={{ color: headerTextColor }}>
                     @{profile.username || profile.id.slice(0, 8)}
                   </p>
                   {profile.bio && (
-                    <p className="text-base text-foreground mt-2 max-w-2xl">{profile.bio}</p>
+                    <p className="text-base mt-2 max-w-2xl" style={{ color: headerTextColor }}>{profile.bio}</p>
                   )}
-                  <div className="flex items-center gap-4 mt-3">
-                    <p className="text-sm text-muted-foreground">
+                  <div className="flex items-center gap-4 mt-3" style={{ color: headerTextColor }}>
+                    <p className="text-sm">
                       <Calendar className="w-4 h-4 inline mr-1" />
                       Member since {new Date(profile.created_at).toLocaleDateString()}
                     </p>
                     {zodiacSign && (
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm">
                         <Star className="w-4 h-4 inline mr-1" />
                         {zodiacSign}
                       </p>
