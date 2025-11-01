@@ -129,10 +129,6 @@ export default function ProfileSettings() {
       setApplyGlobally(Boolean(cp?.apply_globally));
       setSavedCustomColors(Array.isArray(cp?.custom_colors) ? cp.custom_colors : []);
       setTextColor(cp?.text_color || "");
-      const cp = (prof as any)?.color_palette || {};
-      setApplyGlobally(Boolean(cp?.apply_globally));
-      setSavedCustomColors(Array.isArray(cp?.custom_colors) ? cp.custom_colors : []);
-      setTextColor(cp?.text_color || "");
       
       // Completed reads this year: entries count + books without entries fallback
       const computeCompletedCount = async () => {
@@ -813,9 +809,17 @@ export default function ProfileSettings() {
                       const { data: user } = await supabase.auth.getUser();
                       if (!user.user) return;
                       const newColors = [...new Set([...savedCustomColors, customHex])].slice(0, 8);
+                      const { data: cpRow, error: cpErr } = await supabase
+                        .from('profiles')
+                        .select('color_palette')
+                        .eq('id', user.user.id)
+                        .single();
+                      if (cpErr) throw cpErr;
+                      const currentPalette: any = (cpRow as any)?.color_palette || {};
+                      const nextPalette = { ...currentPalette, custom_colors: newColors };
                       const { error } = await supabase
                         .from('profiles')
-                        .update({ color_palette: { ...( (await supabase.from('profiles').select('color_palette').eq('id', user.user.id).single()).data?.color_palette || {} ), custom_colors: newColors } })
+                        .update({ color_palette: nextPalette })
                         .eq('id', user.user.id);
                       if (error) throw error;
                       setSavedCustomColors(newColors);
@@ -858,6 +862,47 @@ export default function ProfileSettings() {
 
           <div className="grid gap-1">
             <span className="text-sm text-muted-foreground">Profile Text Color</span>
+            <div className="grid grid-cols-6 gap-2 mb-3">
+              {[
+                { name: 'Default (Auto)', value: '' },
+                { name: 'Black', value: '#1A1A1A' },
+                { name: 'White', value: '#FFFFFF' },
+                { name: 'Tan', value: '#7A5C3A' },
+                { name: 'Brown', value: '#5C3B28' },
+                { name: 'Dark Olive', value: '#3D4A3D' },
+                { name: 'Plum', value: '#4E2A3A' },
+                { name: 'Indigo', value: '#3F4C8A' },
+              ].map((color) => (
+                <button
+                  key={color.name}
+                  type="button"
+                  onClick={() => setTextColor(color.value)}
+                  className={`h-10 rounded border-2 transition-all ${
+                    textColor === color.value 
+                      ? 'border-primary ring-2 ring-primary/20' 
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                  style={{ backgroundColor: color.value || 'transparent' }}
+                  title={color.name}
+                />
+              ))}
+            </div>
+
+            {savedCustomColors.length > 0 && (
+              <div className="grid grid-cols-6 gap-2 mb-3">
+                {savedCustomColors.map((hex, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setTextColor(hex)}
+                    className={`h-8 rounded border-2 ${textColor === hex ? 'border-primary' : 'border-border'}`}
+                    style={{ backgroundColor: hex }}
+                    title={hex}
+                  />
+                ))}
+              </div>
+            )}
+
             <div className="flex gap-2 items-center">
               <input
                 type="text"
@@ -879,6 +924,40 @@ export default function ProfileSettings() {
                 Apply
               </button>
               <button type="button" onClick={() => { setTextHex(""); setTextColor(""); }} className="px-3 py-2 rounded border hover:bg-accent">Auto</button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!/^#[0-9A-F]{6}$/i.test(textHex)) {
+                    toast({ title: 'Invalid hex code', description: 'Please enter a valid hex code', variant: 'destructive' });
+                    return;
+                  }
+                  try {
+                    const { data: user } = await supabase.auth.getUser();
+                    if (!user.user) return;
+                    const newColors = [...new Set([...savedCustomColors, textHex])].slice(0, 8);
+                    const { data: cpRow, error: cpErr } = await supabase
+                      .from('profiles')
+                      .select('color_palette')
+                      .eq('id', user.user.id)
+                      .single();
+                    if (cpErr) throw cpErr;
+                    const currentPalette: any = (cpRow as any)?.color_palette || {};
+                    const nextPalette = { ...currentPalette, custom_colors: newColors };
+                    const { error } = await supabase
+                      .from('profiles')
+                      .update({ color_palette: nextPalette })
+                      .eq('id', user.user.id);
+                    if (error) throw error;
+                    setSavedCustomColors(newColors);
+                    toast({ title: 'Custom color saved!' });
+                  } catch (e:any) {
+                    toast({ title: 'Error saving color', description: e?.message || 'Try again', variant: 'destructive' });
+                  }
+                }}
+                className="px-3 py-2 rounded border hover:bg-accent"
+              >
+                Save
+              </button>
             </div>
             <div className="text-xs text-muted-foreground">This affects text in your profile (name, username, bio, etc). Leave empty to auto-adjust based on background.</div>
           </div>

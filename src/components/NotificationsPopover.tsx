@@ -17,6 +17,14 @@ export default function NotificationsPopover() {
   const [likes, setLikes] = useState<any[]>([]);
   const [comments, setComments] = useState<any[]>([]);
   const [recs, setRecs] = useState<any[]>([]);
+  const [dismissedRecKeys, setDismissedRecKeys] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('dismissedRecs') || '[]'); } catch { return []; }
+  });
+  const dismissedSet = useMemo(() => new Set(dismissedRecKeys), [dismissedRecKeys]);
+  const saveDismissed = (keys: string[]) => {
+    setDismissedRecKeys(keys);
+    localStorage.setItem('dismissedRecs', JSON.stringify(keys));
+  };
 
   const lastSeen = useMemo(() => {
     const ts = localStorage.getItem("notificationsLastSeen");
@@ -121,13 +129,14 @@ export default function NotificationsPopover() {
           const items = await searchGoogleBooks(q);
           for (const it of items.slice(0, 3)) {
             const key = `${it.title}-${(it.authors || [])[0] || ""}`;
-            if (seen.has(key)) continue;
+            if (seen.has(key) || dismissedSet.has(key)) continue;
             seen.add(key);
             recsAccum.push({
               title: it.title,
               author: (it.authors || [])[0] || undefined,
               thumbnail: it.imageLinks?.thumbnail,
               created_at: new Date().toISOString(),
+              key,
             });
           }
         }
@@ -139,9 +148,16 @@ export default function NotificationsPopover() {
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [userId, dismissedRecKeys]);
 
   const markSeen = () => {
+    localStorage.setItem("notificationsLastSeen", new Date().toISOString());
+  };
+
+  const clearAll = () => {
+    setFollowers([]);
+    setLikes([]);
+    setComments([]);
     localStorage.setItem("notificationsLastSeen", new Date().toISOString());
   };
 
@@ -161,7 +177,10 @@ export default function NotificationsPopover() {
         <div className="p-3 border-b">
           <div className="flex items-center justify-between">
             <h4 className="text-sm font-medium">Notifications</h4>
-            <Badge variant="secondary" className="text-[10px]">{unreadCount} new</Badge>
+            <div className="flex gap-2">
+              <Badge variant="secondary" className="text-[10px]">{unreadCount} new</Badge>
+              <Button variant="ghost" size="sm" onClick={clearAll} className="text-xs">Clear</Button>
+            </div>
           </div>
         </div>
         <div className="max-h-96 overflow-auto divide-y">
@@ -182,7 +201,10 @@ export default function NotificationsPopover() {
           </Section>
           <Section title="Recommendations" loading={loading} empty="No recommendations yet">
             {recs.map((r, i) => (
-              <Row key={i} title={`${r.title}${r.author ? ` — ${r.author}` : ""}`} time={r.created_at} />
+              <div key={i} className="flex items-start justify-between gap-2">
+                <Row title={`${r.title}${r.author ? ` — ${r.author}` : ""}`} time={r.created_at} />
+                <Button variant="ghost" size="sm" onClick={() => saveDismissed([...dismissedRecKeys, r.key])} className="text-xs">×</Button>
+              </div>
             ))}
           </Section>
         </div>

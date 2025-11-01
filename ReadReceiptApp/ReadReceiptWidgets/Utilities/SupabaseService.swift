@@ -5,8 +5,8 @@ class SupabaseService {
     static let shared = SupabaseService()
     
     // These should match your Supabase project settings
-    private let supabaseURL = "YOUR_SUPABASE_URL" // Replace with actual URL
-    private let supabaseAnonKey = "YOUR_SUPABASE_ANON_KEY" // Replace with actual key
+    private let supabaseURL = "https://aekzchumzoaynwryayji.supabase.co"
+    private let supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFla3pjaHVtem9heW53cnlheWppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0MTU1NTEsImV4cCI6MjA3Mzk5MTU1MX0.uNUvv8dmVxLpTi1_-FIxfdA-0t39a5ueqe-k8pCwS1E"
     
     // MARK: - Fetch In Progress Books
     func fetchInProgressBooks(userId: String) async throws -> [BookData] {
