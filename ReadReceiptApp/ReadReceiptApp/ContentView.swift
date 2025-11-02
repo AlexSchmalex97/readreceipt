@@ -29,22 +29,6 @@ struct ContentView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color(red: 0.96, green: 0.95, blue: 0.94))
             }
-            
-            // Header that fades based on scroll (only on home page)
-            if webViewState.isHomePage && !webViewState.isLoading {
-                HStack {
-                    Spacer()
-                    Image("ReadReceiptHeader")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(height: 56)
-                    Spacer()
-                }
-                .padding(.vertical, 6)
-                .background(Color(red: 0.96, green: 0.95, blue: 0.94))
-                .opacity(webViewState.headerOpacity)
-                .allowsHitTesting(false)
-            }
         }
     }
 }
@@ -175,10 +159,9 @@ struct WebView: UIViewRepresentable {
         // Keep a reference for adjusting insets on route changes
         context.coordinator.webView = webView
         
-        // Add top padding to web content (matches header height)
-        let headerInsetTop: CGFloat = 44
-        webView.scrollView.contentInset = UIEdgeInsets(top: headerInsetTop, left: 0, bottom: 0, right: 0)
-        webView.scrollView.scrollIndicatorInsets = UIEdgeInsets(top: headerInsetTop, left: 0, bottom: 0, right: 0)
+        // No top padding needed since header is removed
+        webView.scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        webView.scrollView.scrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         
         // Inject JavaScript to robustly track route changes (React Router)
         let routeTrackingScript = WKUserScript(
@@ -260,17 +243,7 @@ struct WebView: UIViewRepresentable {
                 DispatchQueue.main.async {
                     let isHome = (path == "/" || path == "")
                     self.state.isHomePage = isHome
-                    if let webView = self.webView {
-                        let headerInsetTop: CGFloat = 56
-                        let insetTop: CGFloat = isHome ? headerInsetTop : 0
-                        var inset = webView.scrollView.contentInset
-                        inset.top = insetTop
-                        webView.scrollView.contentInset = inset
-                        var indicatorInset = webView.scrollView.scrollIndicatorInsets
-                        indicatorInset.top = insetTop
-                        webView.scrollView.scrollIndicatorInsets = indicatorInset
-                    }
-                    if isHome { self.state.headerOpacity = 1.0 }
+                    // No inset adjustments needed since header is removed
                 }
             }
         }

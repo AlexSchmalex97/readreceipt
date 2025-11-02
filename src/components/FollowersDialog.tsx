@@ -18,7 +18,7 @@ interface ProfileData {
   avatar_url: string | null;
 }
 
-export function FollowersDialog({ userId, type, count }: FollowersDialogProps) {
+export function FollowersDialog({ userId, type, count, accentColor }: FollowersDialogProps & { accentColor?: string }) {
   const [open, setOpen] = useState(false);
   const [profiles, setProfiles] = useState<ProfileData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -79,7 +79,7 @@ export function FollowersDialog({ userId, type, count }: FollowersDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button variant="outline" size="sm" className="gap-2" style={{ backgroundColor: accentColor || undefined }}>
           <Users className="h-4 w-4" />
           <span className="font-semibold">{count}</span>
           <span className="text-muted-foreground">{type === "followers" ? "Followers" : "Following"}</span>

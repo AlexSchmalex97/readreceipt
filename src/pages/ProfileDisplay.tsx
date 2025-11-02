@@ -398,6 +398,16 @@ export default function ProfileDisplay() {
 
   // Compute accent color for cards/sections
   const accentCardColor = (profile as any)?.color_palette?.accent_color || "#ffffff";
+  
+  // Compute contrast text color for accent sections
+  const accentTextColor = (() => {
+    const hex = accentCardColor;
+    const r = parseInt(hex.slice(1,3),16);
+    const g = parseInt(hex.slice(3,5),16);
+    const b = parseInt(hex.slice(5,7),16);
+    const lum = 0.2126*r + 0.7152*g + 0.0722*b;
+    return lum < 128 ? "#FFFFFF" : "#1A1A1A";
+  })();
 
   return (
     <div
@@ -492,8 +502,8 @@ export default function ProfileDisplay() {
             {/* Followers/Following */}
             {uid && (
               <div className="flex gap-2 mt-3 justify-center">
-                <FollowersDialog userId={uid} type="followers" count={followersCount} />
-                <FollowersDialog userId={uid} type="following" count={followingCount} />
+                <FollowersDialog userId={uid} type="followers" count={followersCount} accentColor={accentCardColor} />
+                <FollowersDialog userId={uid} type="following" count={followingCount} accentColor={accentCardColor} />
               </div>
             )}
           </div>
@@ -517,9 +527,9 @@ export default function ProfileDisplay() {
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium line-clamp-2 leading-tight">{currentBook.title}</p>
-                      <p className="text-xs text-muted-foreground truncate mt-1">{currentBook.author}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-sm font-medium line-clamp-2 leading-tight" style={{ color: accentTextColor }}>{currentBook.title}</p>
+                      <p className="text-xs truncate mt-1" style={{ color: accentTextColor, opacity: 0.7 }}>{currentBook.author}</p>
+                      <p className="text-xs mt-1" style={{ color: accentTextColor, opacity: 0.7 }}>
                         Page {currentBook.current_page} of {currentBook.total_pages}
                       </p>
                     </div>
@@ -538,8 +548,8 @@ export default function ProfileDisplay() {
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium line-clamp-2 leading-tight">{favoriteBook.title}</p>
-                      <p className="text-xs text-muted-foreground truncate mt-1">{favoriteBook.author}</p>
+                      <p className="text-sm font-medium line-clamp-2 leading-tight" style={{ color: accentTextColor }}>{favoriteBook.title}</p>
+                      <p className="text-xs truncate mt-1" style={{ color: accentTextColor, opacity: 0.7 }}>{favoriteBook.author}</p>
                     </div>
                   </div>
                 </div>
