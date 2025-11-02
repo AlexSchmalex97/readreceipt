@@ -504,7 +504,7 @@ export default function ProfileDisplay() {
             <div className="grid grid-cols-2 gap-2 mb-4">
               {currentBook && (
                 <div className="border rounded-lg p-3 bg-card">
-                  <p className="text-xs text-muted-foreground mb-2">Currently Reading</p>
+                  <p className="text-xs mb-2 font-medium" style={{ color: headerTextColor }}>Currently Reading</p>
                   <div className="flex gap-2">
                     {currentBook.cover_url && (
                       <img
@@ -525,7 +525,7 @@ export default function ProfileDisplay() {
               )}
               {favoriteBook && (
                 <div className="border rounded-lg p-3 bg-card">
-                  <p className="text-xs text-muted-foreground mb-2">Favorite Book</p>
+                  <p className="text-xs mb-2 font-medium" style={{ color: headerTextColor }}>Favorite Book</p>
                   <div className="flex gap-2">
                     {favoriteBook.cover_url && (
                       <img
@@ -546,34 +546,39 @@ export default function ProfileDisplay() {
 
           {/* Links */}
           {((profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url) && (
-            <div className="flex flex-wrap justify-center gap-2 mb-4">
-              {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
-                const Icon = getSocialMediaIcon(platform);
-                return (
+            <>
+              <p className="text-sm font-medium mb-2 text-center" style={{ color: headerTextColor }}>Links</p>
+              <div className="flex flex-wrap justify-center gap-2 mb-4">
+                {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
+                  const Icon = getSocialMediaIcon(platform);
+                  return (
+                    <a
+                      key={platform}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs border rounded-full hover:bg-accent transition-colors"
+                      style={{ color: headerTextColor }}
+                    >
+                      <Icon className="w-3 h-3" />
+                      {platform}
+                    </a>
+                  );
+                })}
+                {profile.website_url && (
                   <a
-                    key={platform}
-                    href={url}
+                    href={profile.website_url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 px-3 py-1.5 text-xs border rounded-full hover:bg-accent transition-colors"
+                    style={{ color: headerTextColor }}
                   >
-                    <Icon className="w-3 h-3" />
-                    {platform}
+                    <ExternalLink className="w-3 h-3" />
+                    Website
                   </a>
-                );
-              })}
-              {profile.website_url && (
-                <a
-                  href={profile.website_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs border rounded-full hover:bg-accent transition-colors"
-                >
-                  <ExternalLink className="w-3 h-3" />
-                  Website
-                </a>
-              )}
-            </div>
+                )}
+              </div>
+            </>
           )}
 
           {/* Stats - Single Row */}
