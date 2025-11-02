@@ -55,6 +55,9 @@ export default function ProfileSettings() {
   const [customHex, setCustomHex] = useState("");
   const [textColor, setTextColor] = useState<string>("");
   const [textHex, setTextHex] = useState<string>("");
+  const [accentColor, setAccentColor] = useState<string>("");
+  const [accentHex, setAccentHex] = useState<string>("");
+  const [savedCustomAccents, setSavedCustomAccents] = useState<string[]>([]);
   const [applyGlobally, setApplyGlobally] = useState<boolean>(false);
   const [savedCustomColors, setSavedCustomColors] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -128,7 +131,9 @@ export default function ProfileSettings() {
       const cp = (prof as any)?.color_palette || {};
       setApplyGlobally(Boolean(cp?.apply_globally));
       setSavedCustomColors(Array.isArray(cp?.custom_colors) ? cp.custom_colors : []);
+      setSavedCustomAccents(Array.isArray(cp?.custom_accents) ? cp.custom_accents : []);
       setTextColor(cp?.text_color || "");
+      setAccentColor(cp?.accent_color || "");
       
       // Completed reads this year: entries count + books without entries fallback
       const computeCompletedCount = async () => {
@@ -396,7 +401,9 @@ export default function ProfileSettings() {
       const newColorPalette: any = {
         apply_globally: applyGlobally,
         custom_colors: savedCustomColors,
+        custom_accents: savedCustomAccents,
         text_color: textColor || null,
+        accent_color: accentColor || null,
       };
       if (applyGlobally) {
         newColorPalette.background = hexToHSL(backgroundColor);
@@ -960,6 +967,108 @@ export default function ProfileSettings() {
               </button>
             </div>
             <div className="text-xs text-muted-foreground">This affects text in your profile (name, username, bio, etc). Leave empty to auto-adjust based on background.</div>
+          </div>
+
+          <div className="grid gap-1">
+            <span className="text-sm text-muted-foreground">Profile Accent Color</span>
+            <div className="grid grid-cols-6 gap-2 mb-3">
+              {[
+                { name: 'Default (White)', value: '' },
+                { name: 'Light Beige', value: '#F5F1E8' },
+                { name: 'Soft Blue', value: '#E3F2FD' },
+                { name: 'Pale Green', value: '#E8F5E9' },
+                { name: 'Light Pink', value: '#FCE4EC' },
+                { name: 'Lavender', value: '#F3E5F5' },
+                { name: 'Peach', value: '#FFF3E0' },
+                { name: 'Mint', value: '#E0F2F1' },
+              ].map((color) => (
+                <button
+                  key={color.name}
+                  type="button"
+                  onClick={() => setAccentColor(color.value)}
+                  className={`h-10 rounded border-2 transition-all ${
+                    accentColor === color.value 
+                      ? 'border-primary ring-2 ring-primary/20' 
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                  style={{ backgroundColor: color.value || '#ffffff' }}
+                  title={color.name}
+                />
+              ))}
+            </div>
+
+            {savedCustomAccents.length > 0 && (
+              <div className="grid grid-cols-6 gap-2 mb-3">
+                {savedCustomAccents.map((hex, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setAccentColor(hex)}
+                    className={`h-8 rounded border-2 ${accentColor === hex ? 'border-primary' : 'border-border'}`}
+                    style={{ backgroundColor: hex }}
+                    title={hex}
+                  />
+                ))}
+              </div>
+            )}
+
+            <div className="flex gap-2 items-center">
+              <input
+                type="text"
+                className="border rounded px-3 py-2 bg-background flex-1"
+                value={accentHex}
+                onChange={(e) => setAccentHex(e.target.value)}
+                placeholder="#FFFFFF (leave empty for white)"
+                maxLength={7}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (!accentHex) { setAccentColor(""); toast({ title: 'Using default white' }); return; }
+                  if (/^#[0-9A-F]{6}$/i.test(accentHex)) { setAccentColor(accentHex); toast({ title: 'Accent color applied!' }); }
+                  else { toast({ title: 'Invalid hex code', variant: 'destructive' }); }
+                }}
+                className="px-3 py-2 rounded border hover:bg-accent"
+              >
+                Apply
+              </button>
+              <button type="button" onClick={() => { setAccentHex(""); setAccentColor(""); }} className="px-3 py-2 rounded border hover:bg-accent">Default</button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!/^#[0-9A-F]{6}$/i.test(accentHex)) {
+                    toast({ title: 'Invalid hex code', description: 'Please enter a valid hex code', variant: 'destructive' });
+                    return;
+                  }
+                  try {
+                    const { data: user } = await supabase.auth.getUser();
+                    if (!user.user) return;
+                    const newAccents = [...new Set([...savedCustomAccents, accentHex])].slice(0, 8);
+                    const { data: cpRow, error: cpErr } = await supabase
+                      .from('profiles')
+                      .select('color_palette')
+                      .eq('id', user.user.id)
+                      .single();
+                    if (cpErr) throw cpErr;
+                    const currentPalette: any = (cpRow as any)?.color_palette || {};
+                    const nextPalette = { ...currentPalette, custom_accents: newAccents };
+                    const { error } = await supabase
+                      .from('profiles')
+                      .update({ color_palette: nextPalette })
+                      .eq('id', user.user.id);
+                    if (error) throw error;
+                    setSavedCustomAccents(newAccents);
+                    toast({ title: 'Custom accent saved!' });
+                  } catch (e:any) {
+                    toast({ title: 'Error saving color', description: e?.message || 'Try again', variant: 'destructive' });
+                  }
+                }}
+                className="px-3 py-2 rounded border hover:bg-accent"
+              >
+                Save
+              </button>
+            </div>
+            <div className="text-xs text-muted-foreground">This affects cards, sections, and buttons in your profile (Favourite Book, Currently Reading, 2025 Reading Goal, etc).</div>
           </div>
 
           <div className="flex gap-2">

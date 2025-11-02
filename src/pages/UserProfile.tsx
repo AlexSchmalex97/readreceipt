@@ -407,6 +407,9 @@ export default function UserProfile() {
     return lum < 128 ? "#FFFFFF" : "#1A1A1A";
   })();
 
+  // Compute accent color for cards/sections
+  const accentCardColor = (profile as any)?.color_palette?.accent_color || "#ffffff";
+
   return (
     <UserColorProvider userColorPalette={profile?.color_palette}>
       <div
@@ -481,7 +484,7 @@ export default function UserProfile() {
             {(currentBook || favoriteBook) && (
               <div className="grid grid-cols-2 gap-2 mb-3">
                 {currentBook && (
-                  <div className="border rounded-lg p-2.5 bg-card">
+                  <div className="border rounded-lg p-2.5" style={{ backgroundColor: accentCardColor }}>
                     <p className="text-xs mb-1.5 font-medium" style={{ color: headerTextColor }}>Currently Reading</p>
                     <div className="flex gap-2">
                       {currentBook.cover_url && (
@@ -502,7 +505,7 @@ export default function UserProfile() {
                   </div>
                 )}
                 {favoriteBook && (
-                  <div className="border rounded-lg p-2.5 bg-card">
+                  <div className="border rounded-lg p-2.5" style={{ backgroundColor: accentCardColor }}>
                     <p className="text-xs mb-1.5 font-medium" style={{ color: headerTextColor }}>Favorite Book</p>
                     <div className="flex gap-2">
                       {favoriteBook.cover_url && (
@@ -562,7 +565,7 @@ export default function UserProfile() {
             {/* Stats - Single Row */}
             <div className="grid grid-cols-3 gap-3 mb-3 max-w-md mx-auto">
               <Link to="/">
-                <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
+                <Card className="cursor-pointer hover:bg-accent/50 transition-colors" style={{ backgroundColor: accentCardColor }}>
                   <CardContent className="p-3 text-center">
                     <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
                     <p className="text-2xl font-bold text-foreground">{bookStats.inProgressBooks}</p>
@@ -571,7 +574,7 @@ export default function UserProfile() {
                 </Card>
               </Link>
               <Link to="/completed">
-                <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
+                <Card className="cursor-pointer hover:bg-accent/50 transition-colors" style={{ backgroundColor: accentCardColor }}>
                   <CardContent className="p-3 text-center">
                     <Star className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
                     <p className="text-2xl font-bold text-foreground">{bookStats.completedBooks}</p>
@@ -579,7 +582,7 @@ export default function UserProfile() {
                   </CardContent>
                 </Card>
               </Link>
-              <Card>
+              <Card style={{ backgroundColor: accentCardColor }}>
                 <CardContent className="p-3 text-center">
                   <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
                   <p className="text-2xl font-bold text-foreground">{bookStats.totalBooks}</p>
@@ -590,13 +593,13 @@ export default function UserProfile() {
 
             {/* Reading Goal */}
             <div className="mb-3 max-w-md mx-auto">
-              <HomeReadingGoals userId={profile.id} completedBooksThisYear={completedBooksThisYear} isOwnProfile={false} />
+              <HomeReadingGoals userId={profile.id} completedBooksThisYear={completedBooksThisYear} isOwnProfile={false} accentColor={accentCardColor} />
             </div>
 
             {/* Collapsible Activity Sections - Mobile/Tablet */}
             <Accordion type="multiple" className="w-full space-y-2">
               {/* Recent Reviews */}
-              <AccordionItem value="reviews" className="border rounded-lg px-3 bg-card">
+              <AccordionItem value="reviews" className="border rounded-lg px-3" style={{ backgroundColor: accentCardColor }}>
                 <AccordionTrigger className="hover:no-underline py-3">
                   <div className="flex items-center gap-2">
                     <Star className="w-4 h-4 text-primary" />
@@ -654,7 +657,7 @@ export default function UserProfile() {
               </AccordionItem>
 
               {/* Reading Activity */}
-              <AccordionItem value="activity" className="border rounded-lg px-3 bg-card">
+              <AccordionItem value="activity" className="border rounded-lg px-3" style={{ backgroundColor: accentCardColor }}>
                 <AccordionTrigger className="hover:no-underline py-3">
                   <div className="flex items-center gap-2">
                     <BookOpen className="w-4 h-4 text-primary" />
@@ -730,7 +733,7 @@ export default function UserProfile() {
               </AccordionItem>
 
               {/* TBR List */}
-              <AccordionItem value="tbr" className="border rounded-lg px-3 bg-card">
+              <AccordionItem value="tbr" className="border rounded-lg px-3" style={{ backgroundColor: accentCardColor }}>
                 <AccordionTrigger className="hover:no-underline py-3">
                   <div className="flex items-center gap-2">
                     <BookOpen className="w-4 h-4 text-primary" />

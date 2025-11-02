@@ -17,9 +17,10 @@ interface HomeReadingGoalsProps {
   userId: string | null;
   completedBooksThisYear: number;
   isOwnProfile?: boolean;
+  accentColor?: string;
 }
 
-export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile = true }: HomeReadingGoalsProps) => {
+export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile = true, accentColor }: HomeReadingGoalsProps) => {
   const [goal, setGoal] = useState<ReadingGoal | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -145,7 +146,7 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile 
   const booksRemaining = Math.max(goal.goal_count - totalProgress, 0);
 
   return (
-    <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
+    <Card className="border-primary/20" style={{ backgroundColor: accentColor || undefined }}>
       <CardContent className="p-2 sm:p-4">
         <div className="flex items-center justify-between mb-1.5 sm:mb-3">
           <div className="flex items-center gap-1.5 sm:gap-2">
