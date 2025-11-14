@@ -580,26 +580,26 @@ export default function UserProfile() {
               <Link to="/">
                 <Card className="cursor-pointer hover:bg-accent/50 transition-colors" style={{ backgroundColor: accentCardColor }}>
                   <CardContent className="p-3 text-center">
-                    <BookOpen className="w-5 h-5 mx-auto mb-1" style={{ color: accentTextColor }} />
-                    <p className="text-2xl font-bold" style={{ color: accentTextColor }}>{bookStats.inProgressBooks}</p>
-                    <p className="text-xs" style={{ color: accentTextColor, opacity: 0.7 }}>Reading</p>
+                    <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                    <p className="text-2xl font-bold text-foreground">{bookStats.inProgressBooks}</p>
+                    <p className="text-xs text-muted-foreground">Reading</p>
                   </CardContent>
                 </Card>
               </Link>
               <Link to="/completed">
                 <Card className="cursor-pointer hover:bg-accent/50 transition-colors" style={{ backgroundColor: accentCardColor }}>
                   <CardContent className="p-3 text-center">
-                    <Star className="w-5 h-5 mx-auto mb-1" style={{ color: accentTextColor }} />
-                    <p className="text-2xl font-bold" style={{ color: accentTextColor }}>{bookStats.completedBooks}</p>
-                    <p className="text-xs" style={{ color: accentTextColor, opacity: 0.7 }}>Completed</p>
+                    <Star className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                    <p className="text-2xl font-bold text-foreground">{bookStats.completedBooks}</p>
+                    <p className="text-xs text-muted-foreground">Completed</p>
                   </CardContent>
                 </Card>
               </Link>
               <Card style={{ backgroundColor: accentCardColor }}>
                 <CardContent className="p-3 text-center">
-                  <BookOpen className="w-5 h-5 mx-auto mb-1" style={{ color: accentTextColor }} />
-                  <p className="text-2xl font-bold" style={{ color: accentTextColor }}>{bookStats.totalBooks}</p>
-                  <p className="text-xs" style={{ color: accentTextColor, opacity: 0.7 }}>Total</p>
+                  <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                  <p className="text-2xl font-bold text-foreground">{bookStats.totalBooks}</p>
+                  <p className="text-xs text-muted-foreground">Total</p>
                 </CardContent>
               </Card>
             </div>
@@ -613,9 +613,9 @@ export default function UserProfile() {
             <Accordion type="multiple" className="w-full space-y-2">
               {/* Recent Reviews */}
               <AccordionItem value="reviews" className="border rounded-lg px-3" style={{ backgroundColor: accentCardColor }}>
-                <AccordionTrigger className="hover:no-underline py-3" style={{ color: accentTextColor }}>
+                <AccordionTrigger className="hover:no-underline py-3">
                   <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4" style={{ color: accentTextColor }} />
+                    <Star className="w-4 h-4 text-primary" />
                     <span className="text-sm font-medium">Recent Reviews ({recentReviews.length})</span>
                   </div>
                 </AccordionTrigger>
@@ -671,9 +671,9 @@ export default function UserProfile() {
 
               {/* Reading Activity */}
               <AccordionItem value="activity" className="border rounded-lg px-3" style={{ backgroundColor: accentCardColor }}>
-                <AccordionTrigger className="hover:no-underline py-3" style={{ color: accentTextColor }}>
+                <AccordionTrigger className="hover:no-underline py-3">
                   <div className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4" style={{ color: accentTextColor }} />
+                    <BookOpen className="w-4 h-4 text-primary" />
                     <span className="text-sm font-medium">Reading Activity</span>
                   </div>
                 </AccordionTrigger>
@@ -747,9 +747,9 @@ export default function UserProfile() {
 
               {/* TBR List */}
               <AccordionItem value="tbr" className="border rounded-lg px-3" style={{ backgroundColor: accentCardColor }}>
-                <AccordionTrigger className="hover:no-underline py-3" style={{ color: accentTextColor }}>
+                <AccordionTrigger className="hover:no-underline py-3">
                   <div className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4" style={{ color: accentTextColor }} />
+                    <BookOpen className="w-4 h-4 text-primary" />
                     <span className="text-sm font-medium">To Be Read ({tbrBooks.length})</span>
                   </div>
                 </AccordionTrigger>
