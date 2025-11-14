@@ -600,28 +600,28 @@ export default function ProfileDisplay() {
           {/* Stats - Single Row */}
           <div className="grid grid-cols-3 gap-3 mb-4 max-w-md mx-auto">
             <Link to="/">
-              <Card className="cursor-pointer hover:bg-accent/50 transition-colors" style={{ backgroundColor: accentCardColor }}>
-                <CardContent className="p-3 text-center">
-                  <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                  <p className="text-2xl font-bold text-foreground">{bookStats.inProgressBooks}</p>
-                  <p className="text-xs text-muted-foreground">Reading</p>
-                </CardContent>
-              </Card>
-            </Link>
+            <Card className="cursor-pointer hover:bg-accent/50 transition-colors" style={{ backgroundColor: accentCardColor }}>
+              <CardContent className="p-3 text-center">
+                <BookOpen className="w-5 h-5 mx-auto mb-1" style={{ color: accentTextColor }} />
+                <p className="text-2xl font-bold" style={{ color: accentTextColor }}>{bookStats.inProgressBooks}</p>
+                <p className="text-xs" style={{ color: accentTextColor, opacity: 0.7 }}>Reading</p>
+              </CardContent>
+            </Card>
+          </Link>
             <Link to="/completed">
-              <Card className="cursor-pointer hover:bg-accent/50 transition-colors" style={{ backgroundColor: accentCardColor }}>
-                <CardContent className="p-3 text-center">
-                  <Star className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                  <p className="text-2xl font-bold text-foreground">{bookStats.completedBooks}</p>
-                  <p className="text-xs text-muted-foreground">Completed</p>
-                </CardContent>
-              </Card>
-            </Link>
+            <Card className="cursor-pointer hover:bg-accent/50 transition-colors" style={{ backgroundColor: accentCardColor }}>
+              <CardContent className="p-3 text-center">
+                <Star className="w-5 h-5 mx-auto mb-1" style={{ color: accentTextColor }} />
+                <p className="text-2xl font-bold" style={{ color: accentTextColor }}>{bookStats.completedBooks}</p>
+                <p className="text-xs" style={{ color: accentTextColor, opacity: 0.7 }}>Completed</p>
+              </CardContent>
+            </Card>
+          </Link>
             <Card style={{ backgroundColor: accentCardColor }}>
               <CardContent className="p-3 text-center">
-                <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                <p className="text-2xl font-bold text-foreground">{bookStats.totalBooks}</p>
-                <p className="text-xs text-muted-foreground">Total</p>
+                <BookOpen className="w-5 h-5 mx-auto mb-1" style={{ color: accentTextColor }} />
+                <p className="text-2xl font-bold" style={{ color: accentTextColor }}>{bookStats.totalBooks}</p>
+                <p className="text-xs" style={{ color: accentTextColor, opacity: 0.7 }}>Total</p>
               </CardContent>
             </Card>
           </div>
@@ -635,18 +635,18 @@ export default function ProfileDisplay() {
           <Accordion type="multiple" className="w-full space-y-2">
             {/* Recent Reviews */}
             <AccordionItem value="reviews" className="border rounded-lg px-3" style={{ backgroundColor: accentCardColor }}>
-              <AccordionTrigger className="hover:no-underline py-3">
+              <AccordionTrigger className="hover:no-underline py-3" style={{ color: accentTextColor }}>
                 <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 text-primary" />
+                  <Star className="w-4 h-4" style={{ color: accentTextColor }} />
                   <span className="text-sm font-medium">Recent Reviews ({recentReviews.length})</span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="pb-3">
                 {recentReviews.length === 0 ? (
-                  <div className="text-center py-4">
-                    <Star className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-xs text-muted-foreground">No reviews yet</p>
-                  </div>
+                <div className="text-center py-4">
+                  <Star className="w-8 h-8 mx-auto mb-2" style={{ color: accentTextColor, opacity: 0.5 }} />
+                  <p className="text-xs" style={{ color: accentTextColor, opacity: 0.7 }}>No reviews yet</p>
+                </div>
                 ) : (
                   <div className="space-y-2 max-h-80 overflow-y-auto">
                     {recentReviews.map((review) => (
@@ -693,9 +693,9 @@ export default function ProfileDisplay() {
 
             {/* Reading Activity */}
             <AccordionItem value="activity" className="border rounded-lg px-3" style={{ backgroundColor: accentCardColor }}>
-              <AccordionTrigger className="hover:no-underline py-3">
+              <AccordionTrigger className="hover:no-underline py-3" style={{ color: accentTextColor }}>
                 <div className="flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-primary" />
+                  <BookOpen className="w-4 h-4" style={{ color: accentTextColor }} />
                   <span className="text-sm font-medium">Reading Activity</span>
                 </div>
               </AccordionTrigger>
@@ -769,9 +769,9 @@ export default function ProfileDisplay() {
 
             {/* TBR List */}
             <AccordionItem value="tbr" className="border rounded-lg px-3" style={{ backgroundColor: accentCardColor }}>
-              <AccordionTrigger className="hover:no-underline py-3">
+              <AccordionTrigger className="hover:no-underline py-3" style={{ color: accentTextColor }}>
                 <div className="flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-primary" />
+                  <BookOpen className="w-4 h-4" style={{ color: accentTextColor }} />
                   <span className="text-sm font-medium">To Be Read ({tbrBooks.length})</span>
                 </div>
               </AccordionTrigger>
@@ -1014,9 +1014,9 @@ export default function ProfileDisplay() {
             {/* Recent Reviews */}
             <Card style={{ backgroundColor: accentCardColor }}>
               <CardHeader className="p-3 pb-2">
-                <CardTitle className="flex items-center justify-between text-sm">
+                <CardTitle className="flex items-center justify-between text-sm" style={{ color: accentTextColor }}>
                   Recent Reviews
-                  <Link to="/reviews" className="text-xs font-normal text-primary hover:underline">
+                  <Link to="/reviews" className="text-xs font-normal hover:underline" style={{ color: accentTextColor, opacity: 0.8 }}>
                     View all
                   </Link>
                 </CardTitle>
@@ -1024,8 +1024,8 @@ export default function ProfileDisplay() {
               <CardContent className="p-3 pt-0">
                 {recentReviews.length === 0 ? (
                   <div className="text-center py-8">
-                    <Star className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">No reviews yet</p>
+                    <Star className="w-12 h-12 mx-auto mb-4" style={{ color: accentTextColor, opacity: 0.5 }} />
+                    <p style={{ color: accentTextColor, opacity: 0.7 }}>No reviews yet</p>
                   </div>
                 ) : (
                   <div className="space-y-2.5 max-h-72 overflow-y-auto">
@@ -1045,23 +1045,24 @@ export default function ProfileDisplay() {
                           )}
                           
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-sm text-foreground truncate">{review.books.title}</h4>
-                            <p className="text-xs text-muted-foreground truncate">by {review.books.author}</p>
+                            <h4 className="font-medium text-sm truncate" style={{ color: accentTextColor }}>{review.books.title}</h4>
+                            <p className="text-xs truncate" style={{ color: accentTextColor, opacity: 0.7 }}>by {review.books.author}</p>
                             <div className="flex items-center gap-1.5 mt-0.5">
                               <div className="flex">
                                 {[...Array(5)].map((_, i) => (
                                   <Star 
                                     key={i} 
-                                    className={`w-3 h-3 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'}`}
+                                    className={`w-3 h-3 ${i < review.rating ? 'fill-current' : ''}`}
+                                    style={{ color: accentTextColor, opacity: i < review.rating ? 1 : 0.3 }}
                                   />
                                 ))}
                               </div>
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-xs" style={{ color: accentTextColor, opacity: 0.6 }}>
                                 {new Date(review.created_at).toLocaleDateString()}
                               </span>
                             </div>
                             {review.review && (
-                              <p className="text-xs text-foreground mt-1 line-clamp-2">{review.review}</p>
+                              <p className="text-xs mt-1 line-clamp-2" style={{ color: accentTextColor, opacity: 0.9 }}>{review.review}</p>
                             )}
                           </div>
                         </div>
@@ -1075,8 +1076,8 @@ export default function ProfileDisplay() {
             {/* Activity Feed */}
             <Card style={{ backgroundColor: accentCardColor }}>
               <CardHeader className="p-3 pb-2">
-                <CardTitle className="flex items-center gap-1.5 text-sm">
-                  <BookOpen className="w-4 h-4" />
+                <CardTitle className="flex items-center gap-1.5 text-sm" style={{ color: accentTextColor }}>
+                  <BookOpen className="w-4 h-4" style={{ color: accentTextColor }} />
                   Reading Activity
                 </CardTitle>
               </CardHeader>
