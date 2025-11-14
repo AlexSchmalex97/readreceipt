@@ -401,6 +401,9 @@ export default function ProfileDisplay() {
   
   // Compute contrast text color for accent sections
   const accentTextColor = (() => {
+    const customTextHex = (profile as any)?.color_palette?.accent_text_color as string | undefined;
+    if (customTextHex) return customTextHex;
+    // Auto contrast based on accent color
     const hex = accentCardColor;
     const r = parseInt(hex.slice(1,3),16);
     const g = parseInt(hex.slice(3,5),16);
