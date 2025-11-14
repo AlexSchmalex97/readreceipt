@@ -159,7 +159,7 @@ body.ios-app {
 /* Utility classes that map to your design tokens */
 @layer utilities {
   .bg-gradient-primary { background: var(--gradient-primary); }
-  .bg-gradient-soft    { background: var(--gradient-soft); }
+  .bg-gradient-soft    { background: hsl(var(--background)); }
   .shadow-soft         { box-shadow: var(--shadow-soft); }
   .shadow-card         { box-shadow: var(--shadow-card); }
 }
