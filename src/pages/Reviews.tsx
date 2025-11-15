@@ -192,7 +192,7 @@ export default function Reviews() {
                         <img 
                           src={r.books.cover_url} 
                           alt={r.books.title}
-                          className="w-16 h-24 object-cover rounded shadow-sm"
+                          className="w-16 h-24 object-contain rounded shadow-sm"
                         />
                       ) : (
                         <div className="w-16 h-24 bg-muted rounded flex items-center justify-center shadow-sm">

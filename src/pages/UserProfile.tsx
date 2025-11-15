@@ -529,7 +529,7 @@ export default function UserProfile() {
                         <img
                           src={currentBook.cover_url}
                           alt={currentBook.title}
-                          className="w-10 h-14 object-cover rounded flex-shrink-0"
+                          className="w-10 h-14 object-contain rounded flex-shrink-0"
                         />
                       )}
                       <div className="flex-1 min-w-0">
@@ -550,7 +550,7 @@ export default function UserProfile() {
                         <img
                           src={favoriteBook.cover_url}
                           alt={favoriteBook.title}
-                          className="w-10 h-14 object-cover rounded flex-shrink-0"
+                          className="w-10 h-14 object-contain rounded flex-shrink-0"
                         />
                       )}
                     <div className="flex-1 min-w-0">
@@ -704,7 +704,7 @@ export default function UserProfile() {
                               <img 
                                 src={review.books.cover_url} 
                                 alt={review.books.title}
-                                className="w-8 h-11 object-cover rounded shadow-sm flex-shrink-0"
+                                className="w-8 h-11 object-contain rounded shadow-sm flex-shrink-0"
                               />
                             ) : (
                               <div className="w-8 h-11 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
@@ -838,7 +838,7 @@ export default function UserProfile() {
                               <img 
                                 src={book.cover_url} 
                                 alt={book.title}
-                                className="w-8 h-11 object-cover rounded shadow-sm flex-shrink-0"
+                                className="w-8 h-11 object-contain rounded shadow-sm flex-shrink-0"
                               />
                             ) : (
                               <div className="w-8 h-11 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
@@ -931,7 +931,7 @@ export default function UserProfile() {
                               <img
                                 src={favoriteBook.cover_url}
                                 alt={favoriteBook.title}
-                                className="w-12 h-16 object-cover rounded flex-shrink-0"
+                                className="w-12 h-16 object-contain rounded flex-shrink-0"
                               />
                             )}
                             <div className="flex-1 min-w-0 overflow-hidden">
@@ -954,7 +954,7 @@ export default function UserProfile() {
                               <img
                                 src={currentBook.cover_url}
                                 alt={currentBook.title}
-                                className="w-12 h-16 object-cover rounded flex-shrink-0"
+                                className="w-12 h-16 object-contain rounded flex-shrink-0"
                               />
                             )}
                             <div className="flex-1 min-w-0 overflow-hidden">
@@ -1072,7 +1072,7 @@ export default function UserProfile() {
                               <img 
                                 src={review.books.cover_url} 
                                 alt={review.books.title}
-                                className="w-10 h-14 object-cover rounded shadow-sm flex-shrink-0"
+                                className="w-10 h-14 object-contain rounded shadow-sm flex-shrink-0"
                               />
                             ) : (
                               <div className="w-10 h-14 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
@@ -1135,7 +1135,7 @@ export default function UserProfile() {
                                 <img 
                                   src={item.book_cover_url} 
                                   alt={item.book_title || "Book cover"}
-                                  className="w-8 h-12 object-cover rounded shadow-sm flex-shrink-0"
+                                  className="w-8 h-12 object-contain rounded shadow-sm flex-shrink-0"
                                 />
                               ) : (
                                 <div className="w-8 h-12 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
@@ -1164,7 +1164,7 @@ export default function UserProfile() {
                                 <img 
                                   src={item.book_cover_url} 
                                   alt={item.book_title || "Book cover"}
-                                  className="w-8 h-12 object-cover rounded shadow-sm flex-shrink-0"
+                                  className="w-8 h-12 object-contain rounded shadow-sm flex-shrink-0"
                                 />
                               ) : (
                                 <div className="w-8 h-12 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
@@ -1214,7 +1214,7 @@ export default function UserProfile() {
                               <img 
                                 src={book.cover_url} 
                                 alt={book.title}
-                                className="w-10 h-14 object-cover rounded shadow-sm flex-shrink-0"
+                                className="w-10 h-14 object-contain rounded shadow-sm flex-shrink-0"
                               />
                             ) : (
                               <div className="w-10 h-14 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">

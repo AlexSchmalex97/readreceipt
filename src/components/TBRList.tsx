@@ -336,7 +336,7 @@ export function TBRList({ userId, onMoveToReading, onMoveToCompleted, onMoveToDN
                             <img 
                               src={book.imageLinks.thumbnail} 
                               alt={book.title}
-                              className="w-12 h-16 object-cover rounded"
+                              className="w-12 h-16 object-contain rounded"
                             />
                           )}
                           <div className="flex-1 min-w-0">
@@ -489,7 +489,7 @@ export function TBRList({ userId, onMoveToReading, onMoveToCompleted, onMoveToDN
                       <img 
                         src={book.cover_url} 
                         alt={book.title}
-                        className="w-8 h-12 object-cover rounded shadow-sm"
+                        className="w-8 h-12 object-contain rounded shadow-sm"
                         title={`${book.title} by ${book.author}`}
                       />
                     ) : (
@@ -518,7 +518,7 @@ export function TBRList({ userId, onMoveToReading, onMoveToCompleted, onMoveToDN
                         <img 
                           src={book.cover_url} 
                           alt={book.title}
-                          className="w-12 h-16 object-cover rounded shadow-sm"
+                          className="w-12 h-16 object-contain rounded shadow-sm"
                         />
                       ) : (
                         <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm">

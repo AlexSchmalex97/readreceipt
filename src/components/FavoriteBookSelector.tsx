@@ -118,7 +118,7 @@ export const FavoriteBookSelector = ({ value, onChange, label = "Favorite Book",
                           <img
                             src={book.cover_url}
                             alt={book.title}
-                            className="w-8 h-12 object-cover rounded"
+                            className="w-8 h-12 object-contain rounded"
                           />
                         )}
                         <div className="flex-1">

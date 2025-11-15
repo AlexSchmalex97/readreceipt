@@ -41,7 +41,7 @@ export function TopTenDialog({ open, onOpenChange, books, accentCardColor, accen
                   <img
                     src={book.cover_url}
                     alt={book.title}
-                    className="w-full h-40 object-cover rounded shadow-md"
+                    className="w-full h-40 object-contain rounded shadow-md"
                   />
                 ) : (
                   <div className="w-full h-40 bg-muted rounded flex items-center justify-center">

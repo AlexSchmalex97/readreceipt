@@ -149,7 +149,7 @@ export const BookCard = ({
               <img 
                 src={book.coverUrl} 
                 alt={`Cover of ${book.title}`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
                 onError={(e) => {
                   console.log('Failed to load cover for:', book.title, book.coverUrl);
                   e.currentTarget.style.display = 'none';
