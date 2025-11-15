@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
-import { BookOpen, GripVertical, X, Search } from "lucide-react";
+import { BookOpen, GripVertical, X, Search, Upload } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
@@ -22,14 +22,48 @@ type Book = {
 type SortableBookProps = {
   book: Book;
   onRemove: () => void;
+  onUpdateCover: (bookId: string, coverUrl: string) => void;
 };
 
-function SortableBook({ book, onRemove }: SortableBookProps) {
+function SortableBook({ book, onRemove, onUpdateCover }: SortableBookProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: book.id });
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+  };
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${book.id}-${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError, data } = await supabase.storage
+        .from('book-covers')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('book-covers')
+        .getPublicUrl(fileName);
+
+      // Update the book cover in the database
+      const { error: updateError } = await supabase
+        .from('books')
+        .update({ cover_url: publicUrl })
+        .eq('id', book.id);
+
+      if (updateError) throw updateError;
+
+      onUpdateCover(book.id, publicUrl);
+    } catch (error) {
+      console.error('Error uploading cover:', error);
+    }
   };
 
   return (
@@ -41,13 +75,29 @@ function SortableBook({ book, onRemove }: SortableBookProps) {
       <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
         <GripVertical className="w-5 h-5 text-muted-foreground" />
       </div>
-      {book.cover_url ? (
-        <img src={book.cover_url} alt={book.title} className="w-12 h-16 object-cover rounded shadow-sm" />
-      ) : (
-        <div className="w-12 h-16 bg-muted rounded flex items-center justify-center">
-          <BookOpen className="w-6 h-6 text-muted-foreground" />
-        </div>
-      )}
+      <div className="relative group">
+        {book.cover_url ? (
+          <img src={book.cover_url} alt={book.title} className="w-12 h-16 object-cover rounded shadow-sm" />
+        ) : (
+          <div className="w-12 h-16 bg-muted rounded flex items-center justify-center">
+            <BookOpen className="w-6 h-6 text-muted-foreground" />
+          </div>
+        )}
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center"
+          type="button"
+        >
+          <Upload className="w-4 h-4 text-white" />
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleCoverUpload}
+          className="hidden"
+        />
+      </div>
       <div className="flex-1 min-w-0">
         <div className="font-medium text-sm truncate">{book.title}</div>
         <div className="text-xs text-muted-foreground truncate">{book.author}</div>
@@ -272,6 +322,12 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
     }
   };
 
+  const handleUpdateCover = (bookId: string, newCoverUrl: string) => {
+    setSelectedBooks(selectedBooks.map(book => 
+      book.id === bookId ? { ...book, cover_url: newCoverUrl } : book
+    ));
+  };
+
   const handleRemoveBook = (bookId: string) => {
     const book = selectedBooks.find(b => b.id === bookId);
     if (book) {
@@ -343,7 +399,12 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
                 <SortableContext items={selectedBooks.map(b => b.id)} strategy={verticalListSortingStrategy}>
                   <div className="space-y-2">
                     {selectedBooks.map((book) => (
-                      <SortableBook key={book.id} book={book} onRemove={() => handleRemoveBook(book.id)} />
+                      <SortableBook 
+                        key={book.id} 
+                        book={book} 
+                        onRemove={() => handleRemoveBook(book.id)}
+                        onUpdateCover={handleUpdateCover}
+                      />
                     ))}
                   </div>
                 </SortableContext>
