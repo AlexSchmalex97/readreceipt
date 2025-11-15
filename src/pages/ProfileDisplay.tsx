@@ -114,6 +114,8 @@ export default function ProfileDisplay() {
   const [topFiveBooks, setTopFiveBooks] = useState<FavoriteBook[]>([]);
   const [showAllTopBooks, setShowAllTopBooks] = useState(false);
   const [showTopTenDialog, setShowTopTenDialog] = useState(false);
+  const [showFollowersDialog, setShowFollowersDialog] = useState(false);
+  const [showFollowingDialog, setShowFollowingDialog] = useState(false);
   const [zodiacSign, setZodiacSign] = useState<string | null>(null);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
@@ -432,9 +434,10 @@ export default function ProfileDisplay() {
   })();
 
   return (
+    <>
     <div className="min-h-screen bg-background">
       <Navigation />
-      <div 
+      <div
         ref={scrollableRef}
         className="relative overflow-y-auto"
         style={{ 
@@ -1350,5 +1353,28 @@ export default function ProfileDisplay() {
         </div>
       </div>
     </div>
+    
+    <TopTenDialog 
+      open={showTopTenDialog} 
+      onOpenChange={setShowTopTenDialog} 
+      books={topFiveBooks} 
+      accentCardColor={accentCardColor}
+      accentTextColor={accentTextColor}
+    />
+    <FollowersDialog 
+      open={showFollowersDialog}
+      onOpenChange={setShowFollowersDialog}
+      userId={uid || ''}
+      type="followers"
+      count={followersCount}
+    />
+    <FollowersDialog 
+      open={showFollowingDialog}
+      onOpenChange={setShowFollowingDialog}
+      userId={uid || ''}
+      type="following"
+      count={followingCount}
+    />
+  </>
   );
 }
