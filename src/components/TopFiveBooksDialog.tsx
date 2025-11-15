@@ -196,11 +196,14 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const volumeInfo = googleBook.volumeInfo;
-      const title = volumeInfo.title || "Unknown Title";
-      const author = volumeInfo.authors?.join(", ") || "Unknown Author";
-      const coverUrl = volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || null;
-      const totalPages = volumeInfo.pageCount || 0;
+      // Normalize Google Books shape (supports both raw API item and simplified GoogleBookResult)
+      const vi = googleBook?.volumeInfo ?? googleBook;
+      const title: string = vi?.title || "Unknown Title";
+      const authorsArr: string[] = Array.isArray(vi?.authors) ? vi.authors : [];
+      const author: string = authorsArr.length > 0 ? authorsArr.join(", ") : "Unknown Author";
+      const thumb: string | undefined = vi?.imageLinks?.thumbnail || vi?.imageLinks?.smallThumbnail;
+      const coverUrl: string | null = thumb ? thumb.replace('http:', 'https:') : null;
+      const totalPages: number = vi?.pageCount || 0;
 
       // Check if book already exists for this user
       const { data: existingBook } = await supabase
@@ -236,7 +239,7 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
       }
 
       setSelectedBooks([...selectedBooks, bookToAdd]);
-      setGoogleResults(googleResults.filter(b => b.id !== googleBook.id));
+      setGoogleResults(googleResults.filter((b: any) => (b.id ?? b.volumeInfo?.id) !== (googleBook.id ?? googleBook.volumeInfo?.id)));
     } catch (error) {
       console.error('Error adding book:', error);
       toast({
@@ -438,40 +441,43 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
                       <p className="text-sm">Search for books to add to your Top Five</p>
                     </div>
                   ) : (
-                    googleResults
-                      .filter((book) => book.volumeInfo)
-                      .map((book) => {
-                        const volumeInfo = book.volumeInfo;
-                        return (
-                          <div key={book.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border">
-                            {volumeInfo?.imageLinks?.thumbnail ? (
-                              <img 
-                                src={volumeInfo.imageLinks.thumbnail.replace('http:', 'https:')} 
-                                alt={volumeInfo.title} 
-                                className="w-12 h-16 object-cover rounded shadow-sm" 
-                              />
-                            ) : (
-                              <div className="w-12 h-16 bg-muted rounded flex items-center justify-center">
-                                <BookOpen className="w-6 h-6 text-muted-foreground" />
-                              </div>
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <div className="font-medium text-sm truncate">{volumeInfo?.title || "Unknown Title"}</div>
-                              <div className="text-xs text-muted-foreground truncate">
-                                {volumeInfo?.authors?.join(", ") || "Unknown Author"}
-                              </div>
+                    googleResults.map((book: any) => {
+                      const vi = book?.volumeInfo ?? book; // support both raw Google API item and simplified result
+                      const title: string = vi?.title || "Unknown Title";
+                      const authors: string = Array.isArray(vi?.authors) ? vi.authors.join(", ") : "Unknown Author";
+                      const thumb: string | undefined = vi?.imageLinks?.thumbnail || vi?.imageLinks?.smallThumbnail;
+                      const imgSrc = thumb ? thumb.replace('http:', 'https:') : null;
+
+                      return (
+                        <div key={book.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border">
+                          {imgSrc ? (
+                            <img 
+                              src={imgSrc}
+                              alt={title}
+                              className="w-12 h-16 object-cover rounded shadow-sm" 
+                            />
+                          ) : (
+                            <div className="w-12 h-16 bg-muted rounded flex items-center justify-center">
+                              <BookOpen className="w-6 h-6 text-muted-foreground" />
                             </div>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => handleAddGoogleBook(book)}
-                              disabled={selectedBooks.length >= 5}
-                            >
-                              Add
-                            </Button>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm truncate">{title}</div>
+                            <div className="text-xs text-muted-foreground truncate">
+                              {authors}
+                            </div>
                           </div>
-                        );
-                      })
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => handleAddGoogleBook(book)}
+                            disabled={selectedBooks.length >= 5}
+                          >
+                            Add
+                          </Button>
+                        </div>
+                      );
+                    })
                   )}
                 </div>
               </div>
