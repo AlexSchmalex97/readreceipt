@@ -142,14 +142,14 @@ export function SettingsTabs(props: SettingsTabsProps) {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-3">
-              Select up to 5 of your favorite books. You can drag to reorder them.
+              Select up to 10 of your favorite books for your Top Ten. Drag to reorder. Your Top Five will show on your profile.
             </p>
             <TopFiveBooksDialog
               currentTopFive={props.topFiveBooks}
               onSave={() => window.location.reload()}
             >
               <Button variant="outline">
-                {props.topFiveBooks.length === 0 ? 'Select Top Five Books' : `Edit Top Five (${props.topFiveBooks.length}/5)`}
+                {props.topFiveBooks.length === 0 ? 'Edit Top Ten' : `Edit Top Ten (${props.topFiveBooks.length}/10)`}
               </Button>
             </TopFiveBooksDialog>
           </CardContent>

@@ -331,7 +331,7 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
           {/* Selected Books */}
           <div>
             <h3 className="font-medium mb-3">
-              Your Top Five ({selectedBooks.length}/5)
+              Your Top Ten ({selectedBooks.length}/10)
             </h3>
             {selectedBooks.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
@@ -362,7 +362,7 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
             <TabsContent value="library" className="space-y-3">
               <div>
                 <h3 className="font-medium mb-3">
-                  {selectedBooks.length >= 5 ? 'Completed Books (Remove a book to add another)' : 'Add from Completed Books'}
+                  {selectedBooks.length >= 10 ? 'Completed Books (Remove a book to add another)' : 'Add from Completed Books'}
                 </h3>
                 {availableBooks.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg">
