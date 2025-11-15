@@ -12,10 +12,9 @@ import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { SocialMediaInput } from "@/components/SocialMediaInput";
 import { FavoriteBookSelector } from "@/components/FavoriteBookSelector";
-import { ReadingGoals } from "@/components/ReadingGoals";
-import { TopFiveBooksDialog } from "@/components/TopFiveBooksDialog";
 import { usePlatform } from "@/hooks/usePlatform";
 import { useNavigate } from "react-router-dom";
+import { SettingsTabs } from "@/components/SettingsTabs";
 
 
 function normalizeUsername(raw: string) {
@@ -364,6 +363,37 @@ export default function ProfileSettings() {
     }
   };
 
+  const handleSave = async () => {
+    await saveProfile();
+  };
+
+  const handleUpdateEmail = async () => {
+    // This would open a dialog or prompt for new email
+    toast({ title: "Email change functionality coming soon" });
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!newPassword) {
+      toast({ title: "Please enter a new password", variant: "destructive" });
+      return;
+    }
+    await updatePassword();
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({ title: "Signed out successfully" });
+      navigate("/");
+    } catch (e: any) {
+      toast({ 
+        title: "Error signing out", 
+        description: e?.message,
+        variant: "destructive" 
+      });
+    }
+  };
+
   const saveProfile = async () => {
     try {
       if (!displayName.trim()) return alert("Please enter a display name.");
@@ -564,57 +594,74 @@ export default function ProfileSettings() {
   return (
     <div className="min-h-screen bg-gradient-soft">
       <Navigation />
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <div className="flex items-center gap-4 mb-6">
-        <Link to="/profile">
-          <Button variant="ghost" size="sm" className="gap-2">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Profile
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Link to="/profile">
+              <Button variant="ghost" size="sm" className="gap-2">
+                <ArrowLeft className="w-4 h-4" />
+                Back to Profile
+              </Button>
+            </Link>
+            <h1 className="text-2xl font-bold">Settings</h1>
+          </div>
+          <Button onClick={handleLogout} variant="outline" size="sm">
+            <LogOut className="w-4 h-4 mr-2" />
+            Sign Out
           </Button>
-        </Link>
-        <h1 className="text-2xl font-bold">Profile Settings</h1>
-      </div>
-
-      {/* Profile Photo Section */}
-      <section className="bg-card border rounded p-4 mb-6">
-        <h2 className="font-semibold mb-3">Profile Photo</h2>
-        <div className="flex items-center gap-6">
-          <div className="relative">
-            <div className="w-16 h-16 rounded-full overflow-hidden bg-muted border-2 border-border">
-              {avatarUrl ? (
-                <img 
-                  src={avatarUrl} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <User className="w-6 h-6 text-muted-foreground" />
-                </div>
-              )}
-            </div>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary rounded-full flex items-center justify-center text-primary-foreground hover:opacity-90 transition"
-            >
-              <Camera className="w-3 h-3" />
-            </button>
-          </div>
-          <div>
-            <Button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              variant="outline"
-              size="sm"
-            >
-              {uploading ? "Uploading..." : "Change Photo"}
-            </Button>
-            <p className="text-xs text-muted-foreground mt-1">
-              JPG, PNG up to 5MB
-            </p>
-          </div>
         </div>
+
+        <SettingsTabs
+          uid={uid}
+          favoriteBookId={favoriteBookId}
+          currentBookId={currentBookId}
+          topFiveBooks={topFiveBooks}
+          onFavoriteBookChange={setFavoriteBookId}
+          onCurrentBookChange={setCurrentBookId}
+          onTopFiveBooksChange={setTopFiveBooks}
+          completedBooksThisYear={completedBooksThisYear}
+          avatarUrl={avatarUrl}
+          bio={bio}
+          socialMediaLinks={socialMediaLinks}
+          websiteUrl={websiteUrl}
+          onBioChange={setBio}
+          onSocialMediaLinksChange={setSocialMediaLinks}
+          onWebsiteUrlChange={setWebsiteUrl}
+          onAvatarClick={() => fileInputRef.current?.click()}
+          displayName={displayName}
+          username={username}
+          email={email}
+          birthday={birthday}
+          newPassword={newPassword}
+          normUsername={normUsername}
+          usernameAvailable={usernameAvailable}
+          checkingUsername={checkingUsername}
+          onDisplayNameChange={setDisplayName}
+          onUsernameChange={setUsername}
+          onBirthdayChange={setBirthday}
+          onNewPasswordChange={setNewPassword}
+          onUpdateEmail={handleUpdateEmail}
+          onUpdatePassword={handleUpdatePassword}
+          displayPreference={displayPreference}
+          temperatureUnit={temperatureUnit}
+          backgroundColor={backgroundColor}
+          textColor={textColor}
+          accentColor={accentColor}
+          accentTextColor={accentTextColor}
+          onDisplayPreferenceChange={setDisplayPreference}
+          onTemperatureUnitChange={setTemperatureUnit}
+          onBackgroundColorChange={setBackgroundColor}
+          onTextColorChange={setTextColor}
+          onAccentColorChange={setAccentColor}
+          onAccentTextColorChange={setAccentTextColor}
+        />
+
+        <div className="mt-6 flex justify-end">
+          <Button onClick={handleSave} disabled={usernameAvailable === false}>
+            Save All Changes
+          </Button>
+        </div>
+
         <input
           ref={fileInputRef}
           type="file"
@@ -622,722 +669,30 @@ export default function ProfileSettings() {
           onChange={handleFileSelect}
           className="hidden"
         />
-      </section>
-
-      {/* Reading Goals Section */}
-      <section className="bg-card border rounded p-4 mb-6">
-        <h2 className="font-semibold mb-3">Reading Goals</h2>
-        <ReadingGoals userId={uid || ""} completedBooksThisYear={completedBooksThisYear} />
-      </section>
-
-      <section className="bg-card border rounded p-4 mb-6">
-        <h2 className="font-semibold mb-3">Public Profile</h2>
-        <div className="text-sm text-muted-foreground mb-4 p-3 bg-accent/30 rounded">
-          <strong>Note:</strong> Your display name and username are for social features and will appear in greetings, feeds, and when other users find you. 
-          <br />
-          <strong>Authentication:</strong> For login, use the same method you signed up with (Google OAuth or email/password).
-        </div>
-        <div className="grid gap-3">
-          <label className="grid gap-1">
-            <span className="text-sm text-muted-foreground">Display name</span>
-            <input
-              className="border rounded px-3 py-2 bg-background"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="Your name (appears in greetings)"
-            />
-          </label>
-
-          <label className="grid gap-1">
-            <span className="text-sm text-muted-foreground">Username</span>
-            <input
-              className="border rounded px-3 py-2 bg-background"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="username (for social features)"
-              autoComplete="username"
-            />
-            {username && (
-              <div className="text-xs text-muted-foreground">
-                @{normUsername}{" "}
-                {checkingUsername
-                  ? "• checking…"
-                  : usernameAvailable == null
-                  ? ""
-                  : usernameAvailable
-                  ? "• available"
-                  : "• taken"}
-              </div>
-            )}
-          </label>
-
-          <label className="grid gap-1">
-            <span className="text-sm text-muted-foreground">Bio</span>
-            <textarea
-              className="border rounded px-3 py-2 bg-background resize-none"
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              placeholder="Tell other readers about yourself..."
-              rows={3}
-            />
-          </label>
-
-          <label className="grid gap-1">
-            <span className="text-sm text-muted-foreground">Birthday</span>
-            <input
-              type="date"
-              className="border rounded px-3 py-2 bg-background"
-              value={birthday}
-              onChange={(e) => setBirthday(e.target.value)}
-            />
-          </label>
-
-          <div className="grid gap-1">
-            <FavoriteBookSelector
-              label="Favourite Book"
-              placeholder="Select your favourite book..."
-              value={favoriteBookId}
-              onChange={setFavoriteBookId}
-            />
-          </div>
-
-          <div className="grid gap-1">
-            <FavoriteBookSelector
-              label="Current Read"
-              placeholder="Select your current read..."
-              value={currentBookId}
-              onChange={setCurrentBookId}
-            />
-          </div>
-
-          <div className="grid gap-1">
-            <label className="text-sm font-medium">Top Five Books</label>
-            <TopFiveBooksDialog currentTopFive={topFiveBooks} onSave={async () => {
-              const { data } = await supabase
-                .from('profiles')
-                .select('top_five_books')
-                .eq('id', uid)
-                .single();
-              if (data) {
-                setTopFiveBooks(Array.isArray(data.top_five_books) ? data.top_five_books as string[] : []);
-              }
-            }}>
-              <Button variant="outline" type="button">
-                Edit Top Five ({topFiveBooks.length}/5)
-              </Button>
-            </TopFiveBooksDialog>
-          </div>
-
-          <div className="grid gap-1">
-            <SocialMediaInput
-              value={socialMediaLinks}
-              onChange={setSocialMediaLinks}
-            />
-          </div>
-
-          <label className="grid gap-1">
-            <span className="text-sm text-muted-foreground">Website</span>
-            <input
-              type="url"
-              className="border rounded px-3 py-2 bg-background"
-              value={websiteUrl}
-              onChange={(e) => setWebsiteUrl(e.target.value)}
-              placeholder="https://your-website.com"
-            />
-          </label>
-
-          <label className="grid gap-1">
-            <span className="text-sm text-muted-foreground">Header Display</span>
-            <select
-              className="border rounded px-3 py-2 bg-background"
-              value={displayPreference}
-              onChange={(e) => setDisplayPreference(e.target.value as 'quotes' | 'time_weather' | 'both')}
-            >
-              <option value="quotes">Inspirational Quotes</option>
-              <option value="time_weather">Date/Time & Weather</option>
-              <option value="both">Both (Quotes + Date/Time/Weather)</option>
-            </select>
-            <div className="text-xs text-muted-foreground">
-              Choose what appears in the navigation header between the menu and your greeting.
-            </div>
-          </label>
-
-          <label className="grid gap-1">
-            <span className="text-sm text-muted-foreground">Temperature Unit</span>
-            <select
-              className="border rounded px-3 py-2 bg-background"
-              value={temperatureUnit}
-              onChange={(e) => setTemperatureUnit(e.target.value as 'celsius' | 'fahrenheit')}
-            >
-              <option value="celsius">Celsius (°C)</option>
-              <option value="fahrenheit">Fahrenheit (°F)</option>
-            </select>
-            <div className="text-xs text-muted-foreground">
-              Choose your preferred temperature unit for weather display.
-            </div>
-          </label>
-
-          <div className="grid gap-1">
-            <span className="text-sm text-muted-foreground">Profile Background Color</span>
-            <div className="grid gap-3">
-              <div className="grid grid-cols-4 gap-2">
-                {[
-                  { name: 'Beige', value: '#F5F1E8' },
-                  { name: 'Red', value: '#FEE2E2' },
-                  { name: 'Blue', value: '#DBEAFE' },
-                  { name: 'Pink', value: '#FCE7F3' },
-                  { name: 'Black', value: '#1F2937' },
-                  { name: 'Green', value: '#D1FAE5' },
-                  { name: 'Orange', value: '#FED7AA' },
-                  { name: 'Yellow', value: '#FEF3C7' },
-                ].map((color) => (
-                  <button
-                    key={color.value}
-                    type="button"
-                    onClick={() => setBackgroundColor(color.value)}
-                    className={`h-12 rounded border-2 transition-all ${
-                      backgroundColor === color.value 
-                        ? 'border-primary ring-2 ring-primary/20' 
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                    style={{ backgroundColor: color.value }}
-                    title={color.name}
-                  />
-                ))}
-              </div>
-              <div className="flex gap-2 items-center">
-                <input
-                  type="text"
-                  className="border rounded px-3 py-2 bg-background flex-1"
-                  value={customHex}
-                  onChange={(e) => setCustomHex(e.target.value)}
-                  placeholder="#FFFFFF"
-                  maxLength={7}
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (/^#[0-9A-F]{6}$/i.test(customHex)) {
-                      setBackgroundColor(customHex);
-                      toast({ title: "Custom color applied!" });
-                    } else {
-                      toast({ 
-                        title: "Invalid hex code", 
-                        description: "Please enter a valid hex code (e.g., #FF5733)",
-                        variant: "destructive" 
-                      });
-                    }
-                  }}
-                  className="px-3 py-2 rounded border hover:bg-accent"
-                >
-                  Apply
-                </button>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (!/^#[0-9A-F]{6}$/i.test(customHex)) {
-                      toast({ title: "Invalid hex code", description: "Please enter a valid hex code", variant: "destructive" });
-                      return;
-                    }
-                    try {
-                      const { data: user } = await supabase.auth.getUser();
-                      if (!user.user) return;
-                      const newColors = [...new Set([...savedCustomColors, customHex])].slice(0, 8);
-                      const { data: cpRow, error: cpErr } = await supabase
-                        .from('profiles')
-                        .select('color_palette')
-                        .eq('id', user.user.id)
-                        .single();
-                      if (cpErr) throw cpErr;
-                      const currentPalette: any = (cpRow as any)?.color_palette || {};
-                      const nextPalette = { ...currentPalette, custom_colors: newColors };
-                      const { error } = await supabase
-                        .from('profiles')
-                        .update({ color_palette: nextPalette })
-                        .eq('id', user.user.id);
-                      if (error) throw error;
-                      setSavedCustomColors(newColors);
-                      toast({ title: 'Custom color saved!' });
-                    } catch (e:any) {
-                      toast({ title: 'Error saving color', description: e?.message || 'Try again', variant: 'destructive' });
-                    }
-                  }}
-                  className="px-3 py-2 rounded border hover:bg-accent"
-                >
-                  Save
-                </button>
-              </div>
-
-              {savedCustomColors.length > 0 && (
-                <div className="grid grid-cols-6 gap-2">
-                  {savedCustomColors.map((hex, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => setBackgroundColor(hex)}
-                      className={`h-8 rounded border-2 ${backgroundColor === hex ? 'border-primary' : 'border-border'}`}
-                      style={{ backgroundColor: hex }}
-                      title={hex}
-                    />
-                  ))}
-                </div>
-              )}
-
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={applyGlobally} onChange={(e) => setApplyGlobally(e.target.checked)} />
-                <span>Apply this color to all pages (only you will see it)</span>
-              </label>
-
-              <div className="text-xs text-muted-foreground">
-                Choose a preset color or enter a custom hex code. Public visitors see your profile background only. If applied globally, your app uses your palette while logged in.
-              </div>
-            </div>
-          </div>
-
-          <div className="grid gap-1">
-            <span className="text-sm text-muted-foreground">Profile Text Color</span>
-            <div className="grid grid-cols-6 gap-2 mb-3">
-              {[
-                { name: 'Default (Auto)', value: '' },
-                { name: 'Black', value: '#1A1A1A' },
-                { name: 'White', value: '#FFFFFF' },
-                { name: 'Tan', value: '#7A5C3A' },
-                { name: 'Brown', value: '#5C3B28' },
-                { name: 'Dark Olive', value: '#3D4A3D' },
-                { name: 'Plum', value: '#4E2A3A' },
-                { name: 'Indigo', value: '#3F4C8A' },
-              ].map((color) => (
-                <button
-                  key={color.name}
-                  type="button"
-                  onClick={() => setTextColor(color.value)}
-                  className={`h-10 rounded border-2 transition-all ${
-                    textColor === color.value 
-                      ? 'border-primary ring-2 ring-primary/20' 
-                      : 'border-border hover:border-primary/50'
-                  }`}
-                  style={{ backgroundColor: color.value || 'transparent' }}
-                  title={color.name}
-                />
-              ))}
-            </div>
-
-            {savedCustomColors.length > 0 && (
-              <div className="grid grid-cols-6 gap-2 mb-3">
-                {savedCustomColors.map((hex, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setTextColor(hex)}
-                    className={`h-8 rounded border-2 ${textColor === hex ? 'border-primary' : 'border-border'}`}
-                    style={{ backgroundColor: hex }}
-                    title={hex}
-                  />
-                ))}
-              </div>
-            )}
-
-            <div className="flex gap-2 items-center">
-              <input
-                type="text"
-                className="border rounded px-3 py-2 bg-background flex-1"
-                value={textHex}
-                onChange={(e) => setTextHex(e.target.value)}
-                placeholder="#FFFFFF (leave empty for auto)"
-                maxLength={7}
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  if (!textHex) { setTextColor(""); toast({ title: 'Using auto contrast' }); return; }
-                  if (/^#[0-9A-F]{6}$/i.test(textHex)) { setTextColor(textHex); toast({ title: 'Text color applied!' }); }
-                  else { toast({ title: 'Invalid hex code', variant: 'destructive' }); }
-                }}
-                className="px-3 py-2 rounded border hover:bg-accent"
-              >
-                Apply
-              </button>
-              <button type="button" onClick={() => { setTextHex(""); setTextColor(""); }} className="px-3 py-2 rounded border hover:bg-accent">Auto</button>
-              <button
-                type="button"
-                onClick={async () => {
-                  if (!/^#[0-9A-F]{6}$/i.test(textHex)) {
-                    toast({ title: 'Invalid hex code', description: 'Please enter a valid hex code', variant: 'destructive' });
-                    return;
-                  }
-                  try {
-                    const { data: user } = await supabase.auth.getUser();
-                    if (!user.user) return;
-                    const newColors = [...new Set([...savedCustomColors, textHex])].slice(0, 8);
-                    const { data: cpRow, error: cpErr } = await supabase
-                      .from('profiles')
-                      .select('color_palette')
-                      .eq('id', user.user.id)
-                      .single();
-                    if (cpErr) throw cpErr;
-                    const currentPalette: any = (cpRow as any)?.color_palette || {};
-                    const nextPalette = { ...currentPalette, custom_colors: newColors };
-                    const { error } = await supabase
-                      .from('profiles')
-                      .update({ color_palette: nextPalette })
-                      .eq('id', user.user.id);
-                    if (error) throw error;
-                    setSavedCustomColors(newColors);
-                    toast({ title: 'Custom color saved!' });
-                  } catch (e:any) {
-                    toast({ title: 'Error saving color', description: e?.message || 'Try again', variant: 'destructive' });
-                  }
-                }}
-                className="px-3 py-2 rounded border hover:bg-accent"
-              >
-                Save
-              </button>
-            </div>
-            <div className="text-xs text-muted-foreground">This affects text in your profile (name, username, bio, etc). Leave empty to auto-adjust based on background.</div>
-          </div>
-
-          <div className="grid gap-1">
-            <span className="text-sm text-muted-foreground">Profile Accent Color</span>
-            <div className="grid grid-cols-6 gap-2 mb-3">
-              {[
-                { name: 'Default (White)', value: '' },
-                { name: 'Light Beige', value: '#F5F1E8' },
-                { name: 'Soft Blue', value: '#E3F2FD' },
-                { name: 'Pale Green', value: '#E8F5E9' },
-                { name: 'Light Pink', value: '#FCE4EC' },
-                { name: 'Lavender', value: '#F3E5F5' },
-                { name: 'Peach', value: '#FFF3E0' },
-                { name: 'Mint', value: '#E0F2F1' },
-              ].map((color) => (
-                <button
-                  key={color.name}
-                  type="button"
-                  onClick={() => setAccentColor(color.value)}
-                  className={`h-10 rounded border-2 transition-all ${
-                    accentColor === color.value 
-                      ? 'border-primary ring-2 ring-primary/20' 
-                      : 'border-border hover:border-primary/50'
-                  }`}
-                  style={{ backgroundColor: color.value || '#ffffff' }}
-                  title={color.name}
-                />
-              ))}
-            </div>
-
-            {savedCustomAccents.length > 0 && (
-              <div className="grid grid-cols-6 gap-2 mb-3">
-                {savedCustomAccents.map((hex, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setAccentColor(hex)}
-                    className={`h-8 rounded border-2 ${accentColor === hex ? 'border-primary' : 'border-border'}`}
-                    style={{ backgroundColor: hex }}
-                    title={hex}
-                  />
-                ))}
-              </div>
-            )}
-
-            <div className="flex gap-2 items-center">
-              <input
-                type="text"
-                className="border rounded px-3 py-2 bg-background flex-1"
-                value={accentHex}
-                onChange={(e) => setAccentHex(e.target.value)}
-                placeholder="#FFFFFF (leave empty for white)"
-                maxLength={7}
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  if (!accentHex) { setAccentColor(""); toast({ title: 'Using default white' }); return; }
-                  if (/^#[0-9A-F]{6}$/i.test(accentHex)) { setAccentColor(accentHex); toast({ title: 'Accent color applied!' }); }
-                  else { toast({ title: 'Invalid hex code', variant: 'destructive' }); }
-                }}
-                className="px-3 py-2 rounded border hover:bg-accent"
-              >
-                Apply
-              </button>
-              <button type="button" onClick={() => { setAccentHex(""); setAccentColor(""); }} className="px-3 py-2 rounded border hover:bg-accent">Default</button>
-              <button
-                type="button"
-                onClick={async () => {
-                  if (!/^#[0-9A-F]{6}$/i.test(accentHex)) {
-                    toast({ title: 'Invalid hex code', description: 'Please enter a valid hex code', variant: 'destructive' });
-                    return;
-                  }
-                  try {
-                    const { data: user } = await supabase.auth.getUser();
-                    if (!user.user) return;
-                    const newAccents = [...new Set([...savedCustomAccents, accentHex])].slice(0, 8);
-                    const { data: cpRow, error: cpErr } = await supabase
-                      .from('profiles')
-                      .select('color_palette')
-                      .eq('id', user.user.id)
-                      .single();
-                    if (cpErr) throw cpErr;
-                    const currentPalette: any = (cpRow as any)?.color_palette || {};
-                    const nextPalette = { ...currentPalette, custom_accents: newAccents };
-                    const { error } = await supabase
-                      .from('profiles')
-                      .update({ color_palette: nextPalette })
-                      .eq('id', user.user.id);
-                    if (error) throw error;
-                    setSavedCustomAccents(newAccents);
-                    toast({ title: 'Custom accent saved!' });
-                  } catch (e:any) {
-                    toast({ title: 'Error saving color', description: e?.message || 'Try again', variant: 'destructive' });
-                  }
-                }}
-                className="px-3 py-2 rounded border hover:bg-accent"
-              >
-                Save
-              </button>
-            </div>
-            <div className="text-xs text-muted-foreground">This affects cards, sections, and buttons in your profile (Favourite Book, Currently Reading, 2025 Reading Goal, etc).</div>
-          </div>
-
-          <div className="grid gap-1">
-            <span className="text-sm text-muted-foreground">Accent Text Color</span>
-            <div className="grid grid-cols-6 gap-2 mb-3">
-              {[
-                { name: 'Default (Auto)', value: '' },
-                { name: 'Black', value: '#1A1A1A' },
-                { name: 'White', value: '#FFFFFF' },
-                { name: 'Dark Gray', value: '#4A4A4A' },
-                { name: 'Light Gray', value: '#E0E0E0' },
-                { name: 'Navy', value: '#2C3E50' },
-              ].map((color) => (
-                <button
-                  key={color.name}
-                  type="button"
-                  onClick={() => setAccentTextColor(color.value)}
-                  className={`h-10 rounded border-2 transition-all ${
-                    accentTextColor === color.value 
-                      ? 'border-primary ring-2 ring-primary/20' 
-                      : 'border-border hover:border-primary/50'
-                  }`}
-                  style={{ backgroundColor: color.value || '#ffffff' }}
-                  title={color.name}
-                />
-              ))}
-            </div>
-
-            {savedCustomAccentTexts.length > 0 && (
-              <div className="grid grid-cols-6 gap-2 mb-3">
-                {savedCustomAccentTexts.map((hex, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setAccentTextColor(hex)}
-                    className={`h-8 rounded border-2 ${accentTextColor === hex ? 'border-primary' : 'border-border'}`}
-                    style={{ backgroundColor: hex }}
-                    title={hex}
-                  />
-                ))}
-              </div>
-            )}
-
-            <div className="flex gap-2 items-center">
-              <input
-                type="text"
-                className="border rounded px-3 py-2 bg-background flex-1"
-                value={accentTextHex}
-                onChange={(e) => setAccentTextHex(e.target.value)}
-                placeholder="#1A1A1A"
-                maxLength={7}
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  if (/^#[0-9A-F]{6}$/i.test(accentTextHex)) {
-                    setAccentTextColor(accentTextHex);
-                    toast({ title: "Custom accent text color applied!" });
-                  } else {
-                    toast({ 
-                      title: "Invalid hex code", 
-                      description: "Please enter a valid hex code (e.g., #1A1A1A)",
-                      variant: "destructive" 
-                    });
-                  }
-                }}
-                className="px-3 py-2 rounded border hover:bg-accent"
-              >
-                Apply
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  if (!/^#[0-9A-F]{6}$/i.test(accentTextHex)) {
-                    toast({ title: "Invalid hex code", description: "Please enter a valid hex code", variant: "destructive" });
-                    return;
-                  }
-                  try {
-                    const { data: user } = await supabase.auth.getUser();
-                    if (!user.user) return;
-                    const newTexts = [...new Set([...savedCustomAccentTexts, accentTextHex])].slice(0, 6);
-                    const { data: cpRow, error: cpErr } = await supabase
-                      .from('profiles')
-                      .select('color_palette')
-                      .eq('id', user.user.id)
-                      .single();
-                    if (cpErr) throw cpErr;
-                    const currentPalette: any = (cpRow as any)?.color_palette || {};
-                    const nextPalette = { ...currentPalette, custom_accent_texts: newTexts };
-                    const { error } = await supabase
-                      .from('profiles')
-                      .update({ color_palette: nextPalette })
-                      .eq('id', user.user.id);
-                    if (error) throw error;
-                    setSavedCustomAccentTexts(newTexts);
-                    toast({ title: 'Custom accent text color saved!' });
-                  } catch (e:any) {
-                    toast({ title: 'Error saving color', description: e?.message || 'Try again', variant: 'destructive' });
-                  }
-                }}
-                className="px-3 py-2 rounded border hover:bg-accent"
-              >
-                Save
-              </button>
-            </div>
-            <div className="text-xs text-muted-foreground">This affects text within the accented sections (Currently Reading book title, Favourite Book title, etc). Leave empty to auto-adjust based on accent color.</div>
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={saveProfile}
-              className="px-3 py-2 rounded bg-primary text-primary-foreground"
-            >
-              Save profile
-            </button>
-            <a href="/people" className="px-3 py-2 rounded border">
-              Find people
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-card border rounded p-4 mb-6">
-        <h2 className="font-semibold mb-3">Account</h2>
-        <div className="grid gap-4">
-          <div className="grid gap-2">
-            <label className="text-sm text-muted-foreground">Email</label>
-            <div className="flex gap-2">
-              <input
-                className="border rounded px-3 py-2 bg-background flex-1"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                autoComplete="email"
-              />
-              <button onClick={updateEmail} className="px-3 py-2 rounded border">
-                Update email
-              </button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              You may receive a confirmation email depending on your project settings.
-            </p>
-          </div>
-
-          <div className="grid gap-2">
-            <label className="text-sm text-muted-foreground">New password</label>
-            <div className="flex gap-2">
-              <input
-                className="border rounded px-3 py-2 bg-background flex-1"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="••••••••"
-                autoComplete="new-password"
-              />
-              <button onClick={updatePassword} className="px-3 py-2 rounded border">
-                Update password
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-card border rounded p-4">
-        <h2 className="font-semibold mb-3">Connected accounts</h2>
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="font-medium">Google</div>
-            <div className="text-xs text-muted-foreground">
-              {googleLinked ? "Connected" : "Not connected"}
-            </div>
-          </div>
-          {googleLinked ? (
-            <button onClick={unlinkGoogle} className="px-3 py-2 rounded border">
-              Unlink
-            </button>
-          ) : (
-            <button
-              onClick={linkGoogle}
-              className="px-3 py-2 rounded bg-secondary text-secondary-foreground"
-            >
-              Connect Google
-            </button>
-          )}
-        </div>
-      </section>
-
-      <section className="bg-card border rounded p-4 mb-6">
-        <h2 className="font-semibold mb-3">Integrations</h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Connect with other reading platforms to sync your library
-        </p>
-        <Link to="/integrations">
-          <Button variant="outline" className="gap-2">
-            <Link2 className="h-4 w-4" />
-            Manage Integrations
-          </Button>
-        </Link>
-      </section>
-
-      {(isIOS || isReadReceiptApp) && (
-        <section className="bg-card border rounded p-4">
-          <h2 className="font-semibold mb-3">Sign Out</h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            Sign out of your account
-          </p>
-          <Button 
-            variant="destructive" 
-            className="gap-2"
-            onClick={handleSignOut}
-          >
-            <LogOut className="h-4 w-4" />
-            Sign Out
-          </Button>
-        </section>
-      )}
       </div>
 
       {/* Crop Modal */}
       <Dialog open={showCropModal} onOpenChange={setShowCropModal}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Crop Your Photo</DialogTitle>
+            <DialogTitle>Crop your photo</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             {selectedImage && (
-              <div className="flex justify-center">
-                <ReactCrop
-                  crop={crop}
-                  onChange={(_, percentCrop) => setCrop(percentCrop)}
-                  onComplete={(c) => setCompletedCrop(c)}
-                  aspect={1}
-                  circularCrop
-                >
-                  <img
-                    ref={imgRef}
-                    src={selectedImage}
-                    alt="Crop preview"
-                    style={{ maxHeight: '400px', maxWidth: '100%' }}
-                  />
-                </ReactCrop>
-              </div>
+              <ReactCrop
+                crop={crop}
+                onChange={(c) => setCrop(c)}
+                onComplete={(c) => setCompletedCrop(c)}
+                aspect={1}
+                circularCrop
+              >
+                <img
+                  ref={imgRef}
+                  src={selectedImage}
+                  alt="Crop preview"
+                  style={{ maxHeight: '400px' }}
+                />
+              </ReactCrop>
             )}
             <div className="flex gap-2 justify-end">
               <Button 
