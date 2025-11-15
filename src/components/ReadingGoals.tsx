@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Edit3, Check, X, Target, Calendar } from "lucide-react";
+import { Edit3, Check, X, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -11,7 +11,6 @@ interface ReadingGoal {
   id: string;
   year: number;
   goal_count: number;
-  manual_count: number;
 }
 
 interface ReadingGoalsProps {
@@ -23,9 +22,7 @@ export const ReadingGoals = ({ userId, completedBooksThisYear }: ReadingGoalsPro
   const [goal, setGoal] = useState<ReadingGoal | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditingGoal, setIsEditingGoal] = useState(false);
-  const [isEditingManual, setIsEditingManual] = useState(false);
   const [goalInput, setGoalInput] = useState("");
-  const [manualInput, setManualInput] = useState("");
   const { toast } = useToast();
 
   const currentYear = new Date().getFullYear();
@@ -53,7 +50,6 @@ export const ReadingGoals = ({ userId, completedBooksThisYear }: ReadingGoalsPro
       if (data) {
         setGoal(data);
         setGoalInput(data.goal_count.toString());
-        setManualInput(data.manual_count?.toString() || "0");
       } else {
         // Create default goal for current year
         const { data: newGoal, error: createError } = await supabase
@@ -71,7 +67,6 @@ export const ReadingGoals = ({ userId, completedBooksThisYear }: ReadingGoalsPro
         
         setGoal(newGoal);
         setGoalInput("12");
-        setManualInput("0");
       }
     } catch (error) {
       console.error("Error loading reading goal:", error);
@@ -85,22 +80,22 @@ export const ReadingGoals = ({ userId, completedBooksThisYear }: ReadingGoalsPro
     }
   };
 
-  const updateGoal = async (field: 'goal_count' | 'manual_count', value: number) => {
+  const updateGoal = async (value: number) => {
     if (!userId || !goal) return;
 
     try {
       const { error } = await supabase
         .from("reading_goals")
-        .update({ [field]: value })
+        .update({ goal_count: value })
         .eq("id", goal.id);
 
       if (error) throw error;
 
-      setGoal(prev => prev ? { ...prev, [field]: value } : null);
+      setGoal(prev => prev ? { ...prev, goal_count: value } : null);
       
       toast({
         title: "Goal updated! 🎯",
-        description: field === 'goal_count' ? "Your reading goal has been updated" : "Manual count updated",
+        description: "Your reading goal has been updated",
       });
     } catch (error) {
       console.error("Error updating goal:", error);
@@ -122,32 +117,13 @@ export const ReadingGoals = ({ userId, completedBooksThisYear }: ReadingGoalsPro
       });
       return;
     }
-    updateGoal('goal_count', newGoal);
+    updateGoal(newGoal);
     setIsEditingGoal(false);
-  };
-
-  const handleSaveManual = () => {
-    const newCount = parseInt(manualInput);
-    if (isNaN(newCount) || newCount < 0 || newCount > 1000) {
-      toast({
-        title: "Invalid count",
-        description: "Please enter a number between 0 and 1000",
-        variant: "destructive",
-      });
-      return;
-    }
-    updateGoal('manual_count', newCount);
-    setIsEditingManual(false);
   };
 
   const handleCancelGoal = () => {
     setGoalInput(goal?.goal_count.toString() || "12");
     setIsEditingGoal(false);
-  };
-
-  const handleCancelManual = () => {
-    setManualInput(goal?.manual_count?.toString() || "0");
-    setIsEditingManual(false);
   };
 
   if (!userId) {
@@ -190,9 +166,8 @@ export const ReadingGoals = ({ userId, completedBooksThisYear }: ReadingGoalsPro
 
   if (!goal) return null;
 
-  const totalProgress = completedBooksThisYear + (goal.manual_count || 0);
-  const percentage = Math.min(Math.round((totalProgress / goal.goal_count) * 100), 100);
-  const booksLeft = Math.max(goal.goal_count - totalProgress, 0);
+  const percentage = Math.min(Math.round((completedBooksThisYear / goal.goal_count) * 100), 100);
+  const booksLeft = Math.max(goal.goal_count - completedBooksThisYear, 0);
 
   return (
     <Card className="shadow-card bg-card">
@@ -215,7 +190,7 @@ export const ReadingGoals = ({ userId, completedBooksThisYear }: ReadingGoalsPro
             className="h-3" 
           />
           <div className="text-center">
-            <span className="text-2xl font-bold text-primary">{totalProgress}</span>
+            <span className="text-2xl font-bold text-primary">{completedBooksThisYear}</span>
             <span className="text-muted-foreground"> / {goal.goal_count} books</span>
           </div>
         </div>
@@ -265,60 +240,11 @@ export const ReadingGoals = ({ userId, completedBooksThisYear }: ReadingGoalsPro
           )}
         </div>
 
-        {/* Manual count adjustment */}
-        <div className="flex items-center gap-2 justify-between">
-          <span className="text-sm text-muted-foreground">Manual Count:</span>
-          {isEditingManual ? (
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                value={manualInput}
-                onChange={(e) => setManualInput(e.target.value)}
-                className="w-20 h-8"
-                min="0"
-                max="1000"
-                autoFocus
-              />
-              <Button
-                size="sm"
-                onClick={handleSaveManual}
-                className="h-8 w-8 p-0 bg-gradient-primary hover:opacity-90"
-              >
-                <Check className="w-4 h-4" />
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleCancelManual}
-                className="h-8 w-8 p-0"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <span className="font-medium">{goal.manual_count || 0} books</span>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setIsEditingManual(true)}
-                className="h-8 w-8 p-0"
-              >
-                <Edit3 className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
-        </div>
-
         {/* Stats breakdown */}
         <div className="bg-accent/50 rounded-lg p-3 space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Completed this year:</span>
             <span className="font-medium">{completedBooksThisYear}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Manual additions:</span>
-            <span className="font-medium">{goal.manual_count || 0}</span>
           </div>
           <div className="flex justify-between text-sm font-medium border-t pt-2">
             <span>Books remaining:</span>
