@@ -12,6 +12,7 @@ import { HomeReadingGoals } from "@/components/HomeReadingGoals";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { usePlatform } from "@/hooks/usePlatform";
 import { FollowersDialog } from "@/components/FollowersDialog";
+import { TopTenDialog } from "@/components/TopTenDialog";
 
 type UserProfile = {
   id: string;
@@ -112,6 +113,7 @@ export default function ProfileDisplay() {
   const [currentBook, setCurrentBook] = useState<CurrentBook | null>(null);
   const [topFiveBooks, setTopFiveBooks] = useState<FavoriteBook[]>([]);
   const [showAllTopBooks, setShowAllTopBooks] = useState(false);
+  const [showTopTenDialog, setShowTopTenDialog] = useState(false);
   const [zodiacSign, setZodiacSign] = useState<string | null>(null);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
@@ -594,16 +596,16 @@ export default function ProfileDisplay() {
                 </Link>
                 {topFiveBooks.length > 5 && (
                   <button
-                    onClick={() => setShowAllTopBooks(!showAllTopBooks)}
+                    onClick={() => setShowTopTenDialog(true)}
                     className="text-xs px-2 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
                     style={{ color: accentTextColor, borderColor: accentTextColor }}
                   >
-                    {showAllTopBooks ? "show less" : "view top ten"}
+                    view top ten
                   </button>
                 )}
               </div>
               <div className="flex gap-2 overflow-x-auto pb-2">
-                {topFiveBooks.slice(0, showAllTopBooks ? 10 : 5).map((book, index) => (
+                {topFiveBooks.slice(0, 5).map((book, index) => (
                   <div key={book.id} className="flex-shrink-0 w-24">
                     <div className="relative">
                       <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold z-10" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>
@@ -624,6 +626,14 @@ export default function ProfileDisplay() {
               </div>
             </div>
           )}
+
+          <TopTenDialog 
+            open={showTopTenDialog} 
+            onOpenChange={setShowTopTenDialog} 
+            books={topFiveBooks} 
+            accentCardColor={accentCardColor}
+            accentTextColor={accentTextColor}
+          />
 
           {((profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url) && (
             <>
@@ -1001,15 +1011,15 @@ export default function ProfileDisplay() {
                       </Link>
                       {topFiveBooks.length > 5 && (
                         <button
-                          onClick={() => setShowAllTopBooks(!showAllTopBooks)}
+                          onClick={() => setShowTopTenDialog(true)}
                           className="text-xs px-2 py-0.5 rounded-full border border-muted-foreground/30 text-muted-foreground hover:bg-accent/50 transition-colors"
                         >
-                          {showAllTopBooks ? "show less" : "view top ten"}
+                          view top ten
                         </button>
                       )}
                     </div>
                     <div className="flex gap-3">
-                      {topFiveBooks.slice(0, showAllTopBooks ? 10 : 5).map((book, index) => (
+                      {topFiveBooks.slice(0, 5).map((book, index) => (
                         <div key={book.id} className="flex-shrink-0 w-24">
                           <div className="relative">
                             <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold z-10 bg-primary text-primary-foreground">

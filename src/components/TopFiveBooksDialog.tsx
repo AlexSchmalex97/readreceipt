@@ -321,9 +321,9 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
         <DialogHeader>
-          <DialogTitle>Edit Top Ten Books</DialogTitle>
+          <DialogTitle>Top Five Books</DialogTitle>
           <DialogDescription>
-            Select and order your top 10 favorite books. Drag to reorder. Only the top 5 will be displayed on your profile.
+            Select up to 10 books for your top ten list. Your top 5 will be displayed on your profile.
           </DialogDescription>
         </DialogHeader>
 
