@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -336,6 +337,18 @@ export function SettingsTabs(props: SettingsTabsProps) {
                 </Button>
               )}
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Integrations</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <p className="text-sm text-muted-foreground">Manage connected services and integrations.</p>
+            <Link to="/integrations">
+              <Button variant="outline" size="sm">Open Integrations</Button>
+            </Link>
           </CardContent>
         </Card>
       </TabsContent>
