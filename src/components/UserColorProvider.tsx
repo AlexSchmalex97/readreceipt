@@ -37,6 +37,11 @@ export function UserColorProvider({ userColorPalette, backgroundImageUrl, backgr
         body.style.backgroundPosition = 'center';
         body.style.backgroundAttachment = 'fixed';
       }
+      
+      // Make the default background transparent so the body image shows through
+      root.style.setProperty('--background', '0 0% 100% / 0');
+      root.style.setProperty('--card', '0 0% 100% / 0.8');
+      root.style.setProperty('--popover', '0 0% 100% / 0.9');
     } else {
       body.style.background = '';
       body.style.backgroundImage = '';
