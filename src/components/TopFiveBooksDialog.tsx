@@ -232,9 +232,17 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
           </div>
 
           {/* Available Books */}
-          {selectedBooks.length < 5 && availableBooks.length > 0 && (
-            <div>
-              <h3 className="font-medium mb-3">Add from Completed Books</h3>
+          <div>
+            <h3 className="font-medium mb-3">
+              {selectedBooks.length >= 5 ? 'Completed Books (Remove a book to add another)' : 'Add from Completed Books'}
+            </h3>
+            {availableBooks.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg">
+                <BookOpen className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No completed books available</p>
+                <p className="text-xs mt-1">Mark some books as completed to add them here</p>
+              </div>
+            ) : (
               <div className="space-y-2 max-h-60 overflow-y-auto">
                 {availableBooks.map((book) => (
                   <div key={book.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border">
@@ -249,14 +257,19 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
                       <div className="font-medium text-sm truncate">{book.title}</div>
                       <div className="text-xs text-muted-foreground truncate">{book.author}</div>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => handleAddBook(book)}>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => handleAddBook(book)}
+                      disabled={selectedBooks.length >= 5}
+                    >
                       Add
                     </Button>
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         <div className="flex justify-end gap-2 pt-4">

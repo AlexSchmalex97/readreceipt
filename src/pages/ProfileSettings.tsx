@@ -613,6 +613,10 @@ export default function ProfileSettings() {
 
         <SettingsTabs
           uid={uid}
+          identities={identities}
+          googleLinked={googleLinked}
+          onLinkGoogle={linkGoogle}
+          onUnlinkGoogle={unlinkGoogle}
           favoriteBookId={favoriteBookId}
           currentBookId={currentBookId}
           topFiveBooks={topFiveBooks}
