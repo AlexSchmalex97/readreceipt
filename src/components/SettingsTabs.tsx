@@ -150,6 +150,20 @@ export function SettingsTabs(props: SettingsTabsProps) {
             </TopFiveBooksDialog>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Data Import & Export</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">Import or export your reading data</p>
+            <Link to="/integrations">
+              <Button variant="outline" className="w-full">
+                Manage Integrations
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
       </TabsContent>
 
       {/* Profile Settings Tab */}

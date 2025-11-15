@@ -3,7 +3,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { BookOpen, GripVertical, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { BookOpen, GripVertical, X, Search } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
@@ -66,6 +67,8 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
   const [open, setOpen] = useState(false);
   const [selectedBooks, setSelectedBooks] = useState<Book[]>([]);
   const [availableBooks, setAvailableBooks] = useState<Book[]>([]);
+  const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -79,8 +82,25 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
   useEffect(() => {
     if (open) {
       loadBooks();
+      setSearchQuery("");
     }
   }, [open]);
+
+  useEffect(() => {
+    // Filter books based on search query
+    if (searchQuery.trim() === "") {
+      setFilteredBooks(availableBooks);
+    } else {
+      const query = searchQuery.toLowerCase();
+      setFilteredBooks(
+        availableBooks.filter(
+          (book) =>
+            book.title.toLowerCase().includes(query) ||
+            book.author.toLowerCase().includes(query)
+        )
+      );
+    }
+  }, [searchQuery, availableBooks]);
 
   const loadBooks = async () => {
     try {
@@ -246,31 +266,49 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
                 <p className="text-xs mt-1">Mark some books as completed to add them here</p>
               </div>
             ) : (
-              <div className="space-y-2 max-h-60 overflow-y-auto">
-                {availableBooks.map((book) => (
-                  <div key={book.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border">
-                    {book.cover_url ? (
-                      <img src={book.cover_url} alt={book.title} className="w-12 h-16 object-cover rounded shadow-sm" />
-                    ) : (
-                      <div className="w-12 h-16 bg-muted rounded flex items-center justify-center">
-                        <BookOpen className="w-6 h-6 text-muted-foreground" />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">{book.title}</div>
-                      <div className="text-xs text-muted-foreground truncate">{book.author}</div>
+              <>
+                {/* Search Bar */}
+                <div className="relative mb-3">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by title or author..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {filteredBooks.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p className="text-sm">No books match your search</p>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => handleAddBook(book)}
-                      disabled={selectedBooks.length >= 5}
-                    >
-                      Add
-                    </Button>
-                  </div>
-                ))}
-              </div>
+                  ) : (
+                    filteredBooks.map((book) => (
+                      <div key={book.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border">
+                        {book.cover_url ? (
+                          <img src={book.cover_url} alt={book.title} className="w-12 h-16 object-cover rounded shadow-sm" />
+                        ) : (
+                          <div className="w-12 h-16 bg-muted rounded flex items-center justify-center">
+                            <BookOpen className="w-6 h-6 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm truncate">{book.title}</div>
+                          <div className="text-xs text-muted-foreground truncate">{book.author}</div>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleAddBook(book)}
+                          disabled={selectedBooks.length >= 5}
+                        >
+                          Add
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </>
             )}
           </div>
         </div>
