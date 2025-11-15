@@ -180,6 +180,7 @@ export type Database = {
           id: string
           social_media_links: Json | null
           temperature_unit: string | null
+          top_five_books: Json | null
           username: string
           website_url: string | null
         }
@@ -198,6 +199,7 @@ export type Database = {
           id: string
           social_media_links?: Json | null
           temperature_unit?: string | null
+          top_five_books?: Json | null
           username: string
           website_url?: string | null
         }
@@ -216,6 +218,7 @@ export type Database = {
           id?: string
           social_media_links?: Json | null
           temperature_unit?: string | null
+          top_five_books?: Json | null
           username?: string
           website_url?: string | null
         }
