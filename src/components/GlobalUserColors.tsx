@@ -6,6 +6,7 @@ import { UserColorProvider } from "@/components/UserColorProvider";
 export default function GlobalUserColors({ children }: { children: React.ReactNode }) {
   const [palette, setPalette] = useState<any | null>(null);
   const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
+  const [backgroundTint, setBackgroundTint] = useState<{ color: string; opacity: number } | null>(null);
   const applyGlobally = useMemo(() => Boolean(palette?.apply_globally), [palette]);
 
   // Build a safe, complete palette with fallbacks to current CSS tokens
@@ -36,12 +37,13 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
         }
         const { data } = await supabase
           .from("profiles")
-          .select("color_palette, background_image_url")
+          .select("color_palette, background_image_url, background_tint")
           .eq("id", user.id)
           .single();
         if (!mounted) return;
         setPalette((data as any)?.color_palette || null);
         setBackgroundImageUrl((data as any)?.background_image_url || null);
+        setBackgroundTint((data as any)?.background_tint || null);
       } catch {
         if (mounted) setPalette(null);
       }
@@ -57,11 +59,12 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
         }
         const { data } = await supabase
           .from("profiles")
-          .select("color_palette, background_image_url")
+          .select("color_palette, background_image_url, background_tint")
           .eq("id", user.id)
           .single();
         setPalette((data as any)?.color_palette || null);
         setBackgroundImageUrl((data as any)?.background_image_url || null);
+        setBackgroundTint((data as any)?.background_tint || null);
       })();
     });
     return () => {
@@ -71,7 +74,7 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
   }, []);
 
   if (applyGlobally && (effectivePalette || palette)) {
-    return <UserColorProvider userColorPalette={effectivePalette || palette} backgroundImageUrl={backgroundImageUrl}>{children}</UserColorProvider>;
+    return <UserColorProvider userColorPalette={effectivePalette || palette} backgroundImageUrl={backgroundImageUrl} backgroundTint={backgroundTint}>{children}</UserColorProvider>;
   }
   return <>{children}</>;
 }

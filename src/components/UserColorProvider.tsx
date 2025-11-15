@@ -12,20 +12,30 @@ type ColorPalette = {
 type UserColorProviderProps = {
   userColorPalette?: any;
   backgroundImageUrl?: string | null;
+  backgroundTint?: { color: string; opacity: number } | null;
   children: React.ReactNode;
 };
 
-export function UserColorProvider({ userColorPalette, backgroundImageUrl, children }: UserColorProviderProps) {
+export function UserColorProvider({ userColorPalette, backgroundImageUrl, backgroundTint, children }: UserColorProviderProps) {
   useEffect(() => {
     const root = document.documentElement;
 
     // Apply background image if present
     if (backgroundImageUrl) {
-      root.style.setProperty('background-image', `url(${backgroundImageUrl})`);
+      // Apply tint overlay if configured
+      if (backgroundTint && backgroundTint.opacity > 0) {
+        const { color, opacity } = backgroundTint;
+        root.style.setProperty('background', 
+          `linear-gradient(${color}${Math.round(opacity * 255).toString(16).padStart(2, '0')}, ${color}${Math.round(opacity * 255).toString(16).padStart(2, '0')}), url(${backgroundImageUrl})`
+        );
+      } else {
+        root.style.setProperty('background-image', `url(${backgroundImageUrl})`);
+      }
       root.style.setProperty('background-size', 'cover');
       root.style.setProperty('background-position', 'center');
       root.style.setProperty('background-attachment', 'fixed');
     } else {
+      root.style.removeProperty('background');
       root.style.removeProperty('background-image');
       root.style.removeProperty('background-size');
       root.style.removeProperty('background-position');
@@ -80,7 +90,7 @@ export function UserColorProvider({ userColorPalette, backgroundImageUrl, childr
         root.style.setProperty('--ring', "30 40% 35%");
       }
     };
-  }, [userColorPalette, backgroundImageUrl]);
+  }, [userColorPalette, backgroundImageUrl, backgroundTint]);
 
   return <>{children}</>;
 }
