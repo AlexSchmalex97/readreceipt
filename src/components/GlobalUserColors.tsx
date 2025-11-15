@@ -5,6 +5,7 @@ import { UserColorProvider } from "@/components/UserColorProvider";
 // Wrap children and apply user's palette globally if color_palette.apply_globally is true
 export default function GlobalUserColors({ children }: { children: React.ReactNode }) {
   const [palette, setPalette] = useState<any | null>(null);
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
   const applyGlobally = useMemo(() => Boolean(palette?.apply_globally), [palette]);
 
   // Build a safe, complete palette with fallbacks to current CSS tokens
@@ -35,11 +36,12 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
         }
         const { data } = await supabase
           .from("profiles")
-          .select("color_palette")
+          .select("color_palette, background_image_url")
           .eq("id", user.id)
           .single();
         if (!mounted) return;
         setPalette((data as any)?.color_palette || null);
+        setBackgroundImageUrl((data as any)?.background_image_url || null);
       } catch {
         if (mounted) setPalette(null);
       }
@@ -55,10 +57,11 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
         }
         const { data } = await supabase
           .from("profiles")
-          .select("color_palette")
+          .select("color_palette, background_image_url")
           .eq("id", user.id)
           .single();
         setPalette((data as any)?.color_palette || null);
+        setBackgroundImageUrl((data as any)?.background_image_url || null);
       })();
     });
     return () => {
@@ -68,7 +71,7 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
   }, []);
 
   if (applyGlobally && (effectivePalette || palette)) {
-    return <UserColorProvider userColorPalette={effectivePalette || palette}>{children}</UserColorProvider>;
+    return <UserColorProvider userColorPalette={effectivePalette || palette} backgroundImageUrl={backgroundImageUrl}>{children}</UserColorProvider>;
   }
   return <>{children}</>;
 }

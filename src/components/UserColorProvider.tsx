@@ -11,16 +11,31 @@ type ColorPalette = {
 
 type UserColorProviderProps = {
   userColorPalette?: any;
+  backgroundImageUrl?: string | null;
   children: React.ReactNode;
 };
 
-export function UserColorProvider({ userColorPalette, children }: UserColorProviderProps) {
+export function UserColorProvider({ userColorPalette, backgroundImageUrl, children }: UserColorProviderProps) {
   useEffect(() => {
+    const root = document.documentElement;
+
+    // Apply background image if present
+    if (backgroundImageUrl) {
+      root.style.setProperty('background-image', `url(${backgroundImageUrl})`);
+      root.style.setProperty('background-size', 'cover');
+      root.style.setProperty('background-position', 'center');
+      root.style.setProperty('background-attachment', 'fixed');
+    } else {
+      root.style.removeProperty('background-image');
+      root.style.removeProperty('background-size');
+      root.style.removeProperty('background-position');
+      root.style.removeProperty('background-attachment');
+    }
+
+    // Apply color palette if present and not using default
     if (userColorPalette && userColorPalette.name !== "default") {
       const palette = userColorPalette as ColorPalette;
-      const root = document.documentElement;
       
-      // Apply user's custom color palette
       root.style.setProperty('--primary', palette.primary);
       root.style.setProperty('--secondary', palette.secondary);
       root.style.setProperty('--accent', palette.accent);
@@ -38,11 +53,16 @@ export function UserColorProvider({ userColorPalette, children }: UserColorProvi
       root.style.setProperty('--ring', palette.primary);
     }
 
-    // Cleanup function to reset to default colors when component unmounts
+    // Cleanup function to reset to default
     return () => {
+      // Reset background image
+      root.style.removeProperty('background-image');
+      root.style.removeProperty('background-size');
+      root.style.removeProperty('background-position');
+      root.style.removeProperty('background-attachment');
+
+      // Reset to default colors if custom palette was applied
       if (userColorPalette && userColorPalette.name !== "default") {
-        const root = document.documentElement;
-        // Reset to default colors
         root.style.setProperty('--primary', "30 40% 35%");
         root.style.setProperty('--secondary', "40 20% 85%");
         root.style.setProperty('--accent', "60 20% 80%");
@@ -60,7 +80,7 @@ export function UserColorProvider({ userColorPalette, children }: UserColorProvi
         root.style.setProperty('--ring', "30 40% 35%");
       }
     };
-  }, [userColorPalette]);
+  }, [userColorPalette, backgroundImageUrl]);
 
   return <>{children}</>;
 }
