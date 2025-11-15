@@ -64,6 +64,8 @@ export default function ProfileSettings() {
   const [savedCustomAccentTexts, setSavedCustomAccentTexts] = useState<string[]>([]);
   const [applyGlobally, setApplyGlobally] = useState<boolean>(false);
   const [savedCustomColors, setSavedCustomColors] = useState<string[]>([]);
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
+  const [backgroundTint, setBackgroundTint] = useState<{ color: string; opacity: number } | null>(null);
   const [uploading, setUploading] = useState(false);
   const normUsername = useMemo(() => normalizeUsername(username), [username]);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
@@ -133,6 +135,8 @@ export default function ProfileSettings() {
       setSocialMediaLinks(prof?.social_media_links ? Object.entries(prof.social_media_links).map(([platform, url]) => ({ platform, url: url as string })) : []);
       setWebsiteUrl(prof?.website_url ?? "");
       setBackgroundColor((prof as any)?.background_color ?? "#F5F1E8");
+      setBackgroundImageUrl((prof as any)?.background_image_url ?? null);
+      setBackgroundTint((prof as any)?.background_tint ?? null);
       const cp = (prof as any)?.color_palette || {};
       setApplyGlobally(Boolean(cp?.apply_globally));
       setSavedCustomColors(Array.isArray(cp?.custom_colors) ? cp.custom_colors : []);
@@ -652,12 +656,25 @@ export default function ProfileSettings() {
           textColor={textColor}
           accentColor={accentColor}
           accentTextColor={accentTextColor}
+          backgroundImageUrl={backgroundImageUrl}
+          backgroundTint={backgroundTint}
           onDisplayPreferenceChange={setDisplayPreference}
           onTemperatureUnitChange={setTemperatureUnit}
           onBackgroundColorChange={setBackgroundColor}
           onTextColorChange={setTextColor}
           onAccentColorChange={setAccentColor}
           onAccentTextColorChange={setAccentTextColor}
+          onBackgroundUpdate={async () => {
+            const { data: user } = await supabase.auth.getUser();
+            if (!user.user) return;
+            const { data: prof } = await supabase
+              .from("profiles")
+              .select("background_image_url, background_tint")
+              .eq("id", user.user.id)
+              .single();
+            setBackgroundImageUrl((prof as any)?.background_image_url ?? null);
+            setBackgroundTint((prof as any)?.background_tint ?? null);
+          }}
         />
 
         <div className="mt-6 flex justify-end">

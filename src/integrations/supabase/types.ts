@@ -169,6 +169,7 @@ export type Database = {
           avatar_url: string | null
           background_color: string | null
           background_image_url: string | null
+          background_tint: Json | null
           bio: string | null
           birthday: string | null
           color_palette: Json | null
@@ -189,6 +190,7 @@ export type Database = {
           avatar_url?: string | null
           background_color?: string | null
           background_image_url?: string | null
+          background_tint?: Json | null
           bio?: string | null
           birthday?: string | null
           color_palette?: Json | null
@@ -209,6 +211,7 @@ export type Database = {
           avatar_url?: string | null
           background_color?: string | null
           background_image_url?: string | null
+          background_tint?: Json | null
           bio?: string | null
           birthday?: string | null
           color_palette?: Json | null

@@ -10,6 +10,7 @@ import { ReadingGoals } from "@/components/ReadingGoals";
 import { FavoriteBookSelector } from "@/components/FavoriteBookSelector";
 import { TopFiveBooksDialog } from "@/components/TopFiveBooksDialog";
 import { SocialMediaInput } from "@/components/SocialMediaInput";
+import { BackgroundImageSettings } from "@/components/BackgroundImageSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { BookOpen, User, Settings as SettingsIcon, Palette, Camera, Link as LinkIcon, Upload, Download } from "lucide-react";
@@ -67,12 +68,15 @@ interface SettingsTabsProps {
   textColor: string;
   accentColor: string;
   accentTextColor: string;
+  backgroundImageUrl: string | null;
+  backgroundTint: { color: string; opacity: number } | null;
   onDisplayPreferenceChange: (pref: 'quotes' | 'time_weather' | 'both') => void;
   onTemperatureUnitChange: (unit: 'celsius' | 'fahrenheit') => void;
   onBackgroundColorChange: (color: string) => void;
   onTextColorChange: (color: string) => void;
   onAccentColorChange: (color: string) => void;
   onAccentTextColorChange: (color: string) => void;
+  onBackgroundUpdate: () => void;
 }
 
 export function SettingsTabs(props: SettingsTabsProps) {
@@ -432,6 +436,20 @@ export function SettingsTabs(props: SettingsTabsProps) {
 
       {/* Display Settings Tab */}
       <TabsContent value="display" className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Background Image</CardTitle>
+            <CardDescription>Upload a custom background image for your profile</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <BackgroundImageSettings
+              backgroundImageUrl={props.backgroundImageUrl}
+              backgroundTint={props.backgroundTint}
+              onUpdate={props.onBackgroundUpdate}
+            />
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Header Display</CardTitle>
