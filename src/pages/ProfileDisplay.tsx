@@ -594,15 +594,13 @@ export default function ProfileDisplay() {
                     Top Five
                   </p>
                 </Link>
-                {topFiveBooks.length > 5 && (
-                  <button
-                    onClick={() => setShowTopTenDialog(true)}
-                    className="text-xs px-2 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
-                    style={{ color: accentTextColor, borderColor: accentTextColor }}
-                  >
-                    view top ten
-                  </button>
-                )}
+                <button
+                  onClick={() => setShowTopTenDialog(true)}
+                  className="text-xs px-2 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
+                  style={{ color: accentTextColor, borderColor: accentTextColor }}
+                >
+                  view top ten
+                </button>
               </div>
               <div className="flex gap-2 overflow-x-auto pb-2">
                 {topFiveBooks.slice(0, 5).map((book, index) => (
@@ -1009,14 +1007,12 @@ export default function ProfileDisplay() {
                           Top Five
                         </h3>
                       </Link>
-                      {topFiveBooks.length > 5 && (
-                        <button
-                          onClick={() => setShowTopTenDialog(true)}
-                          className="text-xs px-2 py-0.5 rounded-full border border-muted-foreground/30 text-muted-foreground hover:bg-accent/50 transition-colors"
-                        >
-                          view top ten
-                        </button>
-                      )}
+                      <button
+                        onClick={() => setShowTopTenDialog(true)}
+                        className="text-xs px-2 py-0.5 rounded-full border border-muted-foreground/30 text-muted-foreground hover:bg-accent/50 transition-colors"
+                      >
+                        view top ten
+                      </button>
                     </div>
                     <div className="flex gap-3">
                       {topFiveBooks.slice(0, 5).map((book, index) => (
