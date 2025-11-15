@@ -44,3 +44,5 @@ export const searchGoogleBooks = async (query: string): Promise<GoogleBookResult
     throw error;
   }
 };
+
+export const searchBooks = searchGoogleBooks;

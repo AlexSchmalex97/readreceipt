@@ -9,6 +9,8 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { searchBooks } from "@/lib/googleBooks";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Book = {
   id: string;
@@ -69,6 +71,9 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
   const [availableBooks, setAvailableBooks] = useState<Book[]>([]);
   const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [googleSearchQuery, setGoogleSearchQuery] = useState("");
+  const [googleResults, setGoogleResults] = useState<any[]>([]);
+  const [searchingGoogle, setSearchingGoogle] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -83,6 +88,8 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
     if (open) {
       loadBooks();
       setSearchQuery("");
+      setGoogleSearchQuery("");
+      setGoogleResults([]);
     }
   }, [open]);
 
@@ -175,6 +182,90 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
     setAvailableBooks(availableBooks.filter(b => b.id !== book.id));
   };
 
+  const handleAddGoogleBook = async (googleBook: any) => {
+    if (selectedBooks.length >= 5) {
+      toast({
+        title: "Limit reached",
+        description: "You can only select up to 5 books",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const volumeInfo = googleBook.volumeInfo;
+      const title = volumeInfo.title || "Unknown Title";
+      const author = volumeInfo.authors?.join(", ") || "Unknown Author";
+      const coverUrl = volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || null;
+      const totalPages = volumeInfo.pageCount || 0;
+
+      // Check if book already exists for this user
+      const { data: existingBook } = await supabase
+        .from('books')
+        .select('id, title, author, cover_url')
+        .eq('user_id', user.id)
+        .eq('title', title)
+        .eq('author', author)
+        .maybeSingle();
+
+      let bookToAdd: Book;
+
+      if (existingBook) {
+        bookToAdd = existingBook;
+      } else {
+        // Create new book entry
+        const { data: newBook, error } = await supabase
+          .from('books')
+          .insert({
+            user_id: user.id,
+            title,
+            author,
+            cover_url: coverUrl,
+            total_pages: totalPages,
+            current_page: 0,
+            status: 'completed'
+          })
+          .select('id, title, author, cover_url')
+          .single();
+
+        if (error) throw error;
+        bookToAdd = newBook;
+      }
+
+      setSelectedBooks([...selectedBooks, bookToAdd]);
+      setGoogleResults(googleResults.filter(b => b.id !== googleBook.id));
+    } catch (error) {
+      console.error('Error adding book:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add book",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleGoogleSearch = async () => {
+    if (!googleSearchQuery.trim()) return;
+
+    setSearchingGoogle(true);
+    try {
+      const results = await searchBooks(googleSearchQuery);
+      setGoogleResults(results);
+    } catch (error) {
+      console.error('Error searching Google Books:', error);
+      toast({
+        title: "Search failed",
+        description: "Could not search Google Books",
+        variant: "destructive",
+      });
+    } finally {
+      setSearchingGoogle(false);
+    }
+  };
+
   const handleRemoveBook = (bookId: string) => {
     const book = selectedBooks.find(b => b.id === bookId);
     if (book) {
@@ -254,63 +345,135 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
             )}
           </div>
 
-          {/* Available Books */}
-          <div>
-            <h3 className="font-medium mb-3">
-              {selectedBooks.length >= 5 ? 'Completed Books (Remove a book to add another)' : 'Add from Completed Books'}
-            </h3>
-            {availableBooks.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg">
-                <BookOpen className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">No completed books available</p>
-                <p className="text-xs mt-1">Mark some books as completed to add them here</p>
+          {/* Book Selection Tabs */}
+          <Tabs defaultValue="library" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="library">My Library</TabsTrigger>
+              <TabsTrigger value="search">Search Books</TabsTrigger>
+            </TabsList>
+
+            {/* Library Tab */}
+            <TabsContent value="library" className="space-y-3">
+              <div>
+                <h3 className="font-medium mb-3">
+                  {selectedBooks.length >= 5 ? 'Completed Books (Remove a book to add another)' : 'Add from Completed Books'}
+                </h3>
+                {availableBooks.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg">
+                    <BookOpen className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No completed books available</p>
+                    <p className="text-xs mt-1">Mark some books as completed or search for books in the Search tab</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="relative mb-3">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search your books..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-9"
+                      />
+                    </div>
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                      {filteredBooks.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <p className="text-sm">No books match your search</p>
+                        </div>
+                      ) : (
+                        filteredBooks.map((book) => (
+                          <div key={book.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border">
+                            {book.cover_url ? (
+                              <img src={book.cover_url} alt={book.title} className="w-12 h-16 object-cover rounded shadow-sm" />
+                            ) : (
+                              <div className="w-12 h-16 bg-muted rounded flex items-center justify-center">
+                                <BookOpen className="w-6 h-6 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-sm truncate">{book.title}</div>
+                              <div className="text-xs text-muted-foreground truncate">{book.author}</div>
+                            </div>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => handleAddBook(book)}
+                              disabled={selectedBooks.length >= 5}
+                            >
+                              Add
+                            </Button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
-            ) : (
-              <>
-                {/* Search Bar */}
-                <div className="relative mb-3">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by title or author..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9"
-                  />
+            </TabsContent>
+
+            {/* Google Books Search Tab */}
+            <TabsContent value="search" className="space-y-3">
+              <div>
+                <h3 className="font-medium mb-3">Search Google Books</h3>
+                <div className="flex gap-2 mb-3">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by title or author..."
+                      value={googleSearchQuery}
+                      onChange={(e) => setGoogleSearchQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleGoogleSearch()}
+                      className="pl-9"
+                    />
+                  </div>
+                  <Button onClick={handleGoogleSearch} disabled={searchingGoogle}>
+                    {searchingGoogle ? "Searching..." : "Search"}
+                  </Button>
                 </div>
                 <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {filteredBooks.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <p className="text-sm">No books match your search</p>
+                  {googleResults.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg">
+                      <Search className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">Search for books to add to your Top Five</p>
                     </div>
                   ) : (
-                    filteredBooks.map((book) => (
-                      <div key={book.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border">
-                        {book.cover_url ? (
-                          <img src={book.cover_url} alt={book.title} className="w-12 h-16 object-cover rounded shadow-sm" />
-                        ) : (
-                          <div className="w-12 h-16 bg-muted rounded flex items-center justify-center">
-                            <BookOpen className="w-6 h-6 text-muted-foreground" />
+                    googleResults.map((book) => {
+                      const volumeInfo = book.volumeInfo;
+                      return (
+                        <div key={book.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border">
+                          {volumeInfo.imageLinks?.thumbnail ? (
+                            <img 
+                              src={volumeInfo.imageLinks.thumbnail.replace('http:', 'https:')} 
+                              alt={volumeInfo.title} 
+                              className="w-12 h-16 object-cover rounded shadow-sm" 
+                            />
+                          ) : (
+                            <div className="w-12 h-16 bg-muted rounded flex items-center justify-center">
+                              <BookOpen className="w-6 h-6 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm truncate">{volumeInfo.title}</div>
+                            <div className="text-xs text-muted-foreground truncate">
+                              {volumeInfo.authors?.join(", ") || "Unknown Author"}
+                            </div>
                           </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm truncate">{book.title}</div>
-                          <div className="text-xs text-muted-foreground truncate">{book.author}</div>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => handleAddGoogleBook(book)}
+                            disabled={selectedBooks.length >= 5}
+                          >
+                            Add
+                          </Button>
                         </div>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => handleAddBook(book)}
-                          disabled={selectedBooks.length >= 5}
-                        >
-                          Add
-                        </Button>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
-              </>
-            )}
-          </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
 
         <div className="flex justify-end gap-2 pt-4">
