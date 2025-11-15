@@ -404,7 +404,7 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
                               variant="outline" 
                               size="sm" 
                               onClick={() => handleAddBook(book)}
-                              disabled={selectedBooks.length >= 5}
+                              disabled={selectedBooks.length >= 10}
                             >
                               Add
                             </Button>
@@ -477,7 +477,7 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
                             variant="outline" 
                             size="sm" 
                             onClick={() => handleAddGoogleBook(book)}
-                            disabled={selectedBooks.length >= 5}
+                            disabled={selectedBooks.length >= 10}
                             className="shrink-0"
                           >
                             Add
