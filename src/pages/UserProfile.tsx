@@ -557,9 +557,37 @@ export default function UserProfile() {
                   </div>
                 )}
               </div>
-            )}
+          )}
 
-            {/* Links */}
+          {/* Top Five Books */}
+          {topFiveBooks.length > 0 && (
+            <div className="mb-4">
+              <p className="text-sm mb-2 font-medium text-center" style={{ color: accentTextColor }}>
+                Top Five
+              </p>
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                {topFiveBooks.map((book, index) => (
+                  <div key={book.id} className="flex-shrink-0 w-24">
+                    <div className="relative">
+                      <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold z-10" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>
+                        {index + 1}
+                      </div>
+                      {book.cover_url && (
+                        <img
+                          src={book.cover_url}
+                          alt={book.title}
+                          className="w-full h-32 object-cover rounded shadow-md"
+                        />
+                      )}
+                    </div>
+                    <p className="text-xs mt-1 text-center truncate font-medium" style={{ color: headerTextColor }}>{book.title}</p>
+                    <p className="text-xs text-center truncate" style={{ color: headerTextColor, opacity: 0.7 }}>{book.author}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
             {((profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url) && (
               <>
                 <p className="text-sm font-medium mb-2 text-center" style={{ color: headerTextColor }}>Links</p>
