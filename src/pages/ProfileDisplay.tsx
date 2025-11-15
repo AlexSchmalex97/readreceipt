@@ -434,6 +434,7 @@ export default function ProfileDisplay() {
   })();
 
   return (
+    <>
     <div className="min-h-screen bg-background">
       <Navigation />
       <div
@@ -1347,8 +1348,8 @@ export default function ProfileDisplay() {
                   </div>
                 )}
               </CardContent>
-            </Card>
-        </div>
+          </Card>
+          </div>
         </div>
 
         <TopTenDialog 
@@ -1374,5 +1375,7 @@ export default function ProfileDisplay() {
         />
       </div>
     </div>
+    </div>
+    </>
   );
 }
