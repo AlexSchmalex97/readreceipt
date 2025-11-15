@@ -144,12 +144,12 @@ export const BookCard = ({
       <CardHeader className="pb-1.5 sm:pb-3 pt-2 sm:pt-6 px-2 sm:px-6">
         <div className="flex items-start gap-1.5 sm:gap-3">
           {/* Book Cover */}
-          <div className="relative bg-muted rounded border flex-shrink-0 overflow-hidden w-10 sm:w-16 h-14 sm:h-20">
+          <div className="relative bg-muted rounded border flex-shrink-0 overflow-hidden w-10 sm:w-16 h-14 sm:h-20 flex items-center justify-center">
             {book.coverUrl ? (
               <img 
                 src={book.coverUrl} 
                 alt={`Cover of ${book.title}`}
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain bg-muted"
                 onError={(e) => {
                   console.log('Failed to load cover for:', book.title, book.coverUrl);
                   e.currentTarget.style.display = 'none';
