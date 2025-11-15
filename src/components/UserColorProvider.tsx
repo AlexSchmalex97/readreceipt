@@ -19,27 +19,30 @@ type UserColorProviderProps = {
 export function UserColorProvider({ userColorPalette, backgroundImageUrl, backgroundTint, children }: UserColorProviderProps) {
   useEffect(() => {
     const root = document.documentElement;
+    const body = document.body;
 
     // Apply background image if present
     if (backgroundImageUrl) {
       // Apply tint overlay if configured
       if (backgroundTint && backgroundTint.opacity > 0) {
         const { color, opacity } = backgroundTint;
-        root.style.setProperty('background', 
-          `linear-gradient(${color}${Math.round(opacity * 255).toString(16).padStart(2, '0')}, ${color}${Math.round(opacity * 255).toString(16).padStart(2, '0')}), url(${backgroundImageUrl})`
-        );
+        const hexOpacity = Math.round(opacity * 255).toString(16).padStart(2, '0');
+        body.style.background = `linear-gradient(${color}${hexOpacity}, ${color}${hexOpacity}), url(${backgroundImageUrl})`;
+        body.style.backgroundSize = 'cover';
+        body.style.backgroundPosition = 'center';
+        body.style.backgroundAttachment = 'fixed';
       } else {
-        root.style.setProperty('background-image', `url(${backgroundImageUrl})`);
+        body.style.backgroundImage = `url(${backgroundImageUrl})`;
+        body.style.backgroundSize = 'cover';
+        body.style.backgroundPosition = 'center';
+        body.style.backgroundAttachment = 'fixed';
       }
-      root.style.setProperty('background-size', 'cover');
-      root.style.setProperty('background-position', 'center');
-      root.style.setProperty('background-attachment', 'fixed');
     } else {
-      root.style.removeProperty('background');
-      root.style.removeProperty('background-image');
-      root.style.removeProperty('background-size');
-      root.style.removeProperty('background-position');
-      root.style.removeProperty('background-attachment');
+      body.style.background = '';
+      body.style.backgroundImage = '';
+      body.style.backgroundSize = '';
+      body.style.backgroundPosition = '';
+      body.style.backgroundAttachment = '';
     }
 
     // Apply color palette if present and not using default
@@ -65,11 +68,14 @@ export function UserColorProvider({ userColorPalette, backgroundImageUrl, backgr
 
     // Cleanup function to reset to default
     return () => {
+      const body = document.body;
+      
       // Reset background image
-      root.style.removeProperty('background-image');
-      root.style.removeProperty('background-size');
-      root.style.removeProperty('background-position');
-      root.style.removeProperty('background-attachment');
+      body.style.background = '';
+      body.style.backgroundImage = '';
+      body.style.backgroundSize = '';
+      body.style.backgroundPosition = '';
+      body.style.backgroundAttachment = '';
 
       // Reset to default colors if custom palette was applied
       if (userColorPalette && userColorPalette.name !== "default") {
