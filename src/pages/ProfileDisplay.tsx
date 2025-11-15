@@ -602,18 +602,18 @@ export default function ProfileDisplay() {
                   view top ten
                 </button>
               </div>
-              <div className="flex gap-2 overflow-x-auto pb-2">
+              <div className="flex gap-2 overflow-x-auto pb-2 justify-center md:justify-start">
                 {topFiveBooks.slice(0, 5).map((book, index) => (
-                  <div key={book.id} className="flex-shrink-0 w-24">
+                  <div key={book.id} className="flex-shrink-0 w-20 md:w-24">
                     <div className="relative">
-                      <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold z-10" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>
+                      <div className="absolute -top-2 -left-2 w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-xs font-bold z-10" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>
                         {index + 1}
                       </div>
                       {book.cover_url && (
                         <img
                           src={book.cover_url}
                           alt={book.title}
-                          className="w-full h-32 object-cover rounded shadow-md"
+                          className="w-full h-28 md:h-32 object-cover rounded shadow-md"
                         />
                       )}
                     </div>
