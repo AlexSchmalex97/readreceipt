@@ -903,22 +903,8 @@ export default function UserProfile() {
 
                     {/* Followers/Following + Follow */}
                     <div className="flex gap-2 mt-3">
-                      <button
-                        onClick={() => setShowFollowersDialog(true)}
-                        className="px-4 py-2 rounded-full border hover:bg-white/10 transition-colors"
-                        style={{ color: headerTextColor, borderColor: headerTextColor }}
-                      >
-                        <User className="w-4 h-4 inline mr-1" />
-                        {followersCount} Followers
-                      </button>
-                      <button
-                        onClick={() => setShowFollowingDialog(true)}
-                        className="px-4 py-2 rounded-full border hover:bg-white/10 transition-colors"
-                        style={{ color: headerTextColor, borderColor: headerTextColor }}
-                      >
-                        <User className="w-4 h-4 inline mr-1" />
-                        {followingCount} Following
-                      </button>
+                      <FollowersDialog userId={profile.id} type="followers" count={followersCount} />
+                      <FollowersDialog userId={profile.id} type="following" count={followingCount} />
                       {myId && myId !== profile.id && (
                         <div className="ml-2">
                           <FollowButton targetUserId={profile.id} />
