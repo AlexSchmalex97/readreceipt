@@ -70,6 +70,7 @@ interface SettingsTabsProps {
   accentTextColor: string;
   backgroundImageUrl: string | null;
   backgroundTint: { color: string; opacity: number } | null;
+  backgroundType: 'color' | 'image';
   onDisplayPreferenceChange: (pref: 'quotes' | 'time_weather' | 'both') => void;
   onTemperatureUnitChange: (unit: 'celsius' | 'fahrenheit') => void;
   onBackgroundColorChange: (color: string) => void;
@@ -445,6 +446,7 @@ export function SettingsTabs(props: SettingsTabsProps) {
             <BackgroundImageSettings
               backgroundImageUrl={props.backgroundImageUrl}
               backgroundTint={props.backgroundTint}
+              backgroundType={props.backgroundType}
               onUpdate={props.onBackgroundUpdate}
             />
           </CardContent>
