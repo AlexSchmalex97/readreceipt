@@ -434,7 +434,6 @@ export default function ProfileDisplay() {
   })();
 
   return (
-    <>
     <div className="min-h-screen bg-background">
       <Navigation />
       <div
@@ -1351,30 +1350,30 @@ export default function ProfileDisplay() {
             </Card>
           </div>
         </div>
+        </div>
+
+        <TopTenDialog 
+          open={showTopTenDialog} 
+          onOpenChange={setShowTopTenDialog} 
+          books={topFiveBooks} 
+          accentCardColor={accentCardColor}
+          accentTextColor={accentTextColor}
+        />
+        <FollowersDialog 
+          open={showFollowersDialog}
+          onOpenChange={setShowFollowersDialog}
+          userId={uid || ''}
+          type="followers"
+          count={followersCount}
+        />
+        <FollowersDialog 
+          open={showFollowingDialog}
+          onOpenChange={setShowFollowingDialog}
+          userId={uid || ''}
+          type="following"
+          count={followingCount}
+        />
       </div>
     </div>
-    
-    <TopTenDialog 
-      open={showTopTenDialog} 
-      onOpenChange={setShowTopTenDialog} 
-      books={topFiveBooks} 
-      accentCardColor={accentCardColor}
-      accentTextColor={accentTextColor}
-    />
-    <FollowersDialog 
-      open={showFollowersDialog}
-      onOpenChange={setShowFollowersDialog}
-      userId={uid || ''}
-      type="followers"
-      count={followersCount}
-    />
-    <FollowersDialog 
-      open={showFollowingDialog}
-      onOpenChange={setShowFollowingDialog}
-      userId={uid || ''}
-      type="following"
-      count={followingCount}
-    />
-  </>
   );
 }
