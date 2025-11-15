@@ -589,7 +589,7 @@ export default function UserProfile() {
                         <img
                           src={book.cover_url}
                           alt={book.title}
-                          className="w-full h-28 md:h-32 object-cover rounded shadow-md"
+                          className="w-full h-28 md:h-32 object-contain rounded shadow-md"
                         />
                       )}
                     </div>
