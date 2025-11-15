@@ -932,7 +932,7 @@ const Index = () => {
                           <img 
                             src={book.coverUrl} 
                             alt={book.title}
-                            className="w-6 h-8 object-contain rounded shadow-sm"
+                            className="w-6 h-8 object-contain rounded shadow-sm bg-muted"
                             title={`${book.title} by ${book.author}`}
                           />
                         ) : (
@@ -964,7 +964,7 @@ const Index = () => {
                           <img 
                             src={book.coverUrl} 
                             alt={book.title}
-                            className="w-6 h-8 object-contain rounded shadow-sm"
+                            className="w-6 h-8 object-contain rounded shadow-sm bg-muted"
                             title={`${book.title} by ${book.author}`}
                           />
                         ) : (
@@ -1015,7 +1015,7 @@ const Index = () => {
                               <img 
                                 src={book.coverUrl} 
                                 alt={book.title}
-                                className="w-12 h-16 object-contain rounded shadow-sm"
+                                className="w-12 h-16 object-contain rounded shadow-sm bg-muted"
                               />
                             ) : (
                               <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm">
