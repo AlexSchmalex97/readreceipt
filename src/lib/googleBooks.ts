@@ -26,16 +26,18 @@ export const searchGoogleBooks = async (query: string): Promise<GoogleBookResult
     const data = await response.json();
     
     if (data.items) {
-      return data.items.map((item: any): GoogleBookResult => ({
-        id: item.id,
-        title: item.volumeInfo.title || "Unknown Title",
-        authors: item.volumeInfo.authors || [],
-        pageCount: item.volumeInfo.pageCount,
-        imageLinks: item.volumeInfo.imageLinks,
-        description: item.volumeInfo.description,
-        publishedDate: item.volumeInfo.publishedDate,
-        publisher: item.volumeInfo.publisher,
-      }));
+      return data.items
+        .filter((item: any) => item.volumeInfo)
+        .map((item: any): GoogleBookResult => ({
+          id: item.id,
+          title: item.volumeInfo.title || "Unknown Title",
+          authors: item.volumeInfo.authors || [],
+          pageCount: item.volumeInfo.pageCount,
+          imageLinks: item.volumeInfo.imageLinks,
+          description: item.volumeInfo.description,
+          publishedDate: item.volumeInfo.publishedDate,
+          publisher: item.volumeInfo.publisher,
+        }));
     }
     
     return [];
