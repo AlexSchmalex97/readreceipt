@@ -77,7 +77,7 @@ function SortableBook({ book, onRemove, onUpdateCover }: SortableBookProps) {
       </div>
       <div className="relative group">
         {book.cover_url ? (
-          <img src={book.cover_url} alt={book.title} className="w-12 h-16 object-cover rounded shadow-sm" />
+          <img src={book.cover_url} alt={book.title} className="w-12 h-16 object-contain rounded shadow-sm" />
         ) : (
           <div className="w-12 h-16 bg-muted rounded flex items-center justify-center">
             <BookOpen className="w-6 h-6 text-muted-foreground" />
@@ -451,7 +451,7 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
                         filteredBooks.map((book) => (
                           <div key={book.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border">
                             {book.cover_url ? (
-                              <img src={book.cover_url} alt={book.title} className="w-12 h-16 object-cover rounded shadow-sm" />
+                              <img src={book.cover_url} alt={book.title} className="w-12 h-16 object-contain rounded shadow-sm" />
                             ) : (
                               <div className="w-12 h-16 bg-muted rounded flex items-center justify-center">
                                 <BookOpen className="w-6 h-6 text-muted-foreground" />
@@ -521,7 +521,7 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
                             <img 
                               src={imgSrc}
                               alt={title}
-                              className="w-12 h-16 object-cover rounded shadow-sm" 
+                              className="w-12 h-16 object-contain rounded shadow-sm" 
                             />
                           ) : (
                             <div className="w-12 h-16 bg-muted rounded flex items-center justify-center">

@@ -168,7 +168,7 @@ export const AddBookDialog = ({ onAddBook }: AddBookDialogProps) => {
                           <img 
                             src={book.imageLinks.thumbnail} 
                             alt={book.title}
-                            className="w-12 h-16 object-cover rounded"
+                            className="w-12 h-16 object-contain rounded"
                           />
                         )}
                         <div className="flex-1 min-w-0">

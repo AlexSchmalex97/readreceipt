@@ -301,7 +301,7 @@ export default function Feed() {
                 <img 
                   src={it.book_cover_url} 
                   alt={it.book_title || "Book cover"}
-                  className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
+                  className="w-12 h-16 object-contain rounded shadow-sm flex-shrink-0"
                 />
               ) : (
                 <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
@@ -343,7 +343,7 @@ export default function Feed() {
                 <img 
                   src={it.book_cover_url} 
                   alt={it.book_title || "Book cover"}
-                  className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0"
+                  className="w-12 h-16 object-contain rounded shadow-sm flex-shrink-0"
                 />
               ) : (
                 <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">

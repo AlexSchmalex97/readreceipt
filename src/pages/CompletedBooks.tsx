@@ -226,7 +226,7 @@ export default function CompletedBooks() {
                       <img 
                         src={book.cover_url} 
                         alt={book.title}
-                        className="w-20 h-28 object-cover rounded shadow-sm"
+                        className="w-20 h-28 object-contain rounded shadow-sm"
                       />
                     ) : (
                       <div className="w-20 h-28 bg-muted rounded flex items-center justify-center shadow-sm">

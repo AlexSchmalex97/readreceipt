@@ -297,7 +297,7 @@ export default function Notifications() {
                       <img
                         src={book.imageLinks.thumbnail}
                         alt={book.title}
-                        className="w-16 h-24 object-cover rounded flex-shrink-0"
+                        className="w-16 h-24 object-contain rounded flex-shrink-0"
                       />
                     )}
                     <div className="flex-1">

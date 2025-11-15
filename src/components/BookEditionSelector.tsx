@@ -223,7 +223,7 @@ export function BookEditionSelector({
                   <img 
                     src={currentCoverUrl} 
                     alt="Current cover"
-                    className="w-16 h-24 object-cover rounded shadow-sm"
+                    className="w-16 h-24 object-contain rounded shadow-sm"
                   />
                   <div>
                     <p className="text-sm font-medium">{bookTitle}</p>
@@ -249,7 +249,7 @@ export function BookEditionSelector({
                           <img 
                             src={edition.imageLinks.thumbnail} 
                             alt={edition.title}
-                            className="w-16 h-24 object-cover rounded shadow-sm flex-shrink-0"
+                            className="w-16 h-24 object-contain rounded shadow-sm flex-shrink-0"
                           />
                         ) : (
                           <div className="w-16 h-24 bg-muted rounded flex items-center justify-center flex-shrink-0">
@@ -293,7 +293,7 @@ export function BookEditionSelector({
                   <img 
                     src={currentCoverUrl} 
                     alt="Current cover"
-                    className="w-16 h-24 object-cover rounded shadow-sm"
+                    className="w-16 h-24 object-contain rounded shadow-sm"
                   />
                   <div>
                     <p className="text-sm font-medium">{bookTitle}</p>
