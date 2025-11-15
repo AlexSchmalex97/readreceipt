@@ -168,7 +168,7 @@ export default function ProfileSettings() {
         if (books) {
           extra = books.filter((b: any) => {
             if (booksWithEntry.has(b.id)) return false;
-            if (b.status === 'dnf') return false;
+            if (b.status === 'dnf' || b.status === 'top_five') return false;
             const completedFlag = (b.status === 'completed') || ((b.current_page ?? 0) >= (b.total_pages ?? 0));
             if (!completedFlag) return false;
             if (b.finished_at) {

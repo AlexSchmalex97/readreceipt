@@ -231,7 +231,7 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
             cover_url: coverUrl,
             total_pages: totalPages,
             current_page: 0,
-            status: 'completed'
+            status: 'top_five'
           })
           .select('id, title, author, cover_url')
           .single();

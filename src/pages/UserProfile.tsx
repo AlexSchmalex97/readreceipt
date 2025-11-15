@@ -290,7 +290,8 @@ export default function UserProfile() {
           const inProgress = allBooks.filter(book => 
             book.current_page < book.total_pages && 
             book.status !== 'completed' && 
-            book.status !== 'dnf'
+            book.status !== 'dnf' &&
+            book.status !== 'top_five'
           );
           
           setBookStats({ 

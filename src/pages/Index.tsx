@@ -235,7 +235,7 @@ const Index = () => {
       if (books) {
         extra = books.filter((b: any) => {
           if (booksWithEntry.has(b.id)) return false;
-          if (b.status === 'dnf') return false;
+          if (b.status === 'dnf' || b.status === 'top_five') return false;
           const completedFlag = (b.status === 'completed') || ((b.current_page ?? 0) >= (b.total_pages ?? 0));
           if (!completedFlag) return false;
           if (b.finished_at) {
@@ -773,7 +773,7 @@ const Index = () => {
   };
 
   const booksInProgress = books.filter(
-    (b) => b.currentPage < b.totalPages && b.status !== 'dnf'
+    (b) => b.currentPage < b.totalPages && b.status !== 'dnf' && String(b.status) !== 'top_five'
   ).length;
   const completedBooks = books.filter((b) => b.currentPage >= b.totalPages && b.status !== 'dnf').length;
   const dnfBooks = books.filter((b) => b.status === 'dnf').length;
@@ -782,7 +782,7 @@ const Index = () => {
   const currentYear = new Date().getFullYear();
   
   // Lists for rendering
-  const inProgressBooks = books.filter((b) => b.currentPage < b.totalPages && b.status !== 'dnf');
+  const inProgressBooks = books.filter((b) => b.currentPage < b.totalPages && b.status !== 'dnf' && String(b.status) !== 'top_five');
   const completedBookItems = books.filter((b) => b.currentPage >= b.totalPages && b.status !== 'dnf');
   const dnfBookItems = books.filter((b) => b.status === 'dnf');
 
