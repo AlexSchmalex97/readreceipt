@@ -566,7 +566,7 @@ export default function UserProfile() {
           {/* Top Five Books */}
           {topFiveBooks.length > 0 && (
             <div className="mb-4">
-              <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="flex items-center justify-center gap-2 mb-6">
                 <p className="text-sm font-medium text-center" style={{ color: accentTextColor }}>
                   Top Five
                 </p>

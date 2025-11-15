@@ -588,7 +588,7 @@ export default function ProfileDisplay() {
           {/* Top Five Books */}
           {topFiveBooks.length > 0 && (
             <div className="mb-4">
-              <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="flex items-center justify-center gap-2 mb-6">
                 <Link to="/profile/settings">
                   <p className="text-sm font-medium text-center cursor-pointer hover:underline" style={{ color: accentTextColor }}>
                     Top Five
