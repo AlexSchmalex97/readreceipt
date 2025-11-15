@@ -319,7 +319,7 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto overflow-x-hidden">
+      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>Edit Top Five Books</DialogTitle>
           <DialogDescription>
@@ -327,7 +327,7 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-6 overflow-y-auto pr-2">
           {/* Selected Books */}
           <div>
             <h3 className="font-medium mb-3">

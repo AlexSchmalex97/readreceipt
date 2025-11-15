@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Settings, User, BookOpen, Star, Calendar, Globe, Facebook, Twitter, Instagram, Linkedin, Youtube, ExternalLink, RefreshCw } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { HomeReadingGoals } from "@/components/HomeReadingGoals";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
@@ -975,7 +976,37 @@ export default function ProfileDisplay() {
                   </div>
                 )}
 
-                {/* Links */}
+                {/* Top Five Books - Desktop */}
+                {topFiveBooks.length > 0 && (
+                  <div className="mt-4">
+                    <Link to="/profile/settings">
+                      <h3 className="text-xs font-medium text-muted-foreground mb-2 cursor-pointer hover:underline">
+                        Top Five
+                      </h3>
+                    </Link>
+                    <div className="flex gap-3">
+                      {topFiveBooks.map((book, index) => (
+                        <div key={book.id} className="flex-shrink-0 w-24">
+                          <div className="relative">
+                            <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold z-10 bg-primary text-primary-foreground">
+                              {index + 1}
+                            </div>
+                            {book.cover_url && (
+                              <img
+                                src={book.cover_url}
+                                alt={book.title}
+                                className="w-full h-32 object-cover rounded shadow-md"
+                              />
+                            )}
+                          </div>
+                          <p className="text-xs mt-1 truncate font-medium">{book.title}</p>
+                          <p className="text-xs truncate text-muted-foreground">{book.author}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {(profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url ? (
                   <div className="mt-6">
                     <h3 className="text-xs font-medium text-muted-foreground mb-2">Links</h3>
