@@ -282,13 +282,37 @@ export function ColorPaletteSelector({ currentPalette, onPaletteChange }: ColorP
         .from('avatars')
         .getPublicUrl(filePath);
 
-      // Update profile with background image URL
+      // Save to saved_backgrounds and activate as current background
+      // 1) Keep profile field for backwards-compat preview
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ background_image_url: publicUrl })
         .eq("id", user.user.id);
-
       if (updateError) throw updateError;
+
+      // 2) Create a saved background entry
+      const { data: savedBg, error: saveBgError } = await supabase
+        .from("saved_backgrounds")
+        .insert({
+          user_id: user.user.id,
+          image_url: publicUrl,
+          name: "Uploaded Background",
+          tint_color: null,
+          tint_opacity: 0
+        })
+        .select()
+        .single();
+      if (saveBgError) throw saveBgError;
+
+      // 3) Activate photo backgrounds
+      const { error: activateError } = await supabase
+        .from("profiles")
+        .update({
+          background_type: 'image',
+          active_background_id: savedBg.id
+        })
+        .eq("id", user.user.id);
+      if (activateError) throw activateError;
 
       setBackgroundImageUrl(publicUrl);
       setIsOpen(false);
@@ -296,7 +320,7 @@ export function ColorPaletteSelector({ currentPalette, onPaletteChange }: ColorP
 
       toast({
         title: "Background image uploaded!",
-        description: "Your background image has been updated."
+        description: "Saved to your Background Photos and set as active."
       });
     } catch (error) {
       console.error("Error uploading image:", error);
