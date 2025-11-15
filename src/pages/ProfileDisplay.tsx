@@ -240,7 +240,8 @@ export default function ProfileDisplay() {
         const inProgressBooks = books.filter(book => 
           book.current_page < book.total_pages && 
           book.status !== 'completed' && 
-          book.status !== 'dnf'
+          book.status !== 'dnf' &&
+          book.status !== 'top_five'
         ).length;
         
         setBookStats({ totalBooks, completedBooks, inProgressBooks, completedThisYear });
