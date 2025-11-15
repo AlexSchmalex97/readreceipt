@@ -437,38 +437,40 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
                       <p className="text-sm">Search for books to add to your Top Five</p>
                     </div>
                   ) : (
-                    googleResults.map((book) => {
-                      const volumeInfo = book.volumeInfo;
-                      return (
-                        <div key={book.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border">
-                          {volumeInfo.imageLinks?.thumbnail ? (
-                            <img 
-                              src={volumeInfo.imageLinks.thumbnail.replace('http:', 'https:')} 
-                              alt={volumeInfo.title} 
-                              className="w-12 h-16 object-cover rounded shadow-sm" 
-                            />
-                          ) : (
-                            <div className="w-12 h-16 bg-muted rounded flex items-center justify-center">
-                              <BookOpen className="w-6 h-6 text-muted-foreground" />
+                    googleResults
+                      .filter((book) => book.volumeInfo)
+                      .map((book) => {
+                        const volumeInfo = book.volumeInfo;
+                        return (
+                          <div key={book.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border">
+                            {volumeInfo?.imageLinks?.thumbnail ? (
+                              <img 
+                                src={volumeInfo.imageLinks.thumbnail.replace('http:', 'https:')} 
+                                alt={volumeInfo.title} 
+                                className="w-12 h-16 object-cover rounded shadow-sm" 
+                              />
+                            ) : (
+                              <div className="w-12 h-16 bg-muted rounded flex items-center justify-center">
+                                <BookOpen className="w-6 h-6 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-sm truncate">{volumeInfo?.title || "Unknown Title"}</div>
+                              <div className="text-xs text-muted-foreground truncate">
+                                {volumeInfo?.authors?.join(", ") || "Unknown Author"}
+                              </div>
                             </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-sm truncate">{volumeInfo.title}</div>
-                            <div className="text-xs text-muted-foreground truncate">
-                              {volumeInfo.authors?.join(", ") || "Unknown Author"}
-                            </div>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => handleAddGoogleBook(book)}
+                              disabled={selectedBooks.length >= 5}
+                            >
+                              Add
+                            </Button>
                           </div>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => handleAddGoogleBook(book)}
-                            disabled={selectedBooks.length >= 5}
-                          >
-                            Add
-                          </Button>
-                        </div>
-                      );
-                    })
+                        );
+                      })
                   )}
                 </div>
               </div>
