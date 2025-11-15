@@ -66,6 +66,7 @@ export default function ProfileSettings() {
   const [savedCustomColors, setSavedCustomColors] = useState<string[]>([]);
   const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
   const [backgroundTint, setBackgroundTint] = useState<{ color: string; opacity: number } | null>(null);
+  const [backgroundType, setBackgroundType] = useState<'color' | 'image'>('color');
   const [uploading, setUploading] = useState(false);
   const normUsername = useMemo(() => normalizeUsername(username), [username]);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
@@ -137,6 +138,7 @@ export default function ProfileSettings() {
       setBackgroundColor((prof as any)?.background_color ?? "#F5F1E8");
       setBackgroundImageUrl((prof as any)?.background_image_url ?? null);
       setBackgroundTint((prof as any)?.background_tint ?? null);
+      setBackgroundType((prof as any)?.background_type ?? 'color');
       const cp = (prof as any)?.color_palette || {};
       setApplyGlobally(Boolean(cp?.apply_globally));
       setSavedCustomColors(Array.isArray(cp?.custom_colors) ? cp.custom_colors : []);
@@ -658,6 +660,7 @@ export default function ProfileSettings() {
           accentTextColor={accentTextColor}
           backgroundImageUrl={backgroundImageUrl}
           backgroundTint={backgroundTint}
+          backgroundType={backgroundType}
           onDisplayPreferenceChange={setDisplayPreference}
           onTemperatureUnitChange={setTemperatureUnit}
           onBackgroundColorChange={setBackgroundColor}
@@ -669,11 +672,12 @@ export default function ProfileSettings() {
             if (!user.user) return;
             const { data: prof } = await supabase
               .from("profiles")
-              .select("background_image_url, background_tint")
+              .select("background_image_url, background_tint, background_type, active_background_id")
               .eq("id", user.user.id)
               .single();
             setBackgroundImageUrl((prof as any)?.background_image_url ?? null);
             setBackgroundTint((prof as any)?.background_tint ?? null);
+            setBackgroundType((prof as any)?.background_type ?? 'color');
           }}
         />
 

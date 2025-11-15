@@ -166,10 +166,12 @@ export type Database = {
       }
       profiles: {
         Row: {
+          active_background_id: string | null
           avatar_url: string | null
           background_color: string | null
           background_image_url: string | null
           background_tint: Json | null
+          background_type: string | null
           bio: string | null
           birthday: string | null
           color_palette: Json | null
@@ -187,10 +189,12 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          active_background_id?: string | null
           avatar_url?: string | null
           background_color?: string | null
           background_image_url?: string | null
           background_tint?: Json | null
+          background_type?: string | null
           bio?: string | null
           birthday?: string | null
           color_palette?: Json | null
@@ -208,10 +212,12 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          active_background_id?: string | null
           avatar_url?: string | null
           background_color?: string | null
           background_image_url?: string | null
           background_tint?: Json | null
+          background_type?: string | null
           bio?: string | null
           birthday?: string | null
           color_palette?: Json | null
@@ -229,6 +235,13 @@ export type Database = {
           website_url?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_active_background_id_fkey"
+            columns: ["active_background_id"]
+            isOneToOne: false
+            referencedRelation: "saved_backgrounds"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_favorite_book_id_fkey"
             columns: ["favorite_book_id"]
@@ -384,6 +397,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      saved_backgrounds: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          name: string | null
+          tint_color: string | null
+          tint_opacity: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          name?: string | null
+          tint_color?: string | null
+          tint_opacity?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          name?: string | null
+          tint_color?: string | null
+          tint_opacity?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       tbr_books: {
         Row: {

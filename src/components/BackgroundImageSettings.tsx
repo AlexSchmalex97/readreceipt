@@ -1,14 +1,25 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Upload, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Upload, X, Image as ImageIcon, Palette } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Slider } from "@/components/ui/slider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+interface SavedBackground {
+  id: string;
+  image_url: string;
+  tint_color: string | null;
+  tint_opacity: number;
+  name: string | null;
+}
 
 interface BackgroundImageSettingsProps {
   backgroundImageUrl: string | null;
   backgroundTint: { color: string; opacity: number } | null;
+  backgroundType: 'color' | 'image';
   onUpdate: () => void;
 }
 
@@ -26,38 +37,46 @@ const PRESET_TINT_COLORS = [
 export function BackgroundImageSettings({ 
   backgroundImageUrl, 
   backgroundTint,
+  backgroundType,
   onUpdate 
 }: BackgroundImageSettingsProps) {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
-  const [tintColor, setTintColor] = useState(backgroundTint?.color || "#000000");
-  const [tintOpacity, setTintOpacity] = useState(backgroundTint?.opacity || 0);
-  const [previewTintColor, setPreviewTintColor] = useState(backgroundTint?.color || "#000000");
-  const [previewTintOpacity, setPreviewTintOpacity] = useState(backgroundTint?.opacity || 0);
+  const [savedBackgrounds, setSavedBackgrounds] = useState<SavedBackground[]>([]);
+  const [activeBackgroundId, setActiveBackgroundId] = useState<string | null>(null);
+  const [newImageUrl, setNewImageUrl] = useState<string | null>(null);
+  const [tintColor, setTintColor] = useState("#000000");
+  const [tintOpacity, setTintOpacity] = useState(0);
+  const [backgroundName, setBackgroundName] = useState("");
   const { toast } = useToast();
 
-  // Update preview when saved values change
+  // Load saved backgrounds
   useEffect(() => {
-    setTintColor(backgroundTint?.color || "#000000");
-    setTintOpacity(backgroundTint?.opacity || 0);
-    setPreviewTintColor(backgroundTint?.color || "#000000");
-    setPreviewTintOpacity(backgroundTint?.opacity || 0);
-  }, [backgroundTint]);
+    loadSavedBackgrounds();
+  }, []);
 
-  // Apply preview to background element
-  useEffect(() => {
-    if (!backgroundImageUrl) return;
+  const loadSavedBackgrounds = async () => {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) return;
 
-    const previewElement = document.getElementById('background-preview');
-    if (!previewElement) return;
+    const { data } = await supabase
+      .from("saved_backgrounds")
+      .select("*")
+      .eq("user_id", user.user.id)
+      .order("created_at", { ascending: false });
 
-    if (previewTintOpacity > 0) {
-      const hexOpacity = Math.round(previewTintOpacity * 255).toString(16).padStart(2, '0');
-      previewElement.style.background = `linear-gradient(${previewTintColor}${hexOpacity}, ${previewTintColor}${hexOpacity}), url(${backgroundImageUrl})`;
-    } else {
-      previewElement.style.backgroundImage = `url(${backgroundImageUrl})`;
-      previewElement.style.background = '';
+    if (data) {
+      setSavedBackgrounds(data as SavedBackground[]);
     }
-  }, [previewTintColor, previewTintOpacity, backgroundImageUrl]);
+
+    // Load active background ID
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("active_background_id")
+      .eq("id", user.user.id)
+      .single();
+
+    setActiveBackgroundId((profile as any)?.active_background_id || null);
+  };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -101,18 +120,13 @@ export function BackgroundImageSettings({
         .from('avatars')
         .getPublicUrl(filePath);
 
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ background_image_url: publicUrl })
-        .eq("id", user.user.id);
-
-      if (updateError) throw updateError;
-
-      onUpdate();
+      setNewImageUrl(publicUrl);
+      setTintColor("#000000");
+      setTintOpacity(0);
 
       toast({
-        title: "Background image uploaded!",
-        description: "Your background image has been updated."
+        title: "Image uploaded!",
+        description: "Now add a name and save your background."
       });
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -126,187 +140,325 @@ export function BackgroundImageSettings({
     }
   };
 
-  const handleRemoveBackgroundImage = async () => {
+  const handleSaveBackground = async () => {
+    if (!newImageUrl) {
+      toast({
+        title: "No image to save",
+        description: "Please upload an image first",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) return;
 
-      const { error } = await supabase
-        .from("profiles")
-        .update({ background_image_url: null, background_tint: null })
-        .eq("id", user.user.id);
+      const { data, error } = await supabase
+        .from("saved_backgrounds")
+        .insert({
+          user_id: user.user.id,
+          image_url: newImageUrl,
+          tint_color: tintOpacity > 0 ? tintColor : null,
+          tint_opacity: tintOpacity,
+          name: backgroundName || "Untitled Background"
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
-      onUpdate();
+      setNewImageUrl(null);
+      setBackgroundName("");
+      setTintColor("#000000");
+      setTintOpacity(0);
+      loadSavedBackgrounds();
 
       toast({
-        title: "Background image removed",
-        description: "Your background has been reset."
+        title: "Background saved!",
+        description: "Your background has been added to your collection."
       });
     } catch (error) {
-      console.error("Error removing background image:", error);
+      console.error("Error saving background:", error);
       toast({
-        title: "Error removing image",
+        title: "Error saving background",
         description: "Please try again",
         variant: "destructive"
       });
     }
   };
 
-  const handleTintUpdate = async () => {
+  const handleSelectBackground = async (backgroundId: string) => {
     try {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) return;
 
-      const tintData = previewTintOpacity > 0 ? { color: previewTintColor, opacity: previewTintOpacity } : null;
-
       const { error } = await supabase
         .from("profiles")
-        .update({ background_tint: tintData })
+        .update({
+          background_type: 'image',
+          active_background_id: backgroundId
+        })
         .eq("id", user.user.id);
 
       if (error) throw error;
 
-      setTintColor(previewTintColor);
-      setTintOpacity(previewTintOpacity);
+      setActiveBackgroundId(backgroundId);
       onUpdate();
 
       toast({
-        title: "Tint saved!",
-        description: "Your background tint has been saved."
+        title: "Background applied!",
+        description: "Your photo background is now active."
       });
     } catch (error) {
-      console.error("Error updating tint:", error);
+      console.error("Error selecting background:", error);
       toast({
-        title: "Error saving tint",
+        title: "Error applying background",
         description: "Please try again",
         variant: "destructive"
       });
     }
   };
 
-  const hasUnsavedChanges = previewTintColor !== tintColor || previewTintOpacity !== tintOpacity;
+  const handleUseColorBackground = async () => {
+    try {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) return;
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          background_type: 'color',
+          active_background_id: null
+        })
+        .eq("id", user.user.id);
+
+      if (error) throw error;
+
+      setActiveBackgroundId(null);
+      onUpdate();
+
+      toast({
+        title: "Color background activated!",
+        description: "Switched to color background mode."
+      });
+    } catch (error) {
+      console.error("Error switching to color:", error);
+      toast({
+        title: "Error switching background",
+        description: "Please try again",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteBackground = async (backgroundId: string) => {
+    try {
+      const { error } = await supabase
+        .from("saved_backgrounds")
+        .delete()
+        .eq("id", backgroundId);
+
+      if (error) throw error;
+
+      loadSavedBackgrounds();
+
+      toast({
+        title: "Background deleted",
+        description: "Your background has been removed."
+      });
+    } catch (error) {
+      console.error("Error deleting background:", error);
+      toast({
+        title: "Error deleting background",
+        description: "Please try again",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <div className="space-y-4">
-      <div>
-        <Label className="text-sm font-medium mb-3 block">Background Image</Label>
-        {backgroundImageUrl ? (
-          <div className="relative">
-            <img 
-              src={backgroundImageUrl} 
-              alt="Current background" 
-              className="w-full h-32 object-cover rounded-lg border"
-            />
-            <Button
-              variant="destructive"
-              size="sm"
-              className="absolute top-2 right-2"
-              onClick={handleRemoveBackgroundImage}
-            >
-              <X className="w-4 h-4 mr-1" />
-              Remove
-            </Button>
-          </div>
-        ) : (
-          <div className="border-2 border-dashed rounded-lg p-6 text-center">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-              id="background-upload-settings"
-              disabled={isUploadingImage}
-            />
-            <label 
-              htmlFor="background-upload-settings" 
-              className="cursor-pointer flex flex-col items-center gap-2"
-            >
-              <Upload className="w-8 h-8 text-muted-foreground" />
-              <div className="text-sm">
-                <span className="font-medium text-primary">Click to upload</span>
-                <span className="text-muted-foreground"> or drag and drop</span>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Max file size: 5MB
-              </p>
-            </label>
-            {isUploadingImage && (
-              <p className="text-sm text-muted-foreground mt-2">Uploading...</p>
-            )}
-          </div>
-        )}
-      </div>
+      <Tabs defaultValue={backgroundType === 'image' ? 'photos' : 'color'} className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="photos" className="flex items-center gap-2">
+            <ImageIcon className="w-4 h-4" />
+            Photo Backgrounds
+          </TabsTrigger>
+          <TabsTrigger value="color" className="flex items-center gap-2">
+            <Palette className="w-4 h-4" />
+            Color Background
+          </TabsTrigger>
+        </TabsList>
 
-      {backgroundImageUrl && (
-        <div className="space-y-4 pt-4 border-t">
-          <Label className="text-sm font-medium">Background Tint</Label>
-          
-          {/* Preview */}
-          <div className="relative h-32 rounded-lg border overflow-hidden">
-            <div
-              id="background-preview"
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage: `url(${backgroundImageUrl})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              }}
-            />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-white text-sm font-medium bg-black/50 px-3 py-1 rounded">
-                Preview
-              </span>
+        <TabsContent value="photos" className="space-y-4">
+          {/* Upload New Background */}
+          <div>
+            <Label className="text-sm font-medium mb-3 block">Upload New Background</Label>
+            <div className="border-2 border-dashed rounded-lg p-6 text-center">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+                id="background-upload-settings"
+                disabled={isUploadingImage}
+              />
+              <label 
+                htmlFor="background-upload-settings" 
+                className="cursor-pointer flex flex-col items-center gap-2"
+              >
+                <Upload className="w-8 h-8 text-muted-foreground" />
+                <div className="text-sm">
+                  <span className="font-medium text-primary">Click to upload</span>
+                  <span className="text-muted-foreground"> or drag and drop</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Max file size: 5MB
+                </p>
+              </label>
+              {isUploadingImage && (
+                <p className="text-sm text-muted-foreground mt-2">Uploading...</p>
+              )}
             </div>
           </div>
 
-          <div className="space-y-4">
-            {/* Color Presets */}
-            <div>
-              <Label className="text-sm mb-2 block">Tint Color</Label>
-              <div className="grid grid-cols-4 gap-2">
-                {PRESET_TINT_COLORS.map((preset) => (
-                  <button
-                    key={preset.value}
-                    onClick={() => setPreviewTintColor(preset.value)}
-                    className={`h-10 rounded border-2 transition-all ${
-                      previewTintColor === preset.value
+          {/* New Image Preview and Tint Settings */}
+          {newImageUrl && (
+            <div className="space-y-4 p-4 border rounded-lg">
+              <div className="relative h-32 rounded-lg overflow-hidden">
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{
+                    background: tintOpacity > 0
+                      ? `linear-gradient(${tintColor}${Math.round(tintOpacity * 255).toString(16).padStart(2, '0')}, ${tintColor}${Math.round(tintOpacity * 255).toString(16).padStart(2, '0')}), url(${newImageUrl})`
+                      : `url(${newImageUrl})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                  }}
+                />
+              </div>
+
+              <Input
+                placeholder="Background name (e.g., 'Autumn Forest')"
+                value={backgroundName}
+                onChange={(e) => setBackgroundName(e.target.value)}
+              />
+
+              <div>
+                <Label className="text-sm mb-2 block">Tint Color</Label>
+                <div className="grid grid-cols-4 gap-2">
+                  {PRESET_TINT_COLORS.map((preset) => (
+                    <button
+                      key={preset.value}
+                      onClick={() => setTintColor(preset.value)}
+                      className={`h-10 rounded border-2 transition-all ${
+                        tintColor === preset.value
+                          ? 'border-primary ring-2 ring-primary/20'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                      style={{ backgroundColor: preset.value }}
+                      title={preset.name}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label className="text-sm">Tint Opacity</Label>
+                  <span className="text-sm text-muted-foreground">{Math.round(tintOpacity * 100)}%</span>
+                </div>
+                <Slider
+                  value={[tintOpacity]}
+                  onValueChange={([value]) => setTintOpacity(value)}
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  className="w-full"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Button onClick={handleSaveBackground} className="flex-1">
+                  Save Background
+                </Button>
+                <Button onClick={() => setNewImageUrl(null)} variant="outline">
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Saved Backgrounds Grid */}
+          <div>
+            <Label className="text-sm font-medium mb-3 block">Saved Backgrounds</Label>
+            {savedBackgrounds.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No saved backgrounds yet. Upload one above to get started!
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                {savedBackgrounds.map((bg) => (
+                  <div
+                    key={bg.id}
+                    className={`relative rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
+                      activeBackgroundId === bg.id
                         ? 'border-primary ring-2 ring-primary/20'
                         : 'border-border hover:border-primary/50'
                     }`}
-                    style={{ backgroundColor: preset.value }}
-                    title={preset.name}
-                  />
+                    onClick={() => handleSelectBackground(bg.id)}
+                  >
+                    <div
+                      className="h-24 bg-cover bg-center"
+                      style={{
+                        background: bg.tint_opacity > 0 && bg.tint_color
+                          ? `linear-gradient(${bg.tint_color}${Math.round(bg.tint_opacity * 255).toString(16).padStart(2, '0')}, ${bg.tint_color}${Math.round(bg.tint_opacity * 255).toString(16).padStart(2, '0')}), url(${bg.image_url})`
+                          : `url(${bg.image_url})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                      }}
+                    />
+                    <div className="p-2 bg-card/90 backdrop-blur-sm">
+                      <p className="text-xs font-medium truncate">{bg.name || "Untitled"}</p>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteBackground(bg.id);
+                      }}
+                      className="absolute top-1 right-1 p-1 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                    {activeBackgroundId === bg.id && (
+                      <div className="absolute top-1 left-1 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-xs font-medium">
+                        Active
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
-            </div>
+            )}
+          </div>
+        </TabsContent>
 
-            {/* Opacity Slider */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label className="text-sm">Tint Opacity</Label>
-                <span className="text-sm text-muted-foreground">{Math.round(previewTintOpacity * 100)}%</span>
-              </div>
-              <Slider
-                value={[previewTintOpacity]}
-                onValueChange={([value]) => setPreviewTintOpacity(value)}
-                min={0}
-                max={1}
-                step={0.01}
-                className="w-full"
-              />
-            </div>
-
-            {/* Save Button */}
-            {hasUnsavedChanges && (
-              <Button onClick={handleTintUpdate} className="w-full">
-                Save Tint
+        <TabsContent value="color" className="space-y-4">
+          <div className="text-center py-8">
+            <Palette className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground mb-4">
+              {backgroundType === 'color' 
+                ? "You're currently using a color background. Customize it in the 'Profile Colors' section below."
+                : "Switch to color background mode to use your custom color palette instead of a photo."}
+            </p>
+            {backgroundType !== 'color' && (
+              <Button onClick={handleUseColorBackground}>
+                Use Color Background
               </Button>
             )}
           </div>
-        </div>
-      )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
