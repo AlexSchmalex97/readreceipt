@@ -21,7 +21,32 @@ export function UserColorProvider({ userColorPalette, backgroundImageUrl, backgr
     const root = document.documentElement;
     const body = document.body;
 
-    // Apply background image if present
+    // First, apply the color palette tokens (if any)
+    if (userColorPalette && userColorPalette.name !== "default") {
+      const palette = userColorPalette as ColorPalette;
+      // Base brand tokens
+      root.style.setProperty('--primary', palette.primary);
+      root.style.setProperty('--secondary', palette.secondary);
+      root.style.setProperty('--accent', palette.accent);
+      root.style.setProperty('--foreground', palette.foreground);
+
+      // Surfaces (will be overridden below if a background image is active)
+      root.style.setProperty('--background', palette.background);
+      root.style.setProperty('--card', palette.background);
+      root.style.setProperty('--card-foreground', palette.foreground);
+      root.style.setProperty('--popover', palette.background);
+      root.style.setProperty('--popover-foreground', palette.foreground);
+
+      // Misc
+      root.style.setProperty('--muted', palette.secondary);
+      root.style.setProperty('--muted-foreground', palette.foreground);
+      root.style.setProperty('--accent-foreground', palette.foreground);
+      root.style.setProperty('--border', palette.secondary);
+      root.style.setProperty('--input', palette.secondary);
+      root.style.setProperty('--ring', palette.primary);
+    }
+
+    // Then, apply background image (and make surfaces transparent) if present
     if (backgroundImageUrl) {
       // Apply tint overlay if configured
       if (backgroundTint && backgroundTint.opacity > 0) {
@@ -37,38 +62,19 @@ export function UserColorProvider({ userColorPalette, backgroundImageUrl, backgr
         body.style.backgroundPosition = 'center';
         body.style.backgroundAttachment = 'fixed';
       }
-      
-      // Make the default background transparent so the body image shows through
+
+      // Make the default surfaces transparent so the body image shows through
       root.style.setProperty('--background', '0 0% 100% / 0');
       root.style.setProperty('--card', '0 0% 100% / 0.8');
       root.style.setProperty('--popover', '0 0% 100% / 0.9');
     } else {
+      // No background image → clear any body applied backgrounds
       body.style.background = '';
       body.style.backgroundImage = '';
       body.style.backgroundSize = '';
       body.style.backgroundPosition = '';
       body.style.backgroundAttachment = '';
-    }
-
-    // Apply color palette if present and not using default
-    if (userColorPalette && userColorPalette.name !== "default") {
-      const palette = userColorPalette as ColorPalette;
-      
-      root.style.setProperty('--primary', palette.primary);
-      root.style.setProperty('--secondary', palette.secondary);
-      root.style.setProperty('--accent', palette.accent);
-      root.style.setProperty('--background', palette.background);
-      root.style.setProperty('--foreground', palette.foreground);
-      root.style.setProperty('--card', palette.background);
-      root.style.setProperty('--card-foreground', palette.foreground);
-      root.style.setProperty('--popover', palette.background);
-      root.style.setProperty('--popover-foreground', palette.foreground);
-      root.style.setProperty('--muted', palette.secondary);
-      root.style.setProperty('--muted-foreground', palette.foreground);
-      root.style.setProperty('--accent-foreground', palette.foreground);
-      root.style.setProperty('--border', palette.secondary);
-      root.style.setProperty('--input', palette.secondary);
-      root.style.setProperty('--ring', palette.primary);
+      // When image is not active, leave palette-driven tokens as set above
     }
 
     // Cleanup function to reset to default
