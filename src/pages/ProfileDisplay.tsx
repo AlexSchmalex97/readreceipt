@@ -1014,7 +1014,7 @@ export default function ProfileDisplay() {
                         view top ten
                       </button>
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 pt-3">
                       {topFiveBooks.slice(0, 5).map((book, index) => (
                         <div key={book.id} className="flex-shrink-0 w-24">
                           <div className="relative">
