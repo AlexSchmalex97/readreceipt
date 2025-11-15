@@ -979,7 +979,7 @@ export default function ProfileDisplay() {
 
                 {/* Top Five Books - Desktop */}
                 {topFiveBooks.length > 0 && (
-                  <div className="mt-4">
+                  <div className="mt-8">
                     <Link to="/profile/settings">
                       <h3 className="text-xs font-medium text-muted-foreground mb-2 cursor-pointer hover:underline">
                         Top Five
