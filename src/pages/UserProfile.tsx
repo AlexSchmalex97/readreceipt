@@ -103,7 +103,6 @@ export default function UserProfile() {
   const [inProgressBooks, setInProgressBooks] = useState<any[]>([]);
   const [completedBooks, setCompletedBooks] = useState<any[]>([]);
   const [recentReviews, setRecentReviews] = useState<any[]>([]);
-  const [backgroundColor, setBackgroundColor] = useState<string>('#F5F1E8');
 
   useEffect(() => {
     if (!username) return;
@@ -126,7 +125,6 @@ export default function UserProfile() {
           ...profileData,
           top_five_books: Array.isArray(profileData.top_five_books) ? profileData.top_five_books as string[] : []
         });
-        setBackgroundColor((profileData as any).background_color || '#F5F1E8');
 
         const userId = profileData.id;
 
@@ -424,12 +422,8 @@ export default function UserProfile() {
   const headerTextColor = (() => {
     const textHex = (profile as any)?.color_palette?.text_color as string | undefined;
     if (textHex) return textHex;
-    // Auto contrast
-    const r = parseInt(backgroundColor.slice(1,3),16);
-    const g = parseInt(backgroundColor.slice(3,5),16);
-    const b = parseInt(backgroundColor.slice(5,7),16);
-    const lum = 0.2126*r + 0.7152*g + 0.0722*b;
-    return lum < 128 ? "#FFFFFF" : "#1A1A1A";
+    // Default to foreground
+    return undefined;
   })();
 
   // Compute accent color for cards/sections
@@ -450,10 +444,7 @@ export default function UserProfile() {
 
   return (
     <UserColorProvider userColorPalette={profile?.color_palette}>
-      <div
-        className="min-h-screen"
-        style={{ backgroundColor }}
-      >
+      <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-6 max-w-7xl">
           {/* Header with back button */}
           <div className="flex items-center gap-4 mb-6">
@@ -471,7 +462,7 @@ export default function UserProfile() {
             {/* Header - Centered */}
             <div className="flex flex-col items-center text-center mb-4">
               {/* Profile Photo */}
-              <div className="w-24 h-24 rounded-full overflow-hidden bg-muted border-2 border-border mb-3">
+              <div className="w-32 h-32 rounded-full overflow-hidden bg-muted border-4 border-border mb-3">
                 <img 
                   src={profile.avatar_url || "/assets/default-avatar.png"} 
                   alt="Profile" 
@@ -480,13 +471,13 @@ export default function UserProfile() {
               </div>
               
               {/* Profile Info */}
-              <h1 className="text-2xl font-bold" style={{ color: headerTextColor }}>
+              <h1 className="text-2xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
                 {profile.display_name || "Reader"}
               </h1>
-              <p className="text-sm mt-1" style={{ color: headerTextColor }}>
+              <p className="text-sm mt-1 text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
                 @{profile.username || profile.id.slice(0, 8)}
               </p>
-              <div className="flex items-center justify-center gap-4 mt-2 text-xs" style={{ color: headerTextColor }}>
+              <div className="flex items-center justify-center gap-4 mt-2 text-xs text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
                 <span>
                   <Calendar className="w-3 h-3 inline mr-1" />
                   Member since {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
@@ -515,7 +506,7 @@ export default function UserProfile() {
 
             {/* Bio */}
             {profile.bio && (
-              <p className="text-sm text-center mb-4 max-w-2xl mx-auto" style={{ color: headerTextColor }}>{profile.bio}</p>
+              <p className="text-sm text-center mb-4 max-w-2xl mx-auto text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>{profile.bio}</p>
             )}
 
             {/* Current Book & Favorite Book - Side by Side */}
