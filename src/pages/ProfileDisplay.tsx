@@ -50,6 +50,7 @@ type BookStats = {
   totalBooks: number;
   completedBooks: number;
   inProgressBooks: number;
+  completedThisYear: number;
 };
 
 type Review = {
@@ -103,7 +104,7 @@ export default function ProfileDisplay() {
   const [loading, setLoading] = useState(true);
   const [uid, setUid] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [bookStats, setBookStats] = useState<BookStats>({ totalBooks: 0, completedBooks: 0, inProgressBooks: 0 });
+  const [bookStats, setBookStats] = useState<BookStats>({ totalBooks: 0, completedBooks: 0, inProgressBooks: 0, completedThisYear: 0 });
   const [recentReviews, setRecentReviews] = useState<Review[]>([]);
   const [tbrBooks, setTbrBooks] = useState<TBRBook[]>([]);
   const [activityFeed, setActivityFeed] = useState<ActivityItem[]>([]);
@@ -242,7 +243,7 @@ export default function ProfileDisplay() {
           book.status !== 'dnf'
         ).length;
         
-        setBookStats({ totalBooks, completedBooks, inProgressBooks });
+        setBookStats({ totalBooks, completedBooks, inProgressBooks, completedThisYear });
         
         // Pass completed this year count to reading goals
         const readingGoalsElement = document.querySelector('[data-completed-this-year]');
@@ -678,7 +679,7 @@ export default function ProfileDisplay() {
 
           {/* Reading Goal */}
           <div className="mb-4 max-w-md mx-auto">
-            <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedBooks} accentColor={accentCardColor} />
+            <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedThisYear} accentColor={accentCardColor} />
           </div>
 
           {/* Collapsible Activity Sections - Mobile/Tablet */}
@@ -1046,7 +1047,7 @@ export default function ProfileDisplay() {
               <div className="w-80 flex-shrink-0">
                 {/* Reading Goals */}
                 <div className="mb-3">
-                  <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedBooks} accentColor={accentCardColor} />
+                  <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedThisYear} accentColor={accentCardColor} />
                 </div>
 
                 {/* Stats */}
