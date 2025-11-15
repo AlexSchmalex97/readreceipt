@@ -899,175 +899,198 @@ export default function ProfileDisplay() {
             </Link>
           </div>
 
-          {/* Centered Header Section */}
-          <div className="flex flex-col items-center text-center mb-6">
-            <div className="flex items-center gap-6 mb-4">
-              {/* Profile Photo - Bigger */}
-              <div className="w-40 h-40 rounded-full overflow-hidden bg-muted border-4 border-border flex-shrink-0">
-                {profile.avatar_url ? (
-                  <img 
-                    src={profile.avatar_url} 
-                    alt="Profile" 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <User className="w-16 h-16 text-muted-foreground" />
-                  </div>
-                )}
-              </div>
-              
-              {/* Profile Info */}
-              <div className="text-left">
-                <h1 className="text-5xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
-                  {profile.display_name || "Reader"}
-                </h1>
-                <p className="text-lg mt-1 text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
-                  @{profile.username || profile.id.slice(0, 8)}
-                </p>
-                <div className="flex items-center gap-4 mt-3 text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
-                  <p className="text-sm">
-                    <Calendar className="w-4 h-4 inline mr-1" />
-                    Member since {new Date(profile.created_at).toLocaleDateString()}
-                  </p>
-                  {zodiacSign && (
-                    <p className="text-sm">
-                      <Star className="w-4 h-4 inline mr-1" />
-                      {zodiacSign}
-                    </p>
+          {/* Centered Header Section with Overlay */}
+          <div className="mb-8 flex justify-center">
+            <div className="inline-block bg-black/20 backdrop-blur-sm rounded-2xl p-8">
+              <div className="flex items-center gap-6">
+                {/* Profile Photo - Bigger */}
+                <div className="w-48 h-48 rounded-full overflow-hidden bg-muted border-4 border-white shadow-lg flex-shrink-0">
+                  {profile.avatar_url ? (
+                    <img 
+                      src={profile.avatar_url} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <User className="w-20 h-20 text-muted-foreground" />
+                    </div>
                   )}
                 </div>
-
-                {/* Followers/Following */}
-                {uid && (
-                  <div className="flex gap-2 mt-3">
-                    <FollowersDialog userId={uid} type="followers" count={followersCount} />
-                    <FollowersDialog userId={uid} type="following" count={followingCount} />
-                  </div>
-                )}
-
-                {/* Favorite Book and Current Read */}
-                {(currentBook || favoriteBook) && (
-                  <div className="mt-4 flex gap-4">
-                    {favoriteBook && (
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-xs font-medium text-muted-foreground mb-2">Favorite Book</h3>
-                        <div className="flex items-center gap-2 p-3 border rounded-lg h-full bg-card">
-                          {favoriteBook.cover_url && (
-                            <img
-                              src={favoriteBook.cover_url}
-                              alt={favoriteBook.title}
-                              className="w-12 h-16 object-contain rounded flex-shrink-0"
-                            />
-                          )}
-                          <div className="flex-1 min-w-0 overflow-hidden">
-                            <div className="font-medium text-xs leading-tight line-clamp-2">
-                              {favoriteBook.title}
-                            </div>
-                            <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">
-                              {favoriteBook.author}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {currentBook && (
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-xs font-medium text-muted-foreground mb-2">Currently Reading</h3>
-                        <div className="flex items-center gap-2 p-3 border rounded-lg h-full bg-card">
-                          {currentBook.cover_url && (
-                            <img
-                              src={currentBook.cover_url}
-                              alt={currentBook.title}
-                              className="w-12 h-16 object-contain rounded flex-shrink-0"
-                            />
-                          )}
-                          <div className="flex-1 min-w-0 overflow-hidden">
-                            <div className="font-medium text-xs leading-tight line-clamp-2">{currentBook.title}</div>
-                            <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">{currentBook.author}</div>
-                            <div className="text-[10px] text-muted-foreground mt-1">
-                              Page {currentBook.current_page} of {currentBook.total_pages}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                
+                {/* Profile Info */}
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-5xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
+                    {profile.display_name || "Reader"}
+                  </h1>
+                  <p className="text-lg mt-1 text-foreground" style={headerTextColor ? { color: headerTextColor, opacity: 0.9 } : {}}>
+                    @{profile.username || profile.id.slice(0, 8)}
+                  </p>
+                  {profile.bio && (
+                    <p className="text-base mt-2 max-w-2xl" style={headerTextColor ? { color: headerTextColor, opacity: 0.8 } : {}}>{profile.bio}</p>
+                  )}
+                  <div className="flex items-center gap-4 mt-3 text-foreground text-sm" style={headerTextColor ? { color: headerTextColor, opacity: 0.75 } : {}}>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      Member since {new Date(profile.created_at).toLocaleDateString()}
+                    </span>
+                    {zodiacSign && (
+                      <span className="flex items-center gap-1">
+                        <Star className="w-4 h-4" />
+                        {zodiacSign}
+                      </span>
                     )}
                   </div>
-                )}
 
-                {/* Top Five Books - Desktop */}
-                {topFiveBooks.length > 0 && (
-                  <div className="mt-8">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Link to="/profile/settings">
-                        <h3 className="text-xs font-medium text-muted-foreground cursor-pointer hover:underline">
-                          Top Five
-                        </h3>
-                      </Link>
+                  {/* Followers/Following */}
+                  {uid && (
+                    <div className="flex gap-2 mt-3">
                       <button
-                        onClick={() => setShowTopTenDialog(true)}
-                        className="text-xs px-2 py-0.5 rounded-full border border-muted-foreground/30 text-muted-foreground hover:bg-accent/50 transition-colors"
+                        onClick={() => setShowFollowersDialog(true)}
+                        className="px-4 py-2 rounded-full border hover:bg-white/10 transition-colors"
+                        style={headerTextColor ? { color: headerTextColor, borderColor: headerTextColor } : {}}
                       >
-                        view top ten
+                        <User className="w-4 h-4 inline mr-1" />
+                        {followersCount} Followers
+                      </button>
+                      <button
+                        onClick={() => setShowFollowingDialog(true)}
+                        className="px-4 py-2 rounded-full border hover:bg-white/10 transition-colors"
+                        style={headerTextColor ? { color: headerTextColor, borderColor: headerTextColor } : {}}
+                      >
+                        <User className="w-4 h-4 inline mr-1" />
+                        {followingCount} Following
                       </button>
                     </div>
-                    <div className="flex gap-3 pt-3">
-                      {topFiveBooks.slice(0, 5).map((book, index) => (
-                        <div key={book.id} className="flex-shrink-0 w-24">
-                          <div className="relative">
-                            <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold z-10 bg-primary text-primary-foreground">
-                              {index + 1}
-                            </div>
-                            {book.cover_url && (
-                              <img
-                                src={book.cover_url}
-                                alt={book.title}
-                                className="w-full h-32 object-contain rounded shadow-md"
-                              />
-                            )}
-                          </div>
-                          <p className="text-xs mt-1 truncate font-medium">{book.title}</p>
-                          <p className="text-xs truncate text-muted-foreground">{book.author}</p>
-                        </div>
-                      ))}
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Favorite Book and Current Read */}
+          {(currentBook || favoriteBook) && (
+            <div className="mt-4 flex gap-4">
+              {favoriteBook && (
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-xs font-medium text-muted-foreground mb-2">Favorite Book</h3>
+                  <div className="flex items-center gap-2 p-3 border rounded-lg h-full bg-card">
+                    {favoriteBook.cover_url && (
+                      <img
+                        src={favoriteBook.cover_url}
+                        alt={favoriteBook.title}
+                        className="w-12 h-16 object-contain rounded flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <div className="font-medium text-xs leading-tight line-clamp-2">
+                        {favoriteBook.title}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">
+                        {favoriteBook.author}
+                      </div>
                     </div>
                   </div>
-                )}
+                </div>
+              )}
 
-                {(profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url ? (
-                  <div className="mt-6">
-                    <h3 className="text-xs font-medium text-muted-foreground mb-2">Links</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
-                        const Icon = getSocialMediaIcon(platform);
-                        return (
-                          <a
-                            key={platform}
-                            href={url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 px-2 py-1 text-xs border rounded-full hover:bg-accent transition-colors"
-                          >
-                            <Icon className="w-3 h-3" />
-                            {platform}
-                          </a>
-                        );
-                      })}
-                      {profile.website_url && (
-                        <a
-                          href={profile.website_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 px-2 py-1 text-xs border rounded-full hover:bg-accent transition-colors"
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                          Website
-                        </a>
+              {currentBook && (
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-xs font-medium text-muted-foreground mb-2">Currently Reading</h3>
+                  <div className="flex items-center gap-2 p-3 border rounded-lg h-full bg-card">
+                    {currentBook.cover_url && (
+                      <img
+                        src={currentBook.cover_url}
+                        alt={currentBook.title}
+                        className="w-12 h-16 object-contain rounded flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <div className="font-medium text-xs leading-tight line-clamp-2">{currentBook.title}</div>
+                      <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">{currentBook.author}</div>
+                      <div className="text-[10px] text-muted-foreground mt-1">
+                        Page {currentBook.current_page} of {currentBook.total_pages}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Top Five Books - Desktop */}
+          {topFiveBooks.length > 0 && (
+            <div className="mt-8">
+              <div className="flex items-center gap-2 mb-2">
+                <Link to="/profile/settings">
+                  <h3 className="text-xs font-medium text-muted-foreground cursor-pointer hover:underline">
+                    Top Five
+                  </h3>
+                </Link>
+                <button
+                  onClick={() => setShowTopTenDialog(true)}
+                  className="text-xs px-2 py-0.5 rounded-full border border-muted-foreground text-muted-foreground hover:bg-accent/50 transition-colors"
+                >
+                  view top ten
+                </button>
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                {topFiveBooks.slice(0, 5).map((book, index) => (
+                  <div key={book.id} className="flex-shrink-0 w-20">
+                    <div className="relative">
+                      <div className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-bold z-10">
+                        {index + 1}
+                      </div>
+                      {book.cover_url && (
+                        <img
+                          src={book.cover_url}
+                          alt={book.title}
+                          className="w-full h-28 object-contain rounded shadow-md"
+                        />
                       )}
                     </div>
+                    <p className="text-[10px] mt-1 text-center truncate font-medium">{book.title}</p>
+                    <p className="text-[9px] text-center truncate text-muted-foreground">{book.author}</p>
                   </div>
-                ) : null}
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Links */}
+          {(profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url ? (
+            <div className="mt-6">
+              <h3 className="text-xs font-medium text-muted-foreground mb-2">Links</h3>
+              <div className="flex flex-wrap gap-2">
+                {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
+                  const Icon = getSocialMediaIcon(platform);
+                  return (
+                    <a
+                      key={platform}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 px-3 py-1 text-xs border rounded-full hover:bg-accent transition-colors"
+                    >
+                      <Icon className="w-3 h-3" />
+                      {platform}
+                    </a>
+                  );
+                })}
+                {profile.website_url && (
+                  <a
+                    href={profile.website_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 px-3 py-1 text-xs border rounded-full hover:bg-accent transition-colors"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    Website
+                  </a>
+                )}
+              </div>
+            </div>
+          ) : null}
               </div>
 
               {/* Right Column - Reading Goal & Stats */}
@@ -1325,7 +1348,6 @@ export default function ProfileDisplay() {
             </Card>
           </div>
         </div>
-      </div>
       </div>
     </div>
   );
