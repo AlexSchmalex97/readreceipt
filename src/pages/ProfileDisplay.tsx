@@ -1348,7 +1348,6 @@ export default function ProfileDisplay() {
                 )}
               </CardContent>
             </Card>
-          </div>
         </div>
         </div>
 
