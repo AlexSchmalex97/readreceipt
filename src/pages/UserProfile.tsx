@@ -570,15 +570,13 @@ export default function UserProfile() {
                 <p className="text-sm font-medium text-center" style={{ color: accentTextColor }}>
                   Top Five
                 </p>
-                {topFiveBooks.length > 5 && (
-                  <button
-                    onClick={() => setShowTopTenDialog(true)}
-                    className="text-xs px-2 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
-                    style={{ color: accentTextColor, borderColor: accentTextColor }}
-                  >
-                    view top ten
-                  </button>
-                )}
+                <button
+                  onClick={() => setShowTopTenDialog(true)}
+                  className="text-xs px-2 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
+                  style={{ color: accentTextColor, borderColor: accentTextColor }}
+                >
+                  view top ten
+                </button>
               </div>
               <div className="flex gap-2 overflow-x-auto pb-2">
                 {topFiveBooks.slice(0, 5).map((book, index) => (
