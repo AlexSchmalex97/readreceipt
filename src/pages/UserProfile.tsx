@@ -578,23 +578,23 @@ export default function UserProfile() {
                   view top ten
                 </button>
               </div>
-              <div className="flex gap-2 overflow-x-auto pb-2 justify-center md:justify-start">
+              <div className="flex gap-2 overflow-x-auto pb-2 justify-center md:justify-start pt-3">
                 {topFiveBooks.slice(0, 5).map((book, index) => (
-                  <div key={book.id} className="flex-shrink-0 w-20 md:w-24">
+                  <div key={book.id} className="flex-shrink-0 w-16 md:w-24">
                     <div className="relative">
-                      <div className="absolute -top-2 -left-2 w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-xs font-bold z-10" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>
+                      <div className="absolute -top-1.5 -left-1.5 md:-top-2 md:-left-2 w-4 h-4 md:w-6 md:h-6 rounded-full flex items-center justify-center text-[10px] md:text-xs font-bold z-10" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>
                         {index + 1}
                       </div>
                       {book.cover_url && (
                         <img
                           src={book.cover_url}
                           alt={book.title}
-                          className="w-full h-28 md:h-32 object-contain rounded shadow-md"
+                          className="w-full h-20 md:h-32 object-contain rounded shadow-md"
                         />
                       )}
                     </div>
-                    <p className="text-xs mt-1 text-center truncate font-medium" style={{ color: headerTextColor }}>{book.title}</p>
-                    <p className="text-xs text-center truncate" style={{ color: headerTextColor, opacity: 0.7 }}>{book.author}</p>
+                    <p className="text-[10px] md:text-xs mt-1 text-center truncate font-medium" style={{ color: headerTextColor }}>{book.title}</p>
+                    <p className="text-[10px] md:text-xs text-center truncate" style={{ color: headerTextColor, opacity: 0.7 }}>{book.author}</p>
                   </div>
                 ))}
               </div>
