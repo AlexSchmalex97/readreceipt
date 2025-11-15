@@ -91,6 +91,7 @@ export default function UserProfile() {
   const [canSeeProgress, setCanSeeProgress] = useState<boolean>(true);
   const [favoriteBook, setFavoriteBook] = useState<FavoriteBook | null>(null);
   const [topFiveBooks, setTopFiveBooks] = useState<FavoriteBook[]>([]);
+  const [showAllTopBooks, setShowAllTopBooks] = useState(false);
   const [zodiacSign, setZodiacSign] = useState<string | null>(null);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
@@ -563,11 +564,22 @@ export default function UserProfile() {
           {/* Top Five Books */}
           {topFiveBooks.length > 0 && (
             <div className="mb-4">
-              <p className="text-sm mb-2 font-medium text-center" style={{ color: accentTextColor }}>
-                Top Five
-              </p>
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <p className="text-sm font-medium text-center" style={{ color: accentTextColor }}>
+                  Top Five
+                </p>
+                {topFiveBooks.length > 5 && (
+                  <button
+                    onClick={() => setShowAllTopBooks(!showAllTopBooks)}
+                    className="text-xs px-2 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
+                    style={{ color: accentTextColor, borderColor: accentTextColor }}
+                  >
+                    {showAllTopBooks ? "show less" : "view top ten"}
+                  </button>
+                )}
+              </div>
               <div className="flex gap-2 overflow-x-auto pb-2">
-                {topFiveBooks.map((book, index) => (
+                {topFiveBooks.slice(0, showAllTopBooks ? 10 : 5).map((book, index) => (
                   <div key={book.id} className="flex-shrink-0 w-24">
                     <div className="relative">
                       <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold z-10" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>

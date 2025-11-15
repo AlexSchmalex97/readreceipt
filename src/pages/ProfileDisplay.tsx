@@ -111,6 +111,7 @@ export default function ProfileDisplay() {
   const [favoriteBook, setFavoriteBook] = useState<FavoriteBook | null>(null);
   const [currentBook, setCurrentBook] = useState<CurrentBook | null>(null);
   const [topFiveBooks, setTopFiveBooks] = useState<FavoriteBook[]>([]);
+  const [showAllTopBooks, setShowAllTopBooks] = useState(false);
   const [zodiacSign, setZodiacSign] = useState<string | null>(null);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
@@ -585,13 +586,24 @@ export default function ProfileDisplay() {
           {/* Top Five Books */}
           {topFiveBooks.length > 0 && (
             <div className="mb-4">
-              <Link to="/profile/settings">
-                <p className="text-sm mb-2 font-medium text-center cursor-pointer hover:underline" style={{ color: accentTextColor }}>
-                  Top Five
-                </p>
-              </Link>
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Link to="/profile/settings">
+                  <p className="text-sm font-medium text-center cursor-pointer hover:underline" style={{ color: accentTextColor }}>
+                    Top Five
+                  </p>
+                </Link>
+                {topFiveBooks.length > 5 && (
+                  <button
+                    onClick={() => setShowAllTopBooks(!showAllTopBooks)}
+                    className="text-xs px-2 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
+                    style={{ color: accentTextColor, borderColor: accentTextColor }}
+                  >
+                    {showAllTopBooks ? "show less" : "view top ten"}
+                  </button>
+                )}
+              </div>
               <div className="flex gap-2 overflow-x-auto pb-2">
-                {topFiveBooks.map((book, index) => (
+                {topFiveBooks.slice(0, showAllTopBooks ? 10 : 5).map((book, index) => (
                   <div key={book.id} className="flex-shrink-0 w-24">
                     <div className="relative">
                       <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold z-10" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>
@@ -981,13 +993,23 @@ export default function ProfileDisplay() {
                 {/* Top Five Books - Desktop */}
                 {topFiveBooks.length > 0 && (
                   <div className="mt-8">
-                    <Link to="/profile/settings">
-                      <h3 className="text-xs font-medium text-muted-foreground mb-2 cursor-pointer hover:underline">
-                        Top Five
-                      </h3>
-                    </Link>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Link to="/profile/settings">
+                        <h3 className="text-xs font-medium text-muted-foreground cursor-pointer hover:underline">
+                          Top Five
+                        </h3>
+                      </Link>
+                      {topFiveBooks.length > 5 && (
+                        <button
+                          onClick={() => setShowAllTopBooks(!showAllTopBooks)}
+                          className="text-xs px-2 py-0.5 rounded-full border border-muted-foreground/30 text-muted-foreground hover:bg-accent/50 transition-colors"
+                        >
+                          {showAllTopBooks ? "show less" : "view top ten"}
+                        </button>
+                      )}
+                    </div>
                     <div className="flex gap-3">
-                      {topFiveBooks.map((book, index) => (
+                      {topFiveBooks.slice(0, showAllTopBooks ? 10 : 5).map((book, index) => (
                         <div key={book.id} className="flex-shrink-0 w-24">
                           <div className="relative">
                             <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold z-10 bg-primary text-primary-foreground">
