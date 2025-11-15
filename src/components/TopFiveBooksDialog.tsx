@@ -104,16 +104,19 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
       }
 
       // Load all completed books for selection
-      const { data: allBooks } = await supabase
+      const { data: userBooks } = await supabase
         .from('books')
-        .select('id, title, author, cover_url')
+        .select('id, title, author, cover_url, current_page, total_pages, status, finished_at, created_at')
         .eq('user_id', user.id)
-        .eq('status', 'completed')
         .order('finished_at', { ascending: false });
 
-      if (allBooks) {
-        // Filter out already selected books
-        const available = allBooks.filter(book => !currentTopFive.includes(book.id));
+      if (userBooks) {
+        // Consider a book completed if status is 'completed' OR current_page >= total_pages
+        const completedBooks = userBooks.filter((b: any) => (b.status === 'completed') || (b.current_page >= b.total_pages));
+        // Filter out already selected books and map to minimal fields
+        const available = completedBooks
+          .filter((book: any) => !currentTopFive.includes(book.id))
+          .map((b: any) => ({ id: b.id, title: b.title, author: b.author, cover_url: b.cover_url }));
         setAvailableBooks(available);
       }
     } catch (error) {
