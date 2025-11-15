@@ -1374,5 +1374,6 @@ export default function ProfileDisplay() {
         />
       </div>
     </div>
+  </div>
   );
 }
