@@ -27,12 +27,17 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
 
   useEffect(() => {
     let mounted = true;
-    (async () => {
+
+    const load = async () => {
       try {
         const { data: sess } = await supabase.auth.getSession();
         const user = sess.session?.user;
         if (!user) {
-          if (mounted) setPalette(null);
+          if (mounted) {
+            setPalette(null);
+            setBackgroundImageUrl(null);
+            setBackgroundTint(null);
+          }
           return;
         }
         const { data } = await supabase
@@ -42,7 +47,7 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
           .single();
         if (!mounted) return;
         setPalette((data as any)?.color_palette || null);
-        
+
         // Load background based on type
         if ((data as any)?.background_type === 'image' && (data as any)?.active_background_id) {
           const { data: bgData } = await supabase
@@ -50,62 +55,46 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
             .select("image_url, tint_color, tint_opacity")
             .eq("id", (data as any).active_background_id)
             .single();
-          
+          if (!mounted) return;
           if (bgData) {
             setBackgroundImageUrl(bgData.image_url);
-            setBackgroundTint(bgData.tint_color && bgData.tint_opacity > 0 
+            setBackgroundTint(bgData.tint_color && (bgData.tint_opacity as number) > 0
               ? { color: bgData.tint_color, opacity: bgData.tint_opacity as number }
               : null
             );
+          } else {
+            setBackgroundImageUrl(null);
+            setBackgroundTint(null);
           }
         } else {
           setBackgroundImageUrl(null);
           setBackgroundTint(null);
         }
       } catch {
-        if (mounted) setPalette(null);
-      }
-    })();
-    const { data: sub } = supabase.auth.onAuthStateChange(() => {
-      // reload on auth change
-      (async () => {
-        const { data: sess } = await supabase.auth.getSession();
-        const user = sess.session?.user;
-        if (!user) {
+        if (mounted) {
           setPalette(null);
-          return;
-        }
-        const { data } = await supabase
-          .from("profiles")
-          .select("color_palette, background_type, active_background_id")
-          .eq("id", user.id)
-          .single();
-        setPalette((data as any)?.color_palette || null);
-        
-        // Load background based on type
-        if ((data as any)?.background_type === 'image' && (data as any)?.active_background_id) {
-          const { data: bgData } = await supabase
-            .from("saved_backgrounds")
-            .select("image_url, tint_color, tint_opacity")
-            .eq("id", (data as any).active_background_id)
-            .single();
-          
-          if (bgData) {
-            setBackgroundImageUrl(bgData.image_url);
-            setBackgroundTint(bgData.tint_color && bgData.tint_opacity > 0 
-              ? { color: bgData.tint_color, opacity: bgData.tint_opacity as number }
-              : null
-            );
-          }
-        } else {
           setBackgroundImageUrl(null);
           setBackgroundTint(null);
         }
-      })();
+      }
+    };
+
+    // Initial load
+    load();
+
+    // Reload on auth changes
+    const { data: sub } = supabase.auth.onAuthStateChange(() => {
+      load();
     });
+
+    // Listen for explicit background updates from settings
+    const onBgChanged = () => load();
+    window.addEventListener('profile-background-changed', onBgChanged);
+
     return () => {
       mounted = false;
       sub.subscription.unsubscribe();
+      window.removeEventListener('profile-background-changed', onBgChanged);
     };
   }, []);
 

@@ -205,6 +205,7 @@ export function BackgroundImageSettings({
 
       setActiveBackgroundId(backgroundId);
       onUpdate();
+      window.dispatchEvent(new CustomEvent('profile-background-changed'));
 
       toast({
         title: "Background applied!",
@@ -237,6 +238,7 @@ export function BackgroundImageSettings({
 
       setActiveBackgroundId(null);
       onUpdate();
+      window.dispatchEvent(new CustomEvent('profile-background-changed'));
 
       toast({
         title: "Color background activated!",
@@ -262,6 +264,7 @@ export function BackgroundImageSettings({
       if (error) throw error;
 
       loadSavedBackgrounds();
+      window.dispatchEvent(new CustomEvent('profile-background-changed'));
 
       toast({
         title: "Background deleted",
