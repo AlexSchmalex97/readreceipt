@@ -430,7 +430,11 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
                       className="pl-9"
                     />
                   </div>
-                  <Button onClick={handleGoogleSearch} disabled={searchingGoogle}>
+                  <Button 
+                    onClick={handleGoogleSearch} 
+                    disabled={searchingGoogle}
+                    className="shrink-0"
+                  >
                     {searchingGoogle ? "Searching..." : "Search"}
                   </Button>
                 </div>
@@ -449,7 +453,7 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
                       const imgSrc = thumb ? thumb.replace('http:', 'https:') : null;
 
                       return (
-                        <div key={book.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border">
+                        <div key={book.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border min-w-0">
                           {imgSrc ? (
                             <img 
                               src={imgSrc}
@@ -472,6 +476,7 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
                             size="sm" 
                             onClick={() => handleAddGoogleBook(book)}
                             disabled={selectedBooks.length >= 5}
+                            className="shrink-0"
                           >
                             Add
                           </Button>
