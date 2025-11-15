@@ -21,6 +21,8 @@ interface BackgroundImageSettingsProps {
   backgroundTint: { color: string; opacity: number } | null;
   backgroundType: 'color' | 'image';
   onUpdate: () => void;
+  onTextColorChange?: (color: string) => void;
+  currentTextColor?: string;
 }
 
 const PRESET_TINT_COLORS = [
@@ -38,7 +40,9 @@ export function BackgroundImageSettings({
   backgroundImageUrl, 
   backgroundTint,
   backgroundType,
-  onUpdate 
+  onUpdate,
+  onTextColorChange,
+  currentTextColor 
 }: BackgroundImageSettingsProps) {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [savedBackgrounds, setSavedBackgrounds] = useState<SavedBackground[]>([]);
@@ -47,6 +51,7 @@ export function BackgroundImageSettings({
   const [tintColor, setTintColor] = useState("#000000");
   const [tintOpacity, setTintOpacity] = useState(0);
   const [backgroundName, setBackgroundName] = useState("");
+  const [headerTextColor, setHeaderTextColor] = useState(currentTextColor || "");
   const { toast } = useToast();
 
   // Load saved backgrounds
@@ -380,6 +385,37 @@ export function BackgroundImageSettings({
                   step={0.01}
                   className="w-full"
                 />
+              </div>
+
+              <div>
+                <Label className="text-sm mb-2 block">Header Text Color (Optional)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="color"
+                    value={headerTextColor || "#FFFFFF"}
+                    onChange={(e) => setHeaderTextColor(e.target.value)}
+                    className="w-16 h-10 p-1 cursor-pointer"
+                  />
+                  <Input
+                    type="text"
+                    placeholder="#FFFFFF"
+                    value={headerTextColor}
+                    onChange={(e) => setHeaderTextColor(e.target.value)}
+                    className="flex-1"
+                  />
+                  {headerTextColor && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setHeaderTextColor("")}
+                    >
+                      Clear
+                    </Button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Set a custom text color for better contrast with your background image
+                </p>
               </div>
 
               <div className="flex gap-2">

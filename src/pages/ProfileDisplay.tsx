@@ -117,7 +117,6 @@ export default function ProfileDisplay() {
   const [zodiacSign, setZodiacSign] = useState<string | null>(null);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
-  const [backgroundColor, setBackgroundColor] = useState<string>('#F5F1E8');
   const { toast } = useToast();
   const { isIOS, isReadReceiptApp } = usePlatform();
 
@@ -151,7 +150,6 @@ export default function ProfileDisplay() {
           email: user.email,
           top_five_books: Array.isArray(profileData.top_five_books) ? profileData.top_five_books as string[] : []
         });
-        setBackgroundColor((profileData as any).background_color || '#F5F1E8');
 
         // Fetch favorite book if exists
         if (profileData.favorite_book_id) {
@@ -409,16 +407,12 @@ export default function ProfileDisplay() {
     );
   }
 
-  // Compute text color for header only
+  // Compute text color for header
   const headerTextColor = (() => {
     const textHex = (profile as any)?.color_palette?.text_color as string | undefined;
     if (textHex) return textHex;
-    // Auto contrast
-    const r = parseInt(backgroundColor.slice(1,3),16);
-    const g = parseInt(backgroundColor.slice(3,5),16);
-    const b = parseInt(backgroundColor.slice(5,7),16);
-    const lum = 0.2126*r + 0.7152*g + 0.0722*b;
-    return lum < 128 ? "#FFFFFF" : "#1A1A1A";
+    // Default to foreground
+    return undefined;
   })();
 
   // Compute accent color for cards/sections
@@ -438,10 +432,7 @@ export default function ProfileDisplay() {
   })();
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ backgroundColor }}
-    >
+    <div className="min-h-screen bg-background">
       <Navigation />
       <div 
         ref={scrollableRef}
@@ -493,7 +484,7 @@ export default function ProfileDisplay() {
           {/* Header - Centered */}
           <div className="flex flex-col items-center text-center mb-4">
             {/* Profile Photo */}
-            <div className="w-24 h-24 rounded-full overflow-hidden bg-muted border-2 border-border mb-3">
+            <div className="w-32 h-32 rounded-full overflow-hidden bg-muted border-4 border-border mb-3">
               {profile.avatar_url ? (
                 <img 
                   src={profile.avatar_url} 
@@ -506,15 +497,15 @@ export default function ProfileDisplay() {
                 </div>
               )}
             </div>
-            
+
             {/* Profile Info */}
-            <h1 className="text-2xl font-bold" style={{ color: headerTextColor }}>
+            <h1 className="text-2xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
               {profile.display_name || "Reader"}
             </h1>
-            <p className="text-sm mt-1" style={{ color: headerTextColor }}>
+            <p className="text-sm mt-1 text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
               @{profile.username || profile.id.slice(0, 8)}
             </p>
-            <div className="flex items-center justify-center gap-4 mt-2 text-xs" style={{ color: headerTextColor }}>
+            <div className="flex items-center justify-center gap-4 mt-2 text-xs text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
               <span>
                 <Calendar className="w-3 h-3 inline mr-1" />
                 Member since {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
@@ -538,7 +529,7 @@ export default function ProfileDisplay() {
 
           {/* Bio */}
           {profile.bio && (
-            <p className="text-sm text-center mb-4 max-w-2xl mx-auto" style={{ color: headerTextColor }}>{profile.bio}</p>
+            <p className="text-sm text-center mb-4 max-w-2xl mx-auto text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>{profile.bio}</p>
           )}
           {/* Current Book & Favorite Book - Side by Side */}
           {(currentBook || favoriteBook) && (
@@ -898,11 +889,21 @@ export default function ProfileDisplay() {
 
         {/* Desktop Layout - Original Format */}
         <div className="hidden lg:block">
-          {/* Header with Settings Button */}
-          <div className="flex justify-between items-start mb-4 sm:mb-6">
-            <div className="flex items-center gap-6 flex-1">
-              {/* Profile Photo */}
-              <div className="w-32 h-32 rounded-full overflow-hidden bg-muted border-2 border-border flex-shrink-0">
+          {/* Settings Button - Top Right */}
+          <div className="flex justify-end mb-4">
+            <Link to="/profile/settings">
+              <Button variant="outline" size="sm">
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </Button>
+            </Link>
+          </div>
+
+          {/* Centered Header Section */}
+          <div className="flex flex-col items-center text-center mb-6">
+            <div className="flex items-center gap-6 mb-4">
+              {/* Profile Photo - Bigger */}
+              <div className="w-40 h-40 rounded-full overflow-hidden bg-muted border-4 border-border flex-shrink-0">
                 {profile.avatar_url ? (
                   <img 
                     src={profile.avatar_url} 
@@ -916,18 +917,15 @@ export default function ProfileDisplay() {
                 )}
               </div>
               
-              {/* Left Column - Profile Info */}
-              <div className="flex-1 min-w-0">
-                <h1 className="text-5xl font-bold" style={{ color: headerTextColor }}>
+              {/* Profile Info */}
+              <div className="text-left">
+                <h1 className="text-5xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
                   {profile.display_name || "Reader"}
                 </h1>
-                <p className="text-lg mt-1" style={{ color: headerTextColor }}>
+                <p className="text-lg mt-1 text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
                   @{profile.username || profile.id.slice(0, 8)}
                 </p>
-                {profile.bio && (
-                  <p className="text-base mt-2 max-w-2xl" style={{ color: headerTextColor }}>{profile.bio}</p>
-                )}
-                <div className="flex items-center gap-4 mt-3" style={{ color: headerTextColor }}>
+                <div className="flex items-center gap-4 mt-3 text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
                   <p className="text-sm">
                     <Calendar className="w-4 h-4 inline mr-1" />
                     Member since {new Date(profile.created_at).toLocaleDateString()}
