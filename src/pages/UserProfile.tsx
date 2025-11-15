@@ -70,6 +70,7 @@ interface UserProfile {
   social_media_links?: any;
   website_url?: string | null;
   color_palette?: any;
+  top_five_books?: string[];
 }
 
 interface FavoriteBook {
@@ -89,6 +90,7 @@ export default function UserProfile() {
   const [myId, setMyId] = useState<string | null>(null);
   const [canSeeProgress, setCanSeeProgress] = useState<boolean>(true);
   const [favoriteBook, setFavoriteBook] = useState<FavoriteBook | null>(null);
+  const [topFiveBooks, setTopFiveBooks] = useState<FavoriteBook[]>([]);
   const [zodiacSign, setZodiacSign] = useState<string | null>(null);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
@@ -117,7 +119,10 @@ export default function UserProfile() {
           .single();
 
         if (profileError) throw profileError;
-        setProfile(profileData);
+        setProfile({
+          ...profileData,
+          top_five_books: Array.isArray(profileData.top_five_books) ? profileData.top_five_books as string[] : []
+        });
         setBackgroundColor((profileData as any).background_color || '#F5F1E8');
 
         const userId = profileData.id;
@@ -134,6 +139,22 @@ export default function UserProfile() {
             setFavoriteBook(bookData);
           }
         }
+
+        // Fetch top five books
+        if (profileData.top_five_books && Array.isArray(profileData.top_five_books) && profileData.top_five_books.length > 0) {
+          const { data: topFiveData } = await supabase
+            .from('books')
+            .select('id, title, author, cover_url')
+            .in('id', profileData.top_five_books as string[]);
+          
+          if (topFiveData) {
+            const orderedBooks = (profileData.top_five_books as string[])
+              .map(id => topFiveData.find(book => book.id === id))
+              .filter(Boolean) as FavoriteBook[];
+            setTopFiveBooks(orderedBooks);
+          }
+        }
+
 
         // Calculate zodiac sign if birthday exists
         if (profileData.birthday) {

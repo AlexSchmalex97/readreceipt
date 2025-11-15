@@ -13,6 +13,7 @@ import 'react-image-crop/dist/ReactCrop.css';
 import { SocialMediaInput } from "@/components/SocialMediaInput";
 import { FavoriteBookSelector } from "@/components/FavoriteBookSelector";
 import { ReadingGoals } from "@/components/ReadingGoals";
+import { TopFiveBooksDialog } from "@/components/TopFiveBooksDialog";
 import { usePlatform } from "@/hooks/usePlatform";
 import { useNavigate } from "react-router-dom";
 
@@ -49,6 +50,7 @@ export default function ProfileSettings() {
   const [birthday, setBirthday] = useState("");
   const [favoriteBookId, setFavoriteBookId] = useState<string | undefined>();
   const [currentBookId, setCurrentBookId] = useState<string | undefined>();
+  const [topFiveBooks, setTopFiveBooks] = useState<string[]>([]);
   const [socialMediaLinks, setSocialMediaLinks] = useState<{platform: string, url: string}[]>([]);
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [backgroundColor, setBackgroundColor] = useState("#F5F1E8");
@@ -128,6 +130,7 @@ export default function ProfileSettings() {
       setBirthday(prof?.birthday ?? "");
       setFavoriteBookId(prof?.favorite_book_id ?? undefined);
       setCurrentBookId(prof?.current_book_id ?? undefined);
+      setTopFiveBooks(Array.isArray(prof?.top_five_books) ? prof.top_five_books as string[] : []);
       setSocialMediaLinks(prof?.social_media_links ? Object.entries(prof.social_media_links).map(([platform, url]) => ({ platform, url: url as string })) : []);
       setWebsiteUrl(prof?.website_url ?? "");
       setBackgroundColor((prof as any)?.background_color ?? "#F5F1E8");
@@ -707,6 +710,23 @@ export default function ProfileSettings() {
             />
           </div>
 
+          <div className="grid gap-1">
+            <label className="text-sm font-medium">Top Five Books</label>
+            <TopFiveBooksDialog currentTopFive={topFiveBooks} onSave={async () => {
+              const { data } = await supabase
+                .from('profiles')
+                .select('top_five_books')
+                .eq('id', uid)
+                .single();
+              if (data) {
+                setTopFiveBooks(Array.isArray(data.top_five_books) ? data.top_five_books as string[] : []);
+              }
+            }}>
+              <Button variant="outline" type="button">
+                Edit Top Five ({topFiveBooks.length}/5)
+              </Button>
+            </TopFiveBooksDialog>
+          </div>
 
           <div className="grid gap-1">
             <SocialMediaInput

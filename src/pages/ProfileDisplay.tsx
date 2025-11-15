@@ -26,6 +26,7 @@ type UserProfile = {
   social_media_links?: any;
   website_url?: string | null;
   color_palette?: any;
+  top_five_books?: string[];
 };
 
 type FavoriteBook = {
@@ -107,6 +108,7 @@ export default function ProfileDisplay() {
   const [activityFeed, setActivityFeed] = useState<ActivityItem[]>([]);
   const [favoriteBook, setFavoriteBook] = useState<FavoriteBook | null>(null);
   const [currentBook, setCurrentBook] = useState<CurrentBook | null>(null);
+  const [topFiveBooks, setTopFiveBooks] = useState<FavoriteBook[]>([]);
   const [zodiacSign, setZodiacSign] = useState<string | null>(null);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
@@ -141,7 +143,8 @@ export default function ProfileDisplay() {
       } else {
         setProfile({
           ...profileData,
-          email: user.email
+          email: user.email,
+          top_five_books: Array.isArray(profileData.top_five_books) ? profileData.top_five_books as string[] : []
         });
         setBackgroundColor((profileData as any).background_color || '#F5F1E8');
 
@@ -157,6 +160,22 @@ export default function ProfileDisplay() {
             setFavoriteBook(bookData);
           }
         }
+
+        // Fetch top five books
+        if (profileData.top_five_books && Array.isArray(profileData.top_five_books) && profileData.top_five_books.length > 0) {
+          const { data: topFiveData } = await supabase
+            .from('books')
+            .select('id, title, author, cover_url')
+            .in('id', profileData.top_five_books as string[]);
+          
+          if (topFiveData) {
+            const orderedBooks = (profileData.top_five_books as string[])
+              .map(id => topFiveData.find(book => book.id === id))
+              .filter(Boolean) as FavoriteBook[];
+            setTopFiveBooks(orderedBooks);
+          }
+        }
+
 
         // Fetch current book if exists
         if (profileData.current_book_id) {
