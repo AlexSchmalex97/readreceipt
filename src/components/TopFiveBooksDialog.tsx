@@ -203,15 +203,17 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
       const author: string = authorsArr.length > 0 ? authorsArr.join(", ") : "Unknown Author";
       const thumb: string | undefined = vi?.imageLinks?.thumbnail || vi?.imageLinks?.smallThumbnail;
       const coverUrl: string | null = thumb ? thumb.replace('http:', 'https:') : null;
-      const totalPages: number = vi?.pageCount || 0;
+      const totalPages: number = Math.max(Number(vi?.pageCount || 0), 1);
 
       // Check if book already exists for this user
       const { data: existingBook } = await supabase
         .from('books')
-        .select('id, title, author, cover_url')
+        .select('id, title, author, cover_url, created_at')
         .eq('user_id', user.id)
         .eq('title', title)
         .eq('author', author)
+        .order('created_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       let bookToAdd: Book;
@@ -240,11 +242,11 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
 
       setSelectedBooks([...selectedBooks, bookToAdd]);
       setGoogleResults(googleResults.filter((b: any) => (b.id ?? b.volumeInfo?.id) !== (googleBook.id ?? googleBook.volumeInfo?.id)));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding book:', error);
       toast({
         title: "Error",
-        description: "Failed to add book",
+        description: error?.message ? `Failed to add book: ${error.message}` : "Failed to add book",
         variant: "destructive",
       });
     }
@@ -317,7 +319,7 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
           <DialogTitle>Edit Top Five Books</DialogTitle>
           <DialogDescription>
@@ -416,7 +418,7 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
             </TabsContent>
 
             {/* Google Books Search Tab */}
-            <TabsContent value="search" className="space-y-3">
+            <TabsContent value="search" className="space-y-3 max-w-full overflow-x-hidden">
               <div>
                 <h3 className="font-medium mb-3">Search Google Books</h3>
                 <div className="flex gap-2 mb-3">
@@ -453,7 +455,7 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
                       const imgSrc = thumb ? thumb.replace('http:', 'https:') : null;
 
                       return (
-                        <div key={book.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border min-w-0">
+                        <div key={book.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border min-w-0 w-full">
                           {imgSrc ? (
                             <img 
                               src={imgSrc}
