@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Palette } from "lucide-react";
+import { Palette, Upload, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -76,16 +76,18 @@ export function ColorPaletteSelector({ currentPalette, onPaletteChange }: ColorP
   const [isOpen, setIsOpen] = useState(false);
   const [customHexInput, setCustomHexInput] = useState("");
   const [savedCustomColors, setSavedCustomColors] = useState<string[]>([]);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Load saved custom colors on mount
+  // Load saved custom colors and background image on mount
   useEffect(() => {
     (async () => {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) return;
       const { data } = await supabase
         .from("profiles")
-        .select("color_palette")
+        .select("color_palette, background_image_url")
         .eq("id", user.user.id)
         .single();
       if (data?.color_palette && typeof data.color_palette === 'object' && 'custom_colors' in data.color_palette) {
@@ -93,6 +95,9 @@ export function ColorPaletteSelector({ currentPalette, onPaletteChange }: ColorP
         if (Array.isArray(customColors)) {
           setSavedCustomColors(customColors as string[]);
         }
+      }
+      if (data?.background_image_url) {
+        setBackgroundImageUrl(data.background_image_url);
       }
     })();
   }, []);
@@ -132,22 +137,21 @@ export function ColorPaletteSelector({ currentPalette, onPaletteChange }: ColorP
     if (!/^#[0-9A-F]{6}$/i.test(customHexInput)) {
       toast({
         title: "Invalid hex code",
-        description: "Please enter a valid hex code (e.g., #FF5733)",
+        description: "Please enter a valid 6-digit hex code (e.g., #FF5733)",
         variant: "destructive"
       });
       return;
     }
 
-    // Convert hex to HSL
-    const hexToHSL = (hex: string) => {
+    const hexToHSL = (hex: string): string => {
       const r = parseInt(hex.slice(1, 3), 16) / 255;
       const g = parseInt(hex.slice(3, 5), 16) / 255;
       const b = parseInt(hex.slice(5, 7), 16) / 255;
-      
+
       const max = Math.max(r, g, b);
       const min = Math.min(r, g, b);
       let h = 0, s = 0, l = (max + min) / 2;
-      
+
       if (max !== min) {
         const d = max - min;
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
@@ -158,18 +162,22 @@ export function ColorPaletteSelector({ currentPalette, onPaletteChange }: ColorP
           case b: h = ((r - g) / d + 4) / 6; break;
         }
       }
-      
-      return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+
+      h = Math.round(h * 360);
+      s = Math.round(s * 100);
+      l = Math.round(l * 100);
+
+      return `${h} ${s}% ${l}%`;
     };
 
-    const hsl = hexToHSL(customHexInput);
+    const hslBackground = hexToHSL(customHexInput);
     const customPalette: ColorPalette = {
       name: "custom",
-      primary: hsl,
-      secondary: `${hsl.split(' ')[0]} 20% 85%`,
-      accent: `${hsl.split(' ')[0]} 30% 80%`,
-      background: `${hsl.split(' ')[0]} 30% 96%`,
-      foreground: parseInt(hsl.split('%')[2]) < 50 ? "0 0% 100%" : "0 0% 20%",
+      primary: "30 40% 35%",
+      secondary: "40 20% 85%",
+      accent: "60 20% 80%",
+      background: hslBackground,
+      foreground: "30 25% 20%"
     };
 
     await handlePaletteSelect(customPalette);
@@ -179,7 +187,7 @@ export function ColorPaletteSelector({ currentPalette, onPaletteChange }: ColorP
     if (!/^#[0-9A-F]{6}$/i.test(customHexInput)) {
       toast({
         title: "Invalid hex code",
-        description: "Please enter a valid hex code",
+        description: "Please enter a valid 6-digit hex code (e.g., #FF5733)",
         variant: "destructive"
       });
       return;
@@ -189,29 +197,142 @@ export function ColorPaletteSelector({ currentPalette, onPaletteChange }: ColorP
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) return;
 
-      const newCustomColors = [...new Set([...savedCustomColors, customHexInput])].slice(0, 8);
+      const newColors = Array.from(new Set([...savedCustomColors, customHexInput])).slice(0, 10);
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("color_palette")
+        .eq("id", user.user.id)
+        .single();
+
+      const existingPalette = (data?.color_palette && typeof data.color_palette === 'object') ? data.color_palette : {};
       
+      const updatedPalette = {
+        ...existingPalette,
+        custom_colors: newColors
+      };
+
       const { error } = await supabase
         .from("profiles")
-        .update({
-          color_palette: {
-            ...currentPalette,
-            custom_colors: newCustomColors
-          }
-        })
+        .update({ color_palette: updatedPalette })
         .eq("id", user.user.id);
 
       if (error) throw error;
 
-      setSavedCustomColors(newCustomColors);
+      setSavedCustomColors(newColors);
+      setCustomHexInput("");
+
       toast({
         title: "Custom color saved!",
-        description: "Your custom color has been added to your saved colors."
+        description: "Your custom color has been saved to your palette."
       });
     } catch (error) {
       console.error("Error saving custom color:", error);
       toast({
         title: "Error saving color",
+        description: "Please try again",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an image file",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please upload an image smaller than 5MB",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsUploadingImage(true);
+
+    try {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) return;
+
+      // Upload to Supabase storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `background-${user.user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `${user.user.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Update profile with background image URL
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ background_image_url: publicUrl })
+        .eq("id", user.user.id);
+
+      if (updateError) throw updateError;
+
+      setBackgroundImageUrl(publicUrl);
+      setIsOpen(false);
+      onPaletteChange?.();
+
+      toast({
+        title: "Background image uploaded!",
+        description: "Your background image has been updated."
+      });
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast({
+        title: "Error uploading image",
+        description: "Please try again",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const handleRemoveBackgroundImage = async () => {
+    try {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) return;
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({ background_image_url: null })
+        .eq("id", user.user.id);
+
+      if (error) throw error;
+
+      setBackgroundImageUrl(null);
+      onPaletteChange?.();
+
+      toast({
+        title: "Background image removed",
+        description: "Your background has been reset to color palette."
+      });
+    } catch (error) {
+      console.error("Error removing background image:", error);
+      toast({
+        title: "Error removing image",
         description: "Please try again",
         variant: "destructive"
       });
@@ -269,12 +390,63 @@ export function ColorPaletteSelector({ currentPalette, onPaletteChange }: ColorP
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Choose Your Color Palette</DialogTitle>
+          <DialogTitle>Customize Your Background</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6">
+          {/* Background Image Section */}
           <div>
-            <h3 className="text-sm font-medium mb-3">Preset Palettes</h3>
+            <h3 className="text-sm font-medium mb-3">Background Image</h3>
+            {backgroundImageUrl ? (
+              <div className="relative">
+                <img 
+                  src={backgroundImageUrl} 
+                  alt="Current background" 
+                  className="w-full h-32 object-cover rounded-lg border"
+                />
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="absolute top-2 right-2"
+                  onClick={handleRemoveBackgroundImage}
+                >
+                  <X className="w-4 h-4 mr-1" />
+                  Remove
+                </Button>
+              </div>
+            ) : (
+              <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  id="background-upload"
+                  disabled={isUploadingImage}
+                />
+                <label 
+                  htmlFor="background-upload" 
+                  className="cursor-pointer flex flex-col items-center gap-2"
+                >
+                  <Upload className="w-8 h-8 text-muted-foreground" />
+                  <div className="text-sm">
+                    <span className="font-medium text-primary">Click to upload</span>
+                    <span className="text-muted-foreground"> or drag and drop</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Max file size: 5MB
+                  </p>
+                </label>
+                {isUploadingImage && (
+                  <p className="text-sm text-muted-foreground mt-2">Uploading...</p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Color Palettes Section */}
+          <div>
+            <h3 className="text-sm font-medium mb-3">Preset Color Palettes</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {COLOR_PALETTES.map((palette) => (
                 <Card 
@@ -295,18 +467,19 @@ export function ColorPaletteSelector({ currentPalette, onPaletteChange }: ColorP
             </div>
           </div>
 
+          {/* Custom Color Section */}
           <div>
             <h3 className="text-sm font-medium mb-3">Custom Color</h3>
             <div className="flex gap-2 items-center mb-3">
               <input
                 type="text"
-                className="border rounded px-3 py-2 bg-background flex-1"
-                value={customHexInput}
-                onChange={(e) => setCustomHexInput(e.target.value)}
                 placeholder="#FF5733"
+                value={customHexInput}
+                onChange={(e) => setCustomHexInput(e.target.value.toUpperCase())}
+                className="flex-1 px-3 py-2 border rounded-md text-sm"
                 maxLength={7}
               />
-              <Button onClick={handleCustomHexApply} variant="outline">
+              <Button onClick={handleCustomHexApply} variant="secondary">
                 Apply
               </Button>
               <Button onClick={handleSaveCustomHex} variant="outline">
@@ -315,23 +488,20 @@ export function ColorPaletteSelector({ currentPalette, onPaletteChange }: ColorP
             </div>
             
             {savedCustomColors.length > 0 && (
-              <>
-                <h4 className="text-xs text-muted-foreground mb-2">Saved Custom Colors</h4>
-                <div className="grid grid-cols-4 gap-2">
-                  {savedCustomColors.map((hex, idx) => (
-                    <button
+              <div>
+                <p className="text-xs text-muted-foreground mb-2">Saved custom colors:</p>
+                <div className="flex gap-2 flex-wrap">
+                  {savedCustomColors.map((color, idx) => (
+                    <div
                       key={idx}
-                      onClick={() => {
-                        setCustomHexInput(hex);
-                        handleCustomHexApply();
-                      }}
-                      className="h-12 rounded border-2 border-border hover:border-primary/50 transition-all"
-                      style={{ backgroundColor: hex }}
-                      title={hex}
+                      className="w-8 h-8 rounded-md border cursor-pointer hover:scale-110 transition-transform"
+                      style={{ backgroundColor: color }}
+                      onClick={() => setCustomHexInput(color)}
+                      title={color}
                     />
                   ))}
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
