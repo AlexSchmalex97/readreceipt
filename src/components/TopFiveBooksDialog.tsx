@@ -169,10 +169,10 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
   };
 
   const handleAddBook = (book: Book) => {
-    if (selectedBooks.length >= 5) {
+    if (selectedBooks.length >= 10) {
       toast({
         title: "Limit reached",
-        description: "You can only select up to 5 books",
+        description: "You can only select up to 10 books",
         variant: "destructive",
       });
       return;
@@ -183,10 +183,10 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
   };
 
   const handleAddGoogleBook = async (googleBook: any) => {
-    if (selectedBooks.length >= 5) {
+    if (selectedBooks.length >= 10) {
       toast({
         title: "Limit reached",
-        description: "You can only select up to 5 books",
+        description: "You can only select up to 10 books",
         variant: "destructive",
       });
       return;
@@ -297,7 +297,7 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
 
       toast({
         title: "Success",
-        description: "Top Five books updated successfully",
+        description: "Top Ten books updated successfully",
       });
 
       setOpen(false);
@@ -321,9 +321,9 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
         <DialogHeader>
-          <DialogTitle>Edit Top Five Books</DialogTitle>
+          <DialogTitle>Edit Top Ten Books</DialogTitle>
           <DialogDescription>
-            Select and order your top 5 favorite books. Drag to reorder.
+            Select and order your top 10 favorite books. Drag to reorder. Only the top 5 will be displayed on your profile.
           </DialogDescription>
         </DialogHeader>
 
