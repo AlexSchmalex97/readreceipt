@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,9 @@ import { ReadingGoals } from "@/components/ReadingGoals";
 import { FavoriteBookSelector } from "@/components/FavoriteBookSelector";
 import { TopFiveBooksDialog } from "@/components/TopFiveBooksDialog";
 import { SocialMediaInput } from "@/components/SocialMediaInput";
-import { BookOpen, User, Settings as SettingsIcon, Palette, Camera, Link as LinkIcon } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { BookOpen, User, Settings as SettingsIcon, Palette, Camera, Link as LinkIcon, Upload, Download } from "lucide-react";
 
 interface Identity {
   id: string;
@@ -74,6 +76,8 @@ interface SettingsTabsProps {
 }
 
 export function SettingsTabs(props: SettingsTabsProps) {
+  const { toast } = useToast();
+  
   return (
     <Tabs defaultValue="reading" className="w-full">
       <TabsList className="grid w-full grid-cols-4">
@@ -154,14 +158,84 @@ export function SettingsTabs(props: SettingsTabsProps) {
         <Card>
           <CardHeader>
             <CardTitle>Data Import & Export</CardTitle>
+            <CardDescription>
+              Import your library from Goodreads, Fable, StoryGraph, or Bookly, or export your ReadReceipt library
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">Import or export your reading data</p>
-            <Link to="/integrations">
-              <Button variant="outline" className="w-full">
-                Manage Integrations
-              </Button>
-            </Link>
+          <CardContent className="space-y-4">
+            <div>
+              <h4 className="font-medium mb-2">Goodreads CSV</h4>
+              <p className="text-sm text-muted-foreground mb-3">
+                Import your Goodreads library or export your ReadReceipt library in Goodreads CSV format
+              </p>
+              <div className="flex gap-4">
+                <Button 
+                  onClick={async () => {
+                    try {
+                      const { exportToGoodreadsCSV, downloadCSV } = await import("@/lib/csvExport");
+                      const { data: { user } } = await supabase.auth.getUser();
+                      if (!user) return;
+                      const csvContent = await exportToGoodreadsCSV(user.id);
+                      const timestamp = new Date().toISOString().split("T")[0];
+                      downloadCSV(csvContent, `readreceipt-export-${timestamp}.csv`);
+                      toast({
+                        title: "Export successful",
+                        description: "Your library has been exported to CSV format",
+                      });
+                    } catch (error: any) {
+                      toast({
+                        title: "Export failed",
+                        description: error.message,
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Export to CSV
+                </Button>
+                <Button variant="outline" asChild>
+                  <label className="cursor-pointer">
+                    <Upload className="mr-2 h-4 w-4" />
+                    Import CSV
+                    <input
+                      type="file"
+                      accept=".csv"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          const { importGoodreadsCSV } = await import("@/lib/csvImport");
+                          const { data: { user } } = await supabase.auth.getUser();
+                          if (!user) return;
+                          const csvContent = await file.text();
+                          const { imported, errors } = await importGoodreadsCSV(csvContent, user.id);
+                          toast({
+                            title: "Import complete",
+                            description: `Successfully imported ${imported} books${errors.length > 0 ? `. ${errors.length} errors occurred.` : ""}`,
+                          });
+                        } catch (error: any) {
+                          toast({
+                            title: "Import failed",
+                            description: error.message,
+                            variant: "destructive",
+                          });
+                        }
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </Button>
+              </div>
+            </div>
+            
+            <div className="pt-4 border-t">
+              <p className="text-sm text-muted-foreground">
+                <strong>Note:</strong> Fable, StoryGraph, and Bookly also support Goodreads CSV format. 
+                Export your library from those platforms and import it here using the same CSV import feature.
+              </p>
+            </div>
           </CardContent>
         </Card>
       </TabsContent>
@@ -354,17 +428,6 @@ export function SettingsTabs(props: SettingsTabsProps) {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Integrations</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <p className="text-sm text-muted-foreground">Manage connected services and integrations.</p>
-            <Link to="/integrations">
-              <Button variant="outline" size="sm">Open Integrations</Button>
-            </Link>
-          </CardContent>
-        </Card>
       </TabsContent>
 
       {/* Display Settings Tab */}

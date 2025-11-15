@@ -253,6 +253,7 @@ export function TopFiveBooksDialog({ children, currentTopFive, onSave }: TopFive
     setSearchingGoogle(true);
     try {
       const results = await searchBooks(googleSearchQuery);
+      console.log('Google Books results:', results);
       setGoogleResults(results);
     } catch (error) {
       console.error('Error searching Google Books:', error);
