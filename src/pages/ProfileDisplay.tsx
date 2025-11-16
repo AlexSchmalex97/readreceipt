@@ -897,7 +897,7 @@ export default function ProfileDisplay() {
           </Accordion>
         </div>
 
-        {/* Desktop Layout - Original Format */}
+        {/* Desktop Layout - Centered with larger photo */}
         <div className="hidden lg:block">
           {/* Settings Button - Top Right */}
           <div className="flex justify-end mb-4">
@@ -910,10 +910,10 @@ export default function ProfileDisplay() {
           </div>
 
           {/* Centered Header Section */}
-          <div className="flex flex-col items-center text-center mb-6">
-            <div className="flex items-center gap-6 mb-4">
-              {/* Profile Photo - Bigger */}
-              <div className="w-40 h-40 rounded-full overflow-hidden bg-muted border-4 border-border flex-shrink-0">
+          <div className="flex flex-col items-center mb-6">
+            <div className="flex items-center gap-8 max-w-5xl">
+              {/* Profile Photo - Larger */}
+              <div className="w-48 h-48 rounded-full overflow-hidden bg-muted border-4 border-border flex-shrink-0">
                 {profile.avatar_url ? (
                   <img 
                     src={profile.avatar_url} 
@@ -922,42 +922,61 @@ export default function ProfileDisplay() {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <User className="w-16 h-16 text-muted-foreground" />
+                    <User className="w-20 h-20 text-muted-foreground" />
                   </div>
                 )}
               </div>
               
               {/* Profile Info */}
-              <div className="text-left">
-                <h1 className="text-5xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
-                  {profile.display_name || "Reader"}
-                </h1>
-                <p className="text-lg mt-1 text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
-                  @{profile.username || profile.id.slice(0, 8)}
-                </p>
-                <div className="flex items-center gap-4 mt-3 text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
-                  <p className="text-sm">
-                    <Calendar className="w-4 h-4 inline mr-1" />
+              <div className="text-left space-y-4">
+                <div>
+                  <h1 className="text-5xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
+                    {profile.display_name || "Reader"}
+                  </h1>
+                  <p className="text-2xl mt-1 text-foreground opacity-80" style={headerTextColor ? { color: headerTextColor } : {}}>
+                    @{profile.username || profile.id.slice(0, 8)}
+                  </p>
+                </div>
+
+                {profile.bio && (
+                  <p className="text-base text-foreground max-w-2xl" style={headerTextColor ? { color: headerTextColor } : {}}>{profile.bio}</p>
+                )}
+
+                <div className="flex items-center gap-4 text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
+                  <p className="text-sm flex items-center gap-1">
+                    <Calendar className="w-4 h-4" />
                     Member since {new Date(profile.created_at).toLocaleDateString()}
                   </p>
                   {zodiacSign && (
-                    <p className="text-sm">
-                      <Star className="w-4 h-4 inline mr-1" />
-                      {zodiacSign}
-                    </p>
+                    <>
+                      <span>•</span>
+                      <p className="text-sm flex items-center gap-1">
+                        <Star className="w-4 h-4" />
+                        {zodiacSign}
+                      </p>
+                    </>
                   )}
                 </div>
 
                 {/* Followers/Following */}
                 {uid && (
-                  <div className="flex gap-2 mt-3">
+                  <div className="flex gap-2">
                     <FollowersDialog userId={uid} type="followers" count={followersCount} />
                     <FollowersDialog userId={uid} type="following" count={followingCount} />
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
 
-                {/* Favorite Book and Current Read */}
-                {(currentBook || favoriteBook) && (
+          {/* Bio */}
+          {profile.bio && (
+            <p className="text-center text-base mb-6 max-w-3xl mx-auto text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>{profile.bio}</p>
+          )}
+
+          {/* Favorite Book and Current Read */}
+          <div className="flex flex-col items-center mb-6">
+            {(currentBook || favoriteBook) && (
                   <div className="mt-4 flex gap-4">
                     {favoriteBook && (
                       <div className="flex-1 min-w-0">
@@ -1001,10 +1020,12 @@ export default function ProfileDisplay() {
                             </div>
                           </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
 
                 {/* Top Five Books - Desktop */}
                 {topFiveBooks.length > 0 && (
