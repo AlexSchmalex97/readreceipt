@@ -873,12 +873,12 @@ export default function UserProfile() {
             </Accordion>
           </div>
 
-          {/* Desktop Layout - Match Alex format */}
+          {/* Desktop Layout - Centered with larger photo */}
           <div className="hidden lg:block">
-            <div className="flex justify-between items-start mb-6 sm:mb-8">
-              <div className="flex items-center gap-6 flex-1">
-                {/* Profile Photo */}
-                <div className="w-32 h-32 rounded-full overflow-hidden bg-muted border-2 border-border flex-shrink-0">
+            <div className="flex flex-col items-center mb-6">
+              <div className="flex items-center gap-8 max-w-5xl">
+                {/* Profile Photo - Larger */}
+                <div className="w-48 h-48 rounded-full overflow-hidden bg-muted border-4 border-border flex-shrink-0">
                   <img 
                     src={profile.avatar_url || "/assets/default-avatar.png"} 
                     alt="Profile" 
@@ -886,43 +886,52 @@ export default function UserProfile() {
                   />
                 </div>
                 
-                {/* Left Column - Profile Info */}
-                <div className="flex-1 min-w-0">
-                  <h1 className="text-5xl font-bold" style={{ color: headerTextColor }}>
-                    {profile.display_name || "Reader"}
-                  </h1>
-                  <p className="text-lg mt-1" style={{ color: headerTextColor }}>
-                    @{profile.username || profile.id.slice(0, 8)}
-                  </p>
+                {/* Profile Info */}
+                <div className="text-left space-y-4">
+                  <div>
+                    <h1 className="text-5xl font-bold" style={{ color: headerTextColor }}>
+                      {profile.display_name || "Reader"}
+                    </h1>
+                    <p className="text-2xl mt-1 opacity-80" style={{ color: headerTextColor }}>
+                      @{profile.username || profile.id.slice(0, 8)}
+                    </p>
+                  </div>
+
                   {profile.bio && (
-                    <p className="text-base mt-2 max-w-2xl" style={{ color: headerTextColor }}>{profile.bio}</p>
+                    <p className="text-base max-w-2xl" style={{ color: headerTextColor }}>{profile.bio}</p>
                   )}
-                  <div className="flex items-center gap-4 mt-3" style={{ color: headerTextColor }}>
-                    <p className="text-sm">
-                      <Calendar className="w-4 h-4 inline mr-1" />
+
+                  <div className="flex items-center gap-4" style={{ color: headerTextColor }}>
+                    <p className="text-sm flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
                       Member since {new Date(profile.created_at).toLocaleDateString()}
                     </p>
                     {zodiacSign && (
-                      <p className="text-sm">
-                        <Star className="w-4 h-4 inline mr-1" />
-                        {zodiacSign}
-                      </p>
+                      <>
+                        <span>•</span>
+                        <p className="text-sm flex items-center gap-1">
+                          <Star className="w-4 h-4" />
+                          {zodiacSign}
+                        </p>
+                      </>
                     )}
                   </div>
 
                   {/* Followers/Following + Follow */}
-                  <div className="flex gap-2 mt-3">
+                  <div className="flex gap-2">
                     <FollowersDialog userId={profile.id} type="followers" count={followersCount} />
                     <FollowersDialog userId={profile.id} type="following" count={followingCount} />
                     {myId && myId !== profile.id && (
-                      <div className="ml-2">
-                        <FollowButton targetUserId={profile.id} />
-                      </div>
+                      <FollowButton targetUserId={profile.id} />
                     )}
                   </div>
+                </div>
+              </div>
+            </div>
 
-                  {/* Favorite Book and Current Read */}
-                  {(currentBook || favoriteBook) && (
+            {/* Favorite Book and Current Read */}
+            <div className="flex flex-col items-center">
+              {(currentBook || favoriteBook) && (
                     <div className="mt-4 flex gap-4">
                       {favoriteBook && (
                         <div className="flex-1 min-w-0 max-w-sm">
@@ -966,10 +975,13 @@ export default function UserProfile() {
                               </div>
                             </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
                   {/* Links */}
                   {(profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url ? (
