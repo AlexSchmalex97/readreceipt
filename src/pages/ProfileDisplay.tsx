@@ -409,14 +409,21 @@ export default function ProfileDisplay() {
     );
   }
 
-  // Compute text color for header
+  // Compute header background color
+  const headerBgColor = profile?.color_palette?.headerColor || 'hsl(var(--primary))';
+  
+  // Compute header text color based on background
   const headerTextColor = (() => {
-    const textHex = (profile as any)?.color_palette?.text_color as string | undefined;
-    if (textHex) return textHex;
-    // Default to foreground
-    return undefined;
+    const col = profile?.color_palette?.headerColor;
+    if (!col || col.startsWith('hsl')) return 'hsl(var(--primary-foreground))';
+    const hex = col.replace('#','');
+    const r = parseInt(hex.slice(0,2),16);
+    const g = parseInt(hex.slice(3,5),16);
+    const b = parseInt(hex.slice(5,7),16);
+    const lum = 0.2126*r + 0.7152*g + 0.0722*b;
+    return lum < 128 ? "#FFFFFF" : "#1A1A1A";
   })();
-
+  
   // Compute accent color for cards/sections
   const accentCardColor = (profile as any)?.color_palette?.accent_color || "#ffffff";
   
@@ -433,28 +440,312 @@ export default function ProfileDisplay() {
     return lum < 128 ? "#FFFFFF" : "#1A1A1A";
   })();
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold">Profile</h1>
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 py-8 text-center">
+          <p>Loading profile...</p>
+        </div>
       </div>
+    );
+  }
+
+  if (!uid) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 py-8 text-center">
+          <p>Profile Not Found</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={scrollableRef} className="min-h-screen bg-background" style={{ position: 'relative', overflowY: 'auto' }}>
+      <Navigation />
+      
+      {/* Pull to refresh indicator */}
+      {showPullIndicator && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: `${pullDistance}px`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'opacity 0.2s',
+            opacity: pullDistance > 0 ? Math.min(pullDistance / 60, 1) : 0,
+            zIndex: 10,
+          }}
+        >
+          <RefreshCw className={`w-6 h-6 ${isRefreshing ? 'animate-spin' : ''}`} />
+        </div>
+      )}
+
+      {/* Header Section with Background */}
+      <div 
+        className="relative w-full py-16 mb-8"
+        style={{
+          backgroundColor: headerBgColor,
+          color: headerTextColor,
+        }}
+      >
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col items-center text-center gap-6">
+            {/* Avatar */}
+            <div className="w-32 h-32 rounded-full overflow-hidden bg-muted border-4" style={{ borderColor: headerTextColor }}>
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt={profile.display_name || 'User'} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <User className="w-16 h-16" style={{ color: headerTextColor }} />
+                </div>
+              )}
+            </div>
+
+            {/* Display Name & Username */}
+            <div>
+              <h1 className="text-3xl font-bold">{profile?.display_name || profile?.username || 'User'}</h1>
+              {profile?.username && <p className="text-sm opacity-80">@{profile.username}</p>}
+            </div>
+
+            {/* Bio */}
+            {profile?.bio && (
+              <p className="max-w-2xl text-center opacity-90">{profile.bio}</p>
+            )}
+
+            {/* Social Links */}
+            {(profile?.social_media_links || profile?.website_url) && (
+              <div className="flex flex-wrap gap-3 justify-center">
+                {profile.website_url && (
+                  <a href={profile.website_url} target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity">
+                    <Globe className="w-5 h-5" />
+                  </a>
+                )}
+                {profile.social_media_links && Object.entries(profile.social_media_links).map(([platform, url]: [string, any]) => {
+                  const Icon = getSocialMediaIcon(platform);
+                  return url ? (
+                    <a key={platform} href={url} target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity">
+                      <Icon className="w-5 h-5" />
+                    </a>
+                  ) : null;
+                })}
+              </div>
+            )}
+
+            {/* Followers/Following */}
+            <div className="flex gap-4">
+              <FollowersDialog userId={uid} type="followers" count={followersCount} />
+              <FollowersDialog userId={uid} type="following" count={followingCount} />
+            </div>
+
+            {/* Settings Button */}
+            <Link to="/settings">
+              <Button variant="outline" style={{ borderColor: headerTextColor, color: headerTextColor }}>
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 pb-8">
+        {/* Reading Statistics */}
+        <Card className="mb-6" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>
+          <CardHeader>
+            <CardTitle style={{ color: accentTextColor }}>Reading Statistics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <p className="text-2xl font-bold">{bookStats.totalBooks}</p>
+                <p className="text-sm opacity-80">Total Books</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{bookStats.completedBooks}</p>
+                <p className="text-sm opacity-80">Completed</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{bookStats.inProgressBooks}</p>
+                <p className="text-sm opacity-80">In Progress</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{bookStats.completedThisYear}</p>
+                <p className="text-sm opacity-80">This Year</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Favorite Book */}
+        {favoriteBook && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Favorite Book</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-4">
+                {favoriteBook.cover_url ? (
+                  <img src={favoriteBook.cover_url} alt={favoriteBook.title} className="w-20 h-28 object-cover rounded" />
+                ) : (
+                  <div className="w-20 h-28 bg-muted rounded flex items-center justify-center">
+                    <BookOpen className="w-8 h-8" />
+                  </div>
+                )}
+                <div>
+                  <h3 className="font-semibold">{favoriteBook.title}</h3>
+                  <p className="text-sm text-muted-foreground">{favoriteBook.author}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Currently Reading */}
+        {currentBook && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Currently Reading</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-4 mb-4">
+                {currentBook.cover_url ? (
+                  <img src={currentBook.cover_url} alt={currentBook.title} className="w-20 h-28 object-cover rounded" />
+                ) : (
+                  <div className="w-20 h-28 bg-muted rounded flex items-center justify-center">
+                    <BookOpen className="w-8 h-8" />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <h3 className="font-semibold">{currentBook.title}</h3>
+                  <p className="text-sm text-muted-foreground mb-2">{currentBook.author}</p>
+                  <Progress value={(currentBook.current_page / currentBook.total_pages) * 100} />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {currentBook.current_page} / {currentBook.total_pages} pages
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Top Books */}
+        {topFiveBooks.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Top Books</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {topFiveBooks.slice(0, 5).map((book, index) => (
+                  <div key={book.id} className="text-center">
+                    {book.cover_url ? (
+                      <img src={book.cover_url} alt={book.title} className="w-full h-40 object-cover rounded mb-2" />
+                    ) : (
+                      <div className="w-full h-40 bg-muted rounded flex items-center justify-center mb-2">
+                        <BookOpen className="w-8 h-8" />
+                      </div>
+                    )}
+                    <p className="text-xs font-semibold truncate">{book.title}</p>
+                    <p className="text-xs text-muted-foreground truncate">{book.author}</p>
+                  </div>
+                ))}
+              </div>
+              {topFiveBooks.length > 5 && (
+                <Button 
+                  variant="outline" 
+                  className="w-full mt-4"
+                  onClick={() => setShowTopTenDialog(true)}
+                >
+                  View All {topFiveBooks.length} Books
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Reading Goals */}
+        <div className="mb-6">
+          <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedThisYear} />
+        </div>
+
+        {/* Activity Feed */}
+        {activityFeed.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Accordion type="single" collapsible className="w-full">
+                {activityFeed.slice(0, 10).map((item) => (
+                  <AccordionItem key={item.id} value={item.id}>
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-3">
+                        {item.kind === "progress" ? (
+                          <BookOpen className="w-4 h-4" />
+                        ) : (
+                          <Star className="w-4 h-4" />
+                        )}
+                        <span className="text-sm">
+                          {item.kind === "progress" 
+                            ? `Read ${item.book_title}`
+                            : `Reviewed ${item.book_title}`
+                          }
+                        </span>
+                        <span className="text-xs text-muted-foreground ml-auto">
+                          {new Date(item.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="flex gap-3 pt-2">
+                        {item.book_cover_url && (
+                          <img src={item.book_cover_url} alt={item.book_title || ''} className="w-12 h-16 object-cover rounded" />
+                        )}
+                        <div>
+                          <p className="font-medium">{item.book_title}</p>
+                          <p className="text-sm text-muted-foreground">{item.book_author}</p>
+                          {item.kind === "progress" && (
+                            <p className="text-sm mt-1">
+                              Pages {item.from_page} → {item.to_page}
+                            </p>
+                          )}
+                          {item.kind === "review" && (
+                            <>
+                              <div className="flex gap-1 mt-1">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`w-4 h-4 ${i < item.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                  />
+                                ))}
+                              </div>
+                              {item.review && <p className="text-sm mt-2">{item.review}</p>}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
       <TopTenDialog 
         open={showTopTenDialog} 
         onOpenChange={setShowTopTenDialog} 
         books={topFiveBooks} 
         accentCardColor={accentCardColor}
         accentTextColor={accentTextColor}
-      />
-      <FollowersDialog 
-        userId={uid || ''}
-        type="followers"
-        count={followersCount}
-      />
-      <FollowersDialog 
-        userId={uid || ''}
-        type="following"
-        count={followingCount}
       />
     </div>
   );
