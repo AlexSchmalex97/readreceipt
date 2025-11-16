@@ -140,7 +140,7 @@ export default function ProfileDisplay() {
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
       if (profileError) {
         console.error("Profile load error:", profileError);
