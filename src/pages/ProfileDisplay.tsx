@@ -114,8 +114,6 @@ export default function ProfileDisplay() {
   const [topFiveBooks, setTopFiveBooks] = useState<FavoriteBook[]>([]);
   const [showAllTopBooks, setShowAllTopBooks] = useState(false);
   const [showTopTenDialog, setShowTopTenDialog] = useState(false);
-  const [showFollowersDialog, setShowFollowersDialog] = useState(false);
-  const [showFollowingDialog, setShowFollowingDialog] = useState(false);
   const [zodiacSign, setZodiacSign] = useState<string | null>(null);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
@@ -409,21 +407,14 @@ export default function ProfileDisplay() {
     );
   }
 
-  // Compute header background color
-  const headerBgColor = profile?.color_palette?.headerColor || 'hsl(var(--primary))';
-  
-  // Compute header text color based on background
+  // Compute text color for header
   const headerTextColor = (() => {
-    const col = profile?.color_palette?.headerColor;
-    if (!col || col.startsWith('hsl')) return 'hsl(var(--primary-foreground))';
-    const hex = col.replace('#','');
-    const r = parseInt(hex.slice(0,2),16);
-    const g = parseInt(hex.slice(3,5),16);
-    const b = parseInt(hex.slice(5,7),16);
-    const lum = 0.2126*r + 0.7152*g + 0.0722*b;
-    return lum < 128 ? "#FFFFFF" : "#1A1A1A";
+    const textHex = (profile as any)?.color_palette?.text_color as string | undefined;
+    if (textHex) return textHex;
+    // Default to foreground
+    return undefined;
   })();
-  
+
   // Compute accent color for cards/sections
   const accentCardColor = (profile as any)?.color_palette?.accent_color || "#ffffff";
   
@@ -440,313 +431,902 @@ export default function ProfileDisplay() {
     return lum < 128 ? "#FFFFFF" : "#1A1A1A";
   })();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navigation />
-        <div className="container mx-auto px-4 py-8 text-center">
-          <p>Loading profile...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!uid) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navigation />
-        <div className="container mx-auto px-4 py-8 text-center">
-          <p>Profile Not Found</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div ref={scrollableRef} className="min-h-screen bg-background" style={{ position: 'relative', overflowY: 'auto' }}>
+    <div className="min-h-screen bg-background">
       <Navigation />
-      
-      {/* Pull to refresh indicator */}
-      {showPullIndicator && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: `${pullDistance}px`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'opacity 0.2s',
-            opacity: pullDistance > 0 ? Math.min(pullDistance / 60, 1) : 0,
-            zIndex: 10,
-          }}
-        >
-          <RefreshCw className={`w-6 h-6 ${isRefreshing ? 'animate-spin' : ''}`} />
-        </div>
-      )}
-
-      {/* Header Section with Background */}
       <div 
-        className="relative w-full py-16 mb-8"
-        style={{
-          backgroundColor: headerBgColor,
-          color: headerTextColor,
+        ref={scrollableRef}
+        className="relative overflow-y-auto"
+        style={{ 
+          height: (isIOS || isReadReceiptApp) ? 'calc(100dvh - 4rem)' : 'auto',
+          paddingTop: (isIOS || isReadReceiptApp) ? 'calc(env(safe-area-inset-top, 0px) + 12px)' : undefined,
+          paddingBottom: (isIOS || isReadReceiptApp) ? 'calc(4rem + env(safe-area-inset-bottom, 0px) + 16px)' : undefined,
         }}
       >
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-            {/* Avatar */}
-            <div className="md:col-span-2 flex md:block justify-center">
-              <div className="w-32 h-32 rounded-full overflow-hidden bg-muted border-4" style={{ borderColor: headerTextColor }}>
-                {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt={profile.display_name || 'User'} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <User className="w-16 h-16" style={{ color: headerTextColor }} />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Identity, bio, social, follows */}
-            <div className="md:col-span-8 text-left">
-              <h1 className="text-3xl font-bold">{profile?.display_name || profile?.username || 'User'}</h1>
-              {profile?.username && <p className="text-sm opacity-80">@{profile.username}</p>}
-              {profile?.bio && (
-                <p className="mt-2 opacity-90 max-w-2xl">{profile.bio}</p>
-              )}
-
-              {(profile?.social_media_links || profile?.website_url) && (
-                <div className="flex flex-wrap gap-3 mt-3">
-                  {profile.website_url && (
-                    <a href={profile.website_url} target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity">
-                      <Globe className="w-5 h-5" />
-                    </a>
-                  )}
-                  {profile.social_media_links && Object.entries(profile.social_media_links).map(([platform, url]: [string, any]) => {
-                    const Icon = getSocialMediaIcon(platform);
-                    return url ? (
-                      <a key={platform} href={url} target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity">
-                        <Icon className="w-5 h-5" />
-                      </a>
-                    ) : null;
-                  })}
-                </div>
-              )}
-
-              <div className="flex gap-4 mt-4">
-                <FollowersDialog userId={uid} type="followers" count={followersCount} />
-                <FollowersDialog userId={uid} type="following" count={followingCount} />
-              </div>
-            </div>
-
-            {/* Settings */}
-            <div className="md:col-span-2 flex md:justify-end justify-center">
-              <Link to="/settings">
-                <Button variant="outline" style={{ borderColor: headerTextColor, color: headerTextColor }}>
-                  <Settings className="w-4 h-4 mr-2" />
-                  Settings
-                </Button>
-              </Link>
+        {/* Pull-to-refresh indicator */}
+        {showPullIndicator && (
+          <div 
+            className="absolute top-0 left-0 right-0 flex items-center justify-center transition-all duration-200 z-10"
+            style={{ 
+              height: `${pullDistance}px`,
+              opacity: Math.min(pullDistance / 80, 1),
+            }}
+          >
+            <div className="flex flex-col items-center gap-2">
+              <RefreshCw 
+                className={`w-6 h-6 text-primary ${isRefreshing ? 'animate-spin' : ''}`}
+                style={{
+                  transform: `rotate(${pullDistance * 3}deg)`,
+                }}
+              />
+              <span className="text-xs text-muted-foreground">
+                {isRefreshing ? 'Refreshing...' : pullDistance >= 80 ? 'Release to refresh' : 'Pull to refresh'}
+              </span>
             </div>
           </div>
-        </div>
-      </div>
+        )}
 
-      <div className="container mx-auto px-4 pb-8">
-        {/* Reading Statistics */}
-        <Card className="mb-6" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>
-          <CardHeader>
-            <CardTitle style={{ color: accentTextColor }}>Reading Statistics</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <p className="text-2xl font-bold">{bookStats.totalBooks}</p>
-                <p className="text-sm opacity-80">Total Books</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{bookStats.completedBooks}</p>
-                <p className="text-sm opacity-80">Completed</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{bookStats.inProgressBooks}</p>
-                <p className="text-sm opacity-80">In Progress</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{bookStats.completedThisYear}</p>
-                <p className="text-sm opacity-80">This Year</p>
-              </div>
+      <div className="container mx-auto px-3 sm:px-6 py-2 sm:py-6 max-w-7xl"
+        style={{ paddingTop: showPullIndicator ? `${pullDistance + 8}px` : undefined }}
+      >
+        {/* Mobile & Tablet Layout - Centered */}
+        <div className="lg:hidden">
+          {/* Settings Button - Top Right */}
+          <div className="flex justify-end mb-3">
+            <Link to="/profile/settings">
+              <Button variant="outline" size="sm" className="h-9 px-4">
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </Button>
+            </Link>
+          </div>
+
+          {/* Header - Centered */}
+          <div className="flex flex-col items-center text-center mb-4">
+            {/* Profile Photo */}
+            <div className="w-32 h-32 rounded-full overflow-hidden bg-muted border-4 border-border mb-3">
+              {profile.avatar_url ? (
+                <img 
+                  src={profile.avatar_url} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <User className="w-12 h-12 text-muted-foreground" />
+                </div>
+              )}
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Favorite Book */}
-        {favoriteBook && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Favorite Book</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-4">
-                {favoriteBook.cover_url ? (
-                  <img src={favoriteBook.cover_url} alt={favoriteBook.title} className="w-20 h-28 object-cover rounded" />
-                ) : (
-                  <div className="w-20 h-28 bg-muted rounded flex items-center justify-center">
-                    <BookOpen className="w-8 h-8" />
-                  </div>
-                )}
-                <div>
-                  <h3 className="font-semibold">{favoriteBook.title}</h3>
-                  <p className="text-sm text-muted-foreground">{favoriteBook.author}</p>
-                </div>
+            {/* Profile Info */}
+            <h1 className="text-2xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
+              {profile.display_name || "Reader"}
+            </h1>
+            <p className="text-sm mt-1 text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
+              @{profile.username || profile.id.slice(0, 8)}
+            </p>
+            <div className="flex items-center justify-center gap-4 mt-2 text-xs text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
+              <span>
+                <Calendar className="w-3 h-3 inline mr-1" />
+                Member since {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+              </span>
+              {zodiacSign && (
+                <span>
+                  <Star className="w-3 h-3 inline mr-1" />
+                  {zodiacSign}
+                </span>
+              )}
+            </div>
+
+            {/* Followers/Following */}
+            {uid && (
+              <div className="flex gap-2 mt-3 justify-center">
+                <FollowersDialog userId={uid} type="followers" count={followersCount} accentColor={accentCardColor} />
+                <FollowersDialog userId={uid} type="following" count={followingCount} accentColor={accentCardColor} />
               </div>
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </div>
 
-        {/* Currently Reading */}
-        {currentBook && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Currently Reading</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-4 mb-4">
-                {currentBook.cover_url ? (
-                  <img src={currentBook.cover_url} alt={currentBook.title} className="w-20 h-28 object-cover rounded" />
-                ) : (
-                  <div className="w-20 h-28 bg-muted rounded flex items-center justify-center">
-                    <BookOpen className="w-8 h-8" />
-                  </div>
-                )}
-                <div className="flex-1">
-                  <h3 className="font-semibold">{currentBook.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-2">{currentBook.author}</p>
-                  <Progress value={(currentBook.current_page / currentBook.total_pages) * 100} />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {currentBook.current_page} / {currentBook.total_pages} pages
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Top Books */}
-        {topFiveBooks.length > 0 && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Top Books</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                {topFiveBooks.slice(0, 5).map((book, index) => (
-                  <div key={book.id} className="text-center">
-                    {book.cover_url ? (
-                      <img src={book.cover_url} alt={book.title} className="w-full h-40 object-cover rounded mb-2" />
-                    ) : (
-                      <div className="w-full h-40 bg-muted rounded flex items-center justify-center mb-2">
-                        <BookOpen className="w-8 h-8" />
-                      </div>
+          {/* Bio */}
+          {profile.bio && (
+            <p className="text-sm text-center mb-4 max-w-2xl mx-auto text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>{profile.bio}</p>
+          )}
+          {/* Current Book & Favorite Book - Side by Side */}
+          {(currentBook || favoriteBook) && (
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {currentBook && (
+                <div className="border rounded-lg p-3" style={{ backgroundColor: accentCardColor }}>
+                  <p className="text-xs mb-2 font-medium" style={{ color: headerTextColor }}>Currently Reading</p>
+                  <div className="flex gap-2">
+                    {currentBook.cover_url && (
+                      <img
+                        src={currentBook.cover_url}
+                        alt={currentBook.title}
+                        className="w-12 h-16 object-contain rounded flex-shrink-0"
+                      />
                     )}
-                    <p className="text-xs font-semibold truncate">{book.title}</p>
-                    <p className="text-xs text-muted-foreground truncate">{book.author}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium line-clamp-2 leading-tight" style={{ color: accentTextColor }}>{currentBook.title}</p>
+                      <p className="text-xs truncate mt-1" style={{ color: accentTextColor, opacity: 0.7 }}>{currentBook.author}</p>
+                      <p className="text-xs mt-1" style={{ color: accentTextColor, opacity: 0.7 }}>
+                        Page {currentBook.current_page} of {currentBook.total_pages}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {favoriteBook && (
+                <div className="border rounded-lg p-3" style={{ backgroundColor: accentCardColor }}>
+                  <p className="text-xs mb-2 font-medium" style={{ color: headerTextColor }}>Favorite Book</p>
+                  <div className="flex gap-2">
+                    {favoriteBook.cover_url && (
+                      <img
+                        src={favoriteBook.cover_url}
+                        alt={favoriteBook.title}
+                        className="w-12 h-16 object-contain rounded flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium line-clamp-2 leading-tight" style={{ color: accentTextColor }}>{favoriteBook.title}</p>
+                      <p className="text-xs truncate mt-1" style={{ color: accentTextColor, opacity: 0.7 }}>{favoriteBook.author}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Top Five Books */}
+          {topFiveBooks.length > 0 && (
+            <div className="mb-4">
+              <div className="flex items-center justify-center gap-2 mb-6">
+                <Link to="/profile/settings">
+                  <p className="text-sm font-medium text-center cursor-pointer hover:underline" style={{ color: accentTextColor }}>
+                    Top Five
+                  </p>
+                </Link>
+                <button
+                  onClick={() => setShowTopTenDialog(true)}
+                  className="text-xs px-2 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
+                  style={{ color: accentTextColor, borderColor: accentTextColor }}
+                >
+                  view top ten
+                </button>
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-2 justify-center md:justify-start pt-3">
+                {topFiveBooks.slice(0, 5).map((book, index) => (
+                  <div key={book.id} className="flex-shrink-0 w-16 md:w-24">
+                    <div className="relative">
+                      <div className="absolute -top-1.5 -left-1.5 md:-top-2 md:-left-2 w-4 h-4 md:w-6 md:h-6 rounded-full flex items-center justify-center text-[10px] md:text-xs font-bold z-10" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>
+                        {index + 1}
+                      </div>
+                      {book.cover_url && (
+                        <img
+                          src={book.cover_url}
+                          alt={book.title}
+                          className="w-full h-20 md:h-32 object-contain rounded shadow-md"
+                        />
+                      )}
+                    </div>
+                    <p className="text-[10px] md:text-xs mt-1 text-center truncate font-medium" style={{ color: headerTextColor }}>{book.title}</p>
+                    <p className="text-[10px] md:text-xs text-center truncate" style={{ color: headerTextColor, opacity: 0.7 }}>{book.author}</p>
                   </div>
                 ))}
               </div>
-              {topFiveBooks.length > 5 && (
-                <Button 
-                  variant="outline" 
-                  className="w-full mt-4"
-                  onClick={() => setShowTopTenDialog(true)}
-                >
-                  View All {topFiveBooks.length} Books
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          )}
 
-        {/* Reading Goals */}
-        <div className="mb-6">
-          <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedThisYear} />
-        </div>
+          <TopTenDialog 
+            open={showTopTenDialog} 
+            onOpenChange={setShowTopTenDialog} 
+            books={topFiveBooks} 
+            accentCardColor={accentCardColor}
+            accentTextColor={accentTextColor}
+          />
 
-        {/* Activity Feed */}
-        {activityFeed.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Accordion type="single" collapsible className="w-full">
-                {activityFeed.slice(0, 10).map((item) => (
-                  <AccordionItem key={item.id} value={item.id}>
-                    <AccordionTrigger>
-                      <div className="flex items-center gap-3">
-                        {item.kind === "progress" ? (
-                          <BookOpen className="w-4 h-4" />
-                        ) : (
-                          <Star className="w-4 h-4" />
-                        )}
-                        <span className="text-sm">
-                          {item.kind === "progress" 
-                            ? `Read ${item.book_title}`
-                            : `Reviewed ${item.book_title}`
-                          }
-                        </span>
-                        <span className="text-xs text-muted-foreground ml-auto">
-                          {new Date(item.created_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="flex gap-3 pt-2">
-                        {item.book_cover_url && (
-                          <img src={item.book_cover_url} alt={item.book_title || ''} className="w-12 h-16 object-cover rounded" />
-                        )}
-                        <div>
-                          <p className="font-medium">{item.book_title}</p>
-                          <p className="text-sm text-muted-foreground">{item.book_author}</p>
-                          {item.kind === "progress" && (
-                            <p className="text-sm mt-1">
-                              Pages {item.from_page} → {item.to_page}
-                            </p>
+          {((profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url) && (
+            <>
+              <p className="text-sm font-medium mb-2 text-center" style={{ color: headerTextColor }}>Links</p>
+              <div className="flex flex-wrap justify-center gap-2 mb-4">
+                {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
+                  const Icon = getSocialMediaIcon(platform);
+                  return (
+                    <a
+                      key={platform}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs border rounded-full hover:bg-accent transition-colors"
+                      style={{ color: headerTextColor }}
+                    >
+                      <Icon className="w-3 h-3" />
+                      {platform}
+                    </a>
+                  );
+                })}
+                {profile.website_url && (
+                  <a
+                    href={profile.website_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs border rounded-full hover:bg-accent transition-colors"
+                    style={{ color: headerTextColor }}
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    Website
+                  </a>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Stats - Single Row */}
+          <div className="grid grid-cols-3 gap-3 mb-4 max-w-md mx-auto">
+            <Link to="/">
+              <Card className="cursor-pointer hover:bg-accent/50 transition-colors" style={{ backgroundColor: accentCardColor }}>
+                <CardContent className="p-3 text-center">
+                  <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                  <p className="text-2xl font-bold text-foreground">{bookStats.inProgressBooks}</p>
+                  <p className="text-xs text-muted-foreground">Reading</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link to="/completed">
+              <Card className="cursor-pointer hover:bg-accent/50 transition-colors" style={{ backgroundColor: accentCardColor }}>
+                <CardContent className="p-3 text-center">
+                  <Star className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                  <p className="text-2xl font-bold text-foreground">{bookStats.completedBooks}</p>
+                  <p className="text-xs text-muted-foreground">Completed</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Card style={{ backgroundColor: accentCardColor }}>
+              <CardContent className="p-3 text-center">
+                <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                <p className="text-2xl font-bold text-foreground">{bookStats.totalBooks}</p>
+                <p className="text-xs text-muted-foreground">Total</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Reading Goal */}
+          <div className="mb-4 max-w-md mx-auto">
+            <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedThisYear} accentColor={accentCardColor} />
+          </div>
+
+          {/* Collapsible Activity Sections - Mobile/Tablet */}
+          <Accordion type="multiple" className="w-full space-y-2">
+            {/* Recent Reviews */}
+            <AccordionItem value="reviews" className="border rounded-lg px-3" style={{ backgroundColor: accentCardColor }}>
+              <AccordionTrigger className="hover:no-underline py-3">
+                <div className="flex items-center gap-2">
+                  <Star className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium">Recent Reviews ({recentReviews.length})</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                {recentReviews.length === 0 ? (
+                  <div className="text-center py-4">
+                    <Star className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-xs text-muted-foreground">No reviews yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {recentReviews.map((review) => (
+                      <div key={review.id} className="border-b border-border pb-2 last:border-b-0">
+                        <div className="flex gap-2">
+                          {review.books.cover_url ? (
+                            <img 
+                              src={review.books.cover_url} 
+                              alt={review.books.title}
+                              className="w-8 h-11 object-contain rounded shadow-sm flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="w-8 h-11 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                              <BookOpen className="w-3 h-3 text-muted-foreground" />
+                            </div>
                           )}
-                          {item.kind === "review" && (
-                            <>
-                              <div className="flex gap-1 mt-1">
+                          
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-xs text-foreground truncate">{review.books.title}</h4>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <div className="flex">
                                 {[...Array(5)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className={`w-4 h-4 ${i < item.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                  <Star 
+                                    key={i} 
+                                    className={`w-2.5 h-2.5 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'}`}
                                   />
                                 ))}
                               </div>
-                              {item.review && <p className="text-sm mt-2">{item.review}</p>}
-                            </>
-                          )}
+                              <span className="text-[9px] text-muted-foreground">
+                                {new Date(review.created_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                            {review.review && (
+                              <p className="text-[10px] text-foreground mt-1 line-clamp-2">{review.review}</p>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+                    ))}
+                  </div>
+                )}
+              </AccordionContent>
+            </AccordionItem>
 
-      <TopTenDialog 
-        open={showTopTenDialog} 
-        onOpenChange={setShowTopTenDialog} 
-        books={topFiveBooks} 
-        accentCardColor={accentCardColor}
-        accentTextColor={accentTextColor}
-      />
+            {/* Reading Activity */}
+            <AccordionItem value="activity" className="border rounded-lg px-3" style={{ backgroundColor: accentCardColor }}>
+              <AccordionTrigger className="hover:no-underline py-3">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium">Reading Activity</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                {activityFeed.length === 0 ? (
+                  <div className="text-center py-4">
+                    <BookOpen className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-xs text-muted-foreground">No activity yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {activityFeed.map((item) =>
+                      item.kind === "progress" ? (
+                        <div key={`p-${item.id}`} className="border border-border rounded-lg p-2">
+                          <div className="text-[9px] text-muted-foreground mb-1">
+                            {new Date(item.created_at).toLocaleString()}
+                          </div>
+                          <div className="flex gap-1.5">
+                            {item.book_cover_url ? (
+                              <img 
+                                src={item.book_cover_url} 
+                                alt={item.book_title || "Book cover"}
+                                className="w-6 h-9 object-contain rounded shadow-sm flex-shrink-0"
+                              />
+                            ) : (
+                              <div className="w-6 h-9 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                                <BookOpen className="w-2.5 h-2.5 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-[10px] mb-0.5">Reading Progress</div>
+                              <div className="text-[9px] text-muted-foreground line-clamp-2">
+                                Page {item.to_page} of {item.book_title ?? "Untitled"}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div key={`r-${item.id}`} className="border border-border rounded-lg p-2">
+                          <div className="text-[9px] text-muted-foreground mb-1">
+                            {new Date(item.created_at).toLocaleString()}
+                          </div>
+                          <div className="flex gap-1.5">
+                            {item.book_cover_url ? (
+                              <img 
+                                src={item.book_cover_url} 
+                                alt={item.book_title || "Book cover"}
+                                className="w-6 h-9 object-contain rounded shadow-sm flex-shrink-0"
+                              />
+                            ) : (
+                              <div className="w-6 h-9 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                                <BookOpen className="w-2.5 h-2.5 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-[10px] mb-0.5">
+                                Reviewed: ⭐ {item.rating}/5
+                              </div>
+                              <div className="text-[9px] text-muted-foreground truncate">
+                                {item.book_title ?? "Untitled"}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* TBR List */}
+            <AccordionItem value="tbr" className="border rounded-lg px-3" style={{ backgroundColor: accentCardColor }}>
+              <AccordionTrigger className="hover:no-underline py-3">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium">To Be Read ({tbrBooks.length})</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                {tbrBooks.length === 0 ? (
+                  <div className="text-center py-4">
+                    <BookOpen className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-xs text-muted-foreground">Your TBR list is empty</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {tbrBooks.map((book) => (
+                      <div key={book.id} className="border border-border rounded-lg p-2">
+                        <div className="flex gap-1.5">
+                          {book.cover_url ? (
+                            <img 
+                              src={book.cover_url} 
+                              alt={book.title}
+                              className="w-8 h-11 object-contain rounded shadow-sm flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="w-8 h-11 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                              <BookOpen className="w-3 h-3 text-muted-foreground" />
+                            </div>
+                          )}
+                          
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1 mb-0.5">
+                              <h3 className="font-medium text-xs text-foreground truncate">{book.title}</h3>
+                              {book.priority > 0 && (
+                                <div className="flex">
+                                  {Array(book.priority).fill(0).map((_, i) => (
+                                    <Star key={i} className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400" />
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-[9px] text-muted-foreground truncate">by {book.author}</p>
+                            {book.total_pages && (
+                              <p className="text-[9px] text-muted-foreground">{book.total_pages} pages</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+
+        {/* Desktop Layout - Original Format */}
+        <div className="hidden lg:block">
+          {/* Settings Button - Top Right */}
+          <div className="flex justify-end mb-4">
+            <Link to="/profile/settings">
+              <Button variant="outline" size="sm">
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </Button>
+            </Link>
+          </div>
+
+          {/* Centered Header Section */}
+          <div className="flex flex-col items-center text-center mb-6">
+            <div className="flex items-center gap-6 mb-4">
+              {/* Profile Photo - Bigger */}
+              <div className="w-40 h-40 rounded-full overflow-hidden bg-muted border-4 border-border flex-shrink-0">
+                {profile.avatar_url ? (
+                  <img 
+                    src={profile.avatar_url} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <User className="w-16 h-16 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+              
+              {/* Profile Info */}
+              <div className="text-left">
+                <h1 className="text-5xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
+                  {profile.display_name || "Reader"}
+                </h1>
+                <p className="text-lg mt-1 text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
+                  @{profile.username || profile.id.slice(0, 8)}
+                </p>
+                <div className="flex items-center gap-4 mt-3 text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
+                  <p className="text-sm">
+                    <Calendar className="w-4 h-4 inline mr-1" />
+                    Member since {new Date(profile.created_at).toLocaleDateString()}
+                  </p>
+                  {zodiacSign && (
+                    <p className="text-sm">
+                      <Star className="w-4 h-4 inline mr-1" />
+                      {zodiacSign}
+                    </p>
+                  )}
+                </div>
+
+                {/* Followers/Following */}
+                {uid && (
+                  <div className="flex gap-2 mt-3">
+                    <FollowersDialog userId={uid} type="followers" count={followersCount} />
+                    <FollowersDialog userId={uid} type="following" count={followingCount} />
+                  </div>
+                )}
+
+                {/* Favorite Book and Current Read */}
+                {(currentBook || favoriteBook) && (
+                  <div className="mt-4 flex gap-4">
+                    {favoriteBook && (
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xs font-medium text-muted-foreground mb-2">Favorite Book</h3>
+                        <div className="flex items-center gap-2 p-3 border rounded-lg h-full bg-card">
+                          {favoriteBook.cover_url && (
+                            <img
+                              src={favoriteBook.cover_url}
+                              alt={favoriteBook.title}
+                              className="w-12 h-16 object-contain rounded flex-shrink-0"
+                            />
+                          )}
+                          <div className="flex-1 min-w-0 overflow-hidden">
+                            <div className="font-medium text-xs leading-tight line-clamp-2">
+                              {favoriteBook.title}
+                            </div>
+                            <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">
+                              {favoriteBook.author}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {currentBook && (
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xs font-medium text-muted-foreground mb-2">Currently Reading</h3>
+                        <div className="flex items-center gap-2 p-3 border rounded-lg h-full bg-card">
+                          {currentBook.cover_url && (
+                            <img
+                              src={currentBook.cover_url}
+                              alt={currentBook.title}
+                              className="w-12 h-16 object-contain rounded flex-shrink-0"
+                            />
+                          )}
+                          <div className="flex-1 min-w-0 overflow-hidden">
+                            <div className="font-medium text-xs leading-tight line-clamp-2">{currentBook.title}</div>
+                            <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1">{currentBook.author}</div>
+                            <div className="text-[10px] text-muted-foreground mt-1">
+                              Page {currentBook.current_page} of {currentBook.total_pages}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Top Five Books - Desktop */}
+                {topFiveBooks.length > 0 && (
+                  <div className="mt-8">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Link to="/profile/settings">
+                        <h3 className="text-xs font-medium text-muted-foreground cursor-pointer hover:underline">
+                          Top Five
+                        </h3>
+                      </Link>
+                      <button
+                        onClick={() => setShowTopTenDialog(true)}
+                        className="text-xs px-2 py-0.5 rounded-full border border-muted-foreground/30 text-muted-foreground hover:bg-accent/50 transition-colors"
+                      >
+                        view top ten
+                      </button>
+                    </div>
+                    <div className="flex gap-3 pt-3">
+                      {topFiveBooks.slice(0, 5).map((book, index) => (
+                        <div key={book.id} className="flex-shrink-0 w-24">
+                          <div className="relative">
+                            <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold z-10 bg-primary text-primary-foreground">
+                              {index + 1}
+                            </div>
+                            {book.cover_url && (
+                              <img
+                                src={book.cover_url}
+                                alt={book.title}
+                                className="w-full h-32 object-contain rounded shadow-md"
+                              />
+                            )}
+                          </div>
+                          <p className="text-xs mt-1 truncate font-medium">{book.title}</p>
+                          <p className="text-xs truncate text-muted-foreground">{book.author}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {(profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url ? (
+                  <div className="mt-6">
+                    <h3 className="text-xs font-medium text-muted-foreground mb-2">Links</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
+                        const Icon = getSocialMediaIcon(platform);
+                        return (
+                          <a
+                            key={platform}
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 px-2 py-1 text-xs border rounded-full hover:bg-accent transition-colors"
+                          >
+                            <Icon className="w-3 h-3" />
+                            {platform}
+                          </a>
+                        );
+                      })}
+                      {profile.website_url && (
+                        <a
+                          href={profile.website_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 px-2 py-1 text-xs border rounded-full hover:bg-accent transition-colors"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          Website
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+
+              {/* Right Column - Reading Goal & Stats */}
+              <div className="w-80 flex-shrink-0">
+                {/* Reading Goals */}
+                <div className="mb-3">
+                  <HomeReadingGoals userId={uid} completedBooksThisYear={bookStats.completedThisYear} accentColor={accentCardColor} />
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-2">
+                  <Link to="/">
+                    <Card className="cursor-pointer hover:bg-accent/50 transition-colors" style={{ backgroundColor: accentCardColor }}>
+                      <CardContent className="p-3 text-center">
+                        <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                        <p className="text-2xl font-bold text-foreground">{bookStats.inProgressBooks}</p>
+                        <p className="text-[10px] text-muted-foreground">In Progress</p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                  <Link to="/completed">
+                    <Card className="cursor-pointer hover:bg-accent/50 transition-colors" style={{ backgroundColor: accentCardColor }}>
+                      <CardContent className="p-3 text-center">
+                        <Star className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                        <p className="text-2xl font-bold text-foreground">{bookStats.completedBooks}</p>
+                        <p className="text-[10px] text-muted-foreground">Completed</p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                  <Card style={{ backgroundColor: accentCardColor }}>
+                    <CardContent className="p-3 text-center">
+                      <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                      <p className="text-2xl font-bold text-foreground">{bookStats.totalBooks}</p>
+                      <p className="text-[10px] text-muted-foreground">Total Books</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </div>
+            
+            <Link to="/profile/settings" className="ml-4">
+              <Button variant="outline" className="gap-2">
+                <Settings className="w-4 h-4" />
+                Settings
+              </Button>
+            </Link>
+          </div>
+
+
+          {/* Three Column Layout: Recent Reviews - Activity Feed - TBR List */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* Recent Reviews */}
+            <Card style={{ backgroundColor: accentCardColor }}>
+              <CardHeader className="p-3 pb-2">
+                <CardTitle className="flex items-center justify-between text-sm">
+                  Recent Reviews
+                  <Link to="/reviews" className="text-xs font-normal text-primary hover:underline">
+                    View all
+                  </Link>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3 pt-0">
+                {recentReviews.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Star className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No reviews yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2.5 max-h-72 overflow-y-auto">
+                    {recentReviews.map((review) => (
+                      <div key={review.id} className="border-b border-border pb-2.5 last:border-b-0">
+                        <div className="flex gap-2">
+                          {review.books.cover_url ? (
+                            <img 
+                              src={review.books.cover_url} 
+                              alt={review.books.title}
+                              className="w-10 h-14 object-contain rounded shadow-sm flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="w-10 h-14 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                              <BookOpen className="w-3 h-3 text-muted-foreground" />
+                            </div>
+                          )}
+                          
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-sm text-foreground truncate">{review.books.title}</h4>
+                            <p className="text-xs text-muted-foreground truncate">by {review.books.author}</p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <div className="flex">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star 
+                                    key={i} 
+                                    className={`w-3 h-3 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'}`}
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(review.created_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                            {review.review && (
+                              <p className="text-xs text-foreground mt-1 line-clamp-2">{review.review}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Activity Feed */}
+            <Card style={{ backgroundColor: accentCardColor }}>
+              <CardHeader className="p-3 pb-2">
+                <CardTitle className="flex items-center gap-1.5 text-sm">
+                  <BookOpen className="w-4 h-4" />
+                  Reading Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3 pt-0">
+                {activityFeed.length === 0 ? (
+                  <div className="text-center py-8">
+                    <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No activity yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2.5 max-h-72 overflow-y-auto">
+                    {activityFeed.map((item) =>
+                      item.kind === "progress" ? (
+                        <div key={`p-${item.id}`} className="border border-border rounded-lg p-2">
+                          <div className="text-xs text-muted-foreground mb-1.5">
+                            {new Date(item.created_at).toLocaleString()}
+                          </div>
+                          <div className="flex gap-2">
+                            {item.book_cover_url ? (
+                              <img 
+                                src={item.book_cover_url} 
+                                alt={item.book_title || "Book cover"}
+                                className="w-8 h-12 object-contain rounded shadow-sm flex-shrink-0"
+                              />
+                            ) : (
+                              <div className="w-8 h-12 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                                <BookOpen className="w-3 h-3 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-xs mb-0.5">Reading Progress</div>
+                              <div className="text-xs text-muted-foreground">
+                                Page {item.to_page}
+                                {typeof item.from_page === "number" && item.from_page >= 0
+                                  ? ` (from ${item.from_page})`
+                                  : ""}{" "}
+                                of <span className="truncate">{item.book_title ?? "Untitled"}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div key={`r-${item.id}`} className="border border-border rounded-lg p-2">
+                          <div className="text-xs text-muted-foreground mb-1.5">
+                            {new Date(item.created_at).toLocaleString()}
+                          </div>
+                          <div className="flex gap-2">
+                            {item.book_cover_url ? (
+                              <img 
+                                src={item.book_cover_url} 
+                                alt={item.book_title || "Book cover"}
+                                className="w-8 h-12 object-contain rounded shadow-sm flex-shrink-0"
+                              />
+                            ) : (
+                              <div className="w-8 h-12 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                                <BookOpen className="w-3 h-3 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-xs mb-0.5">
+                                Reviewed: ⭐ {item.rating}/5
+                              </div>
+                              <div className="text-xs text-muted-foreground truncate">
+                                {item.book_title ?? "Untitled"}
+                              </div>
+                              {item.review && (
+                                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{item.review}</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* TBR List */}
+            <Card style={{ backgroundColor: accentCardColor }}>
+              <CardHeader className="p-3 pb-2">
+                <CardTitle className="flex items-center gap-1.5 text-sm">
+                  <BookOpen className="w-4 h-4" />
+                  To Be Read ({tbrBooks.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3 pt-0">
+                {tbrBooks.length === 0 ? (
+                  <div className="text-center py-8">
+                    <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">Your TBR list is empty</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2.5 max-h-72 overflow-y-auto">
+                    {tbrBooks.map((book) => (
+                      <div key={book.id} className="border border-border rounded-lg p-2 hover:bg-accent/5 transition-colors">
+                        <div className="flex gap-2">
+                          {book.cover_url ? (
+                            <img 
+                              src={book.cover_url} 
+                              alt={book.title}
+                              className="w-10 h-14 object-contain rounded shadow-sm flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="w-10 h-14 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                              <BookOpen className="w-3 h-3 text-muted-foreground" />
+                            </div>
+                          )}
+                          
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                              <h3 className="font-medium text-sm text-foreground truncate">{book.title}</h3>
+                              {book.priority > 0 && (
+                                <div className="flex">
+                                  {Array(book.priority).fill(0).map((_, i) => (
+                                    <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground mb-0.5 truncate">by {book.author}</p>
+                            {book.total_pages && (
+                              <p className="text-xs text-muted-foreground mb-0.5">{book.total_pages} pages</p>
+                            )}
+                            {book.notes && (
+                              <p className="text-xs text-muted-foreground line-clamp-2 mb-0.5">{book.notes}</p>
+                            )}
+                            <p className="text-xs text-muted-foreground">
+                              Added {new Date(book.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+      </div>
     </div>
   );
 }
