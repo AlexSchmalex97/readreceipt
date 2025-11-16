@@ -481,66 +481,63 @@ export default function ProfileDisplay() {
             </Link>
           </div>
 
-          {/* Header - Centered with photo next to info */}
-          <div className="flex flex-col items-center mb-4">
-            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-              {/* Profile Photo */}
-              <div className="w-40 h-40 sm:w-48 sm:h-48 rounded-full overflow-hidden bg-muted border-4 border-border flex-shrink-0">
-                {profile.avatar_url ? (
-                  <img 
-                    src={profile.avatar_url} 
-                    alt="Profile" 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <User className="w-16 h-16 text-muted-foreground" />
-                  </div>
+          {/* Header - Profile photo on left with info on right */}
+          <div className="flex items-start gap-4 mb-6 max-w-4xl mx-auto">
+            {/* Profile Photo */}
+            <div className="w-40 h-40 sm:w-48 sm:h-48 rounded-full overflow-hidden bg-muted border-4 border-border flex-shrink-0">
+              {profile.avatar_url ? (
+                <img 
+                  src={profile.avatar_url} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <User className="w-16 h-16 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+
+            {/* Profile Info */}
+            <div className="flex-1 space-y-3 pt-2">
+              <div>
+                <h1 className="text-3xl sm:text-4xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
+                  {profile.display_name || "Reader"}
+                </h1>
+                <p className="text-lg sm:text-xl mt-1 text-foreground opacity-80" style={headerTextColor ? { color: headerTextColor } : {}}>
+                  @{profile.username || profile.id.slice(0, 8)}
+                </p>
+              </div>
+
+              {profile.bio && (
+                <p className="text-sm text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>{profile.bio}</p>
+              )}
+
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-foreground opacity-75" style={headerTextColor ? { color: headerTextColor } : {}}>
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-4 h-4" />
+                  Member since {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                </span>
+                {zodiacSign && (
+                  <>
+                    <span className="hidden sm:inline">•</span>
+                    <span className="flex items-center gap-1">
+                      <Star className="w-4 h-4" />
+                      {zodiacSign}
+                    </span>
+                  </>
                 )}
               </div>
 
-              {/* Profile Info */}
-              <div className="text-center sm:text-left space-y-3">
-                <div>
-                  <h1 className="text-3xl sm:text-4xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
-                    {profile.display_name || "Reader"}
-                  </h1>
-                  <p className="text-lg sm:text-xl mt-1 text-foreground opacity-80" style={headerTextColor ? { color: headerTextColor } : {}}>
-                    @{profile.username || profile.id.slice(0, 8)}
-                  </p>
+              {/* Followers/Following */}
+              {uid && (
+                <div className="flex gap-2">
+                  <FollowersDialog userId={uid} type="followers" count={followersCount} accentColor={accentCardColor} />
+                  <FollowersDialog userId={uid} type="following" count={followingCount} accentColor={accentCardColor} />
                 </div>
-
-                <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-sm text-foreground opacity-75" style={headerTextColor ? { color: headerTextColor } : {}}>
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    Member since {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                  </span>
-                  {zodiacSign && (
-                    <>
-                      <span className="hidden sm:inline">•</span>
-                      <span className="flex items-center gap-1">
-                        <Star className="w-4 h-4" />
-                        {zodiacSign}
-                      </span>
-                    </>
-                  )}
-                </div>
-
-                {/* Followers/Following */}
-                {uid && (
-                  <div className="flex gap-2 justify-center sm:justify-start">
-                    <FollowersDialog userId={uid} type="followers" count={followersCount} accentColor={accentCardColor} />
-                    <FollowersDialog userId={uid} type="following" count={followingCount} accentColor={accentCardColor} />
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </div>
-
-          {/* Bio */}
-          {profile.bio && (
-            <p className="text-sm text-center mb-4 max-w-2xl mx-auto text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>{profile.bio}</p>
-          )}
           {/* Current Book & Favorite Book - Side by Side */}
           {(currentBook || favoriteBook) && (
             <div className="grid grid-cols-2 gap-2 mb-4">
