@@ -496,61 +496,61 @@ export default function ProfileDisplay() {
         }}
       >
         <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center text-center gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
             {/* Avatar */}
-            <div className="w-32 h-32 rounded-full overflow-hidden bg-muted border-4" style={{ borderColor: headerTextColor }}>
-              {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt={profile.display_name || 'User'} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <User className="w-16 h-16" style={{ color: headerTextColor }} />
-                </div>
-              )}
+            <div className="md:col-span-2 flex md:block justify-center">
+              <div className="w-32 h-32 rounded-full overflow-hidden bg-muted border-4" style={{ borderColor: headerTextColor }}>
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} alt={profile.display_name || 'User'} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <User className="w-16 h-16" style={{ color: headerTextColor }} />
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Display Name & Username */}
-            <div>
+            {/* Identity, bio, social, follows */}
+            <div className="md:col-span-8 text-left">
               <h1 className="text-3xl font-bold">{profile?.display_name || profile?.username || 'User'}</h1>
               {profile?.username && <p className="text-sm opacity-80">@{profile.username}</p>}
-            </div>
+              {profile?.bio && (
+                <p className="mt-2 opacity-90 max-w-2xl">{profile.bio}</p>
+              )}
 
-            {/* Bio */}
-            {profile?.bio && (
-              <p className="max-w-2xl text-center opacity-90">{profile.bio}</p>
-            )}
-
-            {/* Social Links */}
-            {(profile?.social_media_links || profile?.website_url) && (
-              <div className="flex flex-wrap gap-3 justify-center">
-                {profile.website_url && (
-                  <a href={profile.website_url} target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity">
-                    <Globe className="w-5 h-5" />
-                  </a>
-                )}
-                {profile.social_media_links && Object.entries(profile.social_media_links).map(([platform, url]: [string, any]) => {
-                  const Icon = getSocialMediaIcon(platform);
-                  return url ? (
-                    <a key={platform} href={url} target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity">
-                      <Icon className="w-5 h-5" />
+              {(profile?.social_media_links || profile?.website_url) && (
+                <div className="flex flex-wrap gap-3 mt-3">
+                  {profile.website_url && (
+                    <a href={profile.website_url} target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity">
+                      <Globe className="w-5 h-5" />
                     </a>
-                  ) : null;
-                })}
-              </div>
-            )}
+                  )}
+                  {profile.social_media_links && Object.entries(profile.social_media_links).map(([platform, url]: [string, any]) => {
+                    const Icon = getSocialMediaIcon(platform);
+                    return url ? (
+                      <a key={platform} href={url} target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity">
+                        <Icon className="w-5 h-5" />
+                      </a>
+                    ) : null;
+                  })}
+                </div>
+              )}
 
-            {/* Followers/Following */}
-            <div className="flex gap-4">
-              <FollowersDialog userId={uid} type="followers" count={followersCount} />
-              <FollowersDialog userId={uid} type="following" count={followingCount} />
+              <div className="flex gap-4 mt-4">
+                <FollowersDialog userId={uid} type="followers" count={followersCount} />
+                <FollowersDialog userId={uid} type="following" count={followingCount} />
+              </div>
             </div>
 
-            {/* Settings Button */}
-            <Link to="/settings">
-              <Button variant="outline" style={{ borderColor: headerTextColor, color: headerTextColor }}>
-                <Settings className="w-4 h-4 mr-2" />
-                Settings
-              </Button>
-            </Link>
+            {/* Settings */}
+            <div className="md:col-span-2 flex md:justify-end justify-center">
+              <Link to="/settings">
+                <Button variant="outline" style={{ borderColor: headerTextColor, color: headerTextColor }}>
+                  <Settings className="w-4 h-4 mr-2" />
+                  Settings
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
