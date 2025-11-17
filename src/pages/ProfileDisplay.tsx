@@ -622,25 +622,25 @@ export default function ProfileDisplay() {
               </Card>
             </div>
           </div>
-          {/* Current Book & Favorite Book - Side by Side - Smaller */}
+          {/* Current Book & Favorite Book - Side by Side - Compact */}
           {(currentBook || favoriteBook) && (
-            <div className="grid grid-cols-2 gap-2 mb-4">
+            <div className="grid grid-cols-2 gap-2 mb-2">
               {favoriteBook && (
-                <div className="border rounded-lg p-1.5" style={{ backgroundColor: accentCardColor }}>
-                  <p className="text-[10px] mb-1 font-medium" style={{ color: accentTextColor }}>Favorite Book</p>
-                  <div className="flex gap-1.5">
+                <div className="border rounded-lg p-1" style={{ backgroundColor: accentCardColor }}>
+                  <p className="text-[9px] mb-0.5 font-medium" style={{ color: accentTextColor }}>Favorite Book</p>
+                  <div className="flex gap-1">
                     {favoriteBook.cover_url && (
                       <img
                         src={favoriteBook.cover_url}
                         alt={favoriteBook.title}
-                        className="w-10 h-14 sm:w-12 sm:h-16 object-cover rounded flex-shrink-0"
+                        className="w-8 h-12 sm:w-10 sm:h-14 object-cover rounded flex-shrink-0"
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium line-clamp-2 mb-0.5" style={{ color: accentTextColor }}>
+                      <p className="text-[10px] font-medium line-clamp-2 mb-0.5 leading-tight" style={{ color: accentTextColor }}>
                         {favoriteBook.title}
                       </p>
-                      <p className="text-[10px] opacity-80" style={{ color: accentTextColor }}>
+                      <p className="text-[9px] opacity-80 leading-tight" style={{ color: accentTextColor }}>
                         {favoriteBook.author}
                       </p>
                     </div>
@@ -648,24 +648,24 @@ export default function ProfileDisplay() {
                 </div>
               )}
               {currentBook && (
-                <div className="border rounded-lg p-1.5" style={{ backgroundColor: accentCardColor }}>
-                  <p className="text-[10px] mb-1 font-medium" style={{ color: accentTextColor }}>Currently Reading</p>
-                  <div className="flex gap-1.5">
+                <div className="border rounded-lg p-1" style={{ backgroundColor: accentCardColor }}>
+                  <p className="text-[9px] mb-0.5 font-medium" style={{ color: accentTextColor }}>Currently Reading</p>
+                  <div className="flex gap-1">
                     {currentBook.cover_url && (
                       <img
                         src={currentBook.cover_url}
                         alt={currentBook.title}
-                        className="w-10 h-14 sm:w-12 sm:h-16 object-cover rounded flex-shrink-0"
+                        className="w-8 h-12 sm:w-10 sm:h-14 object-cover rounded flex-shrink-0"
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium line-clamp-2 mb-0.5" style={{ color: accentTextColor }}>
+                      <p className="text-[10px] font-medium line-clamp-2 mb-0.5 leading-tight" style={{ color: accentTextColor }}>
                         {currentBook.title}
                       </p>
-                      <p className="text-[10px] opacity-80 mb-1" style={{ color: accentTextColor }}>
+                      <p className="text-[9px] opacity-80 mb-0.5 leading-tight" style={{ color: accentTextColor }}>
                         {currentBook.author}
                       </p>
-                      <p className="text-[10px] opacity-80" style={{ color: accentTextColor }}>
+                      <p className="text-[9px] opacity-80 leading-tight" style={{ color: accentTextColor }}>
                         Page {currentBook.current_page} of {currentBook.total_pages}
                       </p>
                     </div>
