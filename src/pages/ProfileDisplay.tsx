@@ -13,6 +13,7 @@ import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { usePlatform } from "@/hooks/usePlatform";
 import { FollowersDialog } from "@/components/FollowersDialog";
 import { TopTenDialog } from "@/components/TopTenDialog";
+import { UserColorProvider } from "@/components/UserColorProvider";
 
 type UserProfile = {
   id: string;
@@ -105,6 +106,8 @@ export default function ProfileDisplay() {
   const [loading, setLoading] = useState(true);
   const [uid, setUid] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
+  const [backgroundTint, setBackgroundTint] = useState<{ color: string; opacity: number } | null>(null);
   const [bookStats, setBookStats] = useState<BookStats>({ totalBooks: 0, completedBooks: 0, inProgressBooks: 0, completedThisYear: 0 });
   const [recentReviews, setRecentReviews] = useState<Review[]>([]);
   const [tbrBooks, setTbrBooks] = useState<TBRBook[]>([]);
@@ -150,6 +153,14 @@ export default function ProfileDisplay() {
           email: user.email,
           top_five_books: Array.isArray(profileData.top_five_books) ? profileData.top_five_books as string[] : []
         });
+
+        // Set background image and tint if exists
+        if (profileData.background_image_url) {
+          setBackgroundImageUrl(profileData.background_image_url);
+        }
+        if (profileData.background_tint) {
+          setBackgroundTint(profileData.background_tint as { color: string; opacity: number });
+        }
 
         // Fetch favorite book if exists
         if (profileData.favorite_book_id) {
@@ -451,8 +462,13 @@ export default function ProfileDisplay() {
   })();
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
+    <UserColorProvider 
+      userColorPalette={profile?.color_palette}
+      backgroundImageUrl={backgroundImageUrl}
+      backgroundTint={backgroundTint}
+    >
+      <div className="min-h-screen bg-background">
+        <Navigation />
       <div 
         ref={scrollableRef}
         className="relative overflow-y-auto"
@@ -500,101 +516,158 @@ export default function ProfileDisplay() {
             </Link>
           </div>
 
-          {/* Header - Profile photo on left with info on right */}
-          <div className="flex items-start gap-4 mb-6 max-w-4xl mx-auto">
-            {/* Profile Photo */}
-            <div className="w-40 h-40 sm:w-48 sm:h-48 rounded-full overflow-hidden bg-muted border-4 border-border flex-shrink-0">
-              {profile.avatar_url ? (
-                <img 
-                  src={profile.avatar_url} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <User className="w-16 h-16 text-muted-foreground" />
-                </div>
-              )}
-            </div>
-
-            {/* Profile Info */}
-            <div className="flex-1 space-y-3 pt-2">
-              <div>
-                <h1 className="text-3xl sm:text-4xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
-                  {profile.display_name || "Reader"}
-                </h1>
-                <p className="text-lg sm:text-xl mt-1 text-foreground opacity-80" style={headerTextColor ? { color: headerTextColor } : {}}>
-                  @{profile.username || profile.id.slice(0, 8)}
-                </p>
-              </div>
-
-              {profile.bio && (
-                <p className="text-sm text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>{profile.bio}</p>
-              )}
-
-              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-foreground opacity-75" style={headerTextColor ? { color: headerTextColor } : {}}>
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  Member since {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                </span>
-                {zodiacSign && (
-                  <>
-                    <span className="hidden sm:inline">•</span>
-                    <span className="flex items-center gap-1">
-                      <Star className="w-4 h-4" />
-                      {zodiacSign}
-                    </span>
-                  </>
+          {/* Header - Profile photo and info on left, stats on right */}
+          <div className="flex items-start gap-4 mb-4 max-w-4xl mx-auto">
+            {/* Left side - Profile Photo and Info */}
+            <div className="flex items-start gap-4 flex-1">
+              {/* Profile Photo */}
+              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-muted border-4 border-border flex-shrink-0">
+                {profile.avatar_url ? (
+                  <img 
+                    src={profile.avatar_url} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <User className="w-16 h-16 text-muted-foreground" />
+                  </div>
                 )}
               </div>
 
-              {/* Followers/Following */}
-              {uid && (
-                <div className="flex gap-2">
-                  <FollowersDialog userId={uid} type="followers" count={followersCount} accentColor={accentCardColor} />
-                  <FollowersDialog userId={uid} type="following" count={followingCount} accentColor={accentCardColor} />
+              {/* Profile Info */}
+              <div className="flex-1 space-y-2 pt-1">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
+                    {profile.display_name || "Reader"}
+                  </h1>
+                  <p className="text-base sm:text-lg mt-0.5 text-foreground opacity-80" style={headerTextColor ? { color: headerTextColor } : {}}>
+                    @{profile.username || profile.id.slice(0, 8)}
+                  </p>
                 </div>
-              )}
+
+                {profile.bio && (
+                  <p className="text-sm text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>{profile.bio}</p>
+                )}
+
+                <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-foreground opacity-75" style={headerTextColor ? { color: headerTextColor } : {}}>
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+                    Member since {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                  </span>
+                  {zodiacSign && (
+                    <>
+                      <span className="hidden sm:inline">•</span>
+                      <span className="flex items-center gap-1">
+                        <Star className="w-3 h-3 sm:w-4 sm:h-4" />
+                        {zodiacSign}
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                {/* Followers/Following */}
+                {uid && (
+                  <div className="flex gap-2">
+                    <FollowersDialog userId={uid} type="followers" count={followersCount} accentColor={accentCardColor} />
+                    <FollowersDialog userId={uid} type="following" count={followingCount} accentColor={accentCardColor} />
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-          {/* Current Book & Favorite Book - Side by Side */}
-          {(currentBook || favoriteBook) && (
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              {currentBook && (
-                <div className="border rounded-lg p-2" style={{ backgroundColor: accentCardColor }}>
-                  <p className="text-xs mb-1 font-medium" style={{ color: headerTextColor }}>Currently Reading</p>
-                  <div className="flex gap-1.5">
-                    {currentBook.cover_url && (
-                      <img
-                        src={currentBook.cover_url}
-                        alt={currentBook.title}
-                        className="w-10 h-14 object-contain rounded flex-shrink-0"
-                      />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium line-clamp-2 leading-tight" style={{ color: accentTextColor }}>{currentBook.title}</p>
-                      <p className="text-[10px] truncate mt-0.5" style={{ color: accentTextColor, opacity: 0.7 }}>{currentBook.author}</p>
-                      <p className="text-[10px] mt-0.5" style={{ color: accentTextColor, opacity: 0.7 }}>
-                        Page {currentBook.current_page} of {currentBook.total_pages}
-                      </p>
+
+            {/* Right side - Reading Goal and Stats */}
+            <div className="flex-shrink-0">
+              <Card className="border-2" style={{ borderColor: accentCardColor, backgroundColor: accentCardColor }}>
+                <CardContent className="p-3 space-y-2">
+                  <div className="flex items-center gap-2 mb-2">
+                    <BookOpen className="w-4 h-4" style={{ color: accentTextColor }} />
+                    <h3 className="text-base font-semibold" style={{ color: accentTextColor }}>
+                      {new Date().getFullYear()} Reading Goal
+                    </h3>
+                  </div>
+                  <HomeReadingGoals 
+                    userId={uid}
+                    completedBooksThisYear={bookStats.completedThisYear}
+                    isOwnProfile={true}
+                    accentColor={accentCardColor}
+                  />
+                  <div className="grid grid-cols-3 gap-2 mt-3">
+                    <div className="text-center">
+                      <div className="text-xl sm:text-2xl font-bold" style={{ color: accentTextColor }}>
+                        {bookStats.inProgressBooks}
+                      </div>
+                      <div className="text-[10px] sm:text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
+                        In Progress
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl sm:text-2xl font-bold" style={{ color: accentTextColor }}>
+                        {bookStats.completedThisYear}
+                      </div>
+                      <div className="text-[10px] sm:text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
+                        Completed
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl sm:text-2xl font-bold" style={{ color: accentTextColor }}>
+                        {bookStats.totalBooks}
+                      </div>
+                      <div className="text-[10px] sm:text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
+                        Total Books
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+          {/* Current Book & Favorite Book - Side by Side - Smaller */}
+          {(currentBook || favoriteBook) && (
+            <div className="grid grid-cols-2 gap-2 mb-4">
               {favoriteBook && (
-                <div className="border rounded-lg p-2" style={{ backgroundColor: accentCardColor }}>
-                  <p className="text-xs mb-1 font-medium" style={{ color: headerTextColor }}>Favorite Book</p>
+                <div className="border rounded-lg p-1.5" style={{ backgroundColor: accentCardColor }}>
+                  <p className="text-[10px] mb-1 font-medium" style={{ color: accentTextColor }}>Favorite Book</p>
                   <div className="flex gap-1.5">
                     {favoriteBook.cover_url && (
                       <img
                         src={favoriteBook.cover_url}
                         alt={favoriteBook.title}
-                        className="w-10 h-14 object-contain rounded flex-shrink-0"
+                        className="w-10 h-14 sm:w-12 sm:h-16 object-cover rounded flex-shrink-0"
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium line-clamp-2 leading-tight" style={{ color: accentTextColor }}>{favoriteBook.title}</p>
-                      <p className="text-[10px] truncate mt-0.5" style={{ color: accentTextColor, opacity: 0.7 }}>{favoriteBook.author}</p>
+                      <p className="text-xs font-medium line-clamp-2 mb-0.5" style={{ color: accentTextColor }}>
+                        {favoriteBook.title}
+                      </p>
+                      <p className="text-[10px] opacity-80" style={{ color: accentTextColor }}>
+                        {favoriteBook.author}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {currentBook && (
+                <div className="border rounded-lg p-1.5" style={{ backgroundColor: accentCardColor }}>
+                  <p className="text-[10px] mb-1 font-medium" style={{ color: accentTextColor }}>Currently Reading</p>
+                  <div className="flex gap-1.5">
+                    {currentBook.cover_url && (
+                      <img
+                        src={currentBook.cover_url}
+                        alt={currentBook.title}
+                        className="w-10 h-14 sm:w-12 sm:h-16 object-cover rounded flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium line-clamp-2 mb-0.5" style={{ color: accentTextColor }}>
+                        {currentBook.title}
+                      </p>
+                      <p className="text-[10px] opacity-80 mb-1" style={{ color: accentTextColor }}>
+                        {currentBook.author}
+                      </p>
+                      <p className="text-[10px] opacity-80" style={{ color: accentTextColor }}>
+                        Page {currentBook.current_page} of {currentBook.total_pages}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -924,83 +997,124 @@ export default function ProfileDisplay() {
             </Link>
           </div>
 
-          {/* Header Section - Profile photo on left with info on right */}
-          <div className="flex items-start gap-6 mb-8 max-w-6xl mx-auto">
-            {/* Profile Photo */}
-            <div className="w-48 h-48 rounded-full overflow-hidden bg-muted border-4 border-border flex-shrink-0">
-              {profile.avatar_url ? (
-                <img 
-                  src={profile.avatar_url} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <User className="w-16 h-16 text-muted-foreground" />
-                </div>
-              )}
-            </div>
-            
-            {/* Profile Info */}
-            <div className="flex-1 space-y-3 pt-2">
-              <div>
-                <h1 className="text-5xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
-                  {profile.display_name || "Reader"}
-                </h1>
-                <p className="text-xl mt-1 text-foreground opacity-80" style={headerTextColor ? { color: headerTextColor } : {}}>
-                  @{profile.username || profile.id.slice(0, 8)}
-                </p>
-              </div>
-
-              {profile.bio && (
-                <p className="text-base max-w-2xl text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
-                  {profile.bio}
-                </p>
-              )}
-              
-              <div className="flex items-center gap-4 text-foreground opacity-75" style={headerTextColor ? { color: headerTextColor } : {}}>
-                <p className="text-sm flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  Member since {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                </p>
-                {zodiacSign && (
-                  <p className="text-sm flex items-center gap-1">
-                    <Star className="w-4 h-4" />
-                    {zodiacSign}
-                  </p>
+          {/* Header Section - Profile photo and info on left, reading stats on right */}
+          <div className="flex items-start gap-6 mb-6 max-w-6xl mx-auto">
+            {/* Left Section - Photo + Info */}
+            <div className="flex items-start gap-6 flex-1">
+              {/* Profile Photo */}
+              <div className="w-40 h-40 rounded-full overflow-hidden bg-muted border-4 border-border flex-shrink-0">
+                {profile.avatar_url ? (
+                  <img 
+                    src={profile.avatar_url} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <User className="w-16 h-16 text-muted-foreground" />
+                  </div>
                 )}
               </div>
-
-              {/* Followers/Following */}
-              {uid && (
-                <div className="flex gap-2">
-                  <FollowersDialog userId={uid} type="followers" count={followersCount} accentColor={accentCardColor} />
-                  <FollowersDialog userId={uid} type="following" count={followingCount} accentColor={accentCardColor} />
+              
+              {/* Profile Info */}
+              <div className="flex-1 space-y-2 pt-1">
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
+                    {profile.display_name || "Reader"}
+                  </h1>
+                  <p className="text-lg mt-0.5 text-foreground opacity-80" style={headerTextColor ? { color: headerTextColor } : {}}>
+                    @{profile.username || profile.id.slice(0, 8)}
+                  </p>
                 </div>
-              )}
+
+                {profile.bio && (
+                  <p className="text-sm max-w-2xl text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
+                    {profile.bio}
+                  </p>
+                )}
+                
+                <div className="flex items-center gap-4 text-foreground opacity-75" style={headerTextColor ? { color: headerTextColor } : {}}>
+                  <p className="text-sm flex items-center gap-1">
+                    <Calendar className="w-4 h-4" />
+                    Member since {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                  </p>
+                  {zodiacSign && (
+                    <p className="text-sm flex items-center gap-1">
+                      <Star className="w-4 h-4" />
+                      {zodiacSign}
+                    </p>
+                  )}
+                </div>
+
+                {/* Followers/Following */}
+                {uid && (
+                  <div className="flex gap-2">
+                    <FollowersDialog userId={uid} type="followers" count={followersCount} accentColor={accentCardColor} />
+                    <FollowersDialog userId={uid} type="following" count={followingCount} accentColor={accentCardColor} />
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Settings Button */}
-            <Link to="/profile/settings">
-              <Button variant="outline" className="gap-2 flex-shrink-0">
-                <Settings className="w-4 h-4" />
-                Settings
-              </Button>
-            </Link>
+            {/* Right Section - Reading Goal and Stats */}
+            <div className="flex-shrink-0 w-80">
+              <Card className="border-2" style={{ borderColor: accentCardColor, backgroundColor: accentCardColor }}>
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <BookOpen className="w-5 h-5" style={{ color: accentTextColor }} />
+                    <h3 className="text-lg font-semibold" style={{ color: accentTextColor }}>
+                      {new Date().getFullYear()} Reading Goal
+                    </h3>
+                  </div>
+                  <HomeReadingGoals 
+                    userId={uid}
+                    completedBooksThisYear={bookStats.completedThisYear}
+                    isOwnProfile={true}
+                    accentColor={accentCardColor}
+                  />
+                  <div className="grid grid-cols-3 gap-3 mt-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold" style={{ color: accentTextColor }}>
+                        {bookStats.inProgressBooks}
+                      </div>
+                      <div className="text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
+                        In Progress
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold" style={{ color: accentTextColor }}>
+                        {bookStats.completedThisYear}
+                      </div>
+                      <div className="text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
+                        Completed
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold" style={{ color: accentTextColor }}>
+                        {bookStats.totalBooks}
+                      </div>
+                      <div className="text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
+                        Total Books
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
-          {/* Favorite Book and Current Read - Below header */}
+          {/* Favorite Book and Current Read - Below header - Smaller */}
           {(currentBook || favoriteBook) && (
-            <div className="flex gap-4 mb-6 max-w-6xl mx-auto">
+            <div className="flex gap-3 mb-4 max-w-6xl mx-auto">
               {favoriteBook && (
                 <div className="flex-1">
-                  <h3 className="text-sm font-medium mb-2" style={{ color: headerTextColor }}>Favorite Book</h3>
-                  <div className="flex items-center gap-2 p-2 border rounded-lg bg-card" style={{ backgroundColor: accentCardColor }}>
+                  <h3 className="text-xs font-medium mb-1.5" style={{ color: headerTextColor }}>Favorite Book</h3>
+                  <div className="flex items-center gap-2 p-1.5 border rounded-lg bg-card" style={{ backgroundColor: accentCardColor }}>
                     {favoriteBook.cover_url && (
                       <img
                         src={favoriteBook.cover_url}
                         alt={favoriteBook.title}
-                        className="w-12 h-16 object-contain rounded flex-shrink-0"
+                        className="w-10 h-14 object-contain rounded flex-shrink-0"
                       />
                     )}
                     <div className="flex-1 min-w-0">
@@ -1017,13 +1131,13 @@ export default function ProfileDisplay() {
 
               {currentBook && (
                 <div className="flex-1">
-                  <h3 className="text-sm font-medium mb-2" style={{ color: headerTextColor }}>Currently Reading</h3>
-                  <div className="flex items-center gap-2 p-2 border rounded-lg bg-card" style={{ backgroundColor: accentCardColor }}>
+                  <h3 className="text-xs font-medium mb-1.5" style={{ color: headerTextColor }}>Currently Reading</h3>
+                  <div className="flex items-center gap-2 p-1.5 border rounded-lg bg-card" style={{ backgroundColor: accentCardColor }}>
                     {currentBook.cover_url && (
                       <img
                         src={currentBook.cover_url}
                         alt={currentBook.title}
-                        className="w-12 h-16 object-contain rounded flex-shrink-0"
+                        className="w-10 h-14 object-contain rounded flex-shrink-0"
                       />
                     )}
                     <div className="flex-1 min-w-0">
@@ -1365,5 +1479,6 @@ export default function ProfileDisplay() {
       </div>
       </div>
     </div>
+    </UserColorProvider>
   );
 }
