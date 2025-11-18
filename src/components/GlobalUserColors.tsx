@@ -98,8 +98,10 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
     };
   }, []);
 
-  if (applyGlobally && (effectivePalette || palette)) {
-    return <UserColorProvider userColorPalette={effectivePalette || palette} backgroundImageUrl={backgroundImageUrl} backgroundTint={backgroundTint}>{children}</UserColorProvider>;
+  // Always apply background image if it exists
+  // For color palette, only apply if apply_globally is true
+  if (backgroundImageUrl || (applyGlobally && (effectivePalette || palette))) {
+    return <UserColorProvider userColorPalette={applyGlobally ? (effectivePalette || palette) : null} backgroundImageUrl={backgroundImageUrl} backgroundTint={backgroundTint}>{children}</UserColorProvider>;
   }
   return <>{children}</>;
 }
