@@ -568,7 +568,7 @@ export default function UserProfile() {
           {topFiveBooks.length > 0 && (
             <div className="mb-4">
               <div className="flex items-center justify-center gap-2 mb-6">
-                <p className="text-sm font-medium text-center" style={{ color: accentTextColor }}>
+                <p className="text-sm font-medium text-center px-2 py-0.5 rounded border border-border/60 bg-black/50" style={{ color: "#FFFFFF" }}>
                   Top Five
                 </p>
                 <button
@@ -1017,7 +1017,7 @@ export default function UserProfile() {
 
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-2">
-                  <Link to="/">
+                  <Link to={`/user/${profile.username}/in-progress`}>
                     <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
                       <CardContent className="p-3 text-center">
                         <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
@@ -1026,7 +1026,7 @@ export default function UserProfile() {
                       </CardContent>
                     </Card>
                   </Link>
-                  <Link to="/completed">
+                  <Link to={`/user/${profile.username}/completed`}>
                     <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
                       <CardContent className="p-3 text-center">
                         <Star className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
