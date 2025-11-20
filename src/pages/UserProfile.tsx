@@ -594,8 +594,8 @@ export default function UserProfile() {
                         />
                       )}
                     </div>
-                    <p className="text-[10px] md:text-xs mt-1 text-center truncate font-medium" style={{ color: headerTextColor }}>{book.title}</p>
-                    <p className="text-[10px] md:text-xs text-center truncate" style={{ color: headerTextColor, opacity: 0.7 }}>{book.author}</p>
+                    <p className="text-[10px] md:text-xs mt-1 text-center truncate font-medium px-1 py-0.5 bg-black/60 rounded" style={{ color: "#FFFFFF" }}>{book.title}</p>
+                    <p className="text-[10px] md:text-xs text-center truncate px-1 py-0.5 bg-black/60 rounded" style={{ color: "#FFFFFF" }}>{book.author}</p>
                   </div>
                 ))}
               </div>

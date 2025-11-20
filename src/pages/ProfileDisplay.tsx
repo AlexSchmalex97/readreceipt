@@ -619,7 +619,7 @@ export default function ProfileDisplay() {
           </div>
           {/* Current Book & Favorite Book - Side by Side - Larger */}
           {(currentBook || favoriteBook) && (
-            <div className="grid grid-cols-2 gap-3 mb-4 max-w-2xl mx-auto">
+            <div className="grid grid-cols-2 gap-3 mb-2 justify-start max-w-2xl">
               {favoriteBook && (
                 <div className="border rounded-lg p-3" style={{ backgroundColor: accentCardColor }}>
                   <p className="text-xs mb-2 font-medium" style={{ color: accentTextColor }}>Favorite Book</p>
@@ -672,7 +672,7 @@ export default function ProfileDisplay() {
 
           {/* Top Five Books */}
           {topFiveBooks.length > 0 && (
-            <div className="mb-3">
+            <div className="mb-2">
               <div className="flex items-center justify-center gap-2 mb-4">
                 <Link to="/profile/settings">
                   <p className="text-sm font-medium text-center cursor-pointer hover:underline" style={{ color: accentTextColor }}>
@@ -703,7 +703,7 @@ export default function ProfileDisplay() {
                       )}
                     </div>
                     <p className="text-[10px] md:text-xs mt-1 text-center truncate font-medium px-1 py-0.5 bg-black/60 rounded" style={{ color: "#FFFFFF" }}>{book.title}</p>
-                    <p className="text-[10px] md:text-xs text-center truncate" style={{ color: headerTextColor, opacity: 0.7 }}>{book.author}</p>
+                    <p className="text-[10px] md:text-xs text-center truncate px-1 py-0.5 bg-black/60 rounded" style={{ color: "#FFFFFF" }}>{book.author}</p>
                   </div>
                 ))}
               </div>
@@ -1069,7 +1069,7 @@ export default function ProfileDisplay() {
 
           {/* Favorite Book and Current Read - Below header - Larger */}
           {(currentBook || favoriteBook) && (
-            <div className="grid grid-cols-2 gap-4 mb-5 max-w-2xl mx-auto">
+            <div className="grid grid-cols-2 gap-4 mb-3 justify-start max-w-2xl">
               {favoriteBook && (
                 <div className="border rounded-lg p-4" style={{ backgroundColor: accentCardColor }}>
                   <p className="text-sm mb-2 font-medium" style={{ color: accentTextColor }}>Favorite Book</p>
@@ -1123,7 +1123,7 @@ export default function ProfileDisplay() {
 
           {/* Top Five Books - Desktop */}
           {topFiveBooks.length > 0 && (
-            <div className="mb-4 max-w-6xl mx-auto">
+            <div className="mb-3 max-w-6xl mx-auto">
               <div className="flex items-center gap-2 mb-3">
                 <Link to="/profile/settings">
                   <h3 className="text-sm font-medium cursor-pointer hover:underline" style={{ color: headerTextColor }}>
@@ -1154,7 +1154,7 @@ export default function ProfileDisplay() {
                       )}
                     </div>
                     <p className="text-xs font-medium mt-2 line-clamp-2 leading-tight px-1.5 py-0.5 bg-black/60 rounded inline-block" style={{ color: "#FFFFFF" }}>{book.title}</p>
-                    <p className="text-xs mt-0.5 line-clamp-1" style={{ color: accentTextColor, opacity: 0.7 }}>{book.author}</p>
+                    <p className="text-xs mt-0.5 line-clamp-1 px-1.5 py-0.5 bg-black/60 rounded inline-block" style={{ color: "#FFFFFF" }}>{book.author}</p>
                   </div>
                 ))}
               </div>
