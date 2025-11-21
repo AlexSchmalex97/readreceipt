@@ -905,6 +905,7 @@ const Index = () => {
                        onMoveToCompleted={handleMoveToCompleted}
                        onMoveToDNF={handleMoveToDNF}
                        onMoveToTBR={handleMoveToTBR}
+                       onBookUpdated={loadBooks}
                      />
                    )}
                  />
@@ -912,7 +913,7 @@ const Index = () => {
             )}
 
             {/* Reading Goals Section - Compact card style */}
-            <HomeReadingGoals userId={userId} completedBooksThisYear={completedBooksThisYear} />
+            <HomeReadingGoals userId={userId} completedBooksThisYear={completedBooksThisYear} accentColor={accentCardColor} />
 
             {/* Stats Grid - Now 2 columns */}
             <div className="grid grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4 items-start">
@@ -1004,14 +1005,25 @@ const Index = () => {
                     onMoveToReading={handleAddBook}
                     onMoveToCompleted={handleMoveToCompletedFromTBR}
                     onMoveToDNF={handleMoveToDNFFromTBR}
+                    accentColor={accentCardColor}
+                    accentTextColor={accentTextColor}
                   />
                 )}
               </div>
 
               {/* DNF Books Section */}
-              <div className="bg-card rounded-lg p-3 sm:p-6 shadow-soft border border-border">
-                <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
-                  <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
+              <div 
+                className="rounded-lg p-3 sm:p-6 shadow-soft border"
+                style={{ 
+                  backgroundColor: accentCardColor,
+                  borderColor: accentCardColor
+                }}
+              >
+                <h2 
+                  className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 flex items-center gap-2"
+                  style={{ color: accentTextColor }}
+                >
+                  <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                   Did Not Finish ({dnfBooks})
                 </h2>
                 {dnfBookItems.length === 0 ? (

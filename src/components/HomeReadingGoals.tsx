@@ -146,60 +146,87 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile 
   const booksRemaining = Math.max(goal.goal_count - totalProgress, 0);
 
   return (
-    <Card className="border-primary/20" style={{ backgroundColor: accentColor || undefined }}>
-      <CardContent className="p-2 sm:p-4">
-        <div className="flex items-center justify-between mb-1.5 sm:mb-3">
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <Target className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-primary" />
-            <span className="text-xs sm:text-base font-semibold text-foreground">{currentYear} Reading Goal</span>
-          </div>
-          <div className="text-[10px] sm:text-sm text-muted-foreground">
-            {totalProgress} of {goal.goal_count} books
+    <Card 
+      className="shadow-soft border-2 hover:shadow-lg transition-all duration-300"
+      style={{ borderColor: accentColor || 'hsl(var(--border))', backgroundColor: accentColor || 'hsl(var(--card))' }}
+    >
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Target className="w-4 h-4 text-primary" />
+            <h3 className="text-sm sm:text-base font-semibold" style={{ color: accentColor ? getContrastColor(accentColor) : undefined }}>
+              {currentYear} Reading Goal
+            </h3>
           </div>
         </div>
-        
-        <Progress value={progressPercentage} className="h-2 sm:h-3 mb-1.5 sm:mb-3" />
-        
-        <div className="flex items-center justify-between text-[10px] sm:text-sm">
-          <div className="text-muted-foreground">
-            {booksRemaining > 0 ? `${booksRemaining} books to go!` : "Goal achieved! 🎉"}
+
+        {loading ? (
+          <div className="text-center py-4">
+            <p className="text-sm text-muted-foreground">Loading...</p>
           </div>
-          {isOwnProfile && goal.manual_count > 0 && (
-            <div className="flex items-center gap-1">
-              <span className="text-[9px] sm:text-xs text-muted-foreground">Manual:</span>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => updateManualCount(false)}
-                className="h-5 w-5 sm:h-6 sm:w-6 p-0"
-              >
-                <Minus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-              </Button>
-              <span className="text-[10px] sm:text-xs font-medium w-3 sm:w-4 text-center">{goal.manual_count}</span>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => updateManualCount(true)}
-                className="h-5 w-5 sm:h-6 sm:w-6 p-0"
-              >
-                <Plus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-              </Button>
+        ) : goal ? (
+          <div className="space-y-2 sm:space-y-3">
+            <div className="flex justify-between items-center text-xs sm:text-sm">
+              <span style={{ color: accentColor ? getContrastColor(accentColor) : undefined }}>
+                Progress: {totalProgress}/{goal.goal_count} books
+              </span>
+              <span className="font-semibold" style={{ color: accentColor ? getContrastColor(accentColor) : undefined }}>
+                {Math.round(progressPercentage)}%
+              </span>
             </div>
-          )}
-          
-          {isOwnProfile && goal.manual_count === 0 && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => updateManualCount(true)}
-              className="h-5 px-1.5 sm:h-6 sm:px-2 text-[10px] sm:text-xs"
-            >
-              <Plus className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
-              Add manual
-            </Button>
-          )}
-        </div>
+            <Progress value={progressPercentage} className="h-2" />
+            
+            {isOwnProfile && (
+              <div className="flex items-center justify-between gap-2 pt-2 border-t" style={{ borderColor: accentColor ? `${accentColor}40` : 'hsl(var(--border))' }}>
+                <span className="text-xs" style={{ color: accentColor ? getContrastColor(accentColor) : undefined }}>
+                  Manual count: {goal.manual_count}
+                </span>
+                <div className="flex gap-1">
+                  <Button
+                    size="icon-xs"
+                    variant="outline"
+                    onClick={() => updateManualCount(false)}
+                    disabled={goal.manual_count === 0}
+                    className="h-6 w-6"
+                    style={{ 
+                      borderColor: accentColor ? getContrastColor(accentColor) : undefined,
+                      color: accentColor ? getContrastColor(accentColor) : undefined
+                    }}
+                  >
+                    <Minus className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    size="icon-xs"
+                    variant="outline"
+                    onClick={() => updateManualCount(true)}
+                    className="h-6 w-6"
+                    style={{ 
+                      borderColor: accentColor ? getContrastColor(accentColor) : undefined,
+                      color: accentColor ? getContrastColor(accentColor) : undefined
+                    }}
+                  >
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-4">
+            <p className="text-xs text-muted-foreground">No reading goal set for {currentYear}</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
 };
+
+// Helper function to get contrasting text color
+function getContrastColor(hexColor: string): string {
+  if (!hexColor || hexColor[0] !== '#') return 'hsl(var(--foreground))';
+  const r = parseInt(hexColor.slice(1, 3), 16);
+  const g = parseInt(hexColor.slice(3, 5), 16);
+  const b = parseInt(hexColor.slice(5, 7), 16);
+  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return lum < 128 ? '#FFFFFF' : '#1A1A1A';
+}

@@ -28,9 +28,11 @@ interface TBRListProps {
   onMoveToReading?: (book: { title: string; author: string; totalPages: number; coverUrl?: string }) => void;
   onMoveToCompleted?: (tbrBookId: string) => void;
   onMoveToDNF?: (tbrBookId: string) => void;
+  accentColor?: string;
+  accentTextColor?: string;
 }
 
-export function TBRList({ userId, onMoveToReading, onMoveToCompleted, onMoveToDNF }: TBRListProps) {
+export function TBRList({ userId, onMoveToReading, onMoveToCompleted, onMoveToDNF, accentColor, accentTextColor }: TBRListProps) {
   const [tbrBooks, setTbrBooks] = useState<TBRBook[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -278,10 +280,19 @@ export function TBRList({ userId, onMoveToReading, onMoveToCompleted, onMoveToDN
   }
 
   return (
-    <div className="bg-card rounded-lg p-6 shadow-soft border border-border">
+    <div 
+      className="rounded-lg p-4 sm:p-6 shadow-soft border"
+      style={{ 
+        backgroundColor: accentColor || 'hsl(var(--card))',
+        borderColor: accentColor || 'hsl(var(--border))'
+      }}
+    >
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
-          <BookOpen className="w-5 h-5" />
+        <h2 
+          className="text-lg sm:text-xl font-semibold flex items-center gap-2"
+          style={{ color: accentTextColor || 'hsl(var(--foreground))' }}
+        >
+          <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
           To Be Read ({tbrBooks.length})
         </h2>
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
