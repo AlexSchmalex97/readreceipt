@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { BookEditionSelector } from "@/components/BookEditionSelector";
 import { BookDatesDialog } from "@/components/BookDatesDialog";
 import { BookMoveMenu } from "@/components/BookMoveMenu";
+import { BookEditDialog } from "@/components/BookEditDialog";
 import { usePlatform } from "@/hooks/usePlatform";
 
 interface Book {
@@ -33,6 +34,7 @@ interface BookCardProps {
   onMoveToCompleted?: (id: string) => void;
   onMoveToDNF?: (id: string) => void;
   onMoveToTBR?: (id: string) => void;
+  onBookUpdated?: () => void;
 }
 
 const getEncouragingMessage = (percentage: number): string => {
@@ -56,6 +58,7 @@ export const BookCard = ({
   onMoveToCompleted,
   onMoveToDNF,
   onMoveToTBR,
+  onBookUpdated,
 }: BookCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [trackingMode, setTrackingMode] = useState<"page" | "percentage">("page");
@@ -187,6 +190,14 @@ export const BookCard = ({
         
         {/* Actions Row - below the book info */}
         <div className="flex items-center justify-end gap-0.5 sm:gap-1 mt-2">
+          <BookEditDialog
+            bookId={book.id}
+            bookTitle={book.title}
+            bookAuthor={book.author}
+            totalPages={book.totalPages}
+            currentCoverUrl={book.coverUrl}
+            onUpdate={() => onBookUpdated?.()}
+          />
           {onUpdateDates && (
             <BookDatesDialog
               book={book}
