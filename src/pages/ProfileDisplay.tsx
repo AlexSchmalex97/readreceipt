@@ -619,9 +619,9 @@ export default function ProfileDisplay() {
           </div>
           {/* Current Book & Favorite Book - Side by Side - Larger */}
           {(currentBook || favoriteBook) && (
-            <div className="grid grid-cols-2 gap-3 mb-2 justify-start max-w-2xl">
+            <div className="flex flex-col sm:flex-row gap-3 mb-2 justify-start max-w-2xl">
               {favoriteBook && (
-                <div className="border rounded-lg p-3" style={{ backgroundColor: accentCardColor }}>
+                <div className="border rounded-lg p-3 flex-1" style={{ backgroundColor: accentCardColor }}>
                   <p className="text-xs mb-2 font-medium" style={{ color: accentTextColor }}>Favorite Book</p>
                   <div className="flex gap-2.5">
                     {favoriteBook.cover_url && (
@@ -643,7 +643,7 @@ export default function ProfileDisplay() {
                 </div>
               )}
               {currentBook && (
-                <div className="border rounded-lg p-3" style={{ backgroundColor: accentCardColor }}>
+                <div className="border rounded-lg p-3 flex-1" style={{ backgroundColor: accentCardColor }}>
                   <p className="text-xs mb-2 font-medium" style={{ color: accentTextColor }}>Currently Reading</p>
                   <div className="flex gap-2.5">
                     {currentBook.cover_url && (
@@ -1069,9 +1069,9 @@ export default function ProfileDisplay() {
 
           {/* Favorite Book and Current Read - Below header - Larger */}
           {(currentBook || favoriteBook) && (
-            <div className="grid grid-cols-2 gap-4 mb-3 justify-start max-w-2xl">
+            <div className="flex flex-col sm:flex-row gap-4 mb-3 justify-start max-w-2xl">
               {favoriteBook && (
-                <div className="border rounded-lg p-4" style={{ backgroundColor: accentCardColor }}>
+                <div className="border rounded-lg p-4 flex-1" style={{ backgroundColor: accentCardColor }}>
                   <p className="text-sm mb-2 font-medium" style={{ color: accentTextColor }}>Favorite Book</p>
                   <div className="flex gap-3">
                     {favoriteBook.cover_url && (
@@ -1082,19 +1082,18 @@ export default function ProfileDisplay() {
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-base font-medium line-clamp-2 mb-1.5 leading-tight" style={{ color: accentTextColor }}>
+                      <p className="text-base font-medium line-clamp-2 mb-1 leading-tight" style={{ color: accentTextColor }}>
                         {favoriteBook.title}
                       </p>
-                      <p className="text-sm opacity-80 line-clamp-1" style={{ color: accentTextColor }}>
+                      <p className="text-sm opacity-80 leading-tight" style={{ color: accentTextColor }}>
                         {favoriteBook.author}
                       </p>
                     </div>
                   </div>
                 </div>
               )}
-
               {currentBook && (
-                <div className="border rounded-lg p-4" style={{ backgroundColor: accentCardColor }}>
+                <div className="border rounded-lg p-4 flex-1" style={{ backgroundColor: accentCardColor }}>
                   <p className="text-sm mb-2 font-medium" style={{ color: accentTextColor }}>Currently Reading</p>
                   <div className="flex gap-3">
                     {currentBook.cover_url && (
@@ -1105,13 +1104,13 @@ export default function ProfileDisplay() {
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-base font-medium line-clamp-2 mb-1.5 leading-tight" style={{ color: accentTextColor }}>
+                      <p className="text-base font-medium line-clamp-2 mb-1 leading-tight" style={{ color: accentTextColor }}>
                         {currentBook.title}
                       </p>
-                      <p className="text-sm opacity-80 mb-1 line-clamp-1" style={{ color: accentTextColor }}>
+                      <p className="text-sm opacity-80 mb-1 leading-tight" style={{ color: accentTextColor }}>
                         {currentBook.author}
                       </p>
-                      <p className="text-sm opacity-80 line-clamp-1" style={{ color: accentTextColor }}>
+                      <p className="text-sm opacity-80 leading-tight" style={{ color: accentTextColor }}>
                         Page {currentBook.current_page} of {currentBook.total_pages}
                       </p>
                     </div>
