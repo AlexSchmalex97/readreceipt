@@ -619,9 +619,9 @@ export default function ProfileDisplay() {
           </div>
           {/* Current Book & Favorite Book - Side by Side - Larger */}
           {(currentBook || favoriteBook) && (
-            <div className="flex flex-col sm:flex-row gap-3 mb-2 justify-start max-w-2xl">
+            <div className={`grid gap-3 mb-2 max-w-2xl ${currentBook && favoriteBook ? 'grid-cols-2' : 'grid-cols-1'}`}>
               {favoriteBook && (
-                <div className="border rounded-lg p-3 flex-1" style={{ backgroundColor: accentCardColor }}>
+                <div className="border rounded-lg p-3" style={{ backgroundColor: accentCardColor }}>
                   <p className="text-xs mb-2 font-medium" style={{ color: accentTextColor }}>Favorite Book</p>
                   <div className="flex gap-2.5">
                     {favoriteBook.cover_url && (
@@ -643,7 +643,7 @@ export default function ProfileDisplay() {
                 </div>
               )}
               {currentBook && (
-                <div className="border rounded-lg p-3 flex-1" style={{ backgroundColor: accentCardColor }}>
+                <div className="border rounded-lg p-3" style={{ backgroundColor: accentCardColor }}>
                   <p className="text-xs mb-2 font-medium" style={{ color: accentTextColor }}>Currently Reading</p>
                   <div className="flex gap-2.5">
                     {currentBook.cover_url && (
@@ -1069,9 +1069,9 @@ export default function ProfileDisplay() {
 
           {/* Favorite Book and Current Read - Below header - Larger */}
           {(currentBook || favoriteBook) && (
-            <div className="flex flex-col sm:flex-row gap-4 mb-3 justify-start max-w-2xl">
+            <div className={`grid gap-4 mb-3 max-w-2xl ${currentBook && favoriteBook ? 'grid-cols-2' : 'grid-cols-1'}`}>
               {favoriteBook && (
-                <div className="border rounded-lg p-4 flex-1" style={{ backgroundColor: accentCardColor }}>
+                <div className="border rounded-lg p-4" style={{ backgroundColor: accentCardColor }}>
                   <p className="text-sm mb-2 font-medium" style={{ color: accentTextColor }}>Favorite Book</p>
                   <div className="flex gap-3">
                     {favoriteBook.cover_url && (
@@ -1093,7 +1093,7 @@ export default function ProfileDisplay() {
                 </div>
               )}
               {currentBook && (
-                <div className="border rounded-lg p-4 flex-1" style={{ backgroundColor: accentCardColor }}>
+                <div className="border rounded-lg p-4" style={{ backgroundColor: accentCardColor }}>
                   <p className="text-sm mb-2 font-medium" style={{ color: accentTextColor }}>Currently Reading</p>
                   <div className="flex gap-3">
                     {currentBook.cover_url && (

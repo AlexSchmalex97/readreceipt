@@ -18,6 +18,7 @@ import { usePlatform } from "@/hooks/usePlatform";
 import { Button } from "@/components/ui/button";
 import { SortableBookGrid } from "@/components/SortableBookGrid";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { useUserAccent } from "@/hooks/useUserAccent";
 
 interface Book {
   id: string;
@@ -35,6 +36,7 @@ interface Book {
 
 const Index = () => {
   const { isIOS, isReadReceiptApp } = usePlatform();
+  const { accentCardColor, accentTextColor } = useUserAccent();
   const [userId, setUserId] = useState<string | null>(null);
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
@@ -914,14 +916,20 @@ const Index = () => {
 
             {/* Stats Grid - Now 2 columns */}
             <div className="grid grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4 items-start">
-              <div className="bg-card rounded-lg p-2.5 sm:p-3 shadow-soft border border-border self-start">
+              <div
+                className="rounded-lg p-2.5 sm:p-3 shadow-soft border self-start"
+                style={{ backgroundColor: accentCardColor, borderColor: accentCardColor }}
+              >
                 <div className="flex items-center space-x-2 sm:space-x-3">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 bg-accent rounded-lg flex items-center justify-center">
-                    <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-accent-foreground" />
+                  <div
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: accentTextColor }}
+                  >
+                    <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: accentCardColor }} />
                   </div>
                   <div className="flex-1">
-                    <p className="text-lg sm:text-xl font-bold text-foreground">{booksInProgress}</p>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">In Progress</p>
+                    <p className="text-lg sm:text-xl font-bold" style={{ color: accentTextColor }}>{booksInProgress}</p>
+                    <p className="text-[10px] sm:text-xs opacity-80" style={{ color: accentTextColor }}>In Progress</p>
                   </div>
                 </div>
                 {inProgressBooks.length > 0 && (
@@ -946,14 +954,21 @@ const Index = () => {
                 )}
               </div>
 
-              <Link to="/completed" className="bg-card rounded-lg p-2.5 sm:p-3 shadow-soft border border-border hover:shadow-lg transition-shadow cursor-pointer self-start">
+              <Link
+                to="/completed"
+                className="rounded-lg p-2.5 sm:p-3 shadow-soft border hover:shadow-lg transition-shadow cursor-pointer self-start"
+                style={{ backgroundColor: accentCardColor, borderColor: accentCardColor }}
+              >
                 <div className="flex items-center space-x-2 sm:space-x-3">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 bg-accent rounded-lg flex items-center justify-center">
-                    <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-accent-foreground" />
+                  <div
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: accentTextColor }}
+                  >
+                    <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: accentCardColor }} />
                   </div>
                   <div className="flex-1">
-                    <p className="text-lg sm:text-xl font-bold text-foreground">{completedBooks}</p>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">Completed</p>
+                    <p className="text-lg sm:text-xl font-bold" style={{ color: accentTextColor }}>{completedBooks}</p>
+                    <p className="text-[10px] sm:text-xs opacity-80" style={{ color: accentTextColor }}>Completed</p>
                   </div>
                 </div>
                 {completedBookItems.length > 0 && (
