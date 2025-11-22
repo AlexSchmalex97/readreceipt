@@ -5,6 +5,7 @@ import { BookOpen, RefreshCw } from "lucide-react";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { useToast } from "@/hooks/use-toast";
 import { usePlatform } from "@/hooks/usePlatform";
+import { useUserAccent } from "@/hooks/useUserAccent";
 
 type Post = {
   kind: "post";
@@ -55,6 +56,7 @@ export default function Feed() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { isIOS, isReadReceiptApp } = usePlatform();
+  const { accentCardColor, accentTextColor } = useUserAccent();
 
   const loadFeed = async () => {
       
@@ -253,7 +255,7 @@ export default function Feed() {
 
       {items.map((it) =>
         it.kind === "post" ? (
-          <div key={`post-${it.id}`} className="bg-card p-4 rounded border">
+          <div key={`post-${it.id}`} className="p-4 rounded border" style={{ backgroundColor: accentCardColor }}>
             <div className="flex items-start gap-3 mb-3">
               <img
                 src={it.avatar_url || "/assets/default-avatar.png"}
@@ -261,8 +263,8 @@ export default function Feed() {
                 className="w-8 h-8 rounded-full object-cover flex-shrink-0"
               />
               <div className="flex-1 min-w-0">
-                <div className="font-medium">{it.display_name || "Reader"}</div>
-                <div className="text-sm text-muted-foreground">
+                <div className="font-medium" style={{ color: accentTextColor }}>{it.display_name || "Reader"}</div>
+                <div className="text-sm" style={{ color: accentTextColor, opacity: 0.8 }}>
                   {new Date(it.created_at).toLocaleString()}
                 </div>
               </div>
@@ -271,16 +273,16 @@ export default function Feed() {
             {/* Post Content */}
             <div className="mb-2">
               {it.book_title && (
-                <div className="text-sm text-muted-foreground mb-2 flex items-center gap-2">
+                <div className="text-sm mb-2 flex items-center gap-2" style={{ color: accentTextColor, opacity: 0.8 }}>
                   <BookOpen className="w-4 h-4" />
                   About: <em>{it.book_title}</em> {it.book_author && `by ${it.book_author}`}
                 </div>
               )}
-              <p className="whitespace-pre-wrap">{it.content}</p>
+              <p className="whitespace-pre-wrap" style={{ color: accentTextColor }}>{it.content}</p>
             </div>
           </div>
         ) : it.kind === "progress" ? (
-          <div key={`p-${it.id}`} className="bg-card p-4 rounded border">
+          <div key={`p-${it.id}`} className="p-4 rounded border" style={{ backgroundColor: accentCardColor }}>
             <div className="flex items-start gap-3 mb-3">
               <img
                 src={it.avatar_url || "/assets/default-avatar.png"}
@@ -288,8 +290,8 @@ export default function Feed() {
                 className="w-8 h-8 rounded-full object-cover flex-shrink-0"
               />
               <div className="flex-1 min-w-0">
-                <div className="font-medium">{it.display_name || "Reader"}</div>
-                <div className="text-sm text-muted-foreground">
+                <div className="font-medium" style={{ color: accentTextColor }}>{it.display_name || "Reader"}</div>
+                <div className="text-sm" style={{ color: accentTextColor, opacity: 0.8 }}>
                   {new Date(it.created_at).toLocaleString()}
                 </div>
               </div>
@@ -311,8 +313,8 @@ export default function Feed() {
               
               {/* Progress Info */}
               <div className="flex-1 min-w-0">
-                <div className="font-medium mb-1">Reading Progress</div>
-                <div>
+                <div className="font-medium mb-1" style={{ color: accentTextColor }}>Reading Progress</div>
+                <div style={{ color: accentTextColor, opacity: 0.9 }}>
                   Read to page {it.to_page}
                   {typeof it.from_page === "number" && it.from_page >= 0 ? ` (from ${it.from_page})` : ""} of{" "}
                   <em className="truncate">{it.book_title ?? "Untitled"}</em>
@@ -322,7 +324,7 @@ export default function Feed() {
             </div>
           </div>
         ) : (
-          <div key={`r-${it.id}`} className="bg-card p-4 rounded border">
+          <div key={`r-${it.id}`} className="p-4 rounded border" style={{ backgroundColor: accentCardColor }}>
             <div className="flex items-start gap-3 mb-3">
               <img
                 src={it.avatar_url || "/assets/default-avatar.png"}
@@ -330,8 +332,8 @@ export default function Feed() {
                 className="w-8 h-8 rounded-full object-cover flex-shrink-0"
               />
               <div className="flex-1 min-w-0">
-                <div className="font-medium">{it.display_name || "Reader"}</div>
-                <div className="text-sm text-muted-foreground">
+                <div className="font-medium" style={{ color: accentTextColor }}>{it.display_name || "Reader"}</div>
+                <div className="text-sm" style={{ color: accentTextColor, opacity: 0.8 }}>
                   {new Date(it.created_at).toLocaleString()}
                 </div>
               </div>
@@ -353,11 +355,11 @@ export default function Feed() {
               
               {/* Review Info */}
               <div className="flex-1 min-w-0">
-                <div className="font-medium mb-1">
+                <div className="font-medium mb-1" style={{ color: accentTextColor }}>
                   Reviewed <em className="truncate">{it.book_title ?? "Untitled"}</em>
                   {it.book_author ? ` by ${it.book_author}` : ""}: ⭐ {it.rating}/5
                 </div>
-                {it.review && <p className="text-sm text-muted-foreground">{it.review}</p>}
+                {it.review && <p className="text-sm" style={{ color: accentTextColor, opacity: 0.8 }}>{it.review}</p>}
               </div>
             </div>
           </div>

@@ -6,6 +6,7 @@ import { BookEditionSelector } from "@/components/BookEditionSelector";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { useToast } from "@/hooks/use-toast";
 import { usePlatform } from "@/hooks/usePlatform";
+import { useUserAccent } from "@/hooks/useUserAccent";
 
 type FinishedBook = {
   id: string;
@@ -33,6 +34,7 @@ export default function Reviews() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { isIOS, isReadReceiptApp } = usePlatform();
+  const { accentCardColor, accentTextColor } = useUserAccent();
 
   const loadReviews = async () => {
     if (!userId) {
@@ -177,14 +179,14 @@ export default function Reviews() {
           
           {/* Your Reviews */}
           {reviews.length === 0 ? (
-            <div className="bg-card p-6 rounded-lg border text-center">
-              <p className="text-muted-foreground">You haven't left any reviews yet.</p>
-              <p className="text-sm text-muted-foreground mt-1">Complete a book to add your first review!</p>
+            <div className="p-6 rounded-lg border text-center" style={{ backgroundColor: accentCardColor }}>
+              <p style={{ color: accentTextColor, opacity: 0.8 }}>You haven't left any reviews yet.</p>
+              <p className="text-sm mt-1" style={{ color: accentTextColor, opacity: 0.7 }}>Complete a book to add your first review!</p>
             </div>
           ) : (
             <div className="space-y-4">
               {reviews.map((r) => (
-                <div key={r.id} className="bg-card p-4 rounded-lg border">
+                <div key={r.id} className="p-4 rounded-lg border" style={{ backgroundColor: accentCardColor }}>
                   <div className="flex gap-4 mb-3">
                     {/* Book Cover */}
                     <div className="relative flex-shrink-0">
@@ -223,19 +225,19 @@ export default function Reviews() {
 
                     {/* Book Info and Review */}
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold truncate">{r.books?.title ?? "Untitled"}</div>
-                      <div className="text-sm text-muted-foreground">by {r.books?.author ?? "Unknown author"}</div>
-                      <div className="mt-2 flex items-center gap-2">
+                      <div className="font-semibold truncate" style={{ color: accentTextColor }}>{r.books?.title ?? "Untitled"}</div>
+                      <div className="text-sm" style={{ color: accentTextColor, opacity: 0.8 }}>by {r.books?.author ?? "Unknown author"}</div>
+                      <div className="mt-2 flex items-center gap-2" style={{ color: accentTextColor }}>
                         <span className="text-sm font-medium">Rating:</span>
                         <span>⭐ {r.rating}/5</span>
                       </div>
                       {r.review && (
                         <div className="mt-2">
-                          <span className="text-sm font-medium">Review:</span>
-                          <p className="text-sm mt-1 italic">"{r.review}"</p>
+                          <span className="text-sm font-medium" style={{ color: accentTextColor }}>Review:</span>
+                          <p className="text-sm mt-1 italic" style={{ color: accentTextColor, opacity: 0.9 }}>"{r.review}"</p>
                         </div>
                       )}
-                      <div className="mt-2 text-xs text-muted-foreground">
+                      <div className="mt-2 text-xs" style={{ color: accentTextColor, opacity: 0.7 }}>
                         {new Date(r.created_at).toLocaleString()}
                       </div>
                     </div>

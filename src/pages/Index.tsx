@@ -913,7 +913,7 @@ const Index = () => {
             )}
 
             {/* Reading Goals Section - Compact card style */}
-            <HomeReadingGoals userId={userId} completedBooksThisYear={completedBooksThisYear} accentColor={accentCardColor} />
+            <HomeReadingGoals userId={userId} completedBooksThisYear={completedBooksThisYear} accentColor={accentCardColor} accentTextColor={accentTextColor} />
 
             {/* Stats Grid - Now 2 columns */}
             <div className="grid grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4 items-start">
