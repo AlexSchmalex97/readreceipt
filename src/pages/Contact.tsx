@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, MessageSquare, HelpCircle, Send, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { usePlatform } from "@/hooks/usePlatform";
+import { useUserAccent } from "@/hooks/useUserAccent";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -21,6 +22,7 @@ export default function Contact() {
   const [isSubscribing, setIsSubscribing] = useState(false);
   const { toast } = useToast();
   const { isIOS, isReadReceiptApp } = usePlatform();
+  const { accentCardColor, accentTextColor } = useUserAccent();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,37 +98,37 @@ ${formData.message}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Contact Options */}
           <div className="space-y-6">
-            <Card>
+            <Card style={{ backgroundColor: accentCardColor }}>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <HelpCircle className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2" style={{ color: accentTextColor }}>
+                  <HelpCircle className="w-5 h-5" style={{ color: accentTextColor }} />
                   Get Help
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <MessageSquare className="w-5 h-5 text-primary mt-1" />
+                  <MessageSquare className="w-5 h-5 mt-1" style={{ color: accentTextColor }} />
                   <div>
-                    <h3 className="font-medium">General Questions</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <h3 className="font-medium" style={{ color: accentTextColor }}>General Questions</h3>
+                    <p className="text-sm" style={{ color: accentTextColor, opacity: 0.8 }}>
                       Questions about how to use features, account issues, or general inquiries.
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Mail className="w-5 h-5 text-primary mt-1" />
+                  <Mail className="w-5 h-5 mt-1" style={{ color: accentTextColor }} />
                   <div>
-                    <h3 className="font-medium">Bug Reports</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <h3 className="font-medium" style={{ color: accentTextColor }}>Bug Reports</h3>
+                    <p className="text-sm" style={{ color: accentTextColor, opacity: 0.8 }}>
                       Found something that's not working correctly? Let us know!
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Send className="w-5 h-5 text-primary mt-1" />
+                  <Send className="w-5 h-5 mt-1" style={{ color: accentTextColor }} />
                   <div>
-                    <h3 className="font-medium">Feature Requests</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <h3 className="font-medium" style={{ color: accentTextColor }}>Feature Requests</h3>
+                    <p className="text-sm" style={{ color: accentTextColor, opacity: 0.8 }}>
                       Have ideas for new features or improvements? We're all ears!
                     </p>
                   </div>
@@ -134,12 +136,12 @@ ${formData.message}
               </CardContent>
             </Card>
 
-            <Card>
+            <Card style={{ backgroundColor: accentCardColor }}>
               <CardHeader>
-                <CardTitle>Response Time</CardTitle>
+                <CardTitle style={{ color: accentTextColor }}>Response Time</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm" style={{ color: accentTextColor, opacity: 0.8 }}>
                   We typically respond to messages within <strong>24-48 hours</strong> during business days. 
                   For urgent issues, please include "URGENT" in your subject line.
                 </p>
@@ -147,15 +149,15 @@ ${formData.message}
             </Card>
 
             {/* Newsletter Subscription */}
-            <Card>
+            <Card style={{ backgroundColor: accentCardColor }}>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2" style={{ color: accentTextColor }}>
+                  <BookOpen className="w-5 h-5" style={{ color: accentTextColor }} />
                   ReadReceipt Updates
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="text-sm mb-4" style={{ color: accentTextColor, opacity: 0.8 }}>
                   Subscribe to our Substack newsletter for app updates, reading tips, and community highlights!
                 </p>
                 <div className="space-y-3">
@@ -189,10 +191,10 @@ ${formData.message}
 
           {/* Contact Form */}
           <div className="lg:col-span-2">
-            <Card>
+            <Card style={{ backgroundColor: accentCardColor }}>
               <CardHeader>
-                <CardTitle>Send us a message</CardTitle>
-                <p className="text-sm text-muted-foreground">
+                <CardTitle style={{ color: accentTextColor }}>Send us a message</CardTitle>
+                <p className="text-sm" style={{ color: accentTextColor, opacity: 0.8 }}>
                   All messages will be sent to <strong>support@readreceiptapp.com</strong>
                 </p>
               </CardHeader>
@@ -200,7 +202,7 @@ ${formData.message}
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
+                      <label htmlFor="name" className="block text-sm font-medium mb-2" style={{ color: accentTextColor }}>
                         Name *
                       </label>
                       <Input
@@ -213,7 +215,7 @@ ${formData.message}
                       />
                     </div>
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
+                      <label htmlFor="email" className="block text-sm font-medium mb-2" style={{ color: accentTextColor }}>
                         Email *
                       </label>
                       <Input
@@ -229,7 +231,7 @@ ${formData.message}
                   </div>
 
                   <div>
-                    <label htmlFor="type" className="block text-sm font-medium text-foreground mb-2">
+                    <label htmlFor="type" className="block text-sm font-medium mb-2" style={{ color: accentTextColor }}>
                       Message Type
                     </label>
                     <select
@@ -248,7 +250,7 @@ ${formData.message}
                   </div>
 
                   <div>
-                    <label htmlFor="subject" className="block text-sm font-medium text-foreground mb-2">
+                    <label htmlFor="subject" className="block text-sm font-medium mb-2" style={{ color: accentTextColor }}>
                       Subject *
                     </label>
                     <Input
@@ -262,7 +264,7 @@ ${formData.message}
                   </div>
 
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">
+                    <label htmlFor="message" className="block text-sm font-medium mb-2" style={{ color: accentTextColor }}>
                       Message *
                     </label>
                     <Textarea

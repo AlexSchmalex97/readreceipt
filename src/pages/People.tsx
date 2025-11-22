@@ -7,6 +7,7 @@ import { RefreshCw } from "lucide-react";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { useToast } from "@/hooks/use-toast";
 import { usePlatform } from "@/hooks/usePlatform";
+import { useUserAccent } from "@/hooks/useUserAccent";
 
 export default function People() {
   const [q, setQ] = useState("");
@@ -16,6 +17,7 @@ export default function People() {
   const [hasSearched, setHasSearched] = useState(false);
   const { toast } = useToast();
   const { isIOS, isReadReceiptApp } = usePlatform();
+  const { accentCardColor, accentTextColor } = useUserAccent();
 
   // Load followed users on mount
   useEffect(() => {
@@ -220,7 +222,8 @@ export default function People() {
                 {followedUsers.map((p) => (
                   <div
                     key={p.id}
-                    className="flex items-center justify-between bg-card p-3 rounded border hover:shadow-md transition-shadow"
+                    className="flex items-center justify-between p-3 rounded border hover:shadow-md transition-shadow"
+                    style={{ backgroundColor: accentCardColor }}
                   >
                     <Link
                       to={`/${p.username || p.id}`}
@@ -232,8 +235,8 @@ export default function People() {
                         alt="Profile"
                       />
                       <div>
-                        <div className="font-medium">{p.display_name || "Reader"}</div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="font-medium" style={{ color: accentTextColor }}>{p.display_name || "Reader"}</div>
+                        <div className="text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
                           @{p.username || p.id.slice(0, 6)}
                         </div>
                       </div>
@@ -258,7 +261,8 @@ export default function People() {
           }).map((p) => (
             <div
               key={p.id}
-              className="flex items-center justify-between bg-card p-3 rounded border hover:shadow-md transition-shadow"
+              className="flex items-center justify-between p-3 rounded border hover:shadow-md transition-shadow"
+              style={{ backgroundColor: accentCardColor }}
             >
               <Link
                 to={`/${p.username || p.id}`}
@@ -270,8 +274,8 @@ export default function People() {
                   alt="Profile"
                 />
                 <div>
-                  <div className="font-medium">{p.display_name || "Reader"}</div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="font-medium" style={{ color: accentTextColor }}>{p.display_name || "Reader"}</div>
+                  <div className="text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
                     @{p.username || p.id.slice(0, 6)}
                   </div>
                 </div>
