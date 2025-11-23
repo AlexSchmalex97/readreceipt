@@ -205,22 +205,22 @@ export default function ProfileDisplay() {
             setCurrentBook(currentBookData);
           }
         } else {
-          // Fallback: find most recent in-progress book if current_book_id is null
+          // Fallback: find most recent in-progress book based on status, matching the home page "In Progress" list
           const { data: fallbackBooks } = await supabase
             .from('books')
             .select('id, title, author, cover_url, current_page, total_pages, status')
             .eq('user_id', user.id)
+            .eq('status', 'in_progress')
             .order('updated_at', { ascending: false })
-            .limit(20);
-          
-          // Match home page logic: treat any non-DNF, non-top_five book with current_page < total_pages as in progress
-          const inProgressBook = fallbackBooks?.find(b => 
-            b.current_page < b.total_pages && 
-            b.status !== 'dnf' && 
-            String(b.status) !== 'top_five'
-          );
+            .limit(1);
 
-          console.log('Profile in-progress fallback:', { fallbackBooks, inProgressBook });
+          const inProgressBook = fallbackBooks && fallbackBooks.length > 0 ? fallbackBooks[0] : null;
+
+          console.log('Profile in-progress fallback (status-based):', { fallbackBooks, inProgressBook });
+
+          if (inProgressBook) {
+            setCurrentBook(inProgressBook as CurrentBook);
+          }
 
           if (inProgressBook) {
             setCurrentBook(inProgressBook);
