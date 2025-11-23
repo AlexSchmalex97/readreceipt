@@ -148,7 +148,7 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile 
 
   return (
     <Card 
-      className="shadow-soft border-2 hover:shadow-lg transition-all duration-300 max-w-sm mx-auto"
+      className="shadow-soft border-2 hover:shadow-lg transition-all duration-300 max-w-md mx-auto"
       style={{ borderColor: accentColor || 'hsl(var(--border))', backgroundColor: accentColor || 'hsl(var(--card))' }}
     >
       <CardContent className="p-2.5 sm:p-3.5">
