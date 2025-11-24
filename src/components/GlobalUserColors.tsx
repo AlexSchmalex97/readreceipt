@@ -14,14 +14,18 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
     if (!palette) return null;
     const cs = getComputedStyle(document.documentElement);
     const read = (k: string) => cs.getPropertyValue(`--${k}`).trim();
+    const p: any = palette;
+    // Normalize keys from stored color_palette (accent_color, text_color, etc.)
+    const accentColor = p.accent || p.accent_color || read("accent");
+    const background = p.background || p.background_color || read("background");
+    const foreground = p.foreground || p.text_color || read("foreground");
     return {
-      name: palette.name || "custom",
-      primary: palette.primary || read("primary"),
-      secondary: palette.secondary || read("secondary"),
-      accent: palette.accent || read("accent"),
-      background: palette.background || read("background"),
-      foreground: palette.foreground || read("foreground"),
-      // Provide foreground fallbacks if only background provided
+      name: p.name || "custom",
+      primary: p.primary || accentColor || read("primary"),
+      secondary: p.secondary || read("secondary"),
+      accent: accentColor,
+      background,
+      foreground,
     };
   }, [palette]);
 
@@ -98,9 +102,20 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
     };
   }, []);
 
-  // Always apply both background image AND color palette globally when user is logged in
-  if (backgroundImageUrl || effectivePalette || palette) {
-    return <UserColorProvider userColorPalette={effectivePalette || palette} backgroundImageUrl={backgroundImageUrl} backgroundTint={backgroundTint}>{children}</UserColorProvider>;
+  // Always apply background image globally when user is logged in.
+  // Apply color palette globally only when user has opted in via apply_globally.
+  const paletteForTheme = applyGlobally ? (effectivePalette || palette) : null;
+
+  if (backgroundImageUrl || paletteForTheme) {
+    return (
+      <UserColorProvider
+        userColorPalette={paletteForTheme || undefined}
+        backgroundImageUrl={backgroundImageUrl}
+        backgroundTint={backgroundTint}
+      >
+        {children}
+      </UserColorProvider>
+    );
   }
   return <>{children}</>;
 }
