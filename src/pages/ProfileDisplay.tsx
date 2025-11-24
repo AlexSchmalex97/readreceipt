@@ -752,36 +752,7 @@ export default function ProfileDisplay() {
               </div>
             )}
           </div>
-              </div>
-            )}
-            <div className="border rounded-lg p-2.5" style={{ backgroundColor: accentCardColor }}>
-              <p className="text-xs mb-1.5 font-medium" style={{ color: accentTextColor }}>Currently Reading</p>
-              <div className="flex gap-2">
-                {currentBook?.cover_url ? (
-                  <img
-                    src={currentBook.cover_url}
-                    alt={currentBook.title}
-                    className="w-10 h-14 object-cover rounded flex-shrink-0"
-                  />
-                ) : (
-                  <div className="w-10 h-14 bg-muted/20 rounded flex-shrink-0 border border-dashed" style={{ borderColor: accentTextColor + '40' }} />
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium line-clamp-2 mb-0.5 leading-tight" style={{ color: accentTextColor }}>
-                    {currentBook?.title || 'TBA'}
-                  </p>
-                  <p className="text-[10px] opacity-80 mb-0.5 leading-tight" style={{ color: accentTextColor }}>
-                    {currentBook?.author || 'TBA'}
-                  </p>
-                  {currentBook && (
-                    <p className="text-[10px] opacity-80 leading-tight" style={{ color: accentTextColor }}>
-                      Page {currentBook.current_page} of {currentBook.total_pages}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+
 
 
           <TopTenDialog 
@@ -791,43 +762,6 @@ export default function ProfileDisplay() {
             accentCardColor={accentCardColor}
             accentTextColor={accentTextColor}
           />
-
-          {((profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url) && (
-            <>
-              <p className="text-sm font-medium mb-2 text-center" style={{ color: headerTextColor }}>Links</p>
-              <div className="flex flex-wrap justify-center gap-2 mb-4">
-                {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
-                  const Icon = getSocialMediaIcon(platform);
-                  return (
-                    <a
-                      key={platform}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs border rounded-full hover:bg-accent transition-colors"
-                      style={{ color: headerTextColor }}
-                    >
-                      <Icon className="w-3 h-3" />
-                      {platform}
-                    </a>
-                  );
-                })}
-                {profile.website_url && (
-                  <a
-                    href={profile.website_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs border rounded-full hover:bg-accent transition-colors"
-                    style={{ color: headerTextColor }}
-                  >
-                    <ExternalLink className="w-3 h-3" />
-                    Website
-                  </a>
-                )}
-              </div>
-            </>
-          )}
-
 
 
           {/* Collapsible Activity Sections - Mobile/Tablet */}
