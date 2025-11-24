@@ -763,9 +763,8 @@ export default function ProfileDisplay() {
             accentTextColor={accentTextColor}
           />
 
-
           {/* Collapsible Activity Sections - Mobile/Tablet */}
-          <Accordion type="multiple" className="w-full space-y-2">
+          <Accordion type="multiple" className="w-full space-y-2 mt-2">
             {/* Recent Reviews */}
             <AccordionItem value="reviews" className="border rounded-lg px-3" style={{ backgroundColor: accentCardColor }}>
               <AccordionTrigger className="hover:no-underline py-3">
