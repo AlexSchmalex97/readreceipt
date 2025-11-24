@@ -1019,9 +1019,42 @@ export default function ProfileDisplay() {
 
                 {/* Followers/Following */}
                 {uid && (
-                  <div className="flex gap-2">
-                    <FollowersDialog userId={uid} type="followers" count={followersCount} accentColor={accentCardColor} />
-                    <FollowersDialog userId={uid} type="following" count={followingCount} accentColor={accentCardColor} />
+                  <div className="flex flex-col gap-2">
+                    <div className="flex gap-2">
+                      <FollowersDialog userId={uid} type="followers" count={followersCount} accentColor={accentCardColor} />
+                      <FollowersDialog userId={uid} type="following" count={followingCount} accentColor={accentCardColor} />
+                    </div>
+                    {/* Social Media Links + Website (desktop) */}
+                    <div className="flex flex-wrap gap-2">
+                      {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
+                        const Icon = getSocialMediaIcon(platform);
+                        return (
+                          <a
+                            key={platform}
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full border hover:bg-accent/50 transition-colors"
+                            style={{ color: accentTextColor, borderColor: accentCardColor, backgroundColor: accentCardColor }}
+                          >
+                            <Icon className="w-3 h-3" />
+                            {platform}
+                          </a>
+                        );
+                      })}
+                      {profile.website_url && (
+                        <a
+                          href={profile.website_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full border hover:bg-accent/50 transition-colors"
+                          style={{ color: accentTextColor, borderColor: accentCardColor, backgroundColor: accentCardColor }}
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          Website
+                        </a>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -1168,42 +1201,6 @@ export default function ProfileDisplay() {
             </div>
           )}
 
-          {/* Links */}
-          {((profile.social_media_links && Object.keys(profile.social_media_links).length > 0) || profile.website_url) && (
-            <>
-              <h3 className="text-sm font-medium mb-2 max-w-6xl mx-auto" style={{ color: headerTextColor }}>Links</h3>
-              <div className="flex flex-wrap gap-2 mb-6 max-w-6xl mx-auto">
-                {profile.social_media_links && Object.entries(profile.social_media_links).map(([platform, url]) => {
-                  const Icon = getSocialMediaIcon(platform);
-                  return (
-                    <a
-                      key={platform}
-                      href={url as string}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs border rounded-full hover:bg-accent transition-colors"
-                      style={{ color: headerTextColor, borderColor: `${headerTextColor}33` }}
-                    >
-                      <Icon className="w-3 h-3" />
-                      {platform}
-                    </a>
-                  );
-                })}
-                {profile.website_url && (
-                  <a
-                    href={profile.website_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs border rounded-full hover:bg-accent transition-colors"
-                    style={{ color: headerTextColor, borderColor: `${headerTextColor}33` }}
-                  >
-                    <ExternalLink className="w-3 h-3" />
-                    Website
-                  </a>
-                )}
-              </div>
-            </>
-          )}
 
 
 
