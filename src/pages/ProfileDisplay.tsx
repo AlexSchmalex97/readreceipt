@@ -576,6 +576,40 @@ export default function ProfileDisplay() {
                     <FollowersDialog userId={uid} type="following" count={followingCount} accentColor={accentCardColor} />
                   </div>
                 )}
+
+                {/* Social Media Links */}
+                <div className="flex flex-wrap gap-2">
+                  {profile.social_media_links && Array.isArray(profile.social_media_links) && profile.social_media_links.length > 0 && (
+                    profile.social_media_links.map((link: { platform: string; url: string }, index: number) => {
+                      const Icon = getSocialMediaIcon(link.platform);
+                      return (
+                        <a
+                          key={index}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full border hover:bg-accent/50 transition-colors"
+                          style={{ color: accentTextColor, borderColor: accentCardColor, backgroundColor: accentCardColor }}
+                        >
+                          <Icon className="w-3 h-3" />
+                          {link.platform}
+                        </a>
+                      );
+                    })
+                  )}
+                  {profile.website_url && (
+                    <a
+                      href={profile.website_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full border hover:bg-accent/50 transition-colors"
+                      style={{ color: accentTextColor, borderColor: accentCardColor, backgroundColor: accentCardColor }}
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      Website
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -626,8 +660,8 @@ export default function ProfileDisplay() {
               </Card>
             </div>
           </div>
-          {/* Current Book & Favorite Book - Side by Side - Compact */}
-          <div className={`grid gap-2 mb-2 ${favoriteBook ? 'grid-cols-2' : 'grid-cols-1'}`} style={{ maxWidth: favoriteBook ? '600px' : '280px', margin: '0 auto' }}>
+          {/* Current Book & Favorite Book - Side by Side, Top Five to the right */}
+          <div className="grid gap-2 mb-4" style={{ gridTemplateColumns: favoriteBook ? 'repeat(2, 260px) auto' : '260px auto', maxWidth: '900px', margin: '0 auto', justifyContent: 'center' }}>
             {favoriteBook && (
               <div className="border rounded-lg p-2.5" style={{ backgroundColor: accentCardColor }}>
                 <p className="text-xs mb-1.5 font-medium" style={{ color: accentTextColor }}>Favorite Book</p>
@@ -677,47 +711,78 @@ export default function ProfileDisplay() {
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Top Five Books */}
-          {topFiveBooks.length > 0 && (
-            <div className="mb-2">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <Link to="/profile/settings">
-                  <p className="text-sm font-medium text-center cursor-pointer hover:underline" style={{ color: accentTextColor }}>
-                    Top Five
-                  </p>
-                </Link>
-                <button
-                  onClick={() => setShowTopTenDialog(true)}
-                  className="text-xs px-2 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
-                  style={{ color: accentTextColor, borderColor: accentTextColor }}
-                >
-                  view top ten
-                </button>
-              </div>
-              <div className="flex gap-2 overflow-x-auto pb-2 justify-center md:justify-start pt-3">
-                {topFiveBooks.slice(0, 5).map((book, index) => (
-                  <div key={book.id} className="flex-shrink-0 w-16 md:w-24">
-                    <div className="relative">
-                      <div className="absolute -top-1.5 -left-1.5 md:-top-2 md:-left-2 w-4 h-4 md:w-6 md:h-6 rounded-full flex items-center justify-center text-[10px] md:text-xs font-bold z-10" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>
-                        {index + 1}
-                      </div>
-                      {book.cover_url && (
+            {/* Top Five Books */}
+            {topFiveBooks.length > 0 && (
+              <div className="row-span-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <Link to="/profile/settings">
+                    <p className="text-xs font-medium cursor-pointer hover:underline" style={{ color: accentTextColor }}>
+                      Top Five
+                    </p>
+                  </Link>
+                  <button
+                    onClick={() => setShowTopTenDialog(true)}
+                    className="text-[10px] px-1.5 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
+                    style={{ color: accentTextColor, borderColor: accentTextColor }}
+                  >
+                    view top ten
+                  </button>
+                </div>
+                <div className="flex gap-1.5 overflow-x-auto pb-2">
+                  {topFiveBooks.slice(0, 5).map((book, index) => (
+                    <div key={book.id} className="flex-shrink-0 text-center" style={{ width: '50px' }}>
+                      {book.cover_url ? (
                         <img
                           src={book.cover_url}
                           alt={book.title}
-                          className="w-full h-20 md:h-32 object-contain rounded shadow-md"
+                          className="w-full h-16 object-cover rounded mb-1 shadow-sm"
                         />
+                      ) : (
+                        <div className="w-full h-16 bg-muted rounded mb-1 flex items-center justify-center">
+                          <BookOpen className="w-5 h-5 text-muted-foreground" />
+                        </div>
                       )}
+                      <p className="text-[9px] font-medium line-clamp-2 leading-tight" style={{ color: accentTextColor }}>
+                        {book.title}
+                      </p>
                     </div>
-                    <p className="text-[10px] md:text-xs mt-1 text-center truncate font-medium px-1 py-0.5 bg-black/60 rounded" style={{ color: "#FFFFFF" }}>{book.title}</p>
-                    <p className="text-[10px] md:text-xs text-center truncate px-1 py-0.5 bg-black/60 rounded" style={{ color: "#FFFFFF" }}>{book.author}</p>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+              </div>
+            )}
+            <div className="border rounded-lg p-2.5" style={{ backgroundColor: accentCardColor }}>
+              <p className="text-xs mb-1.5 font-medium" style={{ color: accentTextColor }}>Currently Reading</p>
+              <div className="flex gap-2">
+                {currentBook?.cover_url ? (
+                  <img
+                    src={currentBook.cover_url}
+                    alt={currentBook.title}
+                    className="w-10 h-14 object-cover rounded flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-10 h-14 bg-muted/20 rounded flex-shrink-0 border border-dashed" style={{ borderColor: accentTextColor + '40' }} />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium line-clamp-2 mb-0.5 leading-tight" style={{ color: accentTextColor }}>
+                    {currentBook?.title || 'TBA'}
+                  </p>
+                  <p className="text-[10px] opacity-80 mb-0.5 leading-tight" style={{ color: accentTextColor }}>
+                    {currentBook?.author || 'TBA'}
+                  </p>
+                  {currentBook && (
+                    <p className="text-[10px] opacity-80 leading-tight" style={{ color: accentTextColor }}>
+                      Page {currentBook.current_page} of {currentBook.total_pages}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
-          )}
+          </div>
+
 
           <TopTenDialog 
             open={showTopTenDialog} 

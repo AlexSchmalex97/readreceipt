@@ -529,8 +529,8 @@ export function SettingsTabs(props: SettingsTabsProps) {
                 className="h-10 w-full"
               />
             </div>
-            <div>
-              <Label>Accent Color</Label>
+            <div style={{ backgroundColor: props.accentColor }}>
+              <Label style={{ color: props.accentTextColor }}>Accent Color</Label>
               <Input
                 type="color"
                 value={props.accentColor}
@@ -538,8 +538,8 @@ export function SettingsTabs(props: SettingsTabsProps) {
                 className="h-10 w-full"
               />
             </div>
-            <div>
-              <Label>Accent Text Color</Label>
+            <div style={{ backgroundColor: props.accentColor }}>
+              <Label style={{ color: props.accentTextColor }}>Accent Text Color</Label>
               <Input
                 type="color"
                 value={props.accentTextColor}
