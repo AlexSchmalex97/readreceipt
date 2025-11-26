@@ -148,8 +148,11 @@ export const BookCard = ({
 
   return (
     <Card 
-      className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-card border-2"
-      style={accentColor ? { borderColor: accentColor } : {}}
+      className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-2"
+      style={accentColor ? { 
+        borderColor: accentColor,
+        backgroundColor: accentColor 
+      } : {}}
     >
       <CardHeader className="pb-1.5 sm:pb-3 pt-2 sm:pt-6 px-2 sm:px-6">
         <div className="flex items-start gap-1.5 sm:gap-3">
@@ -186,10 +189,16 @@ export const BookCard = ({
           
           {/* Book Info */}
           <div className="flex-1 min-w-0">
-            <CardTitle className="text-xs sm:text-lg font-semibold text-foreground leading-tight">
+            <CardTitle 
+              className="text-xs sm:text-lg font-semibold leading-tight"
+              style={accentTextColor ? { color: accentTextColor } : {}}
+            >
               {book.title}
             </CardTitle>
-            <p className="text-[10px] sm:text-sm text-muted-foreground mt-0 sm:mt-1 truncate">
+            <p 
+              className="text-[10px] sm:text-sm mt-0 sm:mt-1 truncate opacity-80"
+              style={accentTextColor ? { color: accentTextColor } : {}}
+            >
               {book.author}
             </p>
           </div>
@@ -237,29 +246,51 @@ export const BookCard = ({
       <CardContent className="space-y-1.5 sm:space-y-4 pt-1.5 sm:pt-2 px-2 sm:px-6 pb-2 sm:pb-6">
         <div className="space-y-0.5 sm:space-y-2">
           <div className="flex justify-between items-center text-xs sm:text-sm">
-            <span className="text-muted-foreground">Progress</span>
-            <span className="font-medium text-primary">{percentage}%</span>
+            <span style={accentTextColor ? { color: accentTextColor, opacity: 0.8 } : {}}>Progress</span>
+            <span className="font-medium" style={accentTextColor ? { color: accentTextColor } : {}}>{percentage}%</span>
           </div>
           <Progress 
             value={percentage} 
             className="h-1.5 sm:h-2.5" 
-            style={{ "--progress-width": `${percentage}%` } as React.CSSProperties}
+            style={{ 
+              "--progress-width": `${percentage}%`,
+              ...(accentTextColor ? { 
+                backgroundColor: `${accentTextColor}30`,
+              } : {})
+            } as React.CSSProperties}
           />
         </div>
 
-        <div className="hidden sm:block bg-accent/50 rounded-lg p-3 text-center">
-            <p className="text-sm font-medium text-accent-foreground animate-bounce-gentle">
-              {getEncouragingMessage(percentage)}
-            </p>
-          </div>
+        <div 
+          className="hidden sm:block rounded-lg p-3 text-center"
+          style={accentTextColor ? { 
+            backgroundColor: `${accentTextColor}20`,
+            color: accentTextColor
+          } : {}}
+        >
+          <p 
+            className="text-sm font-medium animate-bounce-gentle"
+            style={accentTextColor ? { color: accentTextColor } : {}}
+          >
+            {getEncouragingMessage(percentage)}
+          </p>
+        </div>
 
-        <div className="flex justify-between text-[10px] sm:text-sm text-muted-foreground">
+        <div 
+          className="flex justify-between text-[10px] sm:text-sm"
+          style={accentTextColor ? { color: accentTextColor, opacity: 0.7 } : {}}
+        >
           <span>Pages read: {book.currentPage}</span>
           <span>Pages left: {pagesLeft}</span>
         </div>
 
         <div className="flex flex-wrap items-center gap-1 sm:gap-2 w-full">
-          <span className="text-[10px] sm:text-sm text-muted-foreground flex-shrink-0 w-full sm:w-auto">Current {trackingMode === "page" ? "page" : "progress"}:</span>
+          <span 
+            className="text-[10px] sm:text-sm flex-shrink-0 w-full sm:w-auto"
+            style={accentTextColor ? { color: accentTextColor, opacity: 0.7 } : {}}
+          >
+            Current {trackingMode === "page" ? "page" : "progress"}:
+          </span>
           {isEditing ? (
             <>
               <Input
