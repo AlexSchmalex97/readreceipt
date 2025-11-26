@@ -886,10 +886,17 @@ const Index = () => {
           </div>
         ) : (
           <div className="space-y-4 sm:space-y-8">
-            {/* Currently Reading Section - At the top */}
+            {/* Reading Goals Section - Moved to top and made larger */}
+            <div className="max-w-2xl mx-auto">
+              <HomeReadingGoals userId={userId} completedBooksThisYear={completedBooksThisYear} accentColor={accentCardColor} accentTextColor={accentTextColor} />
+            </div>
+
+            {/* Currently Reading Section */}
             {inProgressBooks.length > 0 && (
               <section>
-                <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">Currently Reading</h2>
+                <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4" style={{ color: accentTextColor }}>
+                  Currently Reading
+                </h2>
                  <SortableBookGrid
                    items={inProgressBooks}
                    className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6"
@@ -906,14 +913,13 @@ const Index = () => {
                        onMoveToDNF={handleMoveToDNF}
                        onMoveToTBR={handleMoveToTBR}
                        onBookUpdated={loadBooks}
+                       accentColor={accentCardColor}
+                       accentTextColor={accentTextColor}
                      />
                    )}
                  />
               </section>
             )}
-
-            {/* Reading Goals Section - Compact card style */}
-            <HomeReadingGoals userId={userId} completedBooksThisYear={completedBooksThisYear} accentColor={accentCardColor} accentTextColor={accentTextColor} />
 
             {/* Stats Grid - Now 2 columns */}
             <div className="grid grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4 items-start">

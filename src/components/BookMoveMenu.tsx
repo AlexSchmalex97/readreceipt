@@ -32,13 +32,13 @@ export function BookMoveMenu({
         <Button
           size="icon-xs"
           variant="ghost"
-          className="sm:h-8 sm:w-8 p-0 text-muted-foreground hover:text-foreground"
+          className="sm:h-8 sm:w-8 p-0 hover:bg-accent"
           title="Move to another list"
         >
           <ArrowRightLeft className="w-3 h-3 sm:w-4 sm:h-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-48 bg-card border-border">
         {currentStatus !== 'in_progress' && (
           <DropdownMenuItem onClick={() => onMoveToInProgress(bookId)}>
             <BookOpen className="w-4 h-4 mr-2" />
