@@ -148,14 +148,14 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile 
 
   return (
     <Card 
-      className="shadow-soft border-2 hover:shadow-lg transition-all duration-300 max-w-md mx-auto"
+      className="shadow-soft border-2 hover:shadow-lg transition-all duration-300 w-full"
       style={{ borderColor: accentColor || 'hsl(var(--border))', backgroundColor: accentColor || 'hsl(var(--card))' }}
     >
-      <CardContent className="p-2.5 sm:p-3.5">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-1.5">
-            <Target className="w-3.5 h-3.5" style={{ color: accentTextColor || 'hsl(var(--primary))' }} />
-            <h3 className="text-xs sm:text-sm font-semibold" style={{ color: accentTextColor }}>
+      <CardContent className="p-4 sm:p-5">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Target className="w-5 h-5" style={{ color: accentTextColor || 'hsl(var(--primary))' }} />
+            <h3 className="text-base sm:text-lg font-semibold" style={{ color: accentTextColor }}>
               {currentYear} Reading Goal
             </h3>
           </div>
@@ -166,8 +166,8 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile 
             <p className="text-sm text-muted-foreground">Loading...</p>
           </div>
         ) : goal ? (
-          <div className="space-y-1.5 sm:space-y-2">
-            <div className="flex justify-between items-center text-[10px] sm:text-xs">
+          <div className="space-y-2 sm:space-y-3">
+            <div className="flex justify-between items-center text-xs sm:text-sm">
               <span style={{ color: accentTextColor }}>
                 Progress: {totalProgress}/{goal.goal_count} books
               </span>
@@ -175,38 +175,38 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile 
                 {Math.round(progressPercentage)}%
               </span>
             </div>
-            <Progress value={progressPercentage} className="h-1.5" />
+            <Progress value={progressPercentage} className="h-2" />
             
             {isOwnProfile && (
-              <div className="flex items-center justify-between gap-2 pt-1.5 border-t" style={{ borderColor: accentColor ? `${accentColor}40` : 'hsl(var(--border))' }}>
-                <span className="text-[10px]" style={{ color: accentTextColor }}>
+              <div className="flex items-center justify-between gap-2 pt-2 border-t" style={{ borderColor: accentColor ? `${accentColor}40` : 'hsl(var(--border))' }}>
+                <span className="text-xs" style={{ color: accentTextColor }}>
                   Manual count: {goal.manual_count}
                 </span>
-                <div className="flex gap-1">
+                <div className="flex gap-1.5">
                   <Button
-                    size="icon-xs"
+                    size="sm"
                     variant="outline"
                     onClick={() => updateManualCount(false)}
                     disabled={goal.manual_count === 0}
-                    className="h-5 w-5"
+                    className="h-7 w-7 p-0"
                     style={{ 
                       borderColor: accentTextColor,
                       color: accentTextColor
                     }}
                   >
-                    <Minus className="h-2.5 w-2.5" />
+                    <Minus className="h-3 w-3" />
                   </Button>
                   <Button
-                    size="icon-xs"
+                    size="sm"
                     variant="outline"
                     onClick={() => updateManualCount(true)}
-                    className="h-5 w-5"
+                    className="h-7 w-7 p-0"
                     style={{ 
                       borderColor: accentTextColor,
                       color: accentTextColor
                     }}
                   >
-                    <Plus className="h-2.5 w-2.5" />
+                    <Plus className="h-3 w-3" />
                   </Button>
                 </div>
               </div>

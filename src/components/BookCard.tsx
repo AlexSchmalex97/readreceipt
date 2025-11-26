@@ -35,6 +35,8 @@ interface BookCardProps {
   onMoveToDNF?: (id: string) => void;
   onMoveToTBR?: (id: string) => void;
   onBookUpdated?: () => void;
+  accentColor?: string;
+  accentTextColor?: string;
 }
 
 const getEncouragingMessage = (percentage: number): string => {
@@ -59,6 +61,8 @@ export const BookCard = ({
   onMoveToDNF,
   onMoveToTBR,
   onBookUpdated,
+  accentColor,
+  accentTextColor,
 }: BookCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [trackingMode, setTrackingMode] = useState<"page" | "percentage">("page");
@@ -143,7 +147,10 @@ export const BookCard = ({
   };
 
   return (
-    <Card className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-card">
+    <Card 
+      className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-card border-2"
+      style={accentColor ? { borderColor: accentColor } : {}}
+    >
       <CardHeader className="pb-1.5 sm:pb-3 pt-2 sm:pt-6 px-2 sm:px-6">
         <div className="flex items-start gap-1.5 sm:gap-3">
           {/* Book Cover */}

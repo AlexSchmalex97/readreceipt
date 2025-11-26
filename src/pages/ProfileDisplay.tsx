@@ -712,9 +712,9 @@ export default function ProfileDisplay() {
               </div>
             </div>
 
-            {/* Top Five Books */}
+            {/* Top Five Books - To the right of Favorite/Currently Reading */}
             {topFiveBooks.length > 0 && (
-              <div className="row-span-1">
+              <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Link to="/profile/settings">
                     <p className="text-xs font-medium cursor-pointer hover:underline" style={{ color: accentTextColor }}>
@@ -755,7 +755,7 @@ export default function ProfileDisplay() {
 
 
 
-          <TopTenDialog 
+          <TopTenDialog
             open={showTopTenDialog} 
             onOpenChange={setShowTopTenDialog} 
             books={topFiveBooks} 
@@ -764,7 +764,7 @@ export default function ProfileDisplay() {
           />
 
           {/* Collapsible Activity Sections - Mobile/Tablet */}
-          <Accordion type="multiple" className="w-full space-y-2 mt-2">
+          <Accordion type="multiple" className="w-full space-y-2 mt-1">
             {/* Recent Reviews */}
             <AccordionItem value="reviews" className="border rounded-lg px-3" style={{ backgroundColor: accentCardColor }}>
               <AccordionTrigger className="hover:no-underline py-3">
@@ -823,8 +823,8 @@ export default function ProfileDisplay() {
               </AccordionContent>
             </AccordionItem>
 
-            {/* Reading Activity */}
-            <AccordionItem value="activity" className="border rounded-lg px-3" style={{ backgroundColor: accentCardColor }}>
+            {/* Reading Activity - Moved here */}
+            <AccordionItem value="activity" className="border rounded-lg px-3 mt-1" style={{ backgroundColor: accentCardColor }}>
               <AccordionTrigger className="hover:no-underline py-3">
                 <div className="flex items-center gap-2">
                   <BookOpen className="w-4 h-4 text-primary" />
