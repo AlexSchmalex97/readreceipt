@@ -660,9 +660,9 @@ export default function ProfileDisplay() {
               </Card>
             </div>
           </div>
-          {/* Current Book & Favorite Book - Side by Side, Top Five to the right */}
-          <div className="grid gap-2 mb-4" style={{ gridTemplateColumns: favoriteBook ? 'repeat(2, 260px) auto' : '260px auto', maxWidth: '900px', margin: '0 auto', justifyContent: 'center' }}>
-            {favoriteBook && (
+          {/* Favorite Book - Full Width */}
+          {favoriteBook && (
+            <div className="max-w-md mx-auto mb-4">
               <div className="border rounded-lg p-2.5" style={{ backgroundColor: accentCardColor }}>
                 <p className="text-xs mb-1.5 font-medium" style={{ color: accentTextColor }}>Favorite Book</p>
                 <div className="flex gap-2">
@@ -683,7 +683,11 @@ export default function ProfileDisplay() {
                   </div>
                 </div>
               </div>
-            )}
+            </div>
+          )}
+
+          {/* Currently Reading and Top Five - Side by Side */}
+          <div className="grid gap-2 mb-4" style={{ gridTemplateColumns: '260px auto', maxWidth: '800px', margin: '0 auto', justifyContent: 'center' }}>
             <div className="border rounded-lg p-2.5" style={{ backgroundColor: accentCardColor }}>
               <p className="text-xs mb-1.5 font-medium" style={{ color: accentTextColor }}>Currently Reading</p>
               <div className="flex gap-2">
@@ -712,7 +716,7 @@ export default function ProfileDisplay() {
               </div>
             </div>
 
-            {/* Top Five Books - To the right of Favorite/Currently Reading */}
+            {/* Top Five Books - To the right of Currently Reading */}
             {topFiveBooks.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-2">
