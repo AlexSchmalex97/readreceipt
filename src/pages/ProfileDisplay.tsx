@@ -1112,10 +1112,20 @@ export default function ProfileDisplay() {
             </div>
           </div>
 
-          {/* Favorite Book and Current Read - Below header - Larger */}
-          <div className={`grid gap-3 mb-3 max-w-xl ${favoriteBook ? 'grid-cols-2' : 'grid-cols-1'}`}>
+          {/* Favorite Book, Current Read, and Top Five - Side by Side */}
+          <div className="grid gap-3 mb-3" style={{ 
+            gridTemplateColumns: favoriteBook && topFiveBooks.length > 0 
+              ? '280px 280px 1fr' 
+              : favoriteBook 
+                ? '280px 280px' 
+                : topFiveBooks.length > 0 
+                  ? '280px 1fr' 
+                  : '280px',
+            maxWidth: '1200px',
+            margin: '0 auto'
+          }}>
             {favoriteBook && (
-              <div className="border rounded-lg p-3 max-w-xs" style={{ backgroundColor: accentCardColor }}>
+              <div className="border rounded-lg p-3" style={{ backgroundColor: accentCardColor }}>
                 <p className="text-sm mb-1.5 font-medium" style={{ color: accentTextColor }}>Favorite Book</p>
                 <div className="flex gap-2.5">
                   {favoriteBook.cover_url && (
@@ -1136,7 +1146,7 @@ export default function ProfileDisplay() {
                 </div>
               </div>
             )}
-            <div className="border rounded-lg p-3 max-w-xs" style={{ backgroundColor: accentCardColor }}>
+            <div className="border rounded-lg p-3" style={{ backgroundColor: accentCardColor }}>
               <p className="text-sm mb-1.5 font-medium" style={{ color: accentTextColor }}>Currently Reading</p>
               <div className="flex gap-2.5">
                 {currentBook?.cover_url ? (
@@ -1163,47 +1173,47 @@ export default function ProfileDisplay() {
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Top Five Books - Desktop */}
-          {topFiveBooks.length > 0 && (
-            <div className="mb-3 max-w-6xl mx-auto">
-              <div className="flex items-center gap-2 mb-3">
-                <Link to="/profile/settings">
-                  <h3 className="text-sm font-medium cursor-pointer hover:underline" style={{ color: headerTextColor }}>
-                    Top Five
-                  </h3>
-                </Link>
-                <button
-                  onClick={() => setShowTopTenDialog(true)}
-                  className="text-xs px-2 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
-                  style={{ color: headerTextColor, borderColor: `${headerTextColor}33` }}
-                >
-                  view top ten
-                </button>
-              </div>
-              <div className="flex gap-3">
-                {topFiveBooks.slice(0, 5).map((book, index) => (
-                  <div key={book.id} className="flex-shrink-0 w-28">
-                    <div className="relative">
-                      <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold z-10" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>
-                        {index + 1}
+            {/* Top Five Books - To the right of Currently Reading */}
+            {topFiveBooks.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Link to="/profile/settings">
+                    <h3 className="text-sm font-medium cursor-pointer hover:underline" style={{ color: headerTextColor }}>
+                      Top Five
+                    </h3>
+                  </Link>
+                  <button
+                    onClick={() => setShowTopTenDialog(true)}
+                    className="text-xs px-2 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
+                    style={{ color: headerTextColor, borderColor: `${headerTextColor}33` }}
+                  >
+                    view top ten
+                  </button>
+                </div>
+                <div className="flex gap-3">
+                  {topFiveBooks.slice(0, 5).map((book, index) => (
+                    <div key={book.id} className="flex-shrink-0 w-28">
+                      <div className="relative">
+                        <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold z-10" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>
+                          {index + 1}
+                        </div>
+                        {book.cover_url && (
+                          <img
+                            src={book.cover_url}
+                            alt={book.title}
+                            className="w-full aspect-[2/3] object-cover rounded-lg shadow-md"
+                          />
+                        )}
                       </div>
-                      {book.cover_url && (
-                        <img
-                          src={book.cover_url}
-                          alt={book.title}
-                          className="w-full aspect-[2/3] object-cover rounded-lg shadow-md"
-                        />
-                      )}
+                      <p className="text-xs font-medium mt-2 line-clamp-2 leading-tight px-1.5 py-0.5 bg-black/60 rounded inline-block" style={{ color: "#FFFFFF" }}>{book.title}</p>
+                      <p className="text-xs mt-0.5 line-clamp-1 px-1.5 py-0.5 bg-black/60 rounded inline-block" style={{ color: "#FFFFFF" }}>{book.author}</p>
                     </div>
-                    <p className="text-xs font-medium mt-2 line-clamp-2 leading-tight px-1.5 py-0.5 bg-black/60 rounded inline-block" style={{ color: "#FFFFFF" }}>{book.title}</p>
-                    <p className="text-xs mt-0.5 line-clamp-1 px-1.5 py-0.5 bg-black/60 rounded inline-block" style={{ color: "#FFFFFF" }}>{book.author}</p>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
 
 
