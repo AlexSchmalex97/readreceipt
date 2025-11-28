@@ -246,10 +246,10 @@ export default function Feed() {
       <div className="container mx-auto px-4 py-6 space-y-3"
         style={{ paddingTop: showPullIndicator ? `${pullDistance + 24}px` : undefined }}
       >
-      <h1 className="text-2xl font-bold mb-2">Your Feed</h1>
+      <h1 className="text-2xl font-bold mb-2" style={{ color: accentTextColor }}>Your Feed</h1>
       {items.length === 0 && (
-        <div className="text-muted-foreground">
-          No activity yet. Follow readers in the <a href="/people" className="underline">People</a> tab.
+        <div style={{ color: accentTextColor, opacity: 0.8 }}>
+          No activity yet. Follow readers in the <a href="/people" className="underline" style={{ color: accentTextColor }}>People</a> tab.
         </div>
       )}
 
