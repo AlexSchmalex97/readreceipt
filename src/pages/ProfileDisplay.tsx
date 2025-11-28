@@ -1113,7 +1113,7 @@ export default function ProfileDisplay() {
           </div>
 
           {/* Favorite Book, Current Read, and Top Five - Side by Side */}
-          <div className="grid gap-3 mb-8" style={{
+          <div className="grid gap-3 mb-12" style={{
             gridTemplateColumns: favoriteBook && topFiveBooks.length > 0 
               ? '280px 280px 1fr' 
               : favoriteBook 
@@ -1125,52 +1125,44 @@ export default function ProfileDisplay() {
             margin: '0 auto'
           }}>
             {favoriteBook && (
-              <div className="border rounded-lg p-1.5 flex flex-col" style={{ backgroundColor: accentCardColor }}>
-                <p className="text-sm mb-0.5 font-medium" style={{ color: accentTextColor }}>Favorite Book</p>
-                <div className="flex gap-2 items-center">
-                   {favoriteBook.cover_url && (
-                     <img
-                       src={favoriteBook.cover_url}
-                       alt={favoriteBook.title}
-                       className="w-12 h-18 object-cover rounded flex-shrink-0"
-                     />
-                   )}
-                   <div className="flex-1 min-w-0">
-                     <p className="text-sm font-medium line-clamp-2 leading-tight" style={{ color: accentTextColor }}>
-                       {favoriteBook.title}
-                     </p>
-                     <p className="text-xs leading-tight" style={{ color: accentTextColor, opacity: 0.8 }}>
-                       {favoriteBook.author}
-                     </p>
-                   </div>
+              <div className="border rounded-lg p-2 flex items-center gap-2" style={{ backgroundColor: accentCardColor }}>
+                {favoriteBook.cover_url && (
+                  <img
+                    src={favoriteBook.cover_url}
+                    alt={favoriteBook.title}
+                    className="w-12 h-18 object-cover rounded flex-shrink-0"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs mb-0.5 font-medium opacity-60" style={{ color: accentTextColor }}>Favorite Book</p>
+                  <p className="text-sm font-medium line-clamp-1 leading-tight" style={{ color: accentTextColor }}>
+                    {favoriteBook.title}
+                  </p>
+                  <p className="text-xs leading-tight" style={{ color: accentTextColor, opacity: 0.8 }}>
+                    {favoriteBook.author}
+                  </p>
                 </div>
               </div>
             )}
-            <div className="border rounded-lg p-1.5 flex flex-col" style={{ backgroundColor: accentCardColor }}>
-              <p className="text-sm mb-0.5 font-medium" style={{ color: accentTextColor }}>Currently Reading</p>
-              <div className="flex gap-2 items-center">
-                 {currentBook?.cover_url ? (
-                   <img
-                     src={currentBook.cover_url}
-                     alt={currentBook.title}
-                     className="w-12 h-18 object-cover rounded flex-shrink-0"
-                   />
-                 ) : (
-                   <div className="w-12 h-18 bg-muted/20 rounded flex-shrink-0 border border-dashed" style={{ borderColor: accentTextColor + '40' }} />
-                 )}
-                 <div className="flex-1 min-w-0">
-                   <p className="text-sm font-medium line-clamp-2 leading-tight" style={{ color: accentTextColor }}>
-                     {currentBook?.title || 'TBA'}
-                   </p>
-                   <p className="text-xs leading-tight" style={{ color: accentTextColor, opacity: 0.8 }}>
-                     {currentBook?.author || 'TBA'}
-                   </p>
-                   {currentBook && (
-                     <p className="text-xs leading-tight" style={{ color: accentTextColor, opacity: 0.8 }}>
-                       Page {currentBook.current_page} of {currentBook.total_pages}
-                     </p>
-                   )}
-                 </div>
+            <div className="border rounded-lg p-2 flex items-center gap-2" style={{ backgroundColor: accentCardColor }}>
+              {currentBook?.cover_url ? (
+                <img
+                  src={currentBook.cover_url}
+                  alt={currentBook.title}
+                  className="w-12 h-18 object-cover rounded flex-shrink-0"
+                />
+              ) : (
+                <div className="w-12 h-18 bg-muted/20 rounded flex-shrink-0 border border-dashed" style={{ borderColor: accentTextColor + '40' }} />
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-xs mb-0.5 font-medium opacity-60" style={{ color: accentTextColor }}>Currently Reading</p>
+                <p className="text-sm font-medium line-clamp-1 leading-tight" style={{ color: accentTextColor }}>
+                  {currentBook?.title || 'TBA'}
+                </p>
+                <p className="text-xs leading-tight" style={{ color: accentTextColor, opacity: 0.8 }}>
+                  {currentBook?.author || 'TBA'}
+                  {currentBook && ` • Page ${currentBook.current_page}/${currentBook.total_pages}`}
+                </p>
               </div>
             </div>
 
