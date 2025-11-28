@@ -1125,9 +1125,9 @@ export default function ProfileDisplay() {
             margin: '0 auto'
           }}>
             {favoriteBook && (
-              <div className="border rounded-lg p-3" style={{ backgroundColor: accentCardColor }}>
-                <p className="text-sm mb-1.5 font-medium" style={{ color: accentTextColor }}>Favorite Book</p>
-                <div className="flex gap-2.5">
+              <div className="border rounded-lg p-2" style={{ backgroundColor: accentCardColor }}>
+                <p className="text-sm mb-1 font-medium" style={{ color: accentTextColor }}>Favorite Book</p>
+                <div className="flex gap-2">
                   {favoriteBook.cover_url && (
                     <img
                       src={favoriteBook.cover_url}
@@ -1146,9 +1146,9 @@ export default function ProfileDisplay() {
                 </div>
               </div>
             )}
-            <div className="border rounded-lg p-3" style={{ backgroundColor: accentCardColor }}>
-              <p className="text-sm mb-1.5 font-medium" style={{ color: accentTextColor }}>Currently Reading</p>
-              <div className="flex gap-2.5">
+            <div className="border rounded-lg p-2" style={{ backgroundColor: accentCardColor }}>
+              <p className="text-sm mb-1 font-medium" style={{ color: accentTextColor }}>Currently Reading</p>
+              <div className="flex gap-2">
                 {currentBook?.cover_url ? (
                   <img
                     src={currentBook.cover_url}
@@ -1191,9 +1191,9 @@ export default function ProfileDisplay() {
                     view top ten
                   </button>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-2">
                   {topFiveBooks.slice(0, 5).map((book, index) => (
-                    <div key={book.id} className="flex-shrink-0 w-28">
+                    <div key={book.id} className="flex-shrink-0 w-24">
                       <div className="relative">
                         <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold z-10" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>
                           {index + 1}
