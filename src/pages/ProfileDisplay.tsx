@@ -1113,7 +1113,7 @@ export default function ProfileDisplay() {
           </div>
 
           {/* Favorite Book, Current Read, and Top Five - Side by Side */}
-          <div className="grid gap-3 mb-12" style={{
+          <div className="grid gap-3 mb-16" style={{
             gridTemplateColumns: favoriteBook && topFiveBooks.length > 0 
               ? '280px 280px 1fr' 
               : favoriteBook 
@@ -1125,7 +1125,7 @@ export default function ProfileDisplay() {
             margin: '0 auto'
           }}>
             {favoriteBook && (
-              <div className="border rounded-lg p-2 flex items-center gap-2" style={{ backgroundColor: accentCardColor }}>
+              <div className="border rounded-lg p-1 flex items-center gap-1" style={{ backgroundColor: accentCardColor }}>
                 {favoriteBook.cover_url && (
                   <img
                     src={favoriteBook.cover_url}
@@ -1144,7 +1144,7 @@ export default function ProfileDisplay() {
                 </div>
               </div>
             )}
-            <div className="border rounded-lg p-2 flex items-center gap-2" style={{ backgroundColor: accentCardColor }}>
+            <div className="border rounded-lg p-1 flex items-center gap-1" style={{ backgroundColor: accentCardColor }}>
               {currentBook?.cover_url ? (
                 <img
                   src={currentBook.cover_url}
@@ -1211,7 +1211,7 @@ export default function ProfileDisplay() {
 
 
           {/* Three Column Layout: Recent Reviews - Activity Feed - TBR List */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* Recent Reviews */}
             <Card style={{ backgroundColor: accentCardColor }}>
               <CardHeader className="p-3 pb-2">
