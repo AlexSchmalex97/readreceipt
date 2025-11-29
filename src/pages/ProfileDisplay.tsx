@@ -1068,12 +1068,6 @@ export default function ProfileDisplay() {
             <div className="flex-shrink-0 w-80">
               <Card className="border-2" style={{ borderColor: accentCardColor, backgroundColor: accentCardColor }}>
                 <CardContent className="p-4 space-y-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <BookOpen className="w-5 h-5" style={{ color: accentTextColor }} />
-                    <h3 className="text-lg font-semibold" style={{ color: accentTextColor }}>
-                      {new Date().getFullYear()} Reading Goal
-                    </h3>
-                  </div>
                   <HomeReadingGoals 
                     userId={uid}
                     completedBooksThisYear={bookStats.completedThisYear}
@@ -1125,41 +1119,41 @@ export default function ProfileDisplay() {
             margin: '0 auto'
           }}>
             {favoriteBook && (
-              <div className="border rounded-lg p-0.5 flex items-center gap-1" style={{ backgroundColor: accentCardColor }}>
+              <div className="border rounded-lg py-0.5 px-1 flex items-center gap-1.5" style={{ backgroundColor: accentCardColor }}>
                 {favoriteBook.cover_url && (
                   <img
                     src={favoriteBook.cover_url}
                     alt={favoriteBook.title}
-                    className="w-12 h-18 object-cover rounded flex-shrink-0"
+                    className="w-11 h-16 object-cover rounded flex-shrink-0"
                   />
                 )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] mb-0 font-medium opacity-60 leading-none" style={{ color: accentTextColor }}>Favorite Book</p>
-                  <p className="text-[11px] font-medium line-clamp-1 leading-snug" style={{ color: accentTextColor }}>
+                <div className="flex flex-col justify-center min-w-0 py-0.5">
+                  <p className="text-[9px] font-medium opacity-60 leading-tight mb-0.5" style={{ color: accentTextColor }}>Favorite Book</p>
+                  <p className="text-[11px] font-medium line-clamp-1 leading-tight mb-0.5" style={{ color: accentTextColor }}>
                     {favoriteBook.title}
                   </p>
-                  <p className="text-[10px] leading-snug" style={{ color: accentTextColor, opacity: 0.8 }}>
+                  <p className="text-[10px] leading-tight" style={{ color: accentTextColor, opacity: 0.8 }}>
                     {favoriteBook.author}
                   </p>
                 </div>
               </div>
             )}
-            <div className="border rounded-lg p-0.5 flex items-center gap-1" style={{ backgroundColor: accentCardColor }}>
+            <div className="border rounded-lg py-0.5 px-1 flex items-center gap-1.5" style={{ backgroundColor: accentCardColor }}>
               {currentBook?.cover_url ? (
                 <img
                   src={currentBook.cover_url}
                   alt={currentBook.title}
-                  className="w-12 h-18 object-cover rounded flex-shrink-0"
+                  className="w-11 h-16 object-cover rounded flex-shrink-0"
                 />
               ) : (
-                <div className="w-12 h-18 bg-muted/20 rounded flex-shrink-0 border border-dashed" style={{ borderColor: accentTextColor + '40' }} />
+                <div className="w-11 h-16 bg-muted/20 rounded flex-shrink-0 border border-dashed" style={{ borderColor: accentTextColor + '40' }} />
               )}
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] mb-0 font-medium opacity-60 leading-none" style={{ color: accentTextColor }}>Currently Reading</p>
-                <p className="text-[11px] font-medium line-clamp-1 leading-snug" style={{ color: accentTextColor }}>
+              <div className="flex flex-col justify-center min-w-0 py-0.5">
+                <p className="text-[9px] font-medium opacity-60 leading-tight mb-0.5" style={{ color: accentTextColor }}>Currently Reading</p>
+                <p className="text-[11px] font-medium line-clamp-1 leading-tight mb-0.5" style={{ color: accentTextColor }}>
                   {currentBook?.title || 'TBA'}
                 </p>
-                <p className="text-[10px] leading-snug" style={{ color: accentTextColor, opacity: 0.8 }}>
+                <p className="text-[10px] leading-tight" style={{ color: accentTextColor, opacity: 0.8 }}>
                   {currentBook?.author || 'TBA'}
                   {currentBook && ` • Page ${currentBook.current_page}/${currentBook.total_pages}`}
                 </p>
