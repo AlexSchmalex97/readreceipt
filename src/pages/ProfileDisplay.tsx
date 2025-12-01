@@ -1063,10 +1063,61 @@ export default function ProfileDisplay() {
                 )}
               </div>
             </div>
+
+            {/* Right Section - Reading Goal and Stats */}
+            <div className="flex-shrink-0 w-80">
+              <Card className="border-2" style={{ borderColor: accentCardColor, backgroundColor: accentCardColor }}>
+                <CardContent className="p-4 space-y-3">
+                  <HomeReadingGoals 
+                    userId={uid}
+                    completedBooksThisYear={bookStats.completedThisYear}
+                    isOwnProfile={true}
+                    accentColor={accentCardColor}
+                    accentTextColor={accentTextColor}
+                  />
+                  <div className="grid grid-cols-3 gap-3 mt-4">
+                    <Link to="/" className="text-center cursor-pointer hover:opacity-80 transition-opacity">
+                      <div className="text-2xl font-bold" style={{ color: accentTextColor }}>
+                        {bookStats.inProgressBooks}
+                      </div>
+                      <div className="text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
+                        In Progress
+                      </div>
+                    </Link>
+                    <Link to="/completed" className="text-center cursor-pointer hover:opacity-80 transition-opacity">
+                      <div className="text-2xl font-bold" style={{ color: accentTextColor }}>
+                        {bookStats.completedBooks}
+                      </div>
+                      <div className="text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
+                        Completed
+                      </div>
+                    </Link>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold" style={{ color: accentTextColor }}>
+                        {bookStats.totalBooks}
+                      </div>
+                      <div className="text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
+                        Total Books
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
-          {/* Favorite Book and Currently Reading - Below Profile Info */}
-          <div className="flex gap-3 mb-6 max-w-6xl mx-auto">
+          {/* Favorite Book, Current Read, and Top Five - Side by Side */}
+          <div className="grid gap-3 mb-16" style={{
+            gridTemplateColumns: favoriteBook && topFiveBooks.length > 0 
+              ? '280px 280px 1fr' 
+              : favoriteBook 
+                ? '280px 280px' 
+                : topFiveBooks.length > 0 
+                  ? '280px 1fr' 
+                  : '280px',
+            maxWidth: '1200px',
+            margin: '0 auto'
+          }}>
             {favoriteBook && (
               <div className="space-y-1">
                 <p className="text-xs font-medium" style={{ color: headerTextColor }}>Favorite Book</p>
@@ -1112,88 +1163,47 @@ export default function ProfileDisplay() {
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Reading Goal and Stats */}
-          <div className="mb-6 max-w-6xl mx-auto">
-            <Card className="border-2" style={{ borderColor: accentCardColor, backgroundColor: accentCardColor }}>
-              <CardContent className="p-4 space-y-3">
-                <HomeReadingGoals 
-                  userId={uid}
-                  completedBooksThisYear={bookStats.completedThisYear}
-                  isOwnProfile={true}
-                  accentColor={accentCardColor}
-                  accentTextColor={accentTextColor}
-                />
-                <div className="grid grid-cols-3 gap-3 mt-4">
-                  <Link to="/" className="text-center cursor-pointer hover:opacity-80 transition-opacity">
-                    <div className="text-2xl font-bold" style={{ color: accentTextColor }}>
-                      {bookStats.inProgressBooks}
-                    </div>
-                    <div className="text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
-                      In Progress
-                    </div>
+            {/* Top Five Books - To the right of Currently Reading */}
+            {topFiveBooks.length > 0 && (
+              <div className="ml-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Link to="/profile/settings">
+                    <h3 className="text-sm font-medium cursor-pointer hover:underline" style={{ color: headerTextColor }}>
+                      Top Five
+                    </h3>
                   </Link>
-                  <Link to="/completed" className="text-center cursor-pointer hover:opacity-80 transition-opacity">
-                    <div className="text-2xl font-bold" style={{ color: accentTextColor }}>
-                      {bookStats.completedBooks}
-                    </div>
-                    <div className="text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
-                      Completed
-                    </div>
-                  </Link>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold" style={{ color: accentTextColor }}>
-                      {bookStats.totalBooks}
-                    </div>
-                    <div className="text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
-                      Total Books
-                    </div>
-                  </div>
+                  <button
+                    onClick={() => setShowTopTenDialog(true)}
+                    className="text-xs px-2 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
+                    style={{ color: headerTextColor, borderColor: `${headerTextColor}33` }}
+                  >
+                    view top ten
+                  </button>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Top Five Books */}
-          {topFiveBooks.length > 0 && (
-            <div className="mb-16 max-w-6xl mx-auto">
-              <div className="flex items-center gap-2 mb-3">
-                <Link to="/profile/settings">
-                  <h3 className="text-sm font-medium cursor-pointer hover:underline" style={{ color: headerTextColor }}>
-                    Top Five
-                  </h3>
-                </Link>
-                <button
-                  onClick={() => setShowTopTenDialog(true)}
-                  className="text-xs px-2 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
-                  style={{ color: headerTextColor, borderColor: `${headerTextColor}33` }}
-                >
-                  view top ten
-                </button>
-              </div>
-              <div className="flex gap-1.5">
-                {topFiveBooks.slice(0, 5).map((book, index) => (
-                  <div key={book.id} className="flex-shrink-0 w-20">
-                    <div className="relative">
-                      <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold z-10" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>
-                        {index + 1}
+                <div className="flex gap-1.5">
+                  {topFiveBooks.slice(0, 5).map((book, index) => (
+                    <div key={book.id} className="flex-shrink-0 w-20">
+                      <div className="relative">
+                        <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold z-10" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>
+                          {index + 1}
+                        </div>
+                        {book.cover_url && (
+                          <img
+                            src={book.cover_url}
+                            alt={book.title}
+                            className="w-full aspect-[2/3] object-cover rounded-lg shadow-md"
+                          />
+                        )}
                       </div>
-                      {book.cover_url && (
-                        <img
-                          src={book.cover_url}
-                          alt={book.title}
-                          className="w-full aspect-[2/3] object-cover rounded-lg shadow-md"
-                        />
-                      )}
+                      <p className="text-xs font-medium mt-2 line-clamp-2 leading-tight px-1.5 py-0.5 bg-black/60 rounded inline-block" style={{ color: "#FFFFFF" }}>{book.title}</p>
+                      <p className="text-xs mt-0.5 line-clamp-1 px-1.5 py-0.5 bg-black/60 rounded inline-block" style={{ color: "#FFFFFF" }}>{book.author}</p>
                     </div>
-                    <p className="text-xs font-medium mt-2 line-clamp-2 leading-tight px-1.5 py-0.5 bg-black/60 rounded inline-block" style={{ color: "#FFFFFF" }}>{book.title}</p>
-                    <p className="text-xs mt-0.5 line-clamp-1 px-1.5 py-0.5 bg-black/60 rounded inline-block" style={{ color: "#FFFFFF" }}>{book.author}</p>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
 
 
