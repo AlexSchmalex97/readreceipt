@@ -57,8 +57,8 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <GlobalUserColors>
-          <BrowserRouter>
+        <BrowserRouter>
+          <GlobalUserColors>
             <Routes>
             <Route path="/" element={<ProtectedRoute><IOSProtectedRoute><Index /></IOSProtectedRoute></ProtectedRoute>} />
             <Route path="/home" element={<ProtectedRoute><IOSProtectedRoute><Index /></IOSProtectedRoute></ProtectedRoute>} />
@@ -78,10 +78,10 @@ const App = () => {
             <Route path="/:username" element={<IOSProtectedRoute><UserProfile /></IOSProtectedRoute>} />
             <Route path="*" element={<IOSProtectedRoute><NotFound /></IOSProtectedRoute>} />
           </Routes>
-        </BrowserRouter>
 
-        <Analytics />
-        </GlobalUserColors>
+          <Analytics />
+          </GlobalUserColors>
+        </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
   );
