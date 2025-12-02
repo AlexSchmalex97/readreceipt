@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
 import { FollowButton } from "@/components/FollowButton";
@@ -83,6 +83,7 @@ interface FavoriteBook {
 
 export default function UserProfile() {
   const { username } = useParams<{ username: string }>();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [tbrBooks, setTbrBooks] = useState<TBRBook[]>([]);
@@ -103,6 +104,8 @@ export default function UserProfile() {
   const [inProgressBooks, setInProgressBooks] = useState<any[]>([]);
   const [completedBooks, setCompletedBooks] = useState<any[]>([]);
   const [recentReviews, setRecentReviews] = useState<any[]>([]);
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
+  const [backgroundTint, setBackgroundTint] = useState<{ color: string; opacity: number } | null>(null);
 
   useEffect(() => {
     if (!username) return;
@@ -127,6 +130,29 @@ export default function UserProfile() {
         });
 
         const userId = profileData.id;
+
+        // Load background based on type
+        if ((profileData as any)?.background_type === 'image' && (profileData as any)?.active_background_id) {
+          const { data: bgData } = await supabase
+            .from("saved_backgrounds")
+            .select("image_url, tint_color, tint_opacity")
+            .eq("id", (profileData as any).active_background_id)
+            .single();
+          
+          if (bgData) {
+            setBackgroundImageUrl(bgData.image_url);
+            setBackgroundTint(bgData.tint_color && (bgData.tint_opacity as number) > 0
+              ? { color: bgData.tint_color, opacity: bgData.tint_opacity as number }
+              : null
+            );
+          }
+        } else if ((profileData as any)?.background_image_url) {
+          // Fallback to direct background_image_url
+          setBackgroundImageUrl((profileData as any).background_image_url);
+          if ((profileData as any)?.background_tint) {
+            setBackgroundTint((profileData as any).background_tint as { color: string; opacity: number });
+          }
+        }
 
         // Fetch favorite book if exists
         if (profileData.favorite_book_id) {
@@ -442,19 +468,27 @@ export default function UserProfile() {
     return lum < 128 ? "#FFFFFF" : "#1A1A1A";
   })();
 
+  // Extract background settings from profile
+  const userBackgroundImageUrl = backgroundImageUrl;
+  const userBackgroundTint = backgroundTint;
+
   return (
-    <UserColorProvider userColorPalette={profile?.color_palette}>
+    <UserColorProvider 
+      userColorPalette={profile?.color_palette}
+      backgroundImageUrl={userBackgroundImageUrl}
+      backgroundTint={userBackgroundTint}
+    >
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-6 max-w-7xl">
           {/* Header with back button */}
           <div className="flex items-center gap-4 mb-6">
-            <Link 
-              to="/people" 
+            <button 
+              onClick={() => navigate(-1)}
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to People
-            </Link>
+              Back
+            </button>
           </div>
 
           {/* Mobile & Tablet Layout - Centered */}

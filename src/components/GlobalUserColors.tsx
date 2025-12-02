@@ -1,13 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { UserColorProvider } from "@/components/UserColorProvider";
 
 // Wrap children and apply user's palette globally if color_palette.apply_globally is true
 export default function GlobalUserColors({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
   const [palette, setPalette] = useState<any | null>(null);
   const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
   const [backgroundTint, setBackgroundTint] = useState<{ color: string; opacity: number } | null>(null);
   const applyGlobally = useMemo(() => Boolean(palette?.apply_globally), [palette]);
+  
+  // Check if we're viewing another user's profile (/:username route)
+  const isViewingUserProfile = useMemo(() => {
+    const path = location.pathname;
+    // Exclude known routes, anything else with pattern /:username is a user profile
+    const knownRoutes = [
+      '/', '/home', '/auth', '/contact', '/feed', '/people', '/reviews', 
+      '/profile', '/settings', '/tbr', '/more', '/completed', '/integrations', '/notifications'
+    ];
+    const isKnownRoute = knownRoutes.includes(path) || path.startsWith('/profile/');
+    return !isKnownRoute && path !== '/' && path.length > 1;
+  }, [location.pathname]);
 
   // Build a safe, complete palette with fallbacks to current CSS tokens
   const effectivePalette = useMemo(() => {
@@ -101,6 +115,12 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
       window.removeEventListener('profile-background-changed', onBgChanged);
     };
   }, []);
+
+  // Don't apply logged-in user's customizations when viewing another user's profile
+  // Let the UserProfile page handle customizations for the viewed user
+  if (isViewingUserProfile) {
+    return <>{children}</>;
+  }
 
   // Always apply background image globally when user is logged in.
   // Always apply accent color globally.
