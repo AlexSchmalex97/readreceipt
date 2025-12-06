@@ -27,8 +27,8 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
   const [entries, setEntries] = useState<ReadingEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState<{ started_at: string; finished_at: string; status: 'in_progress' | 'completed' }>(
-    { started_at: '', finished_at: '', status: 'completed' }
+  const [form, setForm] = useState<{ started_at: string; finished_at: string }>(
+    { started_at: '', finished_at: '' }
   );
   const { toast } = useToast();
 
@@ -62,7 +62,7 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
 
   const resetForm = () => {
     setEditingId(null);
-    setForm({ started_at: '', finished_at: '', status: 'completed' });
+    setForm({ started_at: '', finished_at: '' });
   };
 
   const handleSave = async () => {
@@ -77,10 +77,13 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
       }
     }
 
+    // Auto-set status based on whether finished date is provided
+    const status = form.finished_at ? 'completed' : 'in_progress';
+
     const payload: any = {
       user_id: userId,
       book_id: bookId,
-      status: form.status,
+      status,
       started_at: form.started_at || null,
       finished_at: form.finished_at || null,
     };
@@ -115,7 +118,6 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
     setForm({
       started_at: entry.started_at ?? '',
       finished_at: entry.finished_at ?? '',
-      status: (entry.status as any) ?? 'completed',
     });
   };
 
