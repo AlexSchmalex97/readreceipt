@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { BookOpen, Edit3, Check, X, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { BookEditionSelector } from "@/components/BookEditionSelector";
-import { BookDatesDialog } from "@/components/BookDatesDialog";
+import { ReadingEntriesDialog } from "@/components/ReadingEntriesDialog";
 import { BookMoveMenu } from "@/components/BookMoveMenu";
 import { BookEditDialog } from "@/components/BookEditDialog";
 import { usePlatform } from "@/hooks/usePlatform";
@@ -214,12 +214,11 @@ export const BookCard = ({
             currentCoverUrl={book.coverUrl}
             onUpdate={() => onBookUpdated?.()}
           />
-          {onUpdateDates && (
-            <BookDatesDialog
-              book={book}
-              onUpdateDates={onUpdateDates}
-            />
-          )}
+          <ReadingEntriesDialog
+            bookId={book.id}
+            bookTitle={book.title}
+            onChanged={onBookUpdated}
+          />
           {onMoveToInProgress && onMoveToCompleted && onMoveToDNF && onMoveToTBR && book.status && (
             <BookMoveMenu
               bookId={book.id}
