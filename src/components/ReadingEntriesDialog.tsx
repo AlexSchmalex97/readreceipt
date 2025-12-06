@@ -142,8 +142,13 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="h-8 px-2 whitespace-nowrap" title="Edit reading dates">
-          <Calendar className="w-4 h-4 mr-2" /> Edit dates
+        <Button 
+          size="icon-xs" 
+          variant="outline" 
+          className="sm:h-8 sm:w-8 p-0"
+          title="Edit reading dates"
+        >
+          <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[520px] shadow-card">
