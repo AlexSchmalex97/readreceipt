@@ -154,10 +154,10 @@ export const BookCard = ({
         backgroundColor: accentColor 
       } : {}}
     >
-      <CardHeader className="pb-1.5 sm:pb-3 pt-2 sm:pt-6 px-2 sm:px-6">
-        <div className="flex items-start gap-1.5 sm:gap-3">
+      <CardHeader className="pb-1 sm:pb-2 pt-1.5 sm:pt-4 px-1.5 sm:px-4">
+        <div className="flex items-start gap-1 sm:gap-2">
           {/* Book Cover */}
-          <div className="relative rounded flex-shrink-0 overflow-hidden w-10 sm:w-16 h-14 sm:h-20 flex items-center justify-center">
+          <div className="relative rounded flex-shrink-0 overflow-hidden w-8 sm:w-14 h-11 sm:h-[72px] flex items-center justify-center">
             {book.coverUrl ? (
               <img 
                 src={book.coverUrl} 
@@ -170,7 +170,7 @@ export const BookCard = ({
               />
             ) : (
               <div className="w-full h-full bg-muted rounded border flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-muted-foreground" />
+                <BookOpen className="w-4 h-4 text-muted-foreground" />
               </div>
             )}
             {/* Edition selector overlay */}
@@ -190,13 +190,13 @@ export const BookCard = ({
           {/* Book Info */}
           <div className="flex-1 min-w-0">
             <CardTitle 
-              className="text-xs sm:text-lg font-semibold leading-tight"
+              className="text-[10px] sm:text-base font-semibold leading-tight line-clamp-2"
               style={accentTextColor ? { color: accentTextColor } : {}}
             >
               {book.title}
             </CardTitle>
             <p 
-              className="text-[10px] sm:text-sm mt-0 sm:mt-1 truncate opacity-80"
+              className="text-[9px] sm:text-xs mt-0 truncate opacity-80"
               style={accentTextColor ? { color: accentTextColor } : {}}
             >
               {book.author}
@@ -205,7 +205,7 @@ export const BookCard = ({
         </div>
         
         {/* Actions Row - below the book info */}
-        <div className="flex items-center justify-end gap-0.5 sm:gap-1 mt-2">
+        <div className="flex items-center justify-end gap-0.5 mt-1">
           <BookEditDialog
             bookId={book.id}
             bookTitle={book.title}
@@ -234,23 +234,23 @@ export const BookCard = ({
               size="icon-xs"
               variant="ghost"
               onClick={handleDelete}
-              className="sm:h-8 sm:w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+              className="sm:h-6 sm:w-6 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
             >
-              <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+              <Trash2 className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
             </Button>
           )}
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-1.5 sm:space-y-4 pt-1.5 sm:pt-2 px-2 sm:px-6 pb-2 sm:pb-6">
-        <div className="space-y-0.5 sm:space-y-2">
-          <div className="flex justify-between items-center text-xs sm:text-sm">
+      <CardContent className="space-y-1 sm:space-y-2 pt-1 sm:pt-1.5 px-1.5 sm:px-4 pb-1.5 sm:pb-4">
+        <div className="space-y-0.5 sm:space-y-1">
+          <div className="flex justify-between items-center text-[9px] sm:text-xs">
             <span style={accentTextColor ? { color: accentTextColor, opacity: 0.8 } : {}}>Progress</span>
             <span className="font-medium" style={accentTextColor ? { color: accentTextColor } : {}}>{percentage}%</span>
           </div>
           <Progress 
             value={percentage} 
-            className="h-1.5 sm:h-2.5" 
+            className="h-1 sm:h-2" 
             style={{ 
               "--progress-width": `${percentage}%`,
               ...(accentTextColor ? { 
@@ -261,14 +261,14 @@ export const BookCard = ({
         </div>
 
         <div 
-          className="hidden sm:block rounded-lg p-3 text-center"
+          className="hidden sm:block rounded-md p-2 text-center"
           style={accentTextColor ? { 
             backgroundColor: `${accentTextColor}20`,
             color: accentTextColor
           } : {}}
         >
           <p 
-            className="text-sm font-medium animate-bounce-gentle"
+            className="text-xs font-medium animate-bounce-gentle"
             style={accentTextColor ? { color: accentTextColor } : {}}
           >
             {getEncouragingMessage(percentage)}
@@ -276,16 +276,16 @@ export const BookCard = ({
         </div>
 
         <div 
-          className="flex justify-between text-[10px] sm:text-sm"
+          className="flex justify-between text-[8px] sm:text-xs"
           style={accentTextColor ? { color: accentTextColor, opacity: 0.7 } : {}}
         >
           <span>Pages read: {book.currentPage}</span>
           <span>Pages left: {pagesLeft}</span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1 sm:gap-2 w-full">
+        <div className="flex flex-wrap items-center gap-0.5 sm:gap-1.5 w-full">
           <span 
-            className="text-[10px] sm:text-sm flex-shrink-0 w-full sm:w-auto"
+            className="text-[8px] sm:text-xs flex-shrink-0 w-full sm:w-auto"
             style={accentTextColor ? { color: accentTextColor, opacity: 0.7 } : {}}
           >
             Current {trackingMode === "page" ? "page" : "progress"}:
@@ -323,7 +323,7 @@ export const BookCard = ({
                     }
                   }
                 }}
-                className="w-full sm:flex-1 min-w-[140px] h-9 sm:h-10 text-base sm:text-lg px-3 text-foreground"
+                className="w-full sm:flex-1 min-w-[100px] h-7 sm:h-8 text-sm sm:text-base px-2 text-foreground"
                 inputMode="numeric"
                 aria-label={trackingMode === "page" ? "Enter current page" : "Enter percentage"}
                 min="0"
@@ -337,36 +337,36 @@ export const BookCard = ({
                 onClick={() => {
                   setTrackingMode(trackingMode === "page" ? "percentage" : "page");
                 }}
-                className="h-6 sm:h-8 px-1 sm:px-2 text-xs flex-shrink-0 mt-1 sm:mt-0"
+                className="h-5 sm:h-6 px-1 text-[10px] flex-shrink-0 mt-0.5 sm:mt-0"
               >
                 {trackingMode === "page" ? "%" : "#"}
               </Button>
               <Button
                 size="sm"
                 onClick={handleSave}
-                className="h-6 w-6 sm:h-8 sm:w-8 p-0 bg-gradient-primary hover:opacity-90 flex-shrink-0 mt-1 sm:mt-0"
+                className="h-5 w-5 sm:h-6 sm:w-6 p-0 bg-gradient-primary hover:opacity-90 flex-shrink-0 mt-0.5 sm:mt-0"
               >
-                <Check className="w-3 h-3 sm:w-4 sm:h-4" />
+                <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={handleCancel}
-                className="h-6 w-6 sm:h-8 sm:w-8 p-0 flex-shrink-0 mt-1 sm:mt-0"
+                className="h-5 w-5 sm:h-6 sm:w-6 p-0 flex-shrink-0 mt-0.5 sm:mt-0"
               >
-                <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               </Button>
             </>
           ) : (
             <>
-              <span className="flex-1 font-medium text-xs sm:text-base">{book.currentPage} / {book.totalPages}</span>
+              <span className="flex-1 font-medium text-[10px] sm:text-sm">{book.currentPage} / {book.totalPages}</span>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => setIsEditing(true)}
-                className="h-6 w-6 sm:h-8 sm:w-8 p-0"
+                className="h-5 w-5 sm:h-6 sm:w-6 p-0"
               >
-                <Edit3 className="w-3 h-3 sm:w-4 sm:h-4" />
+                <Edit3 className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               </Button>
             </>
           )}

@@ -857,12 +857,12 @@ const Index = () => {
           </div>
         )}
 
-      <main className="container mx-auto px-2 sm:px-4 py-3 sm:py-8"
-        style={{ paddingTop: showPullIndicator ? `${pullDistance + 12}px` : undefined }}
+      <main className="container mx-auto px-2 sm:px-3 py-2 sm:py-4"
+        style={{ paddingTop: showPullIndicator ? `${pullDistance + 8}px` : undefined }}
       >
         {/* Header with Add Book button */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-3 sm:mb-8">
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">Your Reading Journey</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-4">
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">Your Reading Journey</h1>
           <AddBookDialog onAddBook={handleAddBook} />
         </div>
 
@@ -885,21 +885,21 @@ const Index = () => {
             <AddBookDialog onAddBook={handleAddBook} />
           </div>
         ) : (
-          <div className="space-y-4 sm:space-y-8">
+          <div className="space-y-3 sm:space-y-4">
             {/* Reading Goals Section - Moved to top and made larger */}
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-xl mx-auto">
               <HomeReadingGoals userId={userId} completedBooksThisYear={completedBooksThisYear} accentColor={accentCardColor} accentTextColor={accentTextColor} />
             </div>
 
             {/* Currently Reading Section */}
             {inProgressBooks.length > 0 && (
               <section>
-                <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4" style={{ color: accentTextColor }}>
+                <h2 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3" style={{ color: accentTextColor }}>
                   Currently Reading
                 </h2>
                  <SortableBookGrid
                    items={inProgressBooks}
-                   className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6"
+                   className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4"
                    onReorder={handleReorderInProgress}
                    renderItem={(book) => (
                      <BookCard
@@ -922,37 +922,37 @@ const Index = () => {
             )}
 
             {/* Stats Grid - Now 2 columns */}
-            <div className="grid grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4 items-start">
+            <div className="grid grid-cols-2 lg:grid-cols-2 gap-2 sm:gap-3 items-start">
               <div
-                className="rounded-lg p-2.5 sm:p-3 shadow-soft border self-start"
+                className="rounded-lg p-2 sm:p-2.5 shadow-soft border self-start"
                 style={{ backgroundColor: accentCardColor, borderColor: accentCardColor }}
               >
-                <div className="flex items-center space-x-2 sm:space-x-3">
+                <div className="flex items-center space-x-1.5 sm:space-x-2">
                   <div
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center"
+                    className="w-6 h-6 sm:w-7 sm:h-7 rounded-md flex items-center justify-center"
                     style={{ backgroundColor: accentTextColor }}
                   >
-                    <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: accentCardColor }} />
+                    <TrendingUp className="w-3 h-3 sm:w-3.5 sm:h-3.5" style={{ color: accentCardColor }} />
                   </div>
                   <div className="flex-1">
-                    <p className="text-lg sm:text-xl font-bold" style={{ color: accentTextColor }}>{booksInProgress}</p>
-                    <p className="text-[10px] sm:text-xs opacity-80" style={{ color: accentTextColor }}>In Progress</p>
+                    <p className="text-base sm:text-lg font-bold" style={{ color: accentTextColor }}>{booksInProgress}</p>
+                    <p className="text-[9px] sm:text-[10px] opacity-80" style={{ color: accentTextColor }}>In Progress</p>
                   </div>
                 </div>
                 {inProgressBooks.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
+                  <div className="flex flex-wrap gap-0.5 mt-1.5">
                     {inProgressBooks.map((book) => (
                       <div key={`progress-cover-${book.id}`} className="flex-shrink-0">
                         {book.coverUrl ? (
                           <img 
                             src={book.coverUrl} 
                             alt={book.title}
-                            className="w-6 h-8 object-contain rounded shadow-sm"
+                            className="w-5 h-7 object-contain rounded shadow-sm"
                             title={`${book.title} by ${book.author}`}
                           />
                         ) : (
-                          <div className="w-6 h-8 bg-muted rounded flex items-center justify-center shadow-sm" title={`${book.title} by ${book.author}`}>
-                            <TrendingUp className="w-3 h-3 text-muted-foreground" />
+                          <div className="w-5 h-7 bg-muted rounded flex items-center justify-center shadow-sm" title={`${book.title} by ${book.author}`}>
+                            <TrendingUp className="w-2.5 h-2.5 text-muted-foreground" />
                           </div>
                         )}
                       </div>
@@ -963,35 +963,35 @@ const Index = () => {
 
               <Link
                 to="/completed"
-                className="rounded-lg p-2.5 sm:p-3 shadow-soft border hover:shadow-lg transition-shadow cursor-pointer self-start"
+                className="rounded-lg p-2 sm:p-2.5 shadow-soft border hover:shadow-lg transition-shadow cursor-pointer self-start"
                 style={{ backgroundColor: accentCardColor, borderColor: accentCardColor }}
               >
-                <div className="flex items-center space-x-2 sm:space-x-3">
+                <div className="flex items-center space-x-1.5 sm:space-x-2">
                   <div
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center"
+                    className="w-6 h-6 sm:w-7 sm:h-7 rounded-md flex items-center justify-center"
                     style={{ backgroundColor: accentTextColor }}
                   >
-                    <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: accentCardColor }} />
+                    <Target className="w-3 h-3 sm:w-3.5 sm:h-3.5" style={{ color: accentCardColor }} />
                   </div>
                   <div className="flex-1">
-                    <p className="text-lg sm:text-xl font-bold" style={{ color: accentTextColor }}>{completedBooks}</p>
-                    <p className="text-[10px] sm:text-xs opacity-80" style={{ color: accentTextColor }}>Completed</p>
+                    <p className="text-base sm:text-lg font-bold" style={{ color: accentTextColor }}>{completedBooks}</p>
+                    <p className="text-[9px] sm:text-[10px] opacity-80" style={{ color: accentTextColor }}>Completed</p>
                   </div>
                 </div>
                 {completedBookItems.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
+                  <div className="flex flex-wrap gap-0.5 mt-1.5">
                     {completedBookItems.slice(0, 12).map((book) => (
                       <div key={`completed-cover-${book.id}`} className="flex-shrink-0">
                         {book.coverUrl ? (
                           <img 
                             src={book.coverUrl} 
                             alt={book.title}
-                            className="w-6 h-8 object-contain rounded shadow-sm"
+                            className="w-5 h-7 object-contain rounded shadow-sm"
                             title={`${book.title} by ${book.author}`}
                           />
                         ) : (
-                          <div className="w-6 h-8 bg-muted rounded flex items-center justify-center shadow-sm" title={`${book.title} by ${book.author}`}>
-                            <Target className="w-3 h-3 text-muted-foreground" />
+                          <div className="w-5 h-7 bg-muted rounded flex items-center justify-center shadow-sm" title={`${book.title} by ${book.author}`}>
+                            <Target className="w-2.5 h-2.5 text-muted-foreground" />
                           </div>
                         )}
                       </div>
@@ -1002,7 +1002,7 @@ const Index = () => {
             </div>
 
             {/* TBR and DNF Lists side by side */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3 items-start">
               {/* TBR List */}
               <div>
                 {userId && (
@@ -1019,58 +1019,55 @@ const Index = () => {
 
               {/* DNF Books Section */}
               <div 
-                className="rounded-lg p-3 sm:p-6 shadow-soft border"
+                className="rounded-lg p-2 sm:p-4 shadow-soft border"
                 style={{ 
                   backgroundColor: accentCardColor,
                   borderColor: accentCardColor
                 }}
               >
                 <h2 
-                  className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 flex items-center gap-2"
+                  className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 flex items-center gap-1.5"
                   style={{ color: accentTextColor }}
                 >
-                  <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <XCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   Did Not Finish ({dnfBooks})
                 </h2>
                 {dnfBookItems.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <XCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No DNF books. Every book deserves a chance!</p>
+                  <div className="text-center py-4 text-muted-foreground">
+                    <XCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No DNF books. Every book deserves a chance!</p>
                   </div>
                 ) : (
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
                     {dnfBookItems.map((book) => (
-                      <div key={book.id} className="border border-border rounded-lg p-3 pr-10 hover:bg-accent/5 transition-colors relative">
-                        <div className="flex items-start gap-3">
+                      <div key={book.id} className="border border-border rounded-md p-2 pr-8 hover:bg-accent/5 transition-colors relative">
+                        <div className="flex items-start gap-2">
                           {/* Book Cover */}
                           <div className="flex-shrink-0">
                             {book.coverUrl ? (
                               <img 
                                 src={book.coverUrl} 
                                 alt={book.title}
-                                className="w-12 h-16 object-contain rounded shadow-sm"
+                                className="w-8 h-11 object-contain rounded shadow-sm"
                               />
                             ) : (
-                              <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shadow-sm">
-                                <XCircle className="w-4 h-4 text-muted-foreground" />
+                              <div className="w-8 h-11 bg-muted rounded flex items-center justify-center shadow-sm">
+                                <XCircle className="w-3 h-3 text-muted-foreground" />
                               </div>
                             )}
                           </div>
 
                           {/* Book Info */}
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-medium text-foreground truncate">{book.title}</h3>
+                            <div className="flex items-center gap-1.5">
+                              <h3 className="font-medium text-foreground text-sm truncate">{book.title}</h3>
                               {book.dnf_type && (
-                                <span className="text-xs px-2 py-0.5 rounded-md bg-orange-500/20 text-orange-700 dark:text-orange-300 whitespace-nowrap">
-                                  {book.dnf_type === 'soft' ? 'Soft DNF' : 'Hard DNF'}
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-orange-500/20 text-orange-700 dark:text-orange-300 whitespace-nowrap">
+                                  {book.dnf_type === 'soft' ? 'Soft' : 'Hard'}
                                 </span>
                               )}
                             </div>
-                            <p className="text-sm text-muted-foreground">by {book.author}</p>
-                            {book.totalPages && (
-                              <p className="text-xs text-muted-foreground">{book.totalPages} pages</p>
-                            )}
+                            <p className="text-xs text-muted-foreground">by {book.author}</p>
                           </div>
                         </div>
                         {/* Actions: Move menu */}
@@ -1093,11 +1090,11 @@ const Index = () => {
 
             {/* Show message if no books in progress */}
             {inProgressBooks.length === 0 && (
-              <div className="text-center py-12 bg-card rounded-lg border">
-                <h3 className="text-lg font-semibold text-foreground mb-2">
+              <div className="text-center py-6 bg-card rounded-lg border">
+                <h3 className="text-base font-semibold text-foreground mb-1">
                   No books in progress
                 </h3>
-                <p className="text-muted-foreground mb-4">
+                <p className="text-sm text-muted-foreground mb-2">
                   Start reading a new book to track your progress!
                 </p>
               </div>
