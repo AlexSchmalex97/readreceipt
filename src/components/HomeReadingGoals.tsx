@@ -151,23 +151,23 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile 
       className="shadow-soft border-2 hover:shadow-lg transition-all duration-300 w-full"
       style={{ borderColor: accentColor || 'hsl(var(--border))', backgroundColor: accentColor || 'hsl(var(--card))' }}
     >
-      <CardContent className="p-4 sm:p-5">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Target className="w-5 h-5" style={{ color: accentTextColor || 'hsl(var(--primary))' }} />
-            <h3 className="text-base sm:text-lg font-semibold" style={{ color: accentTextColor }}>
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-1.5">
+            <Target className="w-4 h-4" style={{ color: accentTextColor || 'hsl(var(--primary))' }} />
+            <h3 className="text-sm sm:text-base font-semibold" style={{ color: accentTextColor }}>
               {currentYear} Reading Goal
             </h3>
           </div>
         </div>
 
         {loading ? (
-          <div className="text-center py-4">
-            <p className="text-sm text-muted-foreground">Loading...</p>
+          <div className="text-center py-2">
+            <p className="text-xs text-muted-foreground">Loading...</p>
           </div>
         ) : goal ? (
-          <div className="space-y-2 sm:space-y-3">
-            <div className="flex justify-between items-center text-xs sm:text-sm">
+          <div className="space-y-1.5 sm:space-y-2">
+            <div className="flex justify-between items-center text-[11px] sm:text-xs">
               <span style={{ color: accentTextColor }}>
                 Progress: {totalProgress}/{goal.goal_count} books
               </span>
@@ -175,46 +175,46 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile 
                 {Math.round(progressPercentage)}%
               </span>
             </div>
-            <Progress value={progressPercentage} className="h-2" />
+            <Progress value={progressPercentage} className="h-1.5" />
             
             {isOwnProfile && (
-              <div className="flex items-center justify-between gap-2 pt-2 border-t" style={{ borderColor: accentColor ? `${accentColor}40` : 'hsl(var(--border))' }}>
-                <span className="text-xs" style={{ color: accentTextColor }}>
+              <div className="flex items-center justify-between gap-1.5 pt-1.5 border-t" style={{ borderColor: accentColor ? `${accentColor}40` : 'hsl(var(--border))' }}>
+                <span className="text-[10px]" style={{ color: accentTextColor }}>
                   Manual count: {goal.manual_count}
                 </span>
-                <div className="flex gap-1.5">
+                <div className="flex gap-1">
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => updateManualCount(false)}
                     disabled={goal.manual_count === 0}
-                    className="h-7 w-7 p-0"
+                    className="h-5 w-5 p-0"
                     style={{ 
                       borderColor: accentTextColor,
                       color: accentTextColor
                     }}
                   >
-                    <Minus className="h-3 w-3" />
+                    <Minus className="h-2.5 w-2.5" />
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => updateManualCount(true)}
-                    className="h-7 w-7 p-0"
+                    className="h-5 w-5 p-0"
                     style={{ 
                       borderColor: accentTextColor,
                       color: accentTextColor
                     }}
                   >
-                    <Plus className="h-3 w-3" />
+                    <Plus className="h-2.5 w-2.5" />
                   </Button>
                 </div>
               </div>
             )}
           </div>
         ) : (
-          <div className="text-center py-4">
-            <p className="text-xs text-muted-foreground">No reading goal set for {currentYear}</p>
+          <div className="text-center py-2">
+            <p className="text-[10px] text-muted-foreground">No reading goal set for {currentYear}</p>
           </div>
         )}
       </CardContent>
