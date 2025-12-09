@@ -87,10 +87,8 @@ export function Navigation() {
   if (isWeb && !isIOS && !isNative && !isReadReceiptApp && !isIOSWebView && !isStandalonePWA && !(typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent) && (window as any)?.Capacitor)) {
     return (
       <header 
-        className="bg-card shadow-soft border-b transition-opacity duration-300"
+        className="bg-card shadow-md border-b"
         style={{ 
-          opacity: isHomePage ? headerOpacity : 1,
-          pointerEvents: isHomePage && headerOpacity < 0.1 ? 'none' : 'auto',
           borderColor: 'hsl(var(--border))'
         }}
       >

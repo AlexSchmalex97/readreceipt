@@ -886,40 +886,54 @@ const Index = () => {
           </div>
         ) : (
           <div className="space-y-3 sm:space-y-4">
-            {/* Reading Goals Section - Moved to top and made larger */}
-            <div className="max-w-xl mx-auto">
-              <HomeReadingGoals userId={userId} completedBooksThisYear={completedBooksThisYear} accentColor={accentCardColor} accentTextColor={accentTextColor} />
-            </div>
+            {/* Currently Reading + Reading Goals Section - Side by Side */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 items-start">
+              {/* Currently Reading Section - Takes 2 columns */}
+              <div className="lg:col-span-2">
+                {inProgressBooks.length > 0 ? (
+                  <section>
+                    <h2 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3" style={{ color: accentTextColor }}>
+                      Currently Reading
+                    </h2>
+                    <SortableBookGrid
+                      items={inProgressBooks}
+                      className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4"
+                      onReorder={handleReorderInProgress}
+                      renderItem={(book) => (
+                        <BookCard
+                          book={book}
+                          onUpdateProgress={handleUpdateProgress}
+                          onDeleteBook={handleDeleteBook}
+                          onCoverUpdate={handleCoverUpdate}
+                          onUpdateDates={handleUpdateDates}
+                          onMoveToInProgress={handleMoveToInProgress}
+                          onMoveToCompleted={handleMoveToCompleted}
+                          onMoveToDNF={handleMoveToDNF}
+                          onMoveToTBR={handleMoveToTBR}
+                          onBookUpdated={loadBooks}
+                          accentColor={accentCardColor}
+                          accentTextColor={accentTextColor}
+                        />
+                      )}
+                    />
+                  </section>
+                ) : (
+                  <div className="text-center py-6 bg-card rounded-lg border">
+                    <h3 className="text-base font-semibold text-foreground mb-1">
+                      No books in progress
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Start reading a new book to track your progress!
+                    </p>
+                  </div>
+                )}
+              </div>
 
-            {/* Currently Reading Section */}
-            {inProgressBooks.length > 0 && (
-              <section>
-                <h2 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3" style={{ color: accentTextColor }}>
-                  Currently Reading
-                </h2>
-                 <SortableBookGrid
-                   items={inProgressBooks}
-                   className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4"
-                   onReorder={handleReorderInProgress}
-                   renderItem={(book) => (
-                     <BookCard
-                       book={book}
-                       onUpdateProgress={handleUpdateProgress}
-                       onDeleteBook={handleDeleteBook}
-                       onCoverUpdate={handleCoverUpdate}
-                       onUpdateDates={handleUpdateDates}
-                       onMoveToInProgress={handleMoveToInProgress}
-                       onMoveToCompleted={handleMoveToCompleted}
-                       onMoveToDNF={handleMoveToDNF}
-                       onMoveToTBR={handleMoveToTBR}
-                       onBookUpdated={loadBooks}
-                       accentColor={accentCardColor}
-                       accentTextColor={accentTextColor}
-                     />
-                   )}
-                 />
-              </section>
-            )}
+              {/* Reading Goals Section - Takes 1 column on the right */}
+              <div className="lg:col-span-1">
+                <HomeReadingGoals userId={userId} completedBooksThisYear={completedBooksThisYear} accentColor={accentCardColor} accentTextColor={accentTextColor} />
+              </div>
+            </div>
 
             {/* Stats Grid - Now 2 columns */}
             <div className="grid grid-cols-2 lg:grid-cols-2 gap-2 sm:gap-3 items-start">
@@ -1088,17 +1102,6 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Show message if no books in progress */}
-            {inProgressBooks.length === 0 && (
-              <div className="text-center py-6 bg-card rounded-lg border">
-                <h3 className="text-base font-semibold text-foreground mb-1">
-                  No books in progress
-                </h3>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Start reading a new book to track your progress!
-                </p>
-              </div>
-            )}
           </div>
         )}
       </main>
