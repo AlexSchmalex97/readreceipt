@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
-import { BookOpen, RefreshCw } from "lucide-react";
+import { BookOpen, RefreshCw, Edit } from "lucide-react";
 import { BookEditionSelector } from "@/components/BookEditionSelector";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { useToast } from "@/hooks/use-toast";
 import { usePlatform } from "@/hooks/usePlatform";
 import { useUserAccent } from "@/hooks/useUserAccent";
+import { ReviewDialog } from "@/components/ReviewDialog";
+import { Button } from "@/components/ui/button";
 
 type FinishedBook = {
   id: string;
@@ -32,6 +34,8 @@ export default function Reviews() {
   const [finished, setFinished] = useState<FinishedBook[]>([]);
   const [reviews, setReviews] = useState<MyReview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [selectedReview, setSelectedReview] = useState<MyReview | null>(null);
   const { toast } = useToast();
   const { isIOS, isReadReceiptApp } = usePlatform();
   const { accentCardColor, accentTextColor } = useUserAccent();
@@ -225,8 +229,24 @@ export default function Reviews() {
 
                     {/* Book Info and Review */}
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold truncate" style={{ color: accentTextColor }}>{r.books?.title ?? "Untitled"}</div>
-                      <div className="text-sm" style={{ color: accentTextColor, opacity: 0.8 }}>by {r.books?.author ?? "Unknown author"}</div>
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="font-semibold truncate" style={{ color: accentTextColor }}>{r.books?.title ?? "Untitled"}</div>
+                          <div className="text-sm" style={{ color: accentTextColor, opacity: 0.8 }}>by {r.books?.author ?? "Unknown author"}</div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedReview(r);
+                            setReviewDialogOpen(true);
+                          }}
+                          className="flex-shrink-0"
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          Edit
+                        </Button>
+                      </div>
                       <div className="mt-2 flex items-center gap-2" style={{ color: accentTextColor }}>
                         <span className="text-sm font-medium">Rating:</span>
                         <span>⭐ {r.rating}/5</span>
@@ -249,6 +269,25 @@ export default function Reviews() {
         </section>
       </div>
       </div>
+
+      {/* Review Dialog for editing */}
+      {userId && selectedReview && (
+        <ReviewDialog
+          open={reviewDialogOpen}
+          onClose={() => {
+            setReviewDialogOpen(false);
+            setSelectedReview(null);
+          }}
+          userId={userId}
+          bookId={selectedReview.book_id}
+          existingReview={{
+            id: selectedReview.id,
+            rating: selectedReview.rating,
+            review: selectedReview.review,
+          }}
+          onSaved={() => loadReviews()}
+        />
+      )}
     </div>
   );
 }
