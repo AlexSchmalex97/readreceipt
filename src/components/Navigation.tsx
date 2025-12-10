@@ -114,8 +114,8 @@ export function Navigation() {
               to="/"
               className={`text-sm whitespace-nowrap ${
                 isActive("/")
-                  ? "text-foreground font-medium"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "font-medium text-[hsl(30,25%,20%)] dark:text-[hsl(35,30%,92%)]"
+                  : "text-[hsl(30,15%,40%)] hover:text-[hsl(30,25%,20%)] dark:text-[hsl(35,18%,70%)] dark:hover:text-[hsl(35,30%,92%)]"
               }`}
             >
               Home
@@ -124,8 +124,8 @@ export function Navigation() {
               to="/people"
               className={`text-sm whitespace-nowrap ${
                 isActive("/people")
-                  ? "text-foreground font-medium"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "font-medium text-[hsl(30,25%,20%)] dark:text-[hsl(35,30%,92%)]"
+                  : "text-[hsl(30,15%,40%)] hover:text-[hsl(30,25%,20%)] dark:text-[hsl(35,18%,70%)] dark:hover:text-[hsl(35,30%,92%)]"
               }`}
             >
               People
@@ -134,8 +134,8 @@ export function Navigation() {
               to="/feed"
               className={`text-sm whitespace-nowrap ${
                 isActive("/feed")
-                  ? "text-foreground font-medium"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "font-medium text-[hsl(30,25%,20%)] dark:text-[hsl(35,30%,92%)]"
+                  : "text-[hsl(30,15%,40%)] hover:text-[hsl(30,25%,20%)] dark:text-[hsl(35,18%,70%)] dark:hover:text-[hsl(35,30%,92%)]"
               }`}
             >
               Feed
@@ -144,8 +144,8 @@ export function Navigation() {
               to="/reviews"
               className={`text-sm whitespace-nowrap ${
                 isActive("/reviews")
-                  ? "text-foreground font-medium"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "font-medium text-[hsl(30,25%,20%)] dark:text-[hsl(35,30%,92%)]"
+                  : "text-[hsl(30,15%,40%)] hover:text-[hsl(30,25%,20%)] dark:text-[hsl(35,18%,70%)] dark:hover:text-[hsl(35,30%,92%)]"
               }`}
             >
               Reviews
@@ -154,8 +154,8 @@ export function Navigation() {
               to="/profile"
               className={`text-sm whitespace-nowrap ${
                 isActive("/profile")
-                  ? "text-foreground font-medium"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "font-medium text-[hsl(30,25%,20%)] dark:text-[hsl(35,30%,92%)]"
+                  : "text-[hsl(30,15%,40%)] hover:text-[hsl(30,25%,20%)] dark:text-[hsl(35,18%,70%)] dark:hover:text-[hsl(35,30%,92%)]"
               }`}
             >
               Profile
@@ -164,8 +164,8 @@ export function Navigation() {
               to="/contact"
               className={`text-sm whitespace-nowrap ${
                 isActive("/contact")
-                  ? "text-foreground font-medium"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "font-medium text-[hsl(30,25%,20%)] dark:text-[hsl(35,30%,92%)]"
+                  : "text-[hsl(30,15%,40%)] hover:text-[hsl(30,25%,20%)] dark:text-[hsl(35,18%,70%)] dark:hover:text-[hsl(35,30%,92%)]"
               }`}
             >
               Contact
