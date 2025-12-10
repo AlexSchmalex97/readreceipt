@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export function ReviewDialog({
@@ -6,14 +6,25 @@ export function ReviewDialog({
   onClose,
   userId,
   bookId,
+  existingReview,
+  onSaved,
 }: {
   open: boolean;
   onClose: () => void;
   userId: string;
   bookId: string;
+  existingReview?: { id: string; rating: number; review: string | null } | null;
+  onSaved?: () => void;
 }) {
-  const [rating, setRating] = useState<number>(5);
-  const [text, setText] = useState("");
+  const [rating, setRating] = useState<number>(existingReview?.rating ?? 5);
+  const [text, setText] = useState(existingReview?.review ?? "");
+
+  useEffect(() => {
+    if (open) {
+      setRating(existingReview?.rating ?? 5);
+      setText(existingReview?.review ?? "");
+    }
+  }, [open, existingReview]);
 
   if (!open) return null;
 
@@ -25,7 +36,10 @@ export function ReviewDialog({
         [{ user_id: userId, book_id: bookId, rating, review: text }],
         { onConflict: "user_id,book_id" }
       );
-    if (!error) onClose();
+    if (!error) {
+      onSaved?.();
+      onClose();
+    }
   };
 
   return (

@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
-import { Trash2, BookOpen } from "lucide-react";
+import { Trash2, BookOpen, Edit, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { BookEditionSelector } from "@/components/BookEditionSelector";
 import { ReadingEntriesDialog } from "@/components/ReadingEntriesDialog";
+import { ReviewDialog } from "@/components/ReviewDialog";
 import { usePlatform } from "@/hooks/usePlatform";
 
 type CompletedBook = {
@@ -35,6 +36,8 @@ export default function CompletedBooks() {
   const { toast } = useToast();
   const [reloadCounter, setReloadCounter] = useState(0);
   const { isIOS, isReadReceiptApp } = usePlatform();
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [selectedBookForReview, setSelectedBookForReview] = useState<CompletedBook | null>(null);
 
   // Format Supabase date-only (YYYY-MM-DD) as local date to avoid timezone shift
   const toLocalDateString = (dateLike?: string | null) => {
@@ -265,9 +268,23 @@ export default function CompletedBooks() {
                 
                 {book.review ? (
                   <div className="border-t pt-4">
-                    <div className="flex items-center mb-2">
-                      <span className="text-sm font-medium">Your Review:</span>
-                      <span className="ml-2">⭐ {book.review.rating}/5</span>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <span className="text-sm font-medium">Your Review:</span>
+                        <span className="ml-2">⭐ {book.review.rating}/5</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedBookForReview(book);
+                          setReviewDialogOpen(true);
+                        }}
+                        className="h-7 px-2"
+                      >
+                        <Edit className="w-3 h-3 mr-1" />
+                        Edit
+                      </Button>
                     </div>
                     {book.review.review && (
                       <p className="text-sm">{book.review.review}</p>
@@ -275,7 +292,18 @@ export default function CompletedBooks() {
                   </div>
                 ) : (
                   <div className="border-t pt-4">
-                    <p className="text-sm text-muted-foreground italic">No review yet</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedBookForReview(book);
+                        setReviewDialogOpen(true);
+                      }}
+                      className="w-full"
+                    >
+                      <Star className="w-4 h-4 mr-2" />
+                      Write a Review
+                    </Button>
                   </div>
                 )}
 
@@ -314,6 +342,21 @@ export default function CompletedBooks() {
           </div>
         )}
       </div>
+      
+      {/* Review Dialog */}
+      {selectedBookForReview && userId && (
+        <ReviewDialog
+          open={reviewDialogOpen}
+          onClose={() => {
+            setReviewDialogOpen(false);
+            setSelectedBookForReview(null);
+          }}
+          userId={userId}
+          bookId={selectedBookForReview.id}
+          existingReview={selectedBookForReview.review}
+          onSaved={() => setReloadCounter((c) => c + 1)}
+        />
+      )}
     </div>
   );
 }
