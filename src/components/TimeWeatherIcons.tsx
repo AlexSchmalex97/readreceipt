@@ -154,8 +154,8 @@ export function TimeWeatherIcons() {
         ) : (
           <Moon className="w-5 h-5 text-blue-300" />
         )}
-        <div className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
-          <div className="font-medium">{formatDate(currentDateTime)}</div>
+        <div className="text-xs sm:text-sm text-[hsl(30,15%,40%)] dark:text-[hsl(35,18%,70%)] text-center sm:text-left">
+          <div className="font-medium text-[hsl(30,25%,20%)] dark:text-[hsl(35,30%,92%)]">{formatDate(currentDateTime)}</div>
           <div className="text-xs">{formatTime(currentDateTime)}</div>
         </div>
       </div>
@@ -165,7 +165,7 @@ export function TimeWeatherIcons() {
         {loading ? (
           <>
             <Wind className="w-5 h-5 text-gray-400 animate-spin" />
-            <span className="text-xs sm:text-sm text-muted-foreground">Loading...</span>
+            <span className="text-xs sm:text-sm text-[hsl(30,15%,40%)] dark:text-[hsl(35,18%,70%)]">Loading...</span>
           </>
         ) : weather ? (
           <div 
@@ -173,8 +173,8 @@ export function TimeWeatherIcons() {
             title={`${convertTemperature(weather.temperature, temperatureUnit)}°${temperatureUnit === 'celsius' ? 'C' : 'F'} in ${weather.city}, ${weather.country} - ${weather.description}`}
           >
             {getWeatherIcon(weather.condition)}
-            <div className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
-              <div className="font-medium">
+            <div className="text-xs sm:text-sm text-[hsl(30,15%,40%)] dark:text-[hsl(35,18%,70%)] text-center sm:text-left">
+              <div className="font-medium text-[hsl(30,25%,20%)] dark:text-[hsl(35,30%,92%)]">
                 {convertTemperature(weather.temperature, temperatureUnit)}°{temperatureUnit === 'celsius' ? 'C' : 'F'}
               </div>
               <div className="text-xs capitalize">{weather.description}</div>
@@ -183,7 +183,7 @@ export function TimeWeatherIcons() {
         ) : (
           <div className="flex items-center gap-2" title="Weather unavailable">
             <Cloud className="w-5 h-5 text-gray-400" />
-            <span className="text-xs sm:text-sm text-muted-foreground">Weather unavailable</span>
+            <span className="text-xs sm:text-sm text-[hsl(30,15%,40%)] dark:text-[hsl(35,18%,70%)]">Weather unavailable</span>
           </div>
         )}
       </div>

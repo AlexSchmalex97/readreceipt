@@ -144,16 +144,16 @@ export function QuotesDisplay({ compact = false }: QuotesDisplayProps) {
                 compact 
                   ? 'text-xs' 
                   : 'text-sm sm:text-base'
-              } text-foreground font-medium italic leading-tight line-clamp-2`}>
+              } text-[hsl(30,25%,20%)] dark:text-[hsl(35,30%,92%)] font-medium italic leading-tight line-clamp-2`}>
                 "{currentQuote.text}"
               </div>
-              <div className={`${compact ? 'text-[10px]' : 'text-xs sm:text-sm'} text-muted-foreground mt-0.5`}>
+              <div className={`${compact ? 'text-[10px]' : 'text-xs sm:text-sm'} text-[hsl(30,15%,40%)] dark:text-[hsl(35,18%,70%)] mt-0.5`}>
                 — {currentQuote.author}
               </div>
             </div>
             
             <RefreshCw 
-              className={`${compact ? 'w-3 h-3' : 'w-5 h-5'} text-muted-foreground flex-shrink-0 transition-transform ${
+              className={`${compact ? 'w-3 h-3' : 'w-5 h-5'} text-[hsl(30,15%,40%)] dark:text-[hsl(35,18%,70%)] flex-shrink-0 transition-transform ${
                 isRefreshing ? 'animate-spin' : 'hover:rotate-180'
               }`} 
             />
