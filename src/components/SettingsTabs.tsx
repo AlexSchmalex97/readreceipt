@@ -14,6 +14,7 @@ import { BackgroundImageSettings } from "@/components/BackgroundImageSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { BookOpen, User, Settings as SettingsIcon, Palette, Camera, Link as LinkIcon, Upload, Download } from "lucide-react";
+import { useUserAccent } from "@/hooks/useUserAccent";
 
 interface Identity {
   id: string;
@@ -82,6 +83,18 @@ interface SettingsTabsProps {
 
 export function SettingsTabs(props: SettingsTabsProps) {
   const { toast } = useToast();
+  const { accentCardColor, accentTextColor: userAccentTextColor } = useUserAccent();
+  
+  // Wrapper component for styled cards
+  const StyledCard = ({ children, className, ...rest }: React.HTMLAttributes<HTMLDivElement>) => (
+    <Card 
+      className={className} 
+      style={{ backgroundColor: accentCardColor, color: userAccentTextColor }}
+      {...rest}
+    >
+      {children}
+    </Card>
+  );
   
   return (
     <Tabs defaultValue="reading" className="w-full">
@@ -106,16 +119,16 @@ export function SettingsTabs(props: SettingsTabsProps) {
 
       {/* Reading Settings Tab */}
       <TabsContent value="reading" className="space-y-6">
-        <Card>
+        <StyledCard>
           <CardHeader>
             <CardTitle>Reading Goals</CardTitle>
           </CardHeader>
           <CardContent>
             <ReadingGoals userId={props.uid} completedBooksThisYear={props.completedBooksThisYear} />
           </CardContent>
-        </Card>
+        </StyledCard>
 
-        <Card>
+        <StyledCard>
           <CardHeader>
             <CardTitle>Favorite Book</CardTitle>
           </CardHeader>
@@ -125,9 +138,9 @@ export function SettingsTabs(props: SettingsTabsProps) {
               onChange={props.onFavoriteBookChange}
             />
           </CardContent>
-        </Card>
+        </StyledCard>
 
-        <Card>
+        <StyledCard>
           <CardHeader>
             <CardTitle>Currently Reading</CardTitle>
           </CardHeader>
@@ -139,9 +152,9 @@ export function SettingsTabs(props: SettingsTabsProps) {
               placeholder="Select your currently reading book..."
             />
           </CardContent>
-        </Card>
+        </StyledCard>
 
-        <Card>
+        <StyledCard>
           <CardHeader>
             <CardTitle>Top Five Books</CardTitle>
           </CardHeader>
@@ -158,9 +171,9 @@ export function SettingsTabs(props: SettingsTabsProps) {
               </Button>
             </TopFiveBooksDialog>
           </CardContent>
-        </Card>
+        </StyledCard>
 
-        <Card>
+        <StyledCard>
           <CardHeader>
             <CardTitle>Data Import & Export</CardTitle>
             <CardDescription>
@@ -242,12 +255,12 @@ export function SettingsTabs(props: SettingsTabsProps) {
               </p>
             </div>
           </CardContent>
-        </Card>
+        </StyledCard>
       </TabsContent>
 
       {/* Profile Settings Tab */}
       <TabsContent value="profile" className="space-y-6">
-        <Card>
+        <StyledCard>
           <CardHeader>
             <CardTitle>Profile Photo</CardTitle>
           </CardHeader>
@@ -266,9 +279,9 @@ export function SettingsTabs(props: SettingsTabsProps) {
               Change Photo
             </Button>
           </CardContent>
-        </Card>
+        </StyledCard>
 
-        <Card>
+        <StyledCard>
           <CardHeader>
             <CardTitle>Bio</CardTitle>
           </CardHeader>
@@ -280,9 +293,9 @@ export function SettingsTabs(props: SettingsTabsProps) {
               className="min-h-[100px]"
             />
           </CardContent>
-        </Card>
+        </StyledCard>
 
-        <Card>
+        <StyledCard>
           <CardHeader>
             <CardTitle>Social Media Links</CardTitle>
           </CardHeader>
@@ -292,9 +305,9 @@ export function SettingsTabs(props: SettingsTabsProps) {
               onChange={props.onSocialMediaLinksChange}
             />
           </CardContent>
-        </Card>
+        </StyledCard>
 
-        <Card>
+        <StyledCard>
           <CardHeader>
             <CardTitle>Website URL</CardTitle>
           </CardHeader>
@@ -305,12 +318,12 @@ export function SettingsTabs(props: SettingsTabsProps) {
               onChange={(e) => props.onWebsiteUrlChange(e.target.value)}
             />
           </CardContent>
-        </Card>
+        </StyledCard>
       </TabsContent>
 
       {/* Account Settings Tab */}
       <TabsContent value="account" className="space-y-6">
-        <Card>
+        <StyledCard>
           <CardHeader>
             <CardTitle>Display Name</CardTitle>
           </CardHeader>
@@ -321,9 +334,9 @@ export function SettingsTabs(props: SettingsTabsProps) {
               onChange={(e) => props.onDisplayNameChange(e.target.value)}
             />
           </CardContent>
-        </Card>
+        </StyledCard>
 
-        <Card>
+        <StyledCard>
           <CardHeader>
             <CardTitle>Username</CardTitle>
           </CardHeader>
@@ -348,9 +361,9 @@ export function SettingsTabs(props: SettingsTabsProps) {
               <p className="text-sm text-green-600">Username is available</p>
             )}
           </CardContent>
-        </Card>
+        </StyledCard>
 
-        <Card>
+        <StyledCard>
           <CardHeader>
             <CardTitle>Email</CardTitle>
           </CardHeader>
@@ -365,9 +378,9 @@ export function SettingsTabs(props: SettingsTabsProps) {
               Change Email
             </Button>
           </CardContent>
-        </Card>
+        </StyledCard>
 
-        <Card>
+        <StyledCard>
           <CardHeader>
             <CardTitle>Password</CardTitle>
           </CardHeader>
@@ -382,9 +395,9 @@ export function SettingsTabs(props: SettingsTabsProps) {
               Update Password
             </Button>
           </CardContent>
-        </Card>
+        </StyledCard>
 
-        <Card>
+        <StyledCard>
           <CardHeader>
             <CardTitle>Birthday</CardTitle>
           </CardHeader>
@@ -395,9 +408,9 @@ export function SettingsTabs(props: SettingsTabsProps) {
               onChange={(e) => props.onBirthdayChange(e.target.value)}
             />
           </CardContent>
-        </Card>
+        </StyledCard>
 
-        <Card>
+        <StyledCard>
           <CardHeader>
             <CardTitle>Connected Accounts</CardTitle>
           </CardHeader>
@@ -431,13 +444,13 @@ export function SettingsTabs(props: SettingsTabsProps) {
               )}
             </div>
           </CardContent>
-        </Card>
+        </StyledCard>
 
       </TabsContent>
 
       {/* Display Settings Tab */}
       <TabsContent value="display" className="space-y-6">
-        <Card>
+        <StyledCard>
           <CardHeader>
             <CardTitle>Background Image</CardTitle>
             <CardDescription>Upload a custom background image for your profile</CardDescription>
@@ -450,9 +463,9 @@ export function SettingsTabs(props: SettingsTabsProps) {
               onUpdate={props.onBackgroundUpdate}
             />
           </CardContent>
-        </Card>
+        </StyledCard>
 
-        <Card>
+        <StyledCard>
           <CardHeader>
             <CardTitle>Header Display</CardTitle>
           </CardHeader>
@@ -482,9 +495,9 @@ export function SettingsTabs(props: SettingsTabsProps) {
               </Button>
             </div>
           </CardContent>
-        </Card>
+        </StyledCard>
 
-        <Card>
+        <StyledCard>
           <CardHeader>
             <CardTitle>Temperature Unit</CardTitle>
           </CardHeader>
@@ -504,9 +517,9 @@ export function SettingsTabs(props: SettingsTabsProps) {
               Fahrenheit
             </Button>
           </CardContent>
-        </Card>
+        </StyledCard>
 
-        <Card>
+        <StyledCard>
           <CardHeader>
             <CardTitle>Profile Colors</CardTitle>
           </CardHeader>
@@ -548,7 +561,7 @@ export function SettingsTabs(props: SettingsTabsProps) {
               />
             </div>
           </CardContent>
-        </Card>
+        </StyledCard>
       </TabsContent>
     </Tabs>
   );
