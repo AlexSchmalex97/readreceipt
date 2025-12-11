@@ -160,13 +160,13 @@ export function QuotesDisplay({ compact = false }: QuotesDisplayProps) {
           </div>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="max-w-sm p-3">
-          <div className="text-sm font-medium italic">
+          <div className="text-sm font-medium italic text-[hsl(30,25%,20%)] dark:text-[hsl(35,30%,92%)]">
             "{currentQuote.text}"
           </div>
-          <div className="text-xs text-muted-foreground mt-1">
+          <div className="text-xs text-[hsl(30,15%,40%)] dark:text-[hsl(35,18%,70%)] mt-1">
             — {currentQuote.author}
             {currentQuote.source && (
-              <span className="text-primary"> ({currentQuote.source})</span>
+              <span className="text-[hsl(30,25%,20%)] dark:text-[hsl(35,30%,92%)]"> ({currentQuote.source})</span>
             )}
           </div>
         </TooltipContent>
