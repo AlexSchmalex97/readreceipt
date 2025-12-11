@@ -15,6 +15,7 @@ import { FavoriteBookSelector } from "@/components/FavoriteBookSelector";
 import { usePlatform } from "@/hooks/usePlatform";
 import { useNavigate } from "react-router-dom";
 import { SettingsTabs } from "@/components/SettingsTabs";
+import { useUserAccent } from "@/hooks/useUserAccent";
 
 
 function normalizeUsername(raw: string) {
@@ -38,6 +39,7 @@ export default function ProfileSettings() {
   const [completedBooksThisYear, setCompletedBooksThisYear] = useState(0);
   const { isIOS, isReadReceiptApp } = usePlatform();
   const navigate = useNavigate();
+  const { accentTextColor: userAccentTextColor } = useUserAccent();
 
   // profile fields
   const [displayName, setDisplayName] = useState("");
@@ -609,7 +611,7 @@ export default function ProfileSettings() {
                 Back to Profile
               </Button>
             </Link>
-            <h1 className="text-2xl font-bold">Settings</h1>
+            <h1 className="text-2xl font-bold" style={{ color: userAccentTextColor }}>Settings</h1>
           </div>
           <Button onClick={handleLogout} variant="outline" size="sm">
             <LogOut className="w-4 h-4 mr-2" />
