@@ -142,12 +142,12 @@ export function QuotesDisplay({ compact = false }: QuotesDisplayProps) {
             <div className="flex-1 min-w-0">
               <div className={`${
                 compact 
-                  ? 'text-xs' 
-                  : 'text-sm sm:text-base'
+                  ? 'text-sm' 
+                  : 'text-base sm:text-lg'
               } text-[hsl(30,25%,20%)] dark:text-[hsl(35,30%,92%)] font-medium italic leading-tight line-clamp-2`}>
                 "{currentQuote.text}"
               </div>
-              <div className={`${compact ? 'text-[10px]' : 'text-xs sm:text-sm'} text-[hsl(30,15%,40%)] dark:text-[hsl(35,18%,70%)] mt-0.5`}>
+              <div className={`${compact ? 'text-xs' : 'text-sm'} text-[hsl(30,15%,40%)] dark:text-[hsl(35,18%,70%)] mt-0.5`}>
                 — {currentQuote.author}
               </div>
             </div>
