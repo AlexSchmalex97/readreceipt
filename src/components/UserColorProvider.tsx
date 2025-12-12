@@ -63,9 +63,15 @@ export function UserColorProvider({ userColorPalette, backgroundImageUrl, backgr
         body.style.backgroundAttachment = 'fixed';
       }
 
-      // Make the default surfaces transparent so the body image shows through
+      // Make the default surfaces translucent so the body image shows through,
+      // but tint cards using the user's accent colour when a palette is active.
+      const accentForOverlay =
+        userColorPalette && (userColorPalette as ColorPalette).accent
+          ? `${(userColorPalette as ColorPalette).accent} / 0.8`
+          : '0 0% 100% / 0.8';
+
       root.style.setProperty('--background', '0 0% 100% / 0');
-      root.style.setProperty('--card', '0 0% 100% / 0.8');
+      root.style.setProperty('--card', accentForOverlay);
       root.style.setProperty('--popover', '0 0% 100% / 0.9');
     } else {
       // No background image → clear any body applied backgrounds
