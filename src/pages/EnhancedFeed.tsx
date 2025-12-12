@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { usePlatform } from "@/hooks/usePlatform";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { useUserAccent } from "@/hooks/useUserAccent";
 
 type Post = {
   kind: "post";
@@ -93,6 +94,7 @@ export default function EnhancedFeed() {
   const [editCommentContent, setEditCommentContent] = useState("");
   const { toast } = useToast();
   const { isIOS, isReadReceiptApp } = usePlatform();
+  const { accentCardColor, accentTextColor, headerTextColor } = useUserAccent();
 
   const { scrollableRef, pullDistance, isRefreshing, showPullIndicator } = usePullToRefresh({
     onRefresh: async () => {
@@ -489,7 +491,11 @@ export default function EnhancedFeed() {
     const itemComments = comments[commentsKey] || [];
 
     return (
-      <div key={`${item.kind}-${item.id}`} className="bg-card p-4 rounded border">
+      <div
+        key={`${item.kind}-${item.id}`}
+        className="p-4 rounded border"
+        style={{ backgroundColor: accentCardColor, color: accentTextColor }}
+      >
         <div className="flex items-start gap-3 mb-3">
           <img
             src={item.avatar_url || "/assets/default-avatar.png"}
