@@ -301,59 +301,65 @@ export const BookCard = ({
           </span>
           {isEditing ? (
             <>
-              <Input
-                type="number"
-                value={trackingMode === "page" ? currentPageInput : percentageInput}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (trackingMode === "page") {
-                    setCurrentPageInput(val);
-                    if (val.trim() === "") {
-                      setPercentageInput("");
-                    } else {
-                      const v = parseInt(val, 10);
-                      if (Number.isFinite(v) && book.totalPages > 0) {
-                        setPercentageInput(Math.round((v / book.totalPages) * 100).toString());
-                      } else {
+              <div className="flex items-center gap-1 w-full sm:flex-1">
+                <Input
+                  type="number"
+                  value={trackingMode === "page" ? currentPageInput : percentageInput}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (trackingMode === "page") {
+                      setCurrentPageInput(val);
+                      if (val.trim() === "") {
                         setPercentageInput("");
-                      }
-                    }
-                  } else {
-                    setPercentageInput(val);
-                    if (val.trim() === "") {
-                      setCurrentPageInput("");
-                    } else {
-                      const v = parseInt(val, 10);
-                      if (Number.isFinite(v)) {
-                        setCurrentPageInput(Math.round((v / 100) * book.totalPages).toString());
                       } else {
+                        const v = parseInt(val, 10);
+                        if (Number.isFinite(v) && book.totalPages > 0) {
+                          setPercentageInput(Math.round((v / book.totalPages) * 100).toString());
+                        } else {
+                          setPercentageInput("");
+                        }
+                      }
+                    } else {
+                      setPercentageInput(val);
+                      if (val.trim() === "") {
                         setCurrentPageInput("");
+                      } else {
+                        const v = parseInt(val, 10);
+                        if (Number.isFinite(v)) {
+                          setCurrentPageInput(Math.round((v / 100) * book.totalPages).toString());
+                        } else {
+                          setCurrentPageInput("");
+                        }
                       }
                     }
-                  }
-                }}
-                className="w-full sm:flex-1 min-w-[100px] h-7 sm:h-8 text-sm sm:text-base px-2 text-foreground"
-                inputMode="numeric"
-                aria-label={trackingMode === "page" ? "Enter current page" : "Enter percentage"}
-                min="0"
-                max={trackingMode === "page" ? book.totalPages : 100}
-                placeholder={trackingMode === "page" ? "Page" : "%"}
-                autoFocus
-              />
+                  }}
+                  className="flex-1 min-w-[60px] h-7 sm:h-8 text-sm sm:text-base px-2 text-foreground"
+                  inputMode="numeric"
+                  aria-label={trackingMode === "page" ? "Enter current page" : "Enter percentage"}
+                  min="0"
+                  max={trackingMode === "page" ? book.totalPages : 100}
+                  placeholder={trackingMode === "page" ? "Page" : "%"}
+                  autoFocus
+                />
+                <span className="text-xs sm:text-sm font-semibold text-muted-foreground bg-muted px-2 py-1 rounded">
+                  {trackingMode === "page" ? `/ ${book.totalPages}` : "%"}
+                </span>
+              </div>
               <Button
                 size="sm"
-                variant="ghost"
+                variant="outline"
                 onClick={() => {
                   setTrackingMode(trackingMode === "page" ? "percentage" : "page");
                 }}
-                className="h-5 sm:h-6 px-1 text-[10px] flex-shrink-0 mt-0.5 sm:mt-0"
+                className="h-6 sm:h-7 px-2 text-[10px] sm:text-xs flex-shrink-0 font-medium"
+                title={trackingMode === "page" ? "Switch to percentage" : "Switch to page number"}
               >
-                {trackingMode === "page" ? "%" : "#"}
+                {trackingMode === "page" ? "Use %" : "Use #"}
               </Button>
               <Button
                 size="sm"
                 onClick={handleSave}
-                className="h-5 w-5 sm:h-6 sm:w-6 p-0 bg-gradient-primary hover:opacity-90 flex-shrink-0 mt-0.5 sm:mt-0"
+                className="h-5 w-5 sm:h-6 sm:w-6 p-0 bg-gradient-primary hover:opacity-90 flex-shrink-0"
               >
                 <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               </Button>
@@ -361,7 +367,7 @@ export const BookCard = ({
                 size="sm"
                 variant="outline"
                 onClick={handleCancel}
-                className="h-5 w-5 sm:h-6 sm:w-6 p-0 flex-shrink-0 mt-0.5 sm:mt-0"
+                className="h-5 w-5 sm:h-6 sm:w-6 p-0 flex-shrink-0"
               >
                 <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               </Button>
