@@ -297,7 +297,7 @@ export const BookCard = ({
             className="text-[8px] sm:text-xs flex-shrink-0 w-full sm:w-auto"
             style={accentTextColor ? { color: accentTextColor, opacity: 0.7 } : {}}
           >
-            Current {trackingMode === "page" ? "page" : "progress"}:
+            Current {trackingMode === "page" ? "page" : "percentage"}:
           </span>
           {isEditing ? (
             <>
