@@ -354,7 +354,7 @@ export const BookCard = ({
                 className="h-6 sm:h-7 px-2 text-[10px] sm:text-xs flex-shrink-0 font-medium"
                 title={trackingMode === "page" ? "Switch to percentage" : "Switch to page number"}
               >
-                {trackingMode === "page" ? "Use %" : "Use #"}
+                {trackingMode === "page" ? "Use %" : "Use Page #"}
               </Button>
               <Button
                 size="sm"
