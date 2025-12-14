@@ -244,9 +244,14 @@ export const BookCard = ({
       
       <CardContent className="space-y-1 sm:space-y-2 pt-1 sm:pt-1.5 px-1.5 sm:px-4 pb-1.5 sm:pb-4">
         <div className="space-y-0.5 sm:space-y-1">
-          <div className="flex justify-between items-center text-[9px] sm:text-xs">
-            <span style={accentTextColor ? { color: accentTextColor, opacity: 0.8 } : {}}>Progress</span>
-            <span className="font-medium" style={accentTextColor ? { color: accentTextColor } : {}}>{percentage}%</span>
+        <div className="flex justify-between items-center text-[9px] sm:text-xs">
+            <span className="font-medium" style={accentTextColor ? { color: accentTextColor, opacity: 0.8 } : {}}>Progress</span>
+            <span 
+              className="font-bold text-sm sm:text-base bg-primary/10 px-1.5 py-0.5 rounded"
+              style={accentTextColor ? { color: accentTextColor, backgroundColor: `${accentTextColor}20` } : {}}
+            >
+              {percentage}%
+            </span>
           </div>
           <Progress 
             value={percentage} 
@@ -276,11 +281,15 @@ export const BookCard = ({
         </div>
 
         <div 
-          className="flex justify-between text-[8px] sm:text-xs"
-          style={accentTextColor ? { color: accentTextColor, opacity: 0.7 } : {}}
+          className="flex justify-between text-[9px] sm:text-xs font-medium"
+          style={accentTextColor ? { color: accentTextColor } : {}}
         >
-          <span>Pages read: {book.currentPage}</span>
-          <span>Pages left: {pagesLeft}</span>
+          <span className="bg-muted/50 px-1.5 py-0.5 rounded" style={accentTextColor ? { backgroundColor: `${accentTextColor}15` } : {}}>
+            📖 {book.currentPage} read
+          </span>
+          <span className="bg-muted/50 px-1.5 py-0.5 rounded" style={accentTextColor ? { backgroundColor: `${accentTextColor}15` } : {}}>
+            📚 {pagesLeft} left
+          </span>
         </div>
 
         <div className="flex flex-wrap items-center gap-0.5 sm:gap-1.5 w-full">
