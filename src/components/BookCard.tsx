@@ -374,7 +374,9 @@ export const BookCard = ({
             </>
           ) : (
             <>
-              <span className="flex-1 font-medium text-[10px] sm:text-sm">{book.currentPage} / {book.totalPages}</span>
+              <span className="flex-1 font-medium text-[10px] sm:text-sm">
+                {trackingMode === "page" ? `${book.currentPage} / ${book.totalPages}` : `${percentage}%`}
+              </span>
               <Button
                 size="sm"
                 variant="outline"
