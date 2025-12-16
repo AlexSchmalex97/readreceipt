@@ -211,7 +211,7 @@ export default function CompletedBooks() {
     <div className="min-h-screen bg-gradient-soft">
       <Navigation />
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">Completed Books</h1>
+        <h1 className="text-2xl font-bold mb-6 text-primary">Completed Books</h1>
         
         {completedBooks.length === 0 ? (
           <div className="text-center py-16">

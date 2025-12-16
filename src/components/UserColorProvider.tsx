@@ -21,35 +21,107 @@ export function UserColorProvider({ userColorPalette, backgroundImageUrl, backgr
     const root = document.documentElement;
     const body = document.body;
 
+    const isHex = (v: unknown): v is string =>
+      typeof v === "string" && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v.trim());
+
+    const hexToHsl = (hex: string): string => {
+      const h = hex.trim().toLowerCase();
+      const full = h.length === 4 ? `#${h[1]}${h[1]}${h[2]}${h[2]}${h[3]}${h[3]}` : h;
+      const r = parseInt(full.slice(1, 3), 16) / 255;
+      const g = parseInt(full.slice(3, 5), 16) / 255;
+      const b = parseInt(full.slice(5, 7), 16) / 255;
+
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const d = max - min;
+      let hh = 0;
+      let ss = 0;
+      const ll = (max + min) / 2;
+
+      if (d !== 0) {
+        ss = d / (1 - Math.abs(2 * ll - 1));
+        switch (max) {
+          case r:
+            hh = ((g - b) / d + (g < b ? 6 : 0)) * 60;
+            break;
+          case g:
+            hh = ((b - r) / d + 2) * 60;
+            break;
+          case b:
+            hh = ((r - g) / d + 4) * 60;
+            break;
+        }
+      }
+
+      return `${Math.round(hh)} ${Math.round(ss * 100)}% ${Math.round(ll * 100)}%`;
+    };
+
+    const normalizeHsl = (value: unknown): string | undefined => {
+      if (value == null) return undefined;
+      const v = String(value).trim();
+      if (!v) return undefined;
+      if (isHex(v)) return hexToHsl(v);
+      return v;
+    };
+
+    const hslLightness = (hslTriplet: string | undefined) => {
+      if (!hslTriplet) return null;
+      const m = hslTriplet.match(/\b(\d+(?:\.\d+)?)%\b\s*(?:\/|$)/g);
+      // expects "H S% L%"; we want L% (3rd token)
+      const parts = hslTriplet.split(" ");
+      const l = parts?.[2];
+      const n = l ? parseFloat(l.replace("%", "")) : NaN;
+      return Number.isFinite(n) ? n : null;
+    };
+
     // First, apply the color palette tokens (if any)
     if (userColorPalette && userColorPalette.name !== "default") {
-      const palette = userColorPalette as ColorPalette;
-      
-      // Base brand tokens - only set if defined
-      if (palette.primary) root.style.setProperty('--primary', palette.primary);
-      if (palette.accent) root.style.setProperty('--accent', palette.accent);
-      if (palette.accent) root.style.setProperty('--ring', palette.primary || palette.accent);
-      
+      const p: any = userColorPalette;
+      const name: string = p.name || (p.apply_globally ? "custom" : "accent-only");
+
+      const primary = normalizeHsl(p.primary ?? p.accent ?? p.accent_color);
+      const accent = normalizeHsl(p.accent ?? p.accent_color ?? p.primary);
+      const secondary = normalizeHsl(p.secondary);
+      const background = normalizeHsl(p.background ?? p.background_color);
+      const foreground = normalizeHsl(p.foreground ?? p.text_color);
+
+      // Base brand tokens
+      if (primary) root.style.setProperty("--primary", primary);
+      if (accent) root.style.setProperty("--accent", accent);
+      if (primary || accent) root.style.setProperty("--ring", primary || accent!);
+
+      // Keep gradients in sync with the active accent
+      if (accent) root.style.setProperty("--progress-start", accent);
+      if (primary || accent) root.style.setProperty("--progress-end", (primary || accent!) as string);
+      if (accent) root.style.setProperty("--reading-pink", accent);
+      if (primary || accent) root.style.setProperty("--reading-red", (primary || accent!) as string);
+
+      // Improve contrast automatically for primary foreground
+      const l = hslLightness(primary || accent);
+      if (l != null) {
+        root.style.setProperty("--primary-foreground", l > 65 ? "0 0% 10%" : "0 0% 100%");
+      }
+
       // Only apply full palette customizations if not accent-only mode
-      if (userColorPalette.name !== "accent-only") {
-        if (palette.secondary) {
-          root.style.setProperty('--secondary', palette.secondary);
-          root.style.setProperty('--muted', palette.secondary);
-          root.style.setProperty('--border', palette.secondary);
-          root.style.setProperty('--input', palette.secondary);
+      if (name !== "accent-only") {
+        if (secondary) {
+          root.style.setProperty("--secondary", secondary);
+          root.style.setProperty("--muted", secondary);
+          root.style.setProperty("--border", secondary);
+          root.style.setProperty("--input", secondary);
         }
-        if (palette.foreground) {
-          root.style.setProperty('--foreground', palette.foreground);
-          root.style.setProperty('--card-foreground', palette.foreground);
-          root.style.setProperty('--popover-foreground', palette.foreground);
-          root.style.setProperty('--muted-foreground', palette.foreground);
-          root.style.setProperty('--accent-foreground', palette.foreground);
+        if (foreground) {
+          root.style.setProperty("--foreground", foreground);
+          root.style.setProperty("--card-foreground", foreground);
+          root.style.setProperty("--popover-foreground", foreground);
+          root.style.setProperty("--muted-foreground", foreground);
+          root.style.setProperty("--accent-foreground", foreground);
         }
         // Surfaces (will be overridden below if a background image is active)
-        if (palette.background) {
-          root.style.setProperty('--background', palette.background);
-          root.style.setProperty('--card', palette.background);
-          root.style.setProperty('--popover', palette.background);
+        if (background) {
+          root.style.setProperty("--background", background);
+          root.style.setProperty("--card", background);
+          root.style.setProperty("--popover", background);
         }
       }
     }
