@@ -211,7 +211,7 @@ export default function CompletedBooks() {
     <div className="min-h-screen bg-gradient-soft">
       <Navigation />
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">Completed Books</h1>
+        <h1 className="text-2xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">Completed Books</h1>
         
         {completedBooks.length === 0 ? (
           <div className="text-center py-16">
@@ -267,11 +267,11 @@ export default function CompletedBooks() {
                 </div>
                 
                 {book.review ? (
-                  <div className="border-t pt-4">
+                  <div className="border-t border-border pt-4">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center">
                         <span className="text-sm font-medium">Your Review:</span>
-                        <span className="ml-2">⭐ {book.review.rating}/5</span>
+                        <span className="ml-2 text-primary">⭐ {book.review.rating}/5</span>
                       </div>
                       <Button
                         variant="ghost"
@@ -291,15 +291,14 @@ export default function CompletedBooks() {
                     )}
                   </div>
                 ) : (
-                  <div className="border-t pt-4">
+                  <div className="border-t border-border pt-4">
                     <Button
-                      variant="outline"
                       size="sm"
                       onClick={() => {
                         setSelectedBookForReview(book);
                         setReviewDialogOpen(true);
                       }}
-                      className="w-full"
+                      className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
                     >
                       <Star className="w-4 h-4 mr-2" />
                       Write a Review
@@ -321,11 +320,11 @@ export default function CompletedBooks() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="shrink-0 whitespace-nowrap"
+                    className="shrink-0 whitespace-nowrap border-primary/50 hover:bg-primary/10 hover:border-primary"
                     onClick={() => markAsFavorite(book.id)}
                     aria-label={`Mark ${book.title} as favorite`}
                   >
-                    ⭐ Favorite
+                    <Star className="w-4 h-4 mr-1 text-primary" /> Favorite
                   </Button>
                   <Button
                     variant="outline"
