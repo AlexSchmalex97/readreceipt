@@ -39,6 +39,64 @@ export default function CompletedBooks() {
   const { isIOS, isReadReceiptApp } = usePlatform();
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [selectedBookForReview, setSelectedBookForReview] = useState<CompletedBook | null>(null);
+  const { accentCardColor, accentTextColor } = useUserAccent();
+
+  const isHex = (v: unknown): v is string =>
+    typeof v === "string" && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v.trim());
+
+  const isHslTriplet = (v: string) =>
+    /^\d+(?:\.\d+)?\s+\d+(?:\.\d+)?%\s+\d+(?:\.\d+)?%$/.test(v.trim());
+
+  const hexToHslTriplet = (hex: string): string => {
+    const h = hex.trim().toLowerCase();
+    const full = h.length === 4 ? `#${h[1]}${h[1]}${h[2]}${h[2]}${h[3]}${h[3]}` : h;
+    const r = parseInt(full.slice(1, 3), 16) / 255;
+    const g = parseInt(full.slice(3, 5), 16) / 255;
+    const b = parseInt(full.slice(5, 7), 16) / 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const d = max - min;
+    let hh = 0;
+    let ss = 0;
+    const ll = (max + min) / 2;
+
+    if (d !== 0) {
+      ss = d / (1 - Math.abs(2 * ll - 1));
+      switch (max) {
+        case r:
+          hh = ((g - b) / d + (g < b ? 6 : 0)) * 60;
+          break;
+        case g:
+          hh = ((b - r) / d + 2) * 60;
+          break;
+        case b:
+          hh = ((r - g) / d + 4) * 60;
+          break;
+      }
+    }
+
+    return `${Math.round(hh)} ${Math.round(ss * 100)}% ${Math.round(ll * 100)}%`;
+  };
+
+  const extractTripletVar = (v: string) => {
+    const m = v.trim().match(/^hsl\(var\((--[a-z0-9-]+)\)\)$/i);
+    return m ? `var(${m[1]})` : null;
+  };
+
+  const accentCss = (() => {
+    if (!accentCardColor) return "var(--primary)";
+    if (isHex(accentCardColor)) return hexToHslTriplet(accentCardColor);
+    if (isHslTriplet(accentCardColor)) return accentCardColor.trim();
+    return extractTripletVar(accentCardColor) ?? "var(--primary)";
+  })();
+
+  const accentFgCss = (() => {
+    if (!accentTextColor) return "var(--primary-foreground)";
+    if (isHex(accentTextColor)) return hexToHslTriplet(accentTextColor);
+    if (isHslTriplet(accentTextColor)) return accentTextColor.trim();
+    return extractTripletVar(accentTextColor) ?? "var(--primary-foreground)";
+  })();
 
   // Format Supabase date-only (YYYY-MM-DD) as local date to avoid timezone shift
   const toLocalDateString = (dateLike?: string | null) => {
