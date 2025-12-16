@@ -3,13 +3,12 @@ import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { UserColorProvider } from "@/components/UserColorProvider";
 
-// Wrap children and apply user's palette globally if color_palette.apply_globally is true
+// Wrap children and apply user's color palette globally when signed in
 export default function GlobalUserColors({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const [palette, setPalette] = useState<any | null>(null);
   const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
   const [backgroundTint, setBackgroundTint] = useState<{ color: string; opacity: number } | null>(null);
-  const applyGlobally = useMemo(() => Boolean(palette?.apply_globally), [palette]);
   
   // Check if we're viewing another user's profile (/:username route)
   const isViewingUserProfile = useMemo(() => {
@@ -122,12 +121,9 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
     return <>{children}</>;
   }
 
-  // Always apply background image globally when user is logged in.
-  // Always apply accent color globally.
-  // Apply full color palette globally only when user has opted in via apply_globally.
-  const paletteForTheme = effectivePalette 
-    ? (applyGlobally ? effectivePalette : { name: "accent-only", accent: effectivePalette.accent, primary: effectivePalette.accent })
-    : null;
+  // Always apply background image and full color palette globally when user is logged in.
+  // Full palette is always applied for the logged-in user's experience.
+  const paletteForTheme = effectivePalette || null;
 
   if (backgroundImageUrl || paletteForTheme) {
     return (

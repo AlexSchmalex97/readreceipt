@@ -759,7 +759,7 @@ export default function UserProfile() {
                                   ))}
                                 </div>
                                 <span className="text-[9px] text-muted-foreground">
-                                  {new Date(review.created_at).toLocaleDateString()}
+                                  {new Date(review.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
                                 </span>
                               </div>
                               {review.review && (
@@ -934,7 +934,7 @@ export default function UserProfile() {
                   <div className="flex items-center gap-4 mt-3" style={{ color: headerTextColor }}>
                     <p className="text-sm">
                       <Calendar className="w-4 h-4 inline mr-1" />
-                      Member since {new Date(profile.created_at).toLocaleDateString()}
+                      Member since {new Date(profile.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
                     </p>
                     {zodiacSign && (
                       <p className="text-sm">
@@ -1128,7 +1128,7 @@ export default function UserProfile() {
                                   ))}
                                 </div>
                                 <span className="text-xs text-muted-foreground">
-                                  {new Date(review.created_at).toLocaleDateString()}
+                                  {new Date(review.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
                                 </span>
                               </div>
                               {review.review && (
@@ -1276,7 +1276,7 @@ export default function UserProfile() {
                                 <p className="text-xs text-muted-foreground line-clamp-2 mb-0.5">{book.notes}</p>
                               )}
                               <p className="text-xs text-muted-foreground">
-                                Added {new Date(book.created_at).toLocaleDateString()}
+                                Added {new Date(book.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
                               </p>
                             </div>
                           </div>
