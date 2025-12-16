@@ -44,8 +44,8 @@ export function ReviewDialog({
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div className="bg-card rounded-lg border p-4 w-full max-w-md space-y-4 shadow-card">
-        <div className="text-lg font-semibold">Rate this book</div>
+      <div className="bg-card rounded-lg border border-border p-4 w-full max-w-md space-y-4 shadow-card">
+        <div className="text-lg font-semibold bg-gradient-primary bg-clip-text text-transparent">Rate this book</div>
 
         {/* Stars */}
         <div className="flex gap-2" role="radiogroup" aria-label="Rating from 1 to 5 stars">
@@ -61,7 +61,7 @@ export function ReviewDialog({
                 className={`px-3 py-2 rounded border transition
                   ${active
                     ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background hover:bg-muted"
+                    : "bg-background border-border hover:bg-muted hover:border-primary/50"
                   }`}
               >
                 {n}★
@@ -72,7 +72,7 @@ export function ReviewDialog({
 
         {/* Text */}
         <textarea
-          className="w-full rounded border p-2 bg-background"
+          className="w-full rounded border border-border p-2 bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none"
           rows={4}
           placeholder="What did you think?"
           value={text}
@@ -81,12 +81,12 @@ export function ReviewDialog({
 
         {/* Actions */}
         <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="px-3 py-2 border rounded">
+          <button onClick={onClose} className="px-3 py-2 border border-border rounded bg-background hover:bg-muted transition">
             Cancel
           </button>
           <button
             onClick={save}
-            className="px-3 py-2 rounded bg-primary text-primary-foreground"
+            className="px-3 py-2 rounded bg-primary text-primary-foreground hover:bg-primary/90 transition"
           >
             Save review
           </button>
