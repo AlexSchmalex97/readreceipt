@@ -812,7 +812,7 @@ export default function ProfileDisplay() {
                                 ))}
                               </div>
                               <span className="text-[9px] text-muted-foreground">
-                                {new Date(review.created_at).toLocaleDateString()}
+                                {new Date(review.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
                               </span>
                             </div>
                             {review.review && (
@@ -1250,7 +1250,7 @@ export default function ProfileDisplay() {
                                 ))}
                               </div>
                               <span className="text-xs text-muted-foreground">
-                                {new Date(review.created_at).toLocaleDateString()}
+                                {new Date(review.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
                               </span>
                             </div>
                             {review.review && (
@@ -1398,7 +1398,7 @@ export default function ProfileDisplay() {
                               <p className="text-xs text-muted-foreground line-clamp-2 mb-0.5">{book.notes}</p>
                             )}
                             <p className="text-xs text-muted-foreground">
-                              Added {new Date(book.created_at).toLocaleDateString()}
+                              Added {new Date(book.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
                             </p>
                           </div>
                         </div>
