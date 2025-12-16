@@ -126,7 +126,7 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
   // Always apply accent color globally.
   // Apply full color palette globally only when user has opted in via apply_globally.
   const paletteForTheme = effectivePalette 
-    ? (applyGlobally ? effectivePalette : { accent: effectivePalette.accent, primary: effectivePalette.accent })
+    ? (applyGlobally ? effectivePalette : { name: "accent-only", accent: effectivePalette.accent, primary: effectivePalette.accent })
     : null;
 
   if (backgroundImageUrl || paletteForTheme) {
