@@ -8,6 +8,7 @@ import { BookEditionSelector } from "@/components/BookEditionSelector";
 import { ReadingEntriesDialog } from "@/components/ReadingEntriesDialog";
 import { ReviewDialog } from "@/components/ReviewDialog";
 import { usePlatform } from "@/hooks/usePlatform";
+import { useUserAccent } from "@/hooks/useUserAccent";
 
 type CompletedBook = {
   id: string;
