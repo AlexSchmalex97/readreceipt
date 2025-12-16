@@ -45,7 +45,7 @@ export function ReviewDialog({
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
       <div className="bg-card rounded-lg border border-border p-4 w-full max-w-md space-y-4 shadow-card">
-        <div className="text-lg font-semibold bg-gradient-primary bg-clip-text text-transparent">Rate this book</div>
+        <div className="text-lg font-semibold text-primary">Rate this book</div>
 
         {/* Stars */}
         <div className="flex gap-2" role="radiogroup" aria-label="Rating from 1 to 5 stars">

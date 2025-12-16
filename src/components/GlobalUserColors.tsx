@@ -104,6 +104,10 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
       load();
     });
 
+    // Listen for profile updates from settings
+    const onProfileChanged = () => load();
+    window.addEventListener('profile-updated', onProfileChanged);
+
     // Listen for explicit background updates from settings
     const onBgChanged = () => load();
     window.addEventListener('profile-background-changed', onBgChanged);
@@ -111,6 +115,7 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
     return () => {
       mounted = false;
       sub.subscription.unsubscribe();
+      window.removeEventListener('profile-updated', onProfileChanged);
       window.removeEventListener('profile-background-changed', onBgChanged);
     };
   }, []);
