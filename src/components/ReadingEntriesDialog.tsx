@@ -180,9 +180,9 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
                         {e.status === 'completed' ? 'Completed' : 'In progress'}
                       </div>
                       <div className="text-muted-foreground">
-                        {e.started_at ? new Date(e.started_at).toLocaleDateString() : '—'}
+                        {e.started_at ? new Date(e.started_at + 'T00:00:00').toLocaleDateString() : '—'}
                         {' '}→{' '}
-                        {e.finished_at ? new Date(e.finished_at).toLocaleDateString() : '—'}
+                        {e.finished_at ? new Date(e.finished_at + 'T00:00:00').toLocaleDateString() : '—'}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -234,7 +234,7 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
               )}
             </div>
             {latestFinished && (
-              <p className="text-xs text-muted-foreground">Most recent finish: {new Date(latestFinished).toLocaleDateString()}</p>
+              <p className="text-xs text-muted-foreground">Most recent finish: {new Date(latestFinished + 'T00:00:00').toLocaleDateString()}</p>
             )}
           </div>
         </div>
