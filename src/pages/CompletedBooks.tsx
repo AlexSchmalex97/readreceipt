@@ -37,6 +37,7 @@ export default function CompletedBooks() {
   const { toast } = useToast();
   const [reloadCounter, setReloadCounter] = useState(0);
   const { isIOS, isReadReceiptApp } = usePlatform();
+  const { accentCardColor, accentTextColor } = useUserAccent();
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [selectedBookForReview, setSelectedBookForReview] = useState<CompletedBook | null>(null);
   // Format Supabase date-only (YYYY-MM-DD) as local date to avoid timezone shift

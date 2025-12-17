@@ -7,6 +7,24 @@ interface AccentPalette {
   accentTextColor: string;
 }
 
+// Accept either hex ("#RRGGBB") or bare HSL triplet ("210 80% 45%")
+// and return a CSS-ready color string.
+const isHslTriplet = (v: unknown): v is string => {
+  if (typeof v !== "string") return false;
+  const s = v.trim();
+  if (!s) return false;
+  // matches: "H S% L%" (optionally with "/ A" or "/ A%")
+  return /^\d+(?:\.\d+)?\s+\d+(?:\.\d+)?%\s+\d+(?:\.\d+)?%(?:\s*\/\s*(?:0?\.\d+|1|\d+(?:\.\d+)?%))?$/.test(s);
+};
+
+const toCssColor = (v: unknown): string | undefined => {
+  if (v == null) return undefined;
+  const s = String(v).trim();
+  if (!s) return undefined;
+  if (isHslTriplet(s)) return `hsl(${s})`;
+  return s;
+};
+
 // Read the user's saved accent colours directly from their profile
 // so Profile, Home, Feed, Settings, etc. all stay in sync.
 export function useUserAccent(): AccentPalette {
@@ -32,15 +50,17 @@ export function useUserAccent(): AccentPalette {
 
       // Stored fields from Display settings
       const accentCardColor: string =
-        colorPalette.accent_color || colorPalette.accent || "hsl(var(--card))";
-      const headerTextColor: string | undefined =
-        colorPalette.text_color || colorPalette.foreground;
+        toCssColor(colorPalette.accent_color || colorPalette.accent) ?? "hsl(var(--card))";
+      const headerTextColor: string | undefined = toCssColor(
+        colorPalette.text_color || colorPalette.foreground
+      );
 
       // Compute readable text colour for accent sections, with optional override
       const computeAccentText = () => {
         const customText: string | undefined =
           colorPalette.accent_text_color || colorPalette.accentTextColor;
-        if (customText) return customText;
+        const cssCustomText = toCssColor(customText);
+        if (cssCustomText) return cssCustomText;
 
         const hex = accentCardColor;
         if (!hex || hex[0] !== "#" || (hex.length !== 7 && hex.length !== 4)) {
