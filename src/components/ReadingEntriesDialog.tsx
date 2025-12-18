@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,7 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
   const [form, setForm] = useState<{ started_at: string; finished_at: string }>(
     { started_at: '', finished_at: '' }
   );
+  const dialogContentRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -155,7 +156,7 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
           <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[520px] shadow-card">
+      <DialogContent ref={dialogContentRef} className="sm:max-w-[520px] shadow-card overflow-visible">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold bg-gradient-primary bg-clip-text text-transparent">
             Reading dates for "{bookTitle}"
@@ -223,7 +224,7 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
                         : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-popover border shadow-lg z-[100]" align="start">
+                  <PopoverContent className="w-auto p-0 bg-popover border shadow-lg" align="start" container={dialogContentRef.current}>
                     <Calendar
                       mode="single"
                       selected={form.started_at ? parse(form.started_at, "yyyy-MM-dd", new Date()) : undefined}
@@ -251,7 +252,7 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
                         : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-popover border shadow-lg z-[100]" align="start">
+                  <PopoverContent className="w-auto p-0 bg-popover border shadow-lg" align="start" container={dialogContentRef.current}>
                     <Calendar
                       mode="single"
                       selected={form.finished_at ? parse(form.finished_at, "yyyy-MM-dd", new Date()) : undefined}
