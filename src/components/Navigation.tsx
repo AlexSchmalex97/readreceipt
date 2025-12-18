@@ -13,7 +13,10 @@ export function Navigation() {
   const isIOSWebView = typeof window !== 'undefined' && !!(window as any).webkit && !!(window as any).webkit.messageHandlers;
   const isStandalonePWA = typeof window !== 'undefined' && (("standalone" in navigator && (navigator as any).standalone) || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches));
   const [headerOpacity, setHeaderOpacity] = useState(1);
-  const { accentTextColor } = useUserAccent();
+  const { accentTextColor, accentCardColor } = useUserAccent();
+
+  const tabBarBg = accentCardColor || 'hsl(var(--card))';
+  const tabBarText = accentTextColor || 'hsl(var(--foreground))';
 
   const isActive = (path: string) => pathname === path;
   const isHomePage = pathname === "/";
@@ -57,10 +60,11 @@ export function Navigation() {
     return (
       <nav 
         data-mobile-tabbar 
-        className="fixed bottom-0 left-0 right-0 bg-card border-t-2 border-border z-50"
+        className="fixed bottom-0 left-0 right-0 border-t-2 z-50 backdrop-blur-xl shadow-lg"
         style={{
           paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)',
-          borderTopColor: accentTextColor || 'hsl(var(--border))',
+          backgroundColor: tabBarBg,
+          borderTopColor: tabBarText,
         }}
       >
         <div className="flex justify-around items-center h-16">
@@ -75,9 +79,9 @@ export function Navigation() {
                 onClick={() => navigate(item.path)}
                 className="flex flex-col items-center justify-center flex-1 h-full gap-1 transition-all"
                 style={{
-                  color: accentTextColor || "hsl(var(--foreground))",
-                  fontWeight: active ? 600 : 500,
-                  opacity: active ? 1 : 0.65,
+                  color: tabBarText,
+                  fontWeight: active ? 650 : 550,
+                  opacity: active ? 1 : 0.85,
                 }}
               >
                 <Icon className={active ? "w-6 h-6" : "w-5 h-5"} strokeWidth={active ? 2.5 : 2} />

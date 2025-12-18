@@ -455,6 +455,7 @@ export default function ProfileDisplay() {
 
   // Compute accent color for cards/sections
   const accentCardColor = (profile as any)?.color_palette?.accent_color || "#ffffff";
+  const progressBarColor = (profile as any)?.color_palette?.progress_bar_color as string | undefined;
   
   // Compute contrast text color for accent sections
   const accentTextColor = (() => {
@@ -613,47 +614,9 @@ export default function ProfileDisplay() {
               </div>
             </div>
 
-            {/* Right side - Reading Goal and Stats */}
-            <div className="flex-shrink-0 w-48">
-              <Card className="border-2" style={{ borderColor: accentCardColor, backgroundColor: accentCardColor }}>
-                <CardContent className="p-2.5 space-y-1.5">
-                  <HomeReadingGoals 
-                    userId={uid}
-                    completedBooksThisYear={bookStats.completedThisYear}
-                    isOwnProfile={true}
-                    accentColor={accentCardColor}
-                    accentTextColor={accentTextColor}
-                    compact={true}
-                  />
-                  <div className="grid grid-cols-3 gap-1.5 pt-1.5 border-t" style={{ borderColor: accentTextColor + '40' }}>
-                    <Link to="/" className="text-center cursor-pointer hover:opacity-80 transition-opacity">
-                      <div className="text-lg font-bold" style={{ color: accentTextColor }}>
-                        {bookStats.inProgressBooks}
-                      </div>
-                      <div className="text-[9px]" style={{ color: accentTextColor, opacity: 0.8 }}>
-                        In Progress
-                      </div>
-                    </Link>
-                    <Link to="/completed" className="text-center cursor-pointer hover:opacity-80 transition-opacity">
-                      <div className="text-lg font-bold" style={{ color: accentTextColor }}>
-                        {bookStats.completedBooks}
-                      </div>
-                      <div className="text-[9px]" style={{ color: accentTextColor, opacity: 0.8 }}>
-                        Completed
-                      </div>
-                    </Link>
-                    <div className="text-center">
-                      <div className="text-lg font-bold" style={{ color: accentTextColor }}>
-                        {bookStats.totalBooks}
-                      </div>
-                      <div className="text-[9px]" style={{ color: accentTextColor, opacity: 0.8 }}>
-                        Total Books
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+
+            {/* Reading Goal moved below (above Recent Reviews) */}
+
           </div>
           {/* Favorite Book - Full Width */}
           {favoriteBook && (
@@ -761,6 +724,49 @@ export default function ProfileDisplay() {
             accentCardColor={accentCardColor}
             accentTextColor={accentTextColor}
           />
+
+          {/* Reading Goal & Stats - moved above Recent Reviews for iOS compact layout */}
+          <div className="max-w-4xl mx-auto mb-2">
+            <Card className="border-2" style={{ borderColor: accentCardColor, backgroundColor: accentCardColor }}>
+              <CardContent className="p-2.5 space-y-1.5">
+                <HomeReadingGoals 
+                  userId={uid}
+                  completedBooksThisYear={bookStats.completedThisYear}
+                  isOwnProfile={true}
+                  accentColor={accentCardColor}
+                  accentTextColor={accentTextColor}
+                  progressBarColor={progressBarColor}
+                  compact={true}
+                />
+                <div className="grid grid-cols-3 gap-1.5 pt-1.5 border-t" style={{ borderColor: accentTextColor + '40' }}>
+                  <Link to="/" className="text-center cursor-pointer hover:opacity-80 transition-opacity">
+                    <div className="text-lg font-bold" style={{ color: accentTextColor }}>
+                      {bookStats.inProgressBooks}
+                    </div>
+                    <div className="text-[9px]" style={{ color: accentTextColor, opacity: 0.8 }}>
+                      In Progress
+                    </div>
+                  </Link>
+                  <Link to="/completed" className="text-center cursor-pointer hover:opacity-80 transition-opacity">
+                    <div className="text-lg font-bold" style={{ color: accentTextColor }}>
+                      {bookStats.completedBooks}
+                    </div>
+                    <div className="text-[9px]" style={{ color: accentTextColor, opacity: 0.8 }}>
+                      Completed
+                    </div>
+                  </Link>
+                  <div className="text-center">
+                    <div className="text-lg font-bold" style={{ color: accentTextColor }}>
+                      {bookStats.totalBooks}
+                    </div>
+                    <div className="text-[9px]" style={{ color: accentTextColor, opacity: 0.8 }}>
+                      Total Books
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Collapsible Activity Sections - Mobile/Tablet */}
           <Accordion type="multiple" className="w-full space-y-1.5 mt-1">
