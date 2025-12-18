@@ -5,7 +5,11 @@ interface AccentPalette {
   headerTextColor?: string;
   accentCardColor: string;
   accentTextColor: string;
+  progressBarColor: string;
 }
+
+// Default medium brown color for progress bar
+const DEFAULT_PROGRESS_BAR_COLOR = "#8B6914";
 
 // Accept either hex ("#RRGGBB") or bare HSL triplet ("210 80% 45%")
 // and return a CSS-ready color string.
@@ -32,6 +36,7 @@ export function useUserAccent(): AccentPalette {
     accentCardColor: "hsl(var(--card))",
     accentTextColor: "hsl(var(--card-foreground))",
     headerTextColor: "hsl(var(--foreground))",
+    progressBarColor: DEFAULT_PROGRESS_BAR_COLOR,
   });
 
   useEffect(() => {
@@ -78,10 +83,15 @@ export function useUserAccent(): AccentPalette {
         return lum < 128 ? "#FFFFFF" : "#1A1A1A";
       };
 
+      // Get progress bar color with default
+      const progressBarColor: string =
+        toCssColor(colorPalette.progress_bar_color) ?? DEFAULT_PROGRESS_BAR_COLOR;
+
       setPalette({
         headerTextColor,
         accentCardColor,
         accentTextColor: computeAccentText(),
+        progressBarColor,
       });
     };
 

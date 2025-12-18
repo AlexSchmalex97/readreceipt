@@ -20,7 +20,11 @@ interface HomeReadingGoalsProps {
   accentColor?: string;
   accentTextColor?: string;
   compact?: boolean;
+  progressBarColor?: string;
 }
+
+// Default medium brown color for progress bar
+const DEFAULT_PROGRESS_BAR_COLOR = "#8B6914";
 
 // Helper to darken a hex color by a percentage
 function darkenHex(hex: string, percent: number): string {
@@ -36,7 +40,7 @@ function darkenHex(hex: string, percent: number): string {
   return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 }
 
-export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile = true, accentColor, accentTextColor, compact = false }: HomeReadingGoalsProps) => {
+export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile = true, accentColor, accentTextColor, compact = false, progressBarColor: propProgressBarColor }: HomeReadingGoalsProps) => {
   const [goal, setGoal] = useState<ReadingGoal | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -161,10 +165,8 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile 
   const progressPercentage = Math.min((totalProgress / goal.goal_count) * 100, 100);
   const booksRemaining = Math.max(goal.goal_count - totalProgress, 0);
 
-  // Create a darker progress bar color (25% darker than accent text)
-  const progressBarColor = accentTextColor && accentTextColor.startsWith('#') 
-    ? darkenHex(accentTextColor, 0.25)
-    : accentTextColor || 'hsl(var(--primary))';
+  // Use prop progress bar color, or fall back to default medium brown
+  const progressBarColor = propProgressBarColor || DEFAULT_PROGRESS_BAR_COLOR;
 
   // Compact mode for profile page - just the content, no wrapper card
   if (compact) {

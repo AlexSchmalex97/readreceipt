@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { searchGoogleBooks, GoogleBookResult } from "@/lib/googleBooks";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { usePlatform } from "@/hooks/usePlatform";
+import { useUserAccent } from "@/hooks/useUserAccent";
 
 type Notification = {
   id: string;
@@ -22,6 +23,7 @@ export default function Notifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [recommendations, setRecommendations] = useState<GoogleBookResult[]>([]);
   const { isIOS, isReadReceiptApp } = usePlatform();
+  const { accentCardColor, accentTextColor } = useUserAccent();
 
   const loadNotifications = async () => {
     if (!userId) return;
@@ -244,23 +246,27 @@ export default function Notifications() {
         className="container mx-auto px-4 py-6 max-w-2xl"
         style={{ paddingTop: showPullIndicator ? `${pullDistance + 24}px` : undefined }}
       >
-        <h1 className="text-3xl font-bold mb-6">Notifications</h1>
+        <h1 className="text-3xl font-bold mb-6" style={{ color: accentTextColor }}>Notifications</h1>
 
         {/* Recent Activity */}
         <div className="space-y-3 mb-8">
-          <h2 className="text-lg font-semibold">Recent Activity</h2>
+          <h2 className="text-lg font-semibold" style={{ color: accentTextColor }}>Recent Activity</h2>
           {notifications.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No recent activity</p>
+            <p className="text-sm" style={{ color: accentTextColor, opacity: 0.7 }}>No recent activity</p>
           ) : (
             notifications.map((notif) => (
-              <Card key={notif.id} className="hover:shadow-md transition-shadow">
+              <Card 
+                key={notif.id} 
+                className="hover:shadow-md transition-shadow border"
+                style={{ backgroundColor: accentCardColor, borderColor: accentTextColor + '30' }}
+              >
                 <CardContent className="p-4 flex items-start gap-3">
                   <div className="flex-shrink-0 mt-1">
                     {getNotificationIcon(notif.type)}
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm">{getNotificationText(notif)}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-sm" style={{ color: accentTextColor }}>{getNotificationText(notif)}</p>
+                    <p className="text-xs mt-1" style={{ color: accentTextColor, opacity: 0.7 }}>
                       {new Date(notif.created_at).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -285,13 +291,17 @@ export default function Notifications() {
         {/* Book Recommendations */}
         {recommendations.length > 0 && (
           <div className="space-y-3">
-            <h2 className="text-lg font-semibold">Recommended for You</h2>
-            <p className="text-sm text-muted-foreground">
+            <h2 className="text-lg font-semibold" style={{ color: accentTextColor }}>Recommended for You</h2>
+            <p className="text-sm" style={{ color: accentTextColor, opacity: 0.7 }}>
               Based on your reading history
             </p>
             <div className="grid gap-3">
               {recommendations.map((book) => (
-                <Card key={book.id} className="hover:shadow-md transition-shadow">
+                <Card 
+                  key={book.id} 
+                  className="hover:shadow-md transition-shadow border"
+                  style={{ backgroundColor: accentCardColor, borderColor: accentTextColor + '30' }}
+                >
                   <CardContent className="p-4 flex gap-3">
                     {book.imageLinks?.thumbnail && (
                       <img
@@ -301,12 +311,12 @@ export default function Notifications() {
                       />
                     )}
                     <div className="flex-1">
-                      <h3 className="font-semibold text-sm">{book.title}</h3>
-                      <p className="text-xs text-muted-foreground">
+                      <h3 className="font-semibold text-sm" style={{ color: accentTextColor }}>{book.title}</h3>
+                      <p className="text-xs" style={{ color: accentTextColor, opacity: 0.7 }}>
                         {book.authors?.join(", ")}
                       </p>
                       {book.pageCount && (
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-xs mt-1" style={{ color: accentTextColor, opacity: 0.7 }}>
                           {book.pageCount} pages
                         </p>
                       )}
