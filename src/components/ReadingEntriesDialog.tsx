@@ -33,6 +33,8 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
     { started_at: '', finished_at: '' }
   );
   const dialogContentRef = useRef<HTMLDivElement>(null);
+  const [startedPickerOpen, setStartedPickerOpen] = useState(false);
+  const [finishedPickerOpen, setFinishedPickerOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -145,7 +147,17 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
   }, [entries]);
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v);
+        if (!v) {
+          resetForm();
+          setStartedPickerOpen(false);
+          setFinishedPickerOpen(false);
+        }
+      }}
+    >
       <DialogTrigger asChild>
         <Button 
           size="icon-xs" 
@@ -209,7 +221,13 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label htmlFor="started">Date Started</Label>
-                <Popover>
+                <Popover
+                  open={startedPickerOpen}
+                  onOpenChange={(v) => {
+                    setStartedPickerOpen(v);
+                    if (v) setFinishedPickerOpen(false);
+                  }}
+                >
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -224,11 +242,21 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
                         : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-popover border shadow-lg" align="start" container={dialogContentRef.current}>
+                  <PopoverContent
+                    className="w-auto p-0 bg-popover border shadow-lg"
+                    align="start"
+                    container={dialogContentRef.current ?? undefined}
+                  >
                     <Calendar
                       mode="single"
                       selected={form.started_at ? parse(form.started_at, "yyyy-MM-dd", new Date()) : undefined}
-                      onSelect={(date) => setForm((f) => ({ ...f, started_at: date ? format(date, "yyyy-MM-dd") : "" }))}
+                      onSelect={(date) => {
+                        setForm((f) => ({
+                          ...f,
+                          started_at: date ? format(date, "yyyy-MM-dd") : "",
+                        }));
+                        setStartedPickerOpen(false);
+                      }}
                       initialFocus
                       className={cn("p-3 pointer-events-auto")}
                     />
@@ -237,7 +265,13 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
               </div>
               <div className="space-y-1">
                 <Label htmlFor="finished">Date Finished</Label>
-                <Popover>
+                <Popover
+                  open={finishedPickerOpen}
+                  onOpenChange={(v) => {
+                    setFinishedPickerOpen(v);
+                    if (v) setStartedPickerOpen(false);
+                  }}
+                >
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -252,11 +286,21 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
                         : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-popover border shadow-lg" align="start" container={dialogContentRef.current}>
+                  <PopoverContent
+                    className="w-auto p-0 bg-popover border shadow-lg"
+                    align="start"
+                    container={dialogContentRef.current ?? undefined}
+                  >
                     <Calendar
                       mode="single"
                       selected={form.finished_at ? parse(form.finished_at, "yyyy-MM-dd", new Date()) : undefined}
-                      onSelect={(date) => setForm((f) => ({ ...f, finished_at: date ? format(date, "yyyy-MM-dd") : "" }))}
+                      onSelect={(date) => {
+                        setForm((f) => ({
+                          ...f,
+                          finished_at: date ? format(date, "yyyy-MM-dd") : "",
+                        }));
+                        setFinishedPickerOpen(false);
+                      }}
                       initialFocus
                       className={cn("p-3 pointer-events-auto")}
                     />

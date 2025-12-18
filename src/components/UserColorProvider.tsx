@@ -149,7 +149,8 @@ export function UserColorProvider({ userColorPalette, backgroundImageUrl, backgr
       root.style.setProperty('--background', '0 0% 100% / 0');
       root.style.setProperty('--card', '0 0% 100% / 0.8');
       root.style.setProperty('--popover', '0 0% 100% / 0.9');
-    } else {
+      // Ensure popovers (like date pickers) stay readable on top of the light popover surface
+      root.style.setProperty('--popover-foreground', '0 0% 10%');
       // No background image → clear any body applied backgrounds
       body.style.background = '';
       body.style.backgroundImage = '';
