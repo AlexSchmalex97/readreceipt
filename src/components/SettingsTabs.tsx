@@ -69,6 +69,7 @@ interface SettingsTabsProps {
   textColor: string;
   accentColor: string;
   accentTextColor: string;
+  progressBarColor: string;
   backgroundImageUrl: string | null;
   backgroundTint: { color: string; opacity: number } | null;
   backgroundType: 'color' | 'image';
@@ -78,6 +79,7 @@ interface SettingsTabsProps {
   onTextColorChange: (color: string) => void;
   onAccentColorChange: (color: string) => void;
   onAccentTextColorChange: (color: string) => void;
+  onProgressBarColorChange: (color: string) => void;
   onBackgroundUpdate: () => void;
 }
 
@@ -559,6 +561,18 @@ export function SettingsTabs(props: SettingsTabsProps) {
                 onChange={(e) => props.onAccentTextColorChange(e.target.value)}
                 className="h-10 w-full"
               />
+            </div>
+            <div style={{ backgroundColor: props.accentColor }}>
+              <Label style={{ color: props.accentTextColor }}>Reading Goal Progress Bar Color</Label>
+              <Input
+                type="color"
+                value={props.progressBarColor}
+                onChange={(e) => props.onProgressBarColorChange(e.target.value)}
+                className="h-10 w-full"
+              />
+              <p className="text-xs mt-1" style={{ color: props.accentTextColor, opacity: 0.7 }}>
+                Color of the progress bar in your reading goal display
+              </p>
             </div>
           </CardContent>
         </StyledCard>

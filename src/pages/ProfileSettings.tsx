@@ -63,6 +63,7 @@ export default function ProfileSettings() {
   const [savedCustomAccents, setSavedCustomAccents] = useState<string[]>([]);
   const [accentTextColor, setAccentTextColor] = useState<string>("");
   const [accentTextHex, setAccentTextHex] = useState<string>("");
+  const [progressBarColor, setProgressBarColor] = useState<string>("#8B6914");
   const [savedCustomAccentTexts, setSavedCustomAccentTexts] = useState<string[]>([]);
   const [applyGlobally, setApplyGlobally] = useState<boolean>(false);
   const [savedCustomColors, setSavedCustomColors] = useState<string[]>([]);
@@ -149,6 +150,7 @@ export default function ProfileSettings() {
       setTextColor(cp?.text_color || "");
       setAccentColor(cp?.accent_color || "");
       setAccentTextColor(cp?.accent_text_color || "");
+      setProgressBarColor(cp?.progress_bar_color || "#8B6914");
       
       // Completed reads this year: entries count + books without entries fallback
       const computeCompletedCount = async () => {
@@ -452,6 +454,7 @@ export default function ProfileSettings() {
         text_color: textColor || null,
         accent_color: accentColor || null,
         accent_text_color: accentTextColor || null,
+        progress_bar_color: progressBarColor || "#8B6914",
       };
       if (applyGlobally) {
         newColorPalette.background = hexToHSL(backgroundColor);
@@ -660,6 +663,7 @@ export default function ProfileSettings() {
           textColor={textColor}
           accentColor={accentColor}
           accentTextColor={accentTextColor}
+          progressBarColor={progressBarColor}
           backgroundImageUrl={backgroundImageUrl}
           backgroundTint={backgroundTint}
           backgroundType={backgroundType}
@@ -669,6 +673,7 @@ export default function ProfileSettings() {
           onTextColorChange={setTextColor}
           onAccentColorChange={setAccentColor}
           onAccentTextColorChange={setAccentTextColor}
+          onProgressBarColorChange={setProgressBarColor}
           onBackgroundUpdate={async () => {
             const { data: user } = await supabase.auth.getUser();
             if (!user.user) return;

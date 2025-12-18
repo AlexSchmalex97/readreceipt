@@ -3,9 +3,11 @@ import { Navigation } from "@/components/Navigation";
 import { Users, Mail, Settings, Star, ChevronRight, LogOut, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useUserAccent } from "@/hooks/useUserAccent";
 
 export default function More() {
   const navigate = useNavigate();
+  const { accentCardColor, accentTextColor } = useUserAccent();
 
   const handleSignOut = async () => {
     try {
@@ -32,7 +34,7 @@ export default function More() {
       <Navigation />
       
       <div className="container mx-auto px-4 py-6 max-w-2xl">
-        <h1 className="text-3xl font-bold mb-6">More</h1>
+        <h1 className="text-3xl font-bold mb-6" style={{ color: accentTextColor }}>More</h1>
         
         <div className="space-y-2">
           {menuItems.map((item) => {
@@ -41,16 +43,23 @@ export default function More() {
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className="w-full bg-card hover:bg-accent/50 transition-colors rounded-lg p-4 flex items-center gap-4 border border-border"
+                className="w-full hover:opacity-90 transition-all rounded-lg p-4 flex items-center gap-4 border"
+                style={{ 
+                  backgroundColor: accentCardColor,
+                  borderColor: accentTextColor + '30'
+                }}
               >
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-5 h-5 text-primary" />
+                <div 
+                  className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: accentTextColor + '20' }}
+                >
+                  <Icon className="w-5 h-5" style={{ color: accentTextColor }} />
                 </div>
                 <div className="flex-1 text-left">
-                  <h3 className="font-semibold text-foreground">{item.label}</h3>
-                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                  <h3 className="font-semibold" style={{ color: accentTextColor }}>{item.label}</h3>
+                  <p className="text-sm" style={{ color: accentTextColor, opacity: 0.7 }}>{item.description}</p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                <ChevronRight className="w-5 h-5 flex-shrink-0" style={{ color: accentTextColor, opacity: 0.5 }} />
               </button>
             );
           })}

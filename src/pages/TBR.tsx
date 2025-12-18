@@ -5,6 +5,7 @@ import { Navigation } from "@/components/Navigation";
 import { TBRList } from "@/components/TBRList";
 import { useToast } from "@/hooks/use-toast";
 import { usePlatform } from "@/hooks/usePlatform";
+import { useUserAccent } from "@/hooks/useUserAccent";
 
 const TBR = () => {
   const [loading, setLoading] = useState(true);
@@ -13,6 +14,7 @@ const TBR = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isIOS, isReadReceiptApp } = usePlatform();
+  const { accentCardColor, accentTextColor } = useUserAccent();
 
   useEffect(() => {
     // Check authentication status
@@ -158,12 +160,14 @@ const TBR = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       <main className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold mb-8">To Be Read</h1>
+        <h1 className="text-4xl font-bold mb-8" style={{ color: accentTextColor }}>To Be Read</h1>
         <TBRList
           userId={userId}
           onMoveToReading={handleMoveToReading}
           onMoveToCompleted={handleMoveToCompleted}
           onMoveToDNF={handleMoveToDNF}
+          accentColor={accentCardColor}
+          accentTextColor={accentTextColor}
         />
       </main>
     </div>
