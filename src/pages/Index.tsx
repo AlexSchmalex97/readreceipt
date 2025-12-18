@@ -863,7 +863,7 @@ const Index = () => {
         {/* Header with Add Book button */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-4">
           <h1 
-            className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground"
+            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground"
             style={{ 
               textShadow: '-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0 0 8px rgba(255,255,255,0.5)'
             }}
