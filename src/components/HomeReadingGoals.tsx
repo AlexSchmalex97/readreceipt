@@ -146,10 +146,18 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile 
   const progressPercentage = Math.min((totalProgress / goal.goal_count) * 100, 100);
   const booksRemaining = Math.max(goal.goal_count - totalProgress, 0);
 
+  // Create a contrasting border color for better visibility
+  const borderStyle = accentColor 
+    ? { borderColor: accentTextColor || 'hsl(var(--foreground))' }
+    : { borderColor: 'hsl(var(--border))' };
+
   return (
     <Card 
       className="shadow-soft border-2 hover:shadow-lg transition-all duration-300 w-full"
-      style={{ borderColor: accentColor || 'hsl(var(--border))', backgroundColor: accentColor || 'hsl(var(--card))' }}
+      style={{ 
+        ...borderStyle,
+        backgroundColor: accentColor || 'hsl(var(--card))' 
+      }}
     >
       <CardContent className="p-3 sm:p-4">
         <div className="flex items-center justify-between mb-2">
@@ -178,7 +186,7 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile 
             <Progress value={progressPercentage} className="h-1.5" />
             
             {isOwnProfile && (
-              <div className="flex items-center justify-between gap-1.5 pt-1.5 border-t" style={{ borderColor: accentColor ? `${accentColor}40` : 'hsl(var(--border))' }}>
+              <div className="flex items-center justify-between gap-1.5 pt-1.5 border-t" style={{ borderColor: accentTextColor || 'hsl(var(--border))' }}>
                 <span className="text-[10px]" style={{ color: accentTextColor }}>
                   Manual count: {goal.manual_count}
                 </span>

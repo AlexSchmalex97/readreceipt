@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthButtons from "@/components/AuthButtons";
 import { HeaderDisplay } from "@/components/HeaderDisplay";
 import { usePlatform } from "@/hooks/usePlatform";
+import { useUserAccent } from "@/hooks/useUserAccent";
 import { Home, Rss, User, Mail, BookOpen, MoreHorizontal } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -12,6 +13,7 @@ export function Navigation() {
   const isIOSWebView = typeof window !== 'undefined' && !!(window as any).webkit && !!(window as any).webkit.messageHandlers;
   const isStandalonePWA = typeof window !== 'undefined' && (("standalone" in navigator && (navigator as any).standalone) || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches));
   const [headerOpacity, setHeaderOpacity] = useState(1);
+  const { accentCardColor, accentTextColor } = useUserAccent();
 
   const isActive = (path: string) => pathname === path;
   const isHomePage = pathname === "/";
@@ -69,8 +71,9 @@ export function Navigation() {
                 key={item.path}
                 onClick={() => navigate(item.path)}
                 className={`flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors ${
-                  active ? "text-primary" : "text-muted-foreground"
+                  active ? "" : "text-muted-foreground"
                 }`}
+                style={active && accentTextColor ? { color: accentTextColor } : active ? { color: 'hsl(var(--primary))' } : undefined}
               >
                 <Icon className="w-5 h-5" />
                 <span className="text-xs font-medium">{item.label}</span>
@@ -114,9 +117,10 @@ export function Navigation() {
               to="/"
               className={`text-sm whitespace-nowrap ${
                 isActive("/")
-                  ? "font-medium text-[hsl(30,25%,20%)] dark:text-[hsl(35,30%,92%)]"
-                  : "text-[hsl(30,15%,40%)] hover:text-[hsl(30,25%,20%)] dark:text-[hsl(35,18%,70%)] dark:hover:text-[hsl(35,30%,92%)]"
+                  ? "font-medium"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
+              style={isActive("/") && accentTextColor ? { color: accentTextColor } : isActive("/") ? { color: 'hsl(var(--foreground))' } : undefined}
             >
               Home
             </Link>
@@ -124,9 +128,10 @@ export function Navigation() {
               to="/people"
               className={`text-sm whitespace-nowrap ${
                 isActive("/people")
-                  ? "font-medium text-[hsl(30,25%,20%)] dark:text-[hsl(35,30%,92%)]"
-                  : "text-[hsl(30,15%,40%)] hover:text-[hsl(30,25%,20%)] dark:text-[hsl(35,18%,70%)] dark:hover:text-[hsl(35,30%,92%)]"
+                  ? "font-medium"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
+              style={isActive("/people") && accentTextColor ? { color: accentTextColor } : isActive("/people") ? { color: 'hsl(var(--foreground))' } : undefined}
             >
               People
             </Link>
@@ -134,9 +139,10 @@ export function Navigation() {
               to="/feed"
               className={`text-sm whitespace-nowrap ${
                 isActive("/feed")
-                  ? "font-medium text-[hsl(30,25%,20%)] dark:text-[hsl(35,30%,92%)]"
-                  : "text-[hsl(30,15%,40%)] hover:text-[hsl(30,25%,20%)] dark:text-[hsl(35,18%,70%)] dark:hover:text-[hsl(35,30%,92%)]"
+                  ? "font-medium"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
+              style={isActive("/feed") && accentTextColor ? { color: accentTextColor } : isActive("/feed") ? { color: 'hsl(var(--foreground))' } : undefined}
             >
               Feed
             </Link>
@@ -144,9 +150,10 @@ export function Navigation() {
               to="/reviews"
               className={`text-sm whitespace-nowrap ${
                 isActive("/reviews")
-                  ? "font-medium text-[hsl(30,25%,20%)] dark:text-[hsl(35,30%,92%)]"
-                  : "text-[hsl(30,15%,40%)] hover:text-[hsl(30,25%,20%)] dark:text-[hsl(35,18%,70%)] dark:hover:text-[hsl(35,30%,92%)]"
+                  ? "font-medium"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
+              style={isActive("/reviews") && accentTextColor ? { color: accentTextColor } : isActive("/reviews") ? { color: 'hsl(var(--foreground))' } : undefined}
             >
               Reviews
             </Link>
@@ -154,9 +161,10 @@ export function Navigation() {
               to="/profile"
               className={`text-sm whitespace-nowrap ${
                 isActive("/profile")
-                  ? "font-medium text-[hsl(30,25%,20%)] dark:text-[hsl(35,30%,92%)]"
-                  : "text-[hsl(30,15%,40%)] hover:text-[hsl(30,25%,20%)] dark:text-[hsl(35,18%,70%)] dark:hover:text-[hsl(35,30%,92%)]"
+                  ? "font-medium"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
+              style={isActive("/profile") && accentTextColor ? { color: accentTextColor } : isActive("/profile") ? { color: 'hsl(var(--foreground))' } : undefined}
             >
               Profile
             </Link>
@@ -164,9 +172,10 @@ export function Navigation() {
               to="/contact"
               className={`text-sm whitespace-nowrap ${
                 isActive("/contact")
-                  ? "font-medium text-[hsl(30,25%,20%)] dark:text-[hsl(35,30%,92%)]"
-                  : "text-[hsl(30,15%,40%)] hover:text-[hsl(30,25%,20%)] dark:text-[hsl(35,18%,70%)] dark:hover:text-[hsl(35,30%,92%)]"
+                  ? "font-medium"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
+              style={isActive("/contact") && accentTextColor ? { color: accentTextColor } : isActive("/contact") ? { color: 'hsl(var(--foreground))' } : undefined}
             >
               Contact
             </Link>
