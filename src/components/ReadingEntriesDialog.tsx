@@ -223,7 +223,7 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
                         : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 bg-popover border shadow-lg z-[100]" align="start">
                     <Calendar
                       mode="single"
                       selected={form.started_at ? parse(form.started_at, "yyyy-MM-dd", new Date()) : undefined}
@@ -251,7 +251,7 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
                         : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 bg-popover border shadow-lg z-[100]" align="start">
                     <Calendar
                       mode="single"
                       selected={form.finished_at ? parse(form.finished_at, "yyyy-MM-dd", new Date()) : undefined}
