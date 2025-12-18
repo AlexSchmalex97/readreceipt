@@ -153,7 +153,7 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
           className="sm:h-8 sm:w-8 p-0"
           title="Edit reading dates"
         >
-          <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+          <CalendarIcon className="w-3 h-3 sm:w-4 sm:h-4" />
         </Button>
       </DialogTrigger>
       <DialogContent ref={dialogContentRef} className="sm:max-w-[520px] shadow-card overflow-visible">
