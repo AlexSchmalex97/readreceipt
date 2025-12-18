@@ -19,9 +19,24 @@ interface HomeReadingGoalsProps {
   isOwnProfile?: boolean;
   accentColor?: string;
   accentTextColor?: string;
+  compact?: boolean;
 }
 
-export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile = true, accentColor, accentTextColor }: HomeReadingGoalsProps) => {
+// Helper to darken a hex color by a percentage
+function darkenHex(hex: string, percent: number): string {
+  if (!hex || hex[0] !== '#' || (hex.length !== 7 && hex.length !== 4)) {
+    return hex;
+  }
+  const expand = (h: string) =>
+    h.length === 4 ? `#${h[1]}${h[1]}${h[2]}${h[2]}${h[3]}${h[3]}` : h;
+  const full = expand(hex);
+  const r = Math.max(0, Math.round(parseInt(full.slice(1, 3), 16) * (1 - percent)));
+  const g = Math.max(0, Math.round(parseInt(full.slice(3, 5), 16) * (1 - percent)));
+  const b = Math.max(0, Math.round(parseInt(full.slice(5, 7), 16) * (1 - percent)));
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
+export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile = true, accentColor, accentTextColor, compact = false }: HomeReadingGoalsProps) => {
   const [goal, setGoal] = useState<ReadingGoal | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -146,6 +161,67 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile 
   const progressPercentage = Math.min((totalProgress / goal.goal_count) * 100, 100);
   const booksRemaining = Math.max(goal.goal_count - totalProgress, 0);
 
+  // Create a darker progress bar color (25% darker than accent text)
+  const progressBarColor = accentTextColor && accentTextColor.startsWith('#') 
+    ? darkenHex(accentTextColor, 0.25)
+    : accentTextColor || 'hsl(var(--primary))';
+
+  // Compact mode for profile page - just the content, no wrapper card
+  if (compact) {
+    return (
+      <div className="space-y-1">
+        <div className="flex items-center gap-1.5 mb-1">
+          <Target className="w-3.5 h-3.5" style={{ color: accentTextColor || 'hsl(var(--primary))' }} />
+          <h3 className="text-xs font-semibold" style={{ color: accentTextColor }}>
+            {currentYear} Reading Goal
+          </h3>
+        </div>
+        <div className="flex justify-between items-center text-[10px]">
+          <span style={{ color: accentTextColor }}>
+            Progress: {totalProgress}/{goal.goal_count} books
+          </span>
+          <span className="font-semibold" style={{ color: accentTextColor }}>
+            {Math.round(progressPercentage)}%
+          </span>
+        </div>
+        <Progress 
+          value={progressPercentage} 
+          className="h-2 bg-foreground/20 border border-foreground/30"
+          indicatorClassName="bg-none"
+          indicatorStyle={{ backgroundColor: progressBarColor }}
+        />
+        {isOwnProfile && (
+          <div className="flex items-center justify-between gap-1 pt-1">
+            <span className="text-[9px]" style={{ color: accentTextColor }}>
+              Manual count: {goal.manual_count}
+            </span>
+            <div className="flex gap-0.5">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => updateManualCount(false)}
+                disabled={goal.manual_count === 0}
+                className="h-4 w-4 p-0"
+                style={{ borderColor: accentTextColor, color: accentTextColor }}
+              >
+                <Minus className="h-2 w-2" />
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => updateManualCount(true)}
+                className="h-4 w-4 p-0"
+                style={{ borderColor: accentTextColor, color: accentTextColor }}
+              >
+                <Plus className="h-2 w-2" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // Create a contrasting border color for better visibility
   const borderStyle = accentColor 
     ? { borderColor: accentTextColor || 'hsl(var(--foreground))' }
@@ -185,9 +261,9 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile 
             </div>
             <Progress 
               value={progressPercentage} 
-              className="h-2.5 bg-foreground/15 border border-foreground/20"
+              className="h-2.5 bg-foreground/20 border border-foreground/30"
               indicatorClassName="bg-none"
-              indicatorStyle={{ backgroundColor: accentTextColor || 'hsl(var(--primary))' }}
+              indicatorStyle={{ backgroundColor: progressBarColor }}
             />
             
             {isOwnProfile && (

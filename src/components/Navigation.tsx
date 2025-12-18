@@ -57,9 +57,10 @@ export function Navigation() {
     return (
       <nav 
         data-mobile-tabbar 
-        className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50"
+        className="fixed bottom-0 left-0 right-0 bg-card border-t-2 border-border z-50"
         style={{
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)'
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)',
+          borderTopColor: accentTextColor || 'hsl(var(--border))',
         }}
       >
         <div className="flex justify-around items-center h-16">
@@ -72,14 +73,15 @@ export function Navigation() {
                 type="button"
                 aria-current={active ? "page" : undefined}
                 onClick={() => navigate(item.path)}
-                className="flex flex-col items-center justify-center flex-1 h-full gap-1 transition-opacity"
+                className="flex flex-col items-center justify-center flex-1 h-full gap-1 transition-all"
                 style={{
                   color: accentTextColor || "hsl(var(--foreground))",
-                  opacity: active ? 1 : 0.82,
+                  fontWeight: active ? 600 : 500,
+                  opacity: active ? 1 : 0.65,
                 }}
               >
-                <Icon className="w-5 h-5" />
-                <span className="text-xs font-medium">{item.label}</span>
+                <Icon className={active ? "w-6 h-6" : "w-5 h-5"} strokeWidth={active ? 2.5 : 2} />
+                <span className="text-xs">{item.label}</span>
               </button>
             );
           })}
