@@ -124,67 +124,61 @@ export function Navigation() {
           <nav className="flex gap-4 sm:gap-6">
             <Link
               to="/"
-              className={`text-sm whitespace-nowrap transition-opacity ${
+              className={`text-sm whitespace-nowrap transition-opacity text-foreground ${
                 isActive("/")
                   ? "font-medium underline underline-offset-4"
                   : "opacity-80 hover:opacity-100"
               }`}
-              style={{ color: accentTextColor || "hsl(var(--foreground))" }}
             >
               Home
             </Link>
             <Link
               to="/people"
-              className={`text-sm whitespace-nowrap transition-opacity ${
+              className={`text-sm whitespace-nowrap transition-opacity text-foreground ${
                 isActive("/people")
                   ? "font-medium underline underline-offset-4"
                   : "opacity-80 hover:opacity-100"
               }`}
-              style={{ color: accentTextColor || "hsl(var(--foreground))" }}
             >
               People
             </Link>
             <Link
               to="/feed"
-              className={`text-sm whitespace-nowrap transition-opacity ${
+              className={`text-sm whitespace-nowrap transition-opacity text-foreground ${
                 isActive("/feed")
                   ? "font-medium underline underline-offset-4"
                   : "opacity-80 hover:opacity-100"
               }`}
-              style={{ color: accentTextColor || "hsl(var(--foreground))" }}
             >
               Feed
             </Link>
             <Link
               to="/reviews"
-              className={`text-sm whitespace-nowrap transition-opacity ${
+              className={`text-sm whitespace-nowrap transition-opacity text-foreground ${
                 isActive("/reviews")
                   ? "font-medium underline underline-offset-4"
                   : "opacity-80 hover:opacity-100"
               }`}
-              style={{ color: accentTextColor || "hsl(var(--foreground))" }}
             >
               Reviews
             </Link>
             <Link
               to="/profile"
-              className={`text-sm whitespace-nowrap transition-opacity ${
+              className={`text-sm whitespace-nowrap transition-opacity text-foreground ${
                 isActive("/profile")
                   ? "font-medium underline underline-offset-4"
                   : "opacity-80 hover:opacity-100"
               }`}
-              style={{ color: accentTextColor || "hsl(var(--foreground))" }}
             >
               Profile
             </Link>
             <Link
               to="/contact"
-              className={`text-sm whitespace-nowrap transition-opacity ${
+              className={`text-sm whitespace-nowrap transition-opacity text-foreground ${
                 isActive("/contact")
                   ? "font-medium underline underline-offset-4"
                   : "opacity-80 hover:opacity-100"
               }`}
-              style={{ color: accentTextColor || "hsl(var(--foreground))" }}
             >
               Contact
             </Link>
