@@ -2,12 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Plus, Pencil, Trash2 } from "lucide-react";
-
+import { Calendar as CalendarIcon, Plus, Pencil, Trash2 } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format, parse } from "date-fns";
+import { cn } from "@/lib/utils";
 interface ReadingEntry {
   id: string;
   started_at: string | null;
@@ -206,21 +208,59 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label htmlFor="started">Date Started</Label>
-                <Input
-                  id="started"
-                  type="date"
-                  value={form.started_at}
-                  onChange={(e) => setForm((f) => ({ ...f, started_at: e.target.value }))}
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !form.started_at && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {form.started_at
+                        ? format(parse(form.started_at, "yyyy-MM-dd", new Date()), "MM/dd/yyyy")
+                        : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={form.started_at ? parse(form.started_at, "yyyy-MM-dd", new Date()) : undefined}
+                      onSelect={(date) => setForm((f) => ({ ...f, started_at: date ? format(date, "yyyy-MM-dd") : "" }))}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="space-y-1">
                 <Label htmlFor="finished">Date Finished</Label>
-                <Input
-                  id="finished"
-                  type="date"
-                  value={form.finished_at}
-                  onChange={(e) => setForm((f) => ({ ...f, finished_at: e.target.value }))}
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !form.finished_at && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {form.finished_at
+                        ? format(parse(form.finished_at, "yyyy-MM-dd", new Date()), "MM/dd/yyyy")
+                        : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={form.finished_at ? parse(form.finished_at, "yyyy-MM-dd", new Date()) : undefined}
+                      onSelect={(date) => setForm((f) => ({ ...f, finished_at: date ? format(date, "yyyy-MM-dd") : "" }))}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
             <div className="flex gap-2">
