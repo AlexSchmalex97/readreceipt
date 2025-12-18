@@ -618,33 +618,7 @@ export default function ProfileDisplay() {
             {/* Reading Goal moved below (above Recent Reviews) */}
 
           </div>
-          {/* Favorite Book - Full Width */}
-          {favoriteBook && (
-            <div className="max-w-md mx-auto mb-2">
-              <div className="border rounded-lg p-2" style={{ backgroundColor: accentCardColor }}>
-                <p className="text-[10px] mb-1 font-medium" style={{ color: accentTextColor }}>Favorite Book</p>
-                <div className="flex gap-1.5">
-                  {favoriteBook.cover_url && (
-                    <img
-                      src={favoriteBook.cover_url}
-                      alt={favoriteBook.title}
-                      className="w-8 h-12 object-cover rounded flex-shrink-0"
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-medium line-clamp-2 mb-0.5 leading-tight" style={{ color: accentTextColor }}>
-                      {favoriteBook.title}
-                    </p>
-                    <p className="text-[9px] opacity-80 leading-tight" style={{ color: accentTextColor }}>
-                      {favoriteBook.author}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Currently Reading and Top Five - Side by Side */}
+          {/* Currently Reading and Top Five - Side by Side (moved above Favorite Book for iOS) */}
           <div className="grid gap-2 mb-2" style={{ gridTemplateColumns: 'minmax(180px, 220px) auto', maxWidth: '700px', margin: '0 auto', justifyContent: 'center' }}>
             <div className="border rounded-lg p-2" style={{ backgroundColor: accentCardColor }}>
               <p className="text-[10px] mb-1 font-medium" style={{ color: accentTextColor }}>Currently Reading</p>
@@ -714,6 +688,32 @@ export default function ProfileDisplay() {
               </div>
             )}
           </div>
+
+          {/* Favorite Book - Full Width (moved below Top Five for iOS) */}
+          {favoriteBook && (
+            <div className="max-w-md mx-auto mb-2">
+              <div className="border rounded-lg p-2" style={{ backgroundColor: accentCardColor }}>
+                <p className="text-[10px] mb-1 font-medium" style={{ color: accentTextColor }}>Favorite Book</p>
+                <div className="flex gap-1.5">
+                  {favoriteBook.cover_url && (
+                    <img
+                      src={favoriteBook.cover_url}
+                      alt={favoriteBook.title}
+                      className="w-8 h-12 object-cover rounded flex-shrink-0"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-medium line-clamp-2 mb-0.5 leading-tight" style={{ color: accentTextColor }}>
+                      {favoriteBook.title}
+                    </p>
+                    <p className="text-[9px] opacity-80 leading-tight" style={{ color: accentTextColor }}>
+                      {favoriteBook.author}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
 
 
