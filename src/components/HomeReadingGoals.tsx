@@ -183,7 +183,12 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile 
                 {Math.round(progressPercentage)}%
               </span>
             </div>
-            <Progress value={progressPercentage} className="h-1.5" />
+            <Progress 
+              value={progressPercentage} 
+              className="h-2.5 bg-foreground/15 border border-foreground/20"
+              indicatorClassName="bg-none"
+              indicatorStyle={{ backgroundColor: accentTextColor || 'hsl(var(--primary))' }}
+            />
             
             {isOwnProfile && (
               <div className="flex items-center justify-between gap-1.5 pt-1.5 border-t" style={{ borderColor: accentTextColor || 'hsl(var(--border))' }}>

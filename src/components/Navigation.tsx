@@ -13,7 +13,7 @@ export function Navigation() {
   const isIOSWebView = typeof window !== 'undefined' && !!(window as any).webkit && !!(window as any).webkit.messageHandlers;
   const isStandalonePWA = typeof window !== 'undefined' && (("standalone" in navigator && (navigator as any).standalone) || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches));
   const [headerOpacity, setHeaderOpacity] = useState(1);
-  const { accentCardColor, accentTextColor } = useUserAccent();
+  const { accentTextColor } = useUserAccent();
 
   const isActive = (path: string) => pathname === path;
   const isHomePage = pathname === "/";
@@ -69,11 +69,14 @@ export function Navigation() {
             return (
               <button
                 key={item.path}
+                type="button"
+                aria-current={active ? "page" : undefined}
                 onClick={() => navigate(item.path)}
-                className={`flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors ${
-                  active ? "" : "text-muted-foreground"
-                }`}
-                style={active && accentTextColor ? { color: accentTextColor } : active ? { color: 'hsl(var(--primary))' } : undefined}
+                className="flex flex-col items-center justify-center flex-1 h-full gap-1 transition-opacity"
+                style={{
+                  color: accentTextColor || "hsl(var(--foreground))",
+                  opacity: active ? 1 : 0.82,
+                }}
               >
                 <Icon className="w-5 h-5" />
                 <span className="text-xs font-medium">{item.label}</span>
@@ -115,67 +118,67 @@ export function Navigation() {
           <nav className="flex gap-4 sm:gap-6">
             <Link
               to="/"
-              className={`text-sm whitespace-nowrap ${
+              className={`text-sm whitespace-nowrap transition-opacity ${
                 isActive("/")
-                  ? "font-medium"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "font-medium underline underline-offset-4"
+                  : "opacity-80 hover:opacity-100"
               }`}
-              style={isActive("/") && accentTextColor ? { color: accentTextColor } : isActive("/") ? { color: 'hsl(var(--foreground))' } : undefined}
+              style={{ color: accentTextColor || "hsl(var(--foreground))" }}
             >
               Home
             </Link>
             <Link
               to="/people"
-              className={`text-sm whitespace-nowrap ${
+              className={`text-sm whitespace-nowrap transition-opacity ${
                 isActive("/people")
-                  ? "font-medium"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "font-medium underline underline-offset-4"
+                  : "opacity-80 hover:opacity-100"
               }`}
-              style={isActive("/people") && accentTextColor ? { color: accentTextColor } : isActive("/people") ? { color: 'hsl(var(--foreground))' } : undefined}
+              style={{ color: accentTextColor || "hsl(var(--foreground))" }}
             >
               People
             </Link>
             <Link
               to="/feed"
-              className={`text-sm whitespace-nowrap ${
+              className={`text-sm whitespace-nowrap transition-opacity ${
                 isActive("/feed")
-                  ? "font-medium"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "font-medium underline underline-offset-4"
+                  : "opacity-80 hover:opacity-100"
               }`}
-              style={isActive("/feed") && accentTextColor ? { color: accentTextColor } : isActive("/feed") ? { color: 'hsl(var(--foreground))' } : undefined}
+              style={{ color: accentTextColor || "hsl(var(--foreground))" }}
             >
               Feed
             </Link>
             <Link
               to="/reviews"
-              className={`text-sm whitespace-nowrap ${
+              className={`text-sm whitespace-nowrap transition-opacity ${
                 isActive("/reviews")
-                  ? "font-medium"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "font-medium underline underline-offset-4"
+                  : "opacity-80 hover:opacity-100"
               }`}
-              style={isActive("/reviews") && accentTextColor ? { color: accentTextColor } : isActive("/reviews") ? { color: 'hsl(var(--foreground))' } : undefined}
+              style={{ color: accentTextColor || "hsl(var(--foreground))" }}
             >
               Reviews
             </Link>
             <Link
               to="/profile"
-              className={`text-sm whitespace-nowrap ${
+              className={`text-sm whitespace-nowrap transition-opacity ${
                 isActive("/profile")
-                  ? "font-medium"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "font-medium underline underline-offset-4"
+                  : "opacity-80 hover:opacity-100"
               }`}
-              style={isActive("/profile") && accentTextColor ? { color: accentTextColor } : isActive("/profile") ? { color: 'hsl(var(--foreground))' } : undefined}
+              style={{ color: accentTextColor || "hsl(var(--foreground))" }}
             >
               Profile
             </Link>
             <Link
               to="/contact"
-              className={`text-sm whitespace-nowrap ${
+              className={`text-sm whitespace-nowrap transition-opacity ${
                 isActive("/contact")
-                  ? "font-medium"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "font-medium underline underline-offset-4"
+                  : "opacity-80 hover:opacity-100"
               }`}
-              style={isActive("/contact") && accentTextColor ? { color: accentTextColor } : isActive("/contact") ? { color: 'hsl(var(--foreground))' } : undefined}
+              style={{ color: accentTextColor || "hsl(var(--foreground))" }}
             >
               Contact
             </Link>
