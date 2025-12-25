@@ -684,7 +684,7 @@ export default function ProfileDisplay() {
           {/* Top Five Books - Below Currently Reading & Favourite */}
           {topFiveBooks.length > 0 && (
             <div className="max-w-lg mx-auto mb-3">
-              <div className="flex items-center gap-1.5 mb-1">
+              <div className="flex items-center justify-center gap-1.5 mb-1">
                 <Link to="/profile/settings">
                   <p className="text-[10px] font-medium cursor-pointer hover:underline" style={{ color: accentTextColor }}>
                     Top Five
@@ -1124,7 +1124,7 @@ export default function ProfileDisplay() {
             {/* Middle Column: Top Five Books */}
             {topFiveBooks.length > 0 && (
               <div className="px-4">
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center justify-center gap-2 mb-3">
                   <Link to="/profile/settings">
                     <h3 className="text-sm font-medium cursor-pointer hover:underline" style={{ color: headerTextColor }}>
                       Top Five
