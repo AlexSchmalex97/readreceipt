@@ -315,11 +315,12 @@ export default function Feed() {
               {/* Progress Info */}
               <div className="flex-1 min-w-0">
                 <div className="font-medium mb-1" style={{ color: accentTextColor }}>Reading Progress</div>
-                <div className="break-words" style={{ color: accentTextColor, opacity: 0.9 }}>
-                  Read to page {it.to_page}
-                  {typeof it.from_page === "number" && it.from_page >= 0 ? ` (from ${it.from_page})` : ""} of{" "}
-                  <em className="break-words">{it.book_title ?? "Untitled"}</em>
-                  {it.book_author ? ` by ${it.book_author}` : ""}
+                <div className="break-words overflow-hidden" style={{ color: accentTextColor, opacity: 0.9 }}>
+                  <span>Read to page {it.to_page}</span>
+                  {typeof it.from_page === "number" && it.from_page >= 0 ? <span> (from {it.from_page})</span> : null} 
+                  <span> of </span>
+                  <em className="block mt-1 break-words">{it.book_title ?? "Untitled"}</em>
+                  {it.book_author && <span className="block break-words">by {it.book_author}</span>}
                 </div>
               </div>
             </div>
@@ -356,9 +357,10 @@ export default function Feed() {
               
               {/* Review Info */}
               <div className="flex-1 min-w-0">
-                <div className="font-medium mb-1 break-words" style={{ color: accentTextColor }}>
-                  Reviewed <em className="break-words">{it.book_title ?? "Untitled"}</em>
-                  {it.book_author ? ` by ${it.book_author}` : ""}: ⭐ {it.rating}/5
+                <div className="font-medium mb-1 break-words overflow-hidden" style={{ color: accentTextColor }}>
+                  <span>Reviewed: ⭐ {it.rating}/5</span>
+                  <em className="block mt-1 break-words">{it.book_title ?? "Untitled"}</em>
+                  {it.book_author && <span className="block break-words">by {it.book_author}</span>}
                 </div>
                 {it.review && <p className="text-sm break-words" style={{ color: accentTextColor, opacity: 0.8 }}>{it.review}</p>}
               </div>
