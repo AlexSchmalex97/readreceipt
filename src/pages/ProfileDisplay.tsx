@@ -538,7 +538,7 @@ export default function ProfileDisplay() {
             </div>
 
             {/* Profile Info */}
-            <div className="w-full space-y-2 p-3 rounded-lg bg-background/70 backdrop-blur-sm text-center">
+            <div className="w-full space-y-2 p-3 rounded-lg bg-background/85 backdrop-blur-sm text-center">
               <div>
                 <h1
                   className="text-xl sm:text-2xl font-bold text-foreground"
@@ -996,7 +996,7 @@ export default function ProfileDisplay() {
               </div>
               
               {/* Profile Info - with transparent background for visibility */}
-              <div className="flex-1 space-y-2 pt-1 p-4 rounded-lg bg-background/70 backdrop-blur-sm">
+              <div className="flex-1 space-y-2 pt-1 p-4 rounded-lg bg-background/85 backdrop-blur-sm">
                 <div>
                   <h1 className="text-4xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
                     {profile.display_name || "Reader"}
