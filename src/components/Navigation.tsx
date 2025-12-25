@@ -31,7 +31,7 @@ export function Navigation() {
 
   // Scroll detection for header fade effect (only on home page)
   useEffect(() => {
-    if (!isHomePage || !isWeb) return;
+    if (!isHomePage) return;
 
     const handleScroll = () => {
       const scrollY = window.scrollY;
@@ -50,18 +50,19 @@ export function Navigation() {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isHomePage, isWeb]);
+  }, [isHomePage]);
 
   // Check if running in ReadReceipt iOS native app
   const isNativeIOSApp = typeof window !== 'undefined' && (window as any).__RR_NATIVE_IOS_APP;
   const isMobileOrNative = isNativeIOSApp || isReadReceiptApp || isNative || isIOS || isIOSWebView || isStandalonePWA || (typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent) && (window as any)?.Capacitor);
   
-  // Unified layout: Header + Bottom Tab Bar (matches iOS app)
+  // Mobile/Tablet: iOS-style layout with header image + bottom tab bar
+  // Desktop: Original layout with logo, auth buttons, and text navigation
   return (
     <>
-      {/* Top Header with Logo - for both web and iOS */}
+      {/* Mobile/Tablet Header with centered logo - hidden on desktop (lg+) */}
       <header 
-        className="bg-card border-b border-border transition-opacity duration-300 px-4 py-3"
+        className="lg:hidden bg-card border-b border-border transition-opacity duration-300 px-4 py-3"
         style={{ 
           opacity: isHomePage ? headerOpacity : 1,
           pointerEvents: (isHomePage && headerOpacity < 0.1) ? 'none' : 'auto'
@@ -78,10 +79,89 @@ export function Navigation() {
         </div>
       </header>
 
-      {/* Bottom Tab Bar Navigation - matches iOS app */}
+      {/* Desktop Header - hidden on mobile/tablet */}
+      <header 
+        className="hidden lg:block bg-card shadow-md border-b"
+        style={{ borderColor: 'hsl(var(--border))' }}
+      >
+        <div className="container mx-auto px-3 sm:px-4 py-2 sm:py-3">
+          {/* First Row: Logo + Auth */}
+          <div className="flex items-center justify-between gap-4 mb-3">
+            <Link to="/" className="flex items-center gap-3">
+              <img
+                src="/assets/readreceipt-logo-tight.png?v=2"
+                alt="ReadReceipt logo wordmark"
+                className="block h-12 sm:h-14 md:h-16"
+              />
+            </Link>
+            <AuthButtons />
+          </div>
+
+          {/* Second Row: Navigation + Dynamic Display */}
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+            <nav className="flex gap-4 sm:gap-6">
+              <Link
+                to="/"
+                className={`text-sm whitespace-nowrap transition-opacity text-foreground ${
+                  isActive("/") ? "font-medium underline underline-offset-4" : "opacity-80 hover:opacity-100"
+                }`}
+              >
+                Home
+              </Link>
+              <Link
+                to="/people"
+                className={`text-sm whitespace-nowrap transition-opacity text-foreground ${
+                  isActive("/people") ? "font-medium underline underline-offset-4" : "opacity-80 hover:opacity-100"
+                }`}
+              >
+                People
+              </Link>
+              <Link
+                to="/feed"
+                className={`text-sm whitespace-nowrap transition-opacity text-foreground ${
+                  isActive("/feed") ? "font-medium underline underline-offset-4" : "opacity-80 hover:opacity-100"
+                }`}
+              >
+                Feed
+              </Link>
+              <Link
+                to="/reviews"
+                className={`text-sm whitespace-nowrap transition-opacity text-foreground ${
+                  isActive("/reviews") ? "font-medium underline underline-offset-4" : "opacity-80 hover:opacity-100"
+                }`}
+              >
+                Reviews
+              </Link>
+              <Link
+                to="/profile"
+                className={`text-sm whitespace-nowrap transition-opacity text-foreground ${
+                  isActive("/profile") ? "font-medium underline underline-offset-4" : "opacity-80 hover:opacity-100"
+                }`}
+              >
+                Profile
+              </Link>
+              <Link
+                to="/contact"
+                className={`text-sm whitespace-nowrap transition-opacity text-foreground ${
+                  isActive("/contact") ? "font-medium underline underline-offset-4" : "opacity-80 hover:opacity-100"
+                }`}
+              >
+                Contact
+              </Link>
+            </nav>
+
+            {/* Dynamic Display (Quotes or Time/Weather) */}
+            <div className="mt-3 lg:mt-0">
+              <HeaderDisplay />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Bottom Tab Bar Navigation - only on mobile/tablet, hidden on desktop */}
       <nav 
         data-mobile-tabbar 
-        className="fixed bottom-0 left-0 right-0 border-t-2 z-50 backdrop-blur-xl shadow-lg"
+        className="lg:hidden fixed bottom-0 left-0 right-0 border-t-2 z-50 backdrop-blur-xl shadow-lg"
         style={{
           paddingBottom: isMobileOrNative ? 'calc(env(safe-area-inset-bottom, 0px) + 8px)' : '8px',
           backgroundColor: tabBarBg,
