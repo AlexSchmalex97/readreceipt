@@ -1126,14 +1126,14 @@ export default function ProfileDisplay() {
               <div className="px-4">
                 <div className="flex items-center justify-center gap-2 mb-3">
                   <Link to="/profile/settings">
-                    <h3 className="text-sm font-medium cursor-pointer hover:underline" style={{ color: headerTextColor }}>
+                    <h3 className="text-sm font-medium cursor-pointer hover:underline" style={{ color: accentTextColor }}>
                       Top Five
                     </h3>
                   </Link>
                   <button
                     onClick={() => setShowTopTenDialog(true)}
                     className="text-xs px-2 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
-                    style={{ color: headerTextColor, borderColor: `${headerTextColor}33` }}
+                    style={{ color: accentTextColor, borderColor: accentTextColor }}
                   >
                     view top ten
                   </button>
