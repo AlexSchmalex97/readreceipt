@@ -1138,7 +1138,7 @@ export default function ProfileDisplay() {
                     view top ten
                   </button>
                 </div>
-                <div className="flex gap-1.5">
+                <div className="flex justify-center gap-1.5">
                   {topFiveBooks.slice(0, 5).map((book, index) => (
                     <div key={book.id} className="flex-shrink-0 w-20">
                       <div className="relative">
