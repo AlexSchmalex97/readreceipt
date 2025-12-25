@@ -164,12 +164,12 @@ body.ios-app {
   .shadow-card         { box-shadow: var(--shadow-card); }
 }
 
-/* Hide top web header in native iOS app, WKWebView, or PWA standalone */
-.ios-native-app header.bg-card { display: none !important; }
-.ios-app header.bg-card { display: none !important; }
-@media (display-mode: standalone) {
+/* Hide top web header in native iOS app, WKWebView, or PWA standalone - only on mobile/tablet */
+@media (max-width: 1023px) {
+  .ios-native-app header.bg-card { display: none !important; }
+  .ios-app header.bg-card { display: none !important; }
+}
+@media (display-mode: standalone) and (max-width: 1023px) {
   header.bg-card { display: none !important; }
 }
-/* If the mobile tabbar exists, hide the header (robust fallback) */
-body:has(nav[data-mobile-tabbar]) header.bg-card { display: none !important; }
 
