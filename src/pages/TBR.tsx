@@ -159,8 +159,8 @@ const TBR = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <main className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold mb-8" style={{ color: accentTextColor }}>To Be Read</h1>
+      <main className="container mx-auto px-4 py-6 pb-24 lg:pb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-6" style={{ color: accentTextColor }}>To Be Read</h1>
         <TBRList
           userId={userId}
           onMoveToReading={handleMoveToReading}

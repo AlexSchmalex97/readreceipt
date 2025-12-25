@@ -505,13 +505,13 @@ export default function ProfileDisplay() {
           </div>
         )}
 
-      <div className="container mx-auto px-3 sm:px-6 py-2 sm:py-6 max-w-7xl"
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 max-w-7xl pb-24 lg:pb-6"
         style={{ paddingTop: showPullIndicator ? `${pullDistance + 8}px` : undefined }}
       >
         {/* Mobile & Tablet Layout - Centered */}
-        <div className="lg:hidden">
+        <div className="lg:hidden space-y-4">
           {/* Settings Button - Top Right */}
-          <div className="flex justify-end mb-3">
+          <div className="flex justify-end mb-4">
             <Link to="/profile/settings">
               <Button variant="outline" size="sm" className="h-9 px-4">
                 <Settings className="w-4 h-4 mr-2" />
@@ -521,7 +521,7 @@ export default function ProfileDisplay() {
           </div>
 
           {/* Header - Profile photo and info on left, stats on right */}
-          <div className="flex items-start gap-3 mb-3 max-w-4xl mx-auto">
+          <div className="flex items-start gap-4 mb-4 max-w-4xl mx-auto">
             {/* Left side - Profile Photo and Info */}
             <div className="flex items-start gap-3 flex-1">
               {/* Profile Photo */}
