@@ -213,12 +213,11 @@ export default function Feed() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-soft">
+    <div className="min-h-screen bg-gradient-soft flex flex-col">
       <Navigation />
       <div 
         ref={scrollableRef}
-        className="relative overflow-y-auto"
-        style={{ height: (isIOS || isReadReceiptApp) ? 'calc(100dvh - 64px)' : 'calc(100dvh - 64px)' }}
+        className="relative flex-1 overflow-y-auto"
       >
         {/* Pull-to-refresh indicator */}
         {showPullIndicator && (
@@ -273,12 +272,14 @@ export default function Feed() {
             {/* Post Content */}
             <div className="mb-2">
               {it.book_title && (
-                <div className="text-sm mb-2 flex items-center gap-2" style={{ color: accentTextColor, opacity: 0.8 }}>
-                  <BookOpen className="w-4 h-4" />
-                  About: <em>{it.book_title}</em> {it.book_author && `by ${it.book_author}`}
+                <div className="text-sm mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0" style={{ color: accentTextColor, opacity: 0.8 }}>
+                  <BookOpen className="w-4 h-4 flex-shrink-0" />
+                  <span>About:</span>
+                  <em className="break-words">{it.book_title}</em>
+                  {it.book_author && <span className="break-words">by {it.book_author}</span>}
                 </div>
               )}
-              <p className="whitespace-pre-wrap" style={{ color: accentTextColor }}>{it.content}</p>
+              <p className="whitespace-pre-wrap break-words" style={{ color: accentTextColor }}>{it.content}</p>
             </div>
           </div>
         ) : it.kind === "progress" ? (
