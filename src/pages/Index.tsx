@@ -802,35 +802,13 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-soft">
       <Navigation />
 
-      {/* iOS Header - Only on Home page */}
-      {isIOSPlatform && (
-        <header 
-          className="bg-card border-b border-border transition-opacity duration-300 px-4 py-3"
-          style={{ 
-            opacity: headerOpacity,
-            pointerEvents: headerOpacity < 0.1 ? 'none' : 'auto'
-          }}
-        >
-          <div className="flex items-center justify-center">
-            <img
-              src="/assets/readreceipt-header-ios.png"
-              alt="ReadReceipt"
-              className="h-12"
-            />
-          </div>
-        </header>
-      )}
-
       <div 
         ref={(el) => {
           if (scrollableRef) scrollableRef.current = el;
           scrollContainerRef.current = el;
         }}
-        className="relative overflow-y-auto"
+        className="relative overflow-y-auto pb-24"
         style={{ 
-          height: isIOSPlatform ? 'calc(100dvh - 4rem)' : 'auto',
-          paddingTop: isIOSPlatform ? 'calc(env(safe-area-inset-top, 0px) + 12px)' : undefined,
-          paddingBottom: isIOSPlatform ? 'calc(4rem + env(safe-area-inset-bottom, 0px) + 16px)' : undefined,
           marginTop: showPullIndicator ? `${pullDistance}px` : undefined
         }}
       >

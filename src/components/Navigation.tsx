@@ -54,15 +54,36 @@ export function Navigation() {
 
   // Check if running in ReadReceipt iOS native app
   const isNativeIOSApp = typeof window !== 'undefined' && (window as any).__RR_NATIVE_IOS_APP;
+  const isMobileOrNative = isNativeIOSApp || isReadReceiptApp || isNative || isIOS || isIOSWebView || isStandalonePWA || (typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent) && (window as any)?.Capacitor);
   
-  // ReadReceipt iOS App: No header, only bottom tab bar
-  if (isNativeIOSApp || isReadReceiptApp || isNative || isIOS || isIOSWebView || isStandalonePWA || (typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent) && (window as any)?.Capacitor)) {
-    return (
+  // Unified layout: Header + Bottom Tab Bar (matches iOS app)
+  return (
+    <>
+      {/* Top Header with Logo - for both web and iOS */}
+      <header 
+        className="bg-card border-b border-border transition-opacity duration-300 px-4 py-3"
+        style={{ 
+          opacity: isHomePage ? headerOpacity : 1,
+          pointerEvents: (isHomePage && headerOpacity < 0.1) ? 'none' : 'auto'
+        }}
+      >
+        <div className="flex items-center justify-center">
+          <Link to="/">
+            <img
+              src="/assets/readreceipt-header-ios.png"
+              alt="ReadReceipt"
+              className="h-12"
+            />
+          </Link>
+        </div>
+      </header>
+
+      {/* Bottom Tab Bar Navigation - matches iOS app */}
       <nav 
         data-mobile-tabbar 
         className="fixed bottom-0 left-0 right-0 border-t-2 z-50 backdrop-blur-xl shadow-lg"
         style={{
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)',
+          paddingBottom: isMobileOrNative ? 'calc(env(safe-area-inset-bottom, 0px) + 8px)' : '8px',
           backgroundColor: tabBarBg,
           borderTopColor: tabBarText,
         }}
@@ -91,109 +112,6 @@ export function Navigation() {
           })}
         </div>
       </nav>
-    );
-  }
-
-
-  // Web: Original navigation layout - but ONLY if truly web (not iOS, not native, not WKWebView, not PWA)
-  if (isWeb && !isIOS && !isNative && !isReadReceiptApp && !isIOSWebView && !isStandalonePWA && !(typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent) && (window as any)?.Capacitor)) {
-    return (
-      <header 
-        className="bg-card shadow-md border-b"
-        style={{ 
-          borderColor: 'hsl(var(--border))'
-        }}
-      >
-        <div className="container mx-auto px-3 sm:px-4 py-2 sm:py-3">
-        {/* First Row: Logo + Title + Auth */}
-        <div className="flex items-center justify-between gap-4 mb-3">
-          <Link to="/" className="flex items-center gap-3">
-            <img
-              src="/assets/readreceipt-logo-tight.png?v=2"
-              alt="ReadReceipt logo wordmark"
-              className="block h-12 sm:h-14 md:h-16"
-            />
-          </Link>
-          
-          <AuthButtons />
-        </div>
-
-        {/* Second Row: Navigation + Dynamic Display */}
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-          {/* Navigation */}
-          <nav className="flex gap-4 sm:gap-6">
-            <Link
-              to="/"
-              className={`text-sm whitespace-nowrap transition-opacity text-foreground ${
-                isActive("/")
-                  ? "font-medium underline underline-offset-4"
-                  : "opacity-80 hover:opacity-100"
-              }`}
-            >
-              Home
-            </Link>
-            <Link
-              to="/people"
-              className={`text-sm whitespace-nowrap transition-opacity text-foreground ${
-                isActive("/people")
-                  ? "font-medium underline underline-offset-4"
-                  : "opacity-80 hover:opacity-100"
-              }`}
-            >
-              People
-            </Link>
-            <Link
-              to="/feed"
-              className={`text-sm whitespace-nowrap transition-opacity text-foreground ${
-                isActive("/feed")
-                  ? "font-medium underline underline-offset-4"
-                  : "opacity-80 hover:opacity-100"
-              }`}
-            >
-              Feed
-            </Link>
-            <Link
-              to="/reviews"
-              className={`text-sm whitespace-nowrap transition-opacity text-foreground ${
-                isActive("/reviews")
-                  ? "font-medium underline underline-offset-4"
-                  : "opacity-80 hover:opacity-100"
-              }`}
-            >
-              Reviews
-            </Link>
-            <Link
-              to="/profile"
-              className={`text-sm whitespace-nowrap transition-opacity text-foreground ${
-                isActive("/profile")
-                  ? "font-medium underline underline-offset-4"
-                  : "opacity-80 hover:opacity-100"
-              }`}
-            >
-              Profile
-            </Link>
-            <Link
-              to="/contact"
-              className={`text-sm whitespace-nowrap transition-opacity text-foreground ${
-                isActive("/contact")
-                  ? "font-medium underline underline-offset-4"
-                  : "opacity-80 hover:opacity-100"
-              }`}
-            >
-              Contact
-            </Link>
-          </nav>
-
-          {/* Dynamic Display (Quotes or Time/Weather) */}
-          <div className="mt-3 lg:mt-0">
-            <HeaderDisplay />
-          </div>
-        </div>
-      </div>
-    </header>
-    );
-  }
-
-  // Non-web environments: no top header
-  return null;
+    </>
+  );
 }
