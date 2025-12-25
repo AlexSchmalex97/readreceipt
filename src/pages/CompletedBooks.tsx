@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2, BookOpen, Edit, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { BookEditionSelector } from "@/components/BookEditionSelector";
+import { BookEditDialog } from "@/components/BookEditDialog";
 import { ReadingEntriesDialog } from "@/components/ReadingEntriesDialog";
 import { ReviewDialog } from "@/components/ReviewDialog";
 import { usePlatform } from "@/hooks/usePlatform";
@@ -324,6 +325,15 @@ export default function CompletedBooks() {
                 )}
 
                  <div className="mt-auto flex flex-wrap items-center justify-end gap-2 pt-4">
+                   <BookEditDialog
+                     bookId={book.id}
+                     bookTitle={book.title}
+                     bookAuthor={book.author}
+                     totalPages={book.total_pages}
+                     currentCoverUrl={book.cover_url}
+                     onUpdate={() => setReloadCounter((c) => c + 1)}
+                     triggerVariant="button"
+                   />
                    <ReadingEntriesDialog bookId={book.id} bookTitle={book.title} onChanged={() => setReloadCounter((c) => c + 1)} />
                     <Button
                       variant="outline"

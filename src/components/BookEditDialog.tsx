@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,8 @@ interface BookEditDialogProps {
   totalPages: number;
   currentCoverUrl?: string;
   onUpdate: () => void;
+  triggerClassName?: string;
+  triggerVariant?: "icon" | "button";
 }
 
 export const BookEditDialog = ({
@@ -24,15 +26,48 @@ export const BookEditDialog = ({
   totalPages,
   currentCoverUrl,
   onUpdate,
+  triggerClassName,
+  triggerVariant = "icon",
 }: BookEditDialogProps) => {
   const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState(bookTitle);
+  const [author, setAuthor] = useState(bookAuthor);
   const [newTotalPages, setNewTotalPages] = useState(totalPages.toString());
+  const [coverUrl, setCoverUrl] = useState(currentCoverUrl);
   const [updating, setUpdating] = useState(false);
   const { toast } = useToast();
+
+  // Reset form when dialog opens
+  useEffect(() => {
+    if (open) {
+      setTitle(bookTitle);
+      setAuthor(bookAuthor);
+      setNewTotalPages(totalPages.toString());
+      setCoverUrl(currentCoverUrl);
+    }
+  }, [open, bookTitle, bookAuthor, totalPages, currentCoverUrl]);
 
   const handleSave = async () => {
     const pages = parseInt(newTotalPages, 10);
     
+    if (!title.trim()) {
+      toast({
+        title: "Title required",
+        description: "Please enter a book title",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!author.trim()) {
+      toast({
+        title: "Author required",
+        description: "Please enter an author name",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!Number.isFinite(pages) || pages <= 0) {
       toast({
         title: "Invalid page count",
@@ -46,14 +81,19 @@ export const BookEditDialog = ({
     try {
       const { error } = await supabase
         .from("books")
-        .update({ total_pages: pages })
+        .update({ 
+          title: title.trim(),
+          author: author.trim(),
+          total_pages: pages,
+          cover_url: coverUrl
+        })
         .eq("id", bookId);
 
       if (error) throw error;
 
       toast({
         title: "Book updated",
-        description: "Total pages updated successfully",
+        description: "Book details updated successfully",
       });
 
       onUpdate();
@@ -73,13 +113,24 @@ export const BookEditDialog = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          size="icon-xs"
-          variant="ghost"
-          className="sm:h-8 sm:w-8 p-0 text-muted-foreground hover:text-foreground"
-        >
-          <Edit3 className="w-3 h-3 sm:w-4 sm:h-4" />
-        </Button>
+        {triggerVariant === "button" ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className={triggerClassName || "shrink-0"}
+          >
+            <Edit3 className="w-3 h-3 mr-1" />
+            Edit
+          </Button>
+        ) : (
+          <Button
+            size="icon-xs"
+            variant="ghost"
+            className={triggerClassName || "sm:h-8 sm:w-8 p-0 text-muted-foreground hover:text-foreground"}
+          >
+            <Edit3 className="w-3 h-3 sm:w-4 sm:h-4" />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
@@ -90,10 +141,10 @@ export const BookEditDialog = ({
             <Label className="text-sm font-medium">Book Cover</Label>
             <div className="flex items-center gap-3">
               <div className="w-16 h-20 rounded border flex items-center justify-center overflow-hidden bg-muted">
-                {currentCoverUrl ? (
+                {coverUrl ? (
                   <img 
-                    src={currentCoverUrl} 
-                    alt={bookTitle}
+                    src={coverUrl} 
+                    alt={title}
                     className="w-full h-full object-contain"
                   />
                 ) : (
@@ -102,18 +153,44 @@ export const BookEditDialog = ({
               </div>
               <BookEditionSelector
                 bookId={bookId}
-                bookTitle={bookTitle}
-                bookAuthor={bookAuthor}
-                currentCoverUrl={currentCoverUrl}
+                bookTitle={title}
+                bookAuthor={author}
+                currentCoverUrl={coverUrl}
                 onCoverUpdate={(newCoverUrl) => {
+                  setCoverUrl(newCoverUrl);
                   toast({
-                    title: "Cover updated",
-                    description: "Book cover updated successfully",
+                    title: "Cover selected",
+                    description: "Click Save Changes to apply",
                   });
-                  onUpdate();
                 }}
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="book-title" className="text-sm font-medium">
+              Title
+            </Label>
+            <Input
+              id="book-title"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter book title"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="book-author" className="text-sm font-medium">
+              Author
+            </Label>
+            <Input
+              id="book-author"
+              type="text"
+              value={author}
+              onChange={(e) => setAuthor(e.target.value)}
+              placeholder="Enter author name"
+            />
           </div>
           
           <div className="space-y-2">
