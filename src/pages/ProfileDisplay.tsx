@@ -539,8 +539,8 @@ export default function ProfileDisplay() {
                 )}
               </div>
 
-              {/* Profile Info */}
-              <div className="flex-1 space-y-1 pt-0.5">
+              {/* Profile Info - with transparent background for visibility */}
+              <div className="flex-1 space-y-1 pt-0.5 p-3 rounded-lg" style={{ backgroundColor: 'rgba(255, 255, 255, 0.75)', backdropFilter: 'blur(4px)' }}>
                 <div>
                   <h1 className="text-xl sm:text-2xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
                     {profile.display_name || "Reader"}
@@ -618,8 +618,9 @@ export default function ProfileDisplay() {
             {/* Reading Goal moved below (above Recent Reviews) */}
 
           </div>
-          {/* Currently Reading and Top Five - Side by Side (moved above Favorite Book for iOS) */}
-          <div className="grid gap-2 mb-2" style={{ gridTemplateColumns: 'minmax(180px, 220px) auto', maxWidth: '700px', margin: '0 auto', justifyContent: 'center' }}>
+          {/* Currently Reading and Favourite Book - Side by Side */}
+          <div className="grid grid-cols-2 gap-3 mb-3 max-w-lg mx-auto">
+            {/* Currently Reading */}
             <div className="border rounded-lg p-2" style={{ backgroundColor: accentCardColor }}>
               <p className="text-[10px] mb-1 font-medium" style={{ color: accentTextColor }}>Currently Reading</p>
               <div className="flex gap-1.5">
@@ -648,75 +649,70 @@ export default function ProfileDisplay() {
               </div>
             </div>
 
-            {/* Top Five Books - To the right of Currently Reading */}
-            {topFiveBooks.length > 0 && (
-              <div>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <Link to="/profile/settings">
-                    <p className="text-[10px] font-medium cursor-pointer hover:underline" style={{ color: accentTextColor }}>
-                      Top Five
-                    </p>
-                  </Link>
-                  <button
-                    onClick={() => setShowTopTenDialog(true)}
-                    className="text-[9px] px-1 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
-                    style={{ color: accentTextColor, borderColor: accentTextColor }}
-                  >
-                    view top ten
-                  </button>
-                </div>
-                <div className="flex gap-1 overflow-x-auto pb-1">
-                  {topFiveBooks.slice(0, 5).map((book, index) => (
-                    <div key={book.id} className="flex-shrink-0 text-center" style={{ width: '42px' }}>
-                      {book.cover_url ? (
-                        <img
-                          src={book.cover_url}
-                          alt={book.title}
-                          className="w-full h-14 object-cover rounded mb-0.5 shadow-sm"
-                        />
-                      ) : (
-                        <div className="w-full h-14 bg-muted rounded mb-0.5 flex items-center justify-center">
-                          <BookOpen className="w-4 h-4 text-muted-foreground" />
-                        </div>
-                      )}
-                      <p className="text-[8px] font-medium line-clamp-2 leading-tight" style={{ color: accentTextColor }}>
-                        {book.title}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Favorite Book - Full Width (moved below Top Five for iOS) */}
-          {favoriteBook && (
-            <div className="max-w-md mx-auto mb-2">
-              <div className="border rounded-lg p-2" style={{ backgroundColor: accentCardColor }}>
-                <p className="text-[10px] mb-1 font-medium" style={{ color: accentTextColor }}>Favorite Book</p>
-                <div className="flex gap-1.5">
-                  {favoriteBook.cover_url && (
-                    <img
-                      src={favoriteBook.cover_url}
-                      alt={favoriteBook.title}
-                      className="w-8 h-12 object-cover rounded flex-shrink-0"
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-medium line-clamp-2 mb-0.5 leading-tight" style={{ color: accentTextColor }}>
-                      {favoriteBook.title}
-                    </p>
-                    <p className="text-[9px] opacity-80 leading-tight" style={{ color: accentTextColor }}>
-                      {favoriteBook.author}
-                    </p>
-                  </div>
+            {/* Favourite Book - Side by Side with Currently Reading */}
+            <div className="border rounded-lg p-2" style={{ backgroundColor: accentCardColor }}>
+              <p className="text-[10px] mb-1 font-medium" style={{ color: accentTextColor }}>Favorite Book</p>
+              <div className="flex gap-1.5">
+                {favoriteBook?.cover_url ? (
+                  <img
+                    src={favoriteBook.cover_url}
+                    alt={favoriteBook.title}
+                    className="w-8 h-12 object-cover rounded flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-8 h-12 bg-muted/20 rounded flex-shrink-0 border border-dashed" style={{ borderColor: accentTextColor + '40' }} />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-medium line-clamp-2 mb-0.5 leading-tight" style={{ color: accentTextColor }}>
+                    {favoriteBook?.title || 'TBA'}
+                  </p>
+                  <p className="text-[9px] opacity-80 leading-tight" style={{ color: accentTextColor }}>
+                    {favoriteBook?.author || 'TBA'}
+                  </p>
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Top Five Books - Below Currently Reading & Favourite */}
+          {topFiveBooks.length > 0 && (
+            <div className="max-w-lg mx-auto mb-3">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Link to="/profile/settings">
+                  <p className="text-[10px] font-medium cursor-pointer hover:underline" style={{ color: accentTextColor }}>
+                    Top Five
+                  </p>
+                </Link>
+                <button
+                  onClick={() => setShowTopTenDialog(true)}
+                  className="text-[9px] px-1 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
+                  style={{ color: accentTextColor, borderColor: accentTextColor }}
+                >
+                  view top ten
+                </button>
+              </div>
+              <div className="flex gap-2 justify-center pb-1">
+                {topFiveBooks.slice(0, 5).map((book, index) => (
+                  <div key={book.id} className="flex-shrink-0 text-center" style={{ width: '50px' }}>
+                    {book.cover_url ? (
+                      <img
+                        src={book.cover_url}
+                        alt={book.title}
+                        className="w-full h-16 object-cover rounded mb-0.5 shadow-sm"
+                      />
+                    ) : (
+                      <div className="w-full h-16 bg-muted rounded mb-0.5 flex items-center justify-center">
+                        <BookOpen className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                    )}
+                    <p className="text-[8px] font-medium line-clamp-2 leading-tight" style={{ color: accentTextColor }}>
+                      {book.title}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
-
-
-
           <TopTenDialog
             open={showTopTenDialog} 
             onOpenChange={setShowTopTenDialog} 
@@ -992,8 +988,8 @@ export default function ProfileDisplay() {
                 )}
               </div>
               
-              {/* Profile Info */}
-              <div className="flex-1 space-y-2 pt-1">
+              {/* Profile Info - with transparent background for visibility */}
+              <div className="flex-1 space-y-2 pt-1 p-4 rounded-lg" style={{ backgroundColor: 'rgba(255, 255, 255, 0.75)', backdropFilter: 'blur(4px)' }}>
                 <div>
                   <h1 className="text-4xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
                     {profile.display_name || "Reader"}
