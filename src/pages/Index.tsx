@@ -807,7 +807,7 @@ const Index = () => {
           if (scrollableRef) scrollableRef.current = el;
           scrollContainerRef.current = el;
         }}
-        className="relative overflow-y-auto pb-24"
+        className="relative overflow-y-auto pb-24 lg:pb-4"
         style={{ 
           marginTop: showPullIndicator ? `${pullDistance}px` : undefined
         }}
