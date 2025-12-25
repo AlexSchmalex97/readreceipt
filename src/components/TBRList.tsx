@@ -480,7 +480,7 @@ export function TBRList({ userId, onMoveToReading, onMoveToCompleted, onMoveToDN
         </div>
       )}
 
-      <div className="space-y-3 max-h-96 overflow-y-auto">
+      <div className="space-y-3 lg:max-h-96 lg:overflow-y-auto">
         {loading ? (
           <div className="text-center py-8 text-muted-foreground">
             Loading...

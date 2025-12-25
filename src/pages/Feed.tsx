@@ -243,10 +243,10 @@ export default function Feed() {
           </div>
         )}
 
-      <div className="container mx-auto px-4 py-6 space-y-3"
+      <div className="container mx-auto px-4 py-6 space-y-4 pb-24 lg:pb-6"
         style={{ paddingTop: showPullIndicator ? `${pullDistance + 24}px` : undefined }}
       >
-      <h1 className="text-2xl font-bold mb-2" style={{ color: accentTextColor }}>Your Feed</h1>
+      <h1 className="text-2xl font-bold mb-4" style={{ color: accentTextColor }}>Your Feed</h1>
       {items.length === 0 && (
         <div style={{ color: accentTextColor, opacity: 0.8 }}>
           No activity yet. Follow readers in the <a href="/people" className="underline" style={{ color: accentTextColor }}>People</a> tab.
@@ -314,10 +314,10 @@ export default function Feed() {
               {/* Progress Info */}
               <div className="flex-1 min-w-0">
                 <div className="font-medium mb-1" style={{ color: accentTextColor }}>Reading Progress</div>
-                <div style={{ color: accentTextColor, opacity: 0.9 }}>
+                <div className="break-words" style={{ color: accentTextColor, opacity: 0.9 }}>
                   Read to page {it.to_page}
                   {typeof it.from_page === "number" && it.from_page >= 0 ? ` (from ${it.from_page})` : ""} of{" "}
-                  <em className="truncate">{it.book_title ?? "Untitled"}</em>
+                  <em className="break-words">{it.book_title ?? "Untitled"}</em>
                   {it.book_author ? ` by ${it.book_author}` : ""}
                 </div>
               </div>
@@ -355,11 +355,11 @@ export default function Feed() {
               
               {/* Review Info */}
               <div className="flex-1 min-w-0">
-                <div className="font-medium mb-1" style={{ color: accentTextColor }}>
-                  Reviewed <em className="truncate">{it.book_title ?? "Untitled"}</em>
+                <div className="font-medium mb-1 break-words" style={{ color: accentTextColor }}>
+                  Reviewed <em className="break-words">{it.book_title ?? "Untitled"}</em>
                   {it.book_author ? ` by ${it.book_author}` : ""}: ⭐ {it.rating}/5
                 </div>
-                {it.review && <p className="text-sm" style={{ color: accentTextColor, opacity: 0.8 }}>{it.review}</p>}
+                {it.review && <p className="text-sm break-words" style={{ color: accentTextColor, opacity: 0.8 }}>{it.review}</p>}
               </div>
             </div>
           </div>
