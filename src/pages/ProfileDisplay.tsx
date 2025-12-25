@@ -520,104 +520,111 @@ export default function ProfileDisplay() {
             </Link>
           </div>
 
-          {/* Header - Profile photo and info on left, stats on right */}
-          <div className="flex items-start gap-4 mb-4 max-w-4xl mx-auto">
-            {/* Left side - Profile Photo and Info */}
-            <div className="flex items-start gap-3 flex-1">
-              {/* Profile Photo */}
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-muted border-3 border-border flex-shrink-0">
-                {profile.avatar_url ? (
-                  <img 
-                    src={profile.avatar_url} 
-                    alt="Profile" 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <User className="w-10 h-10 text-muted-foreground" />
-                  </div>
-                )}
-              </div>
-
-              {/* Profile Info - with transparent background for visibility */}
-              <div className="flex-1 space-y-1 pt-0.5 p-3 rounded-lg" style={{ backgroundColor: 'rgba(255, 255, 255, 0.75)', backdropFilter: 'blur(4px)' }}>
-                <div>
-                  <h1 className="text-xl sm:text-2xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
-                    {profile.display_name || "Reader"}
-                  </h1>
-                  <p className="text-sm sm:text-base mt-0 text-foreground opacity-80" style={headerTextColor ? { color: headerTextColor } : {}}>
-                    @{profile.username || profile.id.slice(0, 8)}
-                  </p>
+          {/* Header - Profile photo centered with info below */}
+          <div className="flex flex-col items-center gap-3 mb-4 max-w-md mx-auto">
+            {/* Profile Photo */}
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden bg-muted border-3 border-border flex-shrink-0">
+              {profile.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <User className="w-10 h-10 text-muted-foreground" />
                 </div>
-
-                {profile.bio && (
-                  <p className="text-xs text-foreground line-clamp-2" style={headerTextColor ? { color: headerTextColor } : {}}>{profile.bio}</p>
-                )}
-
-                <div className="flex flex-wrap items-center gap-1.5 text-[10px] sm:text-xs text-foreground opacity-75" style={headerTextColor ? { color: headerTextColor } : {}}>
-                  <span className="flex items-center gap-0.5">
-                    <Calendar className="w-3 h-3" />
-                    Member since {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                  </span>
-                  {zodiacSign && (
-                    <>
-                      <span className="hidden sm:inline">•</span>
-                      <span className="flex items-center gap-0.5">
-                        <Star className="w-3 h-3" />
-                        {zodiacSign}
-                      </span>
-                    </>
-                  )}
-                </div>
-
-                {/* Followers/Following */}
-                {uid && (
-                  <div className="flex gap-1.5">
-                    <FollowersDialog userId={uid} type="followers" count={followersCount} accentColor={accentCardColor} />
-                    <FollowersDialog userId={uid} type="following" count={followingCount} accentColor={accentCardColor} />
-                  </div>
-                )}
-
-                {/* Social Media Links */}
-                <div className="flex flex-wrap gap-1">
-                  {profile.social_media_links && Array.isArray(profile.social_media_links) && profile.social_media_links.length > 0 && (
-                    profile.social_media_links.map((link: { platform: string; url: string }, index: number) => {
-                      const Icon = getSocialMediaIcon(link.platform);
-                      return (
-                        <a
-                          key={index}
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] rounded-full border hover:bg-accent/50 transition-colors"
-                          style={{ color: accentTextColor, borderColor: accentCardColor, backgroundColor: accentCardColor }}
-                        >
-                          <Icon className="w-2.5 h-2.5" />
-                          {link.platform}
-                        </a>
-                      );
-                    })
-                  )}
-                  {profile.website_url && (
-                    <a
-                      href={profile.website_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] rounded-full border hover:bg-accent/50 transition-colors"
-                      style={{ color: accentTextColor, borderColor: accentCardColor, backgroundColor: accentCardColor }}
-                    >
-                      <ExternalLink className="w-2.5 h-2.5" />
-                      Website
-                    </a>
-                  )}
-                </div>
-              </div>
+              )}
             </div>
 
+            {/* Profile Info */}
+            <div className="w-full space-y-2 p-3 rounded-lg bg-background/70 backdrop-blur-sm text-center">
+              <div>
+                <h1
+                  className="text-xl sm:text-2xl font-bold text-foreground"
+                  style={headerTextColor ? { color: headerTextColor } : {}}
+                >
+                  {profile.display_name || "Reader"}
+                </h1>
+                <p
+                  className="text-sm sm:text-base mt-0 text-foreground opacity-80"
+                  style={headerTextColor ? { color: headerTextColor } : {}}
+                >
+                  @{profile.username || profile.id.slice(0, 8)}
+                </p>
+              </div>
 
-            {/* Reading Goal moved below (above Recent Reviews) */}
+              {profile.bio && (
+                <p
+                  className="text-xs text-foreground line-clamp-3"
+                  style={headerTextColor ? { color: headerTextColor } : {}}
+                >
+                  {profile.bio}
+                </p>
+              )}
 
+              <div
+                className="flex flex-wrap items-center justify-center gap-1.5 text-[10px] sm:text-xs text-foreground opacity-75"
+                style={headerTextColor ? { color: headerTextColor } : {}}
+              >
+                <span className="flex items-center gap-0.5">
+                  <Calendar className="w-3 h-3" />
+                  Member since {new Date(profile.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                </span>
+                {zodiacSign && (
+                  <>
+                    <span className="hidden sm:inline">•</span>
+                    <span className="flex items-center gap-0.5">
+                      <Star className="w-3 h-3" />
+                      {zodiacSign}
+                    </span>
+                  </>
+                )}
+              </div>
+
+              {/* Followers/Following */}
+              {uid && (
+                <div className="flex gap-1.5 justify-center">
+                  <FollowersDialog userId={uid} type="followers" count={followersCount} accentColor={accentCardColor} />
+                  <FollowersDialog userId={uid} type="following" count={followingCount} accentColor={accentCardColor} />
+                </div>
+              )}
+
+              {/* Social Media Links */}
+              <div className="flex flex-wrap gap-1 justify-center">
+                {profile.social_media_links && Array.isArray(profile.social_media_links) && profile.social_media_links.length > 0 &&
+                  profile.social_media_links.map((link: { platform: string; url: string }, index: number) => {
+                    const Icon = getSocialMediaIcon(link.platform);
+                    return (
+                      <a
+                        key={index}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] rounded-full border hover:bg-accent/50 transition-colors"
+                        style={{ color: accentTextColor, borderColor: accentCardColor, backgroundColor: accentCardColor }}
+                      >
+                        <Icon className="w-2.5 h-2.5" />
+                        {link.platform}
+                      </a>
+                    );
+                  })}
+                {profile.website_url && (
+                  <a
+                    href={profile.website_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] rounded-full border hover:bg-accent/50 transition-colors"
+                    style={{ color: accentTextColor, borderColor: accentCardColor, backgroundColor: accentCardColor }}
+                  >
+                    <ExternalLink className="w-2.5 h-2.5" />
+                    Website
+                  </a>
+                )}
+              </div>
+            </div>
           </div>
+
           {/* Currently Reading and Favourite Book - Side by Side */}
           <div className="grid grid-cols-2 gap-3 mb-3 max-w-lg mx-auto">
             {/* Currently Reading */}
@@ -989,7 +996,7 @@ export default function ProfileDisplay() {
               </div>
               
               {/* Profile Info - with transparent background for visibility */}
-              <div className="flex-1 space-y-2 pt-1 p-4 rounded-lg" style={{ backgroundColor: 'rgba(255, 255, 255, 0.75)', backdropFilter: 'blur(4px)' }}>
+              <div className="flex-1 space-y-2 pt-1 p-4 rounded-lg bg-background/70 backdrop-blur-sm">
                 <div>
                   <h1 className="text-4xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
                     {profile.display_name || "Reader"}
