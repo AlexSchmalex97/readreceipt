@@ -580,9 +580,11 @@ export default function EnhancedFeed() {
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm text-muted-foreground flex items-center gap-2 mb-1">
-                        <BookOpen className="w-4 h-4" />
-                        About: <em>{item.book_title}</em> {item.book_author && `by ${item.book_author}`}
+                      <div className="text-sm text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-1 mb-1 min-w-0">
+                        <BookOpen className="w-4 h-4 flex-shrink-0" />
+                        <span>About:</span>
+                        <em className="break-words">{item.book_title}</em>
+                        {item.book_author && <span className="break-words">by {item.book_author}</span>}
                       </div>
                       <p className="whitespace-pre-wrap text-sm">{item.content}</p>
                     </div>
@@ -616,7 +618,7 @@ export default function EnhancedFeed() {
                   <div>
                     Read to page {item.to_page}
                     {typeof item.from_page === "number" && item.from_page >= 0 ? ` (from ${item.from_page})` : ""} of{" "}
-                    <em className="truncate">{item.book_title ?? "Untitled"}</em>
+                     <em className="break-words whitespace-normal lg:truncate">{item.book_title ?? "Untitled"}</em>
                     {item.book_author ? ` by ${item.book_author}` : ""}
                   </div>
                 </div>
@@ -625,7 +627,7 @@ export default function EnhancedFeed() {
               {item.kind === "review" && (
                 <div>
                   <div className="font-medium mb-1">
-                    Reviewed <em className="truncate">{item.book_title ?? "Untitled"}</em>
+                    Reviewed <em className="break-words whitespace-normal lg:truncate">{item.book_title ?? "Untitled"}</em>
                     {item.book_author ? ` by ${item.book_author}` : ""}: ⭐ {item.rating}/5
                   </div>
                   {item.review && <p className="text-sm text-muted-foreground">{item.review}</p>}
