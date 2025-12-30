@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Target, Plus, Minus } from "lucide-react";
+import { Target, Plus, Minus, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,7 +43,9 @@ function darkenHex(hex: string, percent: number): string {
 export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile = true, accentColor, accentTextColor, compact = false, progressBarColor: propProgressBarColor }: HomeReadingGoalsProps) => {
   const [goal, setGoal] = useState<ReadingGoal | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSharing, setIsSharing] = useState(false);
   const { toast } = useToast();
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const currentYear = new Date().getFullYear();
 
@@ -142,6 +144,141 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile 
     }
   };
 
+  const handleShare = async () => {
+    if (!goal) return;
+    
+    setIsSharing(true);
+    try {
+      const totalProgress = completedBooksThisYear + (goal.manual_count || 0);
+      const progressPercentage = Math.min((totalProgress / goal.goal_count) * 100, 100);
+      
+      // Create a canvas to generate the share image
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Could not get canvas context');
+      
+      // Set canvas size
+      canvas.width = 600;
+      canvas.height = 400;
+      
+      // Background
+      const bgColor = accentColor || '#1a1a2e';
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Add subtle gradient overlay
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, 'rgba(255,255,255,0.1)');
+      gradient.addColorStop(1, 'rgba(0,0,0,0.1)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Text color
+      const textColor = accentTextColor || '#ffffff';
+      
+      // Title
+      ctx.fillStyle = textColor;
+      ctx.font = 'bold 36px system-ui, -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`📚 ${currentYear} Reading Goal`, canvas.width / 2, 70);
+      
+      // Progress text
+      ctx.font = '28px system-ui, -apple-system, sans-serif';
+      ctx.fillText(`${totalProgress} of ${goal.goal_count} books read`, canvas.width / 2, 130);
+      
+      // Progress bar background
+      const barX = 60;
+      const barY = 170;
+      const barWidth = 480;
+      const barHeight = 40;
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.roundRect(barX, barY, barWidth, barHeight, 20);
+      ctx.fill();
+      
+      // Progress bar fill
+      const progressWidth = (progressPercentage / 100) * barWidth;
+      const progressColor = propProgressBarColor || DEFAULT_PROGRESS_BAR_COLOR;
+      ctx.fillStyle = progressColor;
+      ctx.beginPath();
+      ctx.roundRect(barX, barY, progressWidth, barHeight, 20);
+      ctx.fill();
+      
+      // Percentage
+      ctx.fillStyle = textColor;
+      ctx.font = 'bold 48px system-ui, -apple-system, sans-serif';
+      ctx.fillText(`${Math.round(progressPercentage)}%`, canvas.width / 2, 280);
+      
+      // Motivational message
+      ctx.font = '20px system-ui, -apple-system, sans-serif';
+      const message = progressPercentage >= 100 
+        ? "🎉 Goal achieved!" 
+        : progressPercentage >= 75 
+          ? "Almost there! 💪" 
+          : progressPercentage >= 50 
+            ? "Halfway there! 📖" 
+            : "Keep reading! 📚";
+      ctx.fillText(message, canvas.width / 2, 330);
+      
+      // Branding
+      ctx.font = '16px system-ui, -apple-system, sans-serif';
+      ctx.fillStyle = textColor;
+      ctx.globalAlpha = 0.7;
+      ctx.fillText('ReadReceipt', canvas.width / 2, 375);
+      ctx.globalAlpha = 1;
+      
+      // Convert to blob and share
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          throw new Error('Failed to create image');
+        }
+        
+        const file = new File([blob], 'reading-goal.png', { type: 'image/png' });
+        
+        // Check if Web Share API is available with files
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: `My ${currentYear} Reading Goal`,
+            text: `I've read ${totalProgress} of ${goal.goal_count} books this year! ${Math.round(progressPercentage)}% complete.`,
+            files: [file]
+          });
+        } else if (navigator.share) {
+          // Fallback to sharing without file
+          await navigator.share({
+            title: `My ${currentYear} Reading Goal`,
+            text: `📚 I've read ${totalProgress} of ${goal.goal_count} books this year! ${Math.round(progressPercentage)}% complete. #ReadReceipt`
+          });
+        } else {
+          // Fallback: download the image
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'reading-goal.png';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          
+          toast({
+            title: "Image downloaded!",
+            description: "Share it on your favorite social media platform.",
+          });
+        }
+        
+        setIsSharing(false);
+      }, 'image/png');
+    } catch (error: any) {
+      console.error('Error sharing:', error);
+      if (error.name !== 'AbortError') {
+        toast({
+          title: "Couldn't share",
+          description: error.message || "Please try again",
+          variant: "destructive",
+        });
+      }
+      setIsSharing(false);
+    }
+  };
+
   if (loading) return null;
 
   // If no goal exists for other users, show a message
@@ -172,11 +309,26 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile 
   if (compact) {
     return (
       <div className="space-y-1">
-        <div className="flex items-center gap-1.5 mb-1">
-          <Target className="w-3.5 h-3.5" style={{ color: accentTextColor || 'hsl(var(--primary))' }} />
-          <h3 className="text-xs font-semibold" style={{ color: accentTextColor }}>
-            {currentYear} Reading Goal
-          </h3>
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-1.5">
+            <Target className="w-3.5 h-3.5" style={{ color: accentTextColor || 'hsl(var(--primary))' }} />
+            <h3 className="text-xs font-semibold" style={{ color: accentTextColor }}>
+              {currentYear} Reading Goal
+            </h3>
+          </div>
+          {isOwnProfile && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleShare}
+              disabled={isSharing}
+              className="h-5 w-5 p-0"
+              style={{ color: accentTextColor }}
+              title="Share reading goal"
+            >
+              <Share2 className="h-3 w-3" />
+            </Button>
+          )}
         </div>
         <div className="flex justify-between items-center text-[10px]">
           <span style={{ color: accentTextColor }}>
@@ -245,6 +397,19 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile 
               {currentYear} Reading Goal
             </h3>
           </div>
+          {isOwnProfile && goal && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleShare}
+              disabled={isSharing}
+              className="h-6 w-6 p-0"
+              style={{ color: accentTextColor }}
+              title="Share reading goal"
+            >
+              <Share2 className="h-3.5 w-3.5" />
+            </Button>
+          )}
         </div>
 
         {loading ? (
