@@ -509,7 +509,7 @@ export default function ProfileDisplay() {
         style={{ paddingTop: showPullIndicator ? `${pullDistance + 8}px` : undefined }}
       >
         {/* Mobile & Tablet Layout - Centered */}
-        <div className="lg:hidden space-y-4">
+        <div className="md:hidden space-y-4">
           {/* Settings Button - Top Right */}
           <div className="flex justify-end mb-4">
             <Link to="/profile/settings">
@@ -965,7 +965,7 @@ export default function ProfileDisplay() {
         </div>
 
         {/* Desktop Layout - Original Format */}
-        <div className="hidden lg:block">
+        <div className="hidden md:block">
           {/* Settings Button - Top Right */}
           <div className="flex justify-end mb-4">
             <Link to="/profile/settings">
