@@ -729,7 +729,7 @@ export default function ProfileDisplay() {
           />
 
           {/* Reading Goal & Stats - moved above Recent Reviews for iOS compact layout */}
-          <div className="max-w-4xl mx-auto mt-3 mb-2">
+          <div className="w-80 mx-auto mt-3 mb-2">
             <Card className="border-2" style={{ borderColor: accentCardColor, backgroundColor: accentCardColor }}>
               <CardContent className="p-2.5 space-y-1.5">
                 <HomeReadingGoals 
