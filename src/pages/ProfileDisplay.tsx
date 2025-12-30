@@ -964,8 +964,8 @@ export default function ProfileDisplay() {
           </Accordion>
         </div>
 
-        {/* Desktop Layout - Original Format */}
-        <div className="hidden md:block">
+        {/* Tablet Layout */}
+        <div className="hidden md:block lg:hidden">
           {/* Settings Button - Top Right */}
           <div className="flex justify-end mb-4">
             <Link to="/profile/settings">
@@ -1027,14 +1027,18 @@ export default function ProfileDisplay() {
 
                 {/* Followers/Following */}
                 {uid && (
-                  <div className="flex flex-col gap-2">
-                    <div className="flex gap-2">
-                      <FollowersDialog userId={uid} type="followers" count={followersCount} accentColor={accentCardColor} />
-                      <FollowersDialog userId={uid} type="following" count={followingCount} accentColor={accentCardColor} />
-                    </div>
-                    {/* Social Media Links + Website (desktop) */}
-                    <div className="flex flex-wrap gap-2">
-                      {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>).map(([platform, url]) => {
+                  <div className="flex gap-2">
+                    <FollowersDialog userId={uid} type="followers" count={followersCount} accentColor={accentCardColor} />
+                    <FollowersDialog userId={uid} type="following" count={followingCount} accentColor={accentCardColor} />
+                  </div>
+                )}
+
+                {/* Social Media Links + Website (tablet) */}
+                {((profile.social_media_links && Object.values(profile.social_media_links as Record<string, string>).some(v => v)) || profile.website_url) && (
+                  <div className="flex flex-wrap gap-2 pt-2 border-t" style={{ borderColor: headerTextColor ? headerTextColor + '30' : undefined }}>
+                    {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>)
+                      .filter(([_, url]) => url)
+                      .map(([platform, url]) => {
                         const Icon = getSocialMediaIcon(platform);
                         return (
                           <a
@@ -1046,10 +1050,254 @@ export default function ProfileDisplay() {
                             style={{ color: accentTextColor, borderColor: accentCardColor, backgroundColor: accentCardColor }}
                           >
                             <Icon className="w-3 h-3" />
-                            {platform}
+                            {platform.charAt(0).toUpperCase() + platform.slice(1)}
                           </a>
                         );
                       })}
+                    {profile.website_url && (
+                      <a
+                        href={profile.website_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full border hover:bg-accent/50 transition-colors"
+                        style={{ color: accentTextColor, borderColor: accentCardColor, backgroundColor: accentCardColor }}
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        Website
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+          </div>
+
+          {/* Tablet Layout: Reading Goal above Top Five, centered */}
+          <div className="flex flex-col items-center gap-4 mb-6 max-w-4xl mx-auto">
+            {/* Reading Goal - Centered at top */}
+            <div className="w-80">
+              <Card className="border-2" style={{ borderColor: accentCardColor, backgroundColor: accentCardColor }}>
+                <CardContent className="p-4 space-y-3">
+                  <HomeReadingGoals 
+                    userId={uid}
+                    completedBooksThisYear={bookStats.completedThisYear}
+                    isOwnProfile={true}
+                    accentColor={accentCardColor}
+                    accentTextColor={accentTextColor}
+                  />
+                  <div className="grid grid-cols-3 gap-3 mt-4">
+                    <Link to="/" className="text-center cursor-pointer hover:opacity-80 transition-opacity">
+                      <div className="text-2xl font-bold" style={{ color: accentTextColor }}>
+                        {bookStats.inProgressBooks}
+                      </div>
+                      <div className="text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
+                        In Progress
+                      </div>
+                    </Link>
+                    <Link to="/completed" className="text-center cursor-pointer hover:opacity-80 transition-opacity">
+                      <div className="text-2xl font-bold" style={{ color: accentTextColor }}>
+                        {bookStats.completedBooks}
+                      </div>
+                      <div className="text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
+                        Completed
+                      </div>
+                    </Link>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold" style={{ color: accentTextColor }}>
+                        {bookStats.totalBooks}
+                      </div>
+                      <div className="text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
+                        Total Books
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Top Five Books - Centered below */}
+            {topFiveBooks.length > 0 && (
+              <div className="w-full">
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <Link to="/profile/settings">
+                    <h3 className="text-sm font-medium cursor-pointer hover:underline" style={{ color: accentTextColor }}>
+                      Top Five
+                    </h3>
+                  </Link>
+                  <button
+                    onClick={() => setShowTopTenDialog(true)}
+                    className="text-xs px-2 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
+                    style={{ color: accentTextColor, borderColor: accentTextColor }}
+                  >
+                    view top ten
+                  </button>
+                </div>
+                <div className="flex justify-center gap-1.5">
+                  {topFiveBooks.slice(0, 5).map((book, index) => (
+                    <div key={book.id} className="flex-shrink-0 w-20">
+                      <div className="relative">
+                        <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold z-10" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>
+                          {index + 1}
+                        </div>
+                        {book.cover_url && (
+                          <img
+                            src={book.cover_url}
+                            alt={book.title}
+                            className="w-full aspect-[2/3] object-cover rounded-lg shadow-md"
+                          />
+                        )}
+                      </div>
+                      <p className="text-xs font-medium mt-2 line-clamp-2 leading-tight px-1.5 py-0.5 bg-black/60 rounded inline-block" style={{ color: "#FFFFFF" }}>{book.title}</p>
+                      <p className="text-xs mt-0.5 line-clamp-1 px-1.5 py-0.5 bg-black/60 rounded inline-block" style={{ color: "#FFFFFF" }}>{book.author}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Favorite + Currently Reading Row */}
+            <div className="flex gap-4 justify-center">
+              {favoriteBook && (
+                <div className="space-y-1 w-64">
+                  <p className="text-xs font-medium" style={{ color: headerTextColor }}>Favorite Book</p>
+                  <div className="border rounded-lg px-1 py-0.5 flex items-center gap-1" style={{ backgroundColor: accentCardColor }}>
+                    {favoriteBook.cover_url && (
+                      <img
+                        src={favoriteBook.cover_url}
+                        alt={favoriteBook.title}
+                        className="w-11 h-16 object-cover rounded flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] font-medium line-clamp-1 leading-tight" style={{ color: accentTextColor }}>
+                        {favoriteBook.title}
+                      </p>
+                      <p className="text-[10px] leading-tight" style={{ color: accentTextColor, opacity: 0.8 }}>
+                        {favoriteBook.author}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className="space-y-1 w-64">
+                <p className="text-xs font-medium" style={{ color: headerTextColor }}>Currently Reading</p>
+                <div className="border rounded-lg px-1 py-0.5 flex items-center gap-1" style={{ backgroundColor: accentCardColor }}>
+                  {currentBook?.cover_url ? (
+                    <img
+                      src={currentBook.cover_url}
+                      alt={currentBook.title}
+                      className="w-11 h-16 object-cover rounded flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="w-11 h-16 bg-muted/20 rounded flex-shrink-0 border border-dashed" style={{ borderColor: accentTextColor + '40' }} />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-medium line-clamp-1 leading-tight" style={{ color: accentTextColor }}>
+                      {currentBook?.title || 'TBA'}
+                    </p>
+                    <p className="text-[10px] leading-tight" style={{ color: accentTextColor, opacity: 0.8 }}>
+                      {currentBook?.author || 'TBA'}
+                      {currentBook && ` • Page ${currentBook.current_page}/${currentBook.total_pages}`}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Layout - Three Column */}
+        <div className="hidden lg:block">
+          {/* Settings Button - Top Right */}
+          <div className="flex justify-end mb-4">
+            <Link to="/profile/settings">
+              <Button variant="outline" size="sm">
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </Button>
+            </Link>
+          </div>
+
+          {/* Header Section - Profile photo and info on left, reading stats on right */}
+          <div className="flex items-start gap-6 mb-6 max-w-6xl mx-auto">
+            {/* Left Section - Photo + Info */}
+            <div className="flex items-start gap-6 flex-1">
+              {/* Profile Photo */}
+              <div className="w-40 h-40 rounded-full overflow-hidden bg-muted border-4 border-border flex-shrink-0">
+                {profile.avatar_url ? (
+                  <img 
+                    src={profile.avatar_url} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <User className="w-16 h-16 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+              
+              {/* Profile Info - with transparent background for visibility */}
+              <div className="flex-1 space-y-2 pt-1 p-4 rounded-lg bg-muted/90 backdrop-blur-md">
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
+                    {profile.display_name || "Reader"}
+                  </h1>
+                  <p className="text-lg mt-0.5 text-foreground opacity-80" style={headerTextColor ? { color: headerTextColor } : {}}>
+                    @{profile.username || profile.id.slice(0, 8)}
+                  </p>
+                </div>
+
+                {profile.bio && (
+                  <p className="text-sm max-w-2xl text-foreground" style={headerTextColor ? { color: headerTextColor } : {}}>
+                    {profile.bio}
+                  </p>
+                )}
+                
+                <div className="flex items-center gap-4 text-foreground opacity-75" style={headerTextColor ? { color: headerTextColor } : {}}>
+                  <p className="text-sm flex items-center gap-1">
+                    <Calendar className="w-4 h-4" />
+                    Member since {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                  </p>
+                  {zodiacSign && (
+                    <p className="text-sm flex items-center gap-1">
+                      <Star className="w-4 h-4" />
+                      {zodiacSign}
+                    </p>
+                  )}
+                </div>
+
+                {/* Followers/Following */}
+                {uid && (
+                  <div className="flex gap-2">
+                    <FollowersDialog userId={uid} type="followers" count={followersCount} accentColor={accentCardColor} />
+                    <FollowersDialog userId={uid} type="following" count={followingCount} accentColor={accentCardColor} />
+                  </div>
+                )}
+
+                {/* Social Links */}
+                {((profile.social_media_links && Object.values(profile.social_media_links as Record<string, string>).some(v => v)) || profile.website_url) && (
+                  <div className="pt-2 border-t" style={{ borderColor: headerTextColor ? headerTextColor + '30' : undefined }}>
+                    <div className="flex flex-wrap gap-2">
+                      {profile.social_media_links && Object.entries(profile.social_media_links as Record<string, string>)
+                        .filter(([_, url]) => url)
+                        .map(([platform, url]) => {
+                          const IconComponent = getSocialMediaIcon(platform);
+                          return (
+                            <a
+                              key={platform}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full border hover:bg-accent/50 transition-colors"
+                              style={{ color: accentTextColor, borderColor: accentCardColor, backgroundColor: accentCardColor }}
+                            >
+                              <IconComponent className="w-3 h-3" />
+                              {platform.charAt(0).toUpperCase() + platform.slice(1)}
+                            </a>
+                          );
+                        })}
                       {profile.website_url && (
                         <a
                           href={profile.website_url}
