@@ -872,9 +872,9 @@ const Index = () => {
         ) : (
           <div className="space-y-3 sm:space-y-4">
             {/* Currently Reading + Reading Goals Section - Side by Side */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 items-start">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 items-start">
               {/* Currently Reading Section - Takes 2 columns */}
-              <div className="lg:col-span-2">
+              <div className="md:col-span-2">
                 {inProgressBooks.length > 0 ? (
                   <section>
                     <h2 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3" style={{ color: accentTextColor }}>
@@ -915,7 +915,7 @@ const Index = () => {
               </div>
 
               {/* Reading Goals Section - Takes 1 column on the right */}
-              <div className="lg:col-span-1">
+              <div className="md:col-span-1">
                 <HomeReadingGoals userId={userId} completedBooksThisYear={completedBooksThisYear} accentColor={accentCardColor} accentTextColor={accentTextColor} />
               </div>
             </div>
