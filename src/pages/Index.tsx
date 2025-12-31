@@ -916,7 +916,7 @@ const Index = () => {
 
               {/* Reading Goals Section - Takes 1 column on the right */}
               <div className="md:col-span-1">
-                <HomeReadingGoals userId={userId} completedBooksThisYear={completedBooksThisYear} accentColor={accentCardColor} accentTextColor={accentTextColor} />
+                <HomeReadingGoals userId={userId} completedBooksThisYear={completedBooksThisYear} accentColor={accentCardColor} accentTextColor={accentTextColor} inProgressCount={booksInProgress} totalBooksCount={books.length} />
               </div>
             </div>
 
