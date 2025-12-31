@@ -740,6 +740,8 @@ export default function ProfileDisplay() {
                   accentTextColor={accentTextColor}
                   progressBarColor={progressBarColor}
                   compact={true}
+                  inProgressCount={bookStats.inProgressBooks}
+                  totalBooksCount={bookStats.totalBooks}
                 />
                 <div className="grid grid-cols-3 gap-1.5 pt-1.5 border-t" style={{ borderColor: accentTextColor + '40' }}>
                   <Link to="/" className="text-center cursor-pointer hover:opacity-80 transition-opacity">
@@ -1073,41 +1075,104 @@ export default function ProfileDisplay() {
 
           </div>
 
-          {/* Tablet Layout: Reading Goal above Top Five, centered */}
-          <div className="flex flex-col items-center gap-4 mb-6 max-w-4xl mx-auto">
-            {/* Reading Goal - Centered at top */}
-            <div className="w-80">
+          {/* Tablet Layout: Favourite/Currently Reading on left, Reading Goal on right */}
+          <div className="flex gap-6 mb-6 max-w-4xl mx-auto">
+            {/* Left Section - Favourite Book and Currently Reading */}
+            <div className="flex flex-col gap-3 flex-1">
+              {favoriteBook && (
+                <div className="space-y-1">
+                  <p className="text-xs font-medium" style={{ color: headerTextColor }}>Favorite Book</p>
+                  <div className="border rounded-lg px-2 py-1.5 flex items-center gap-2" style={{ backgroundColor: accentCardColor }}>
+                    {favoriteBook.cover_url && (
+                      <img
+                        src={favoriteBook.cover_url}
+                        alt={favoriteBook.title}
+                        className="w-12 h-18 object-cover rounded flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium line-clamp-2 leading-tight" style={{ color: accentTextColor }}>
+                        {favoriteBook.title}
+                      </p>
+                      <p className="text-xs leading-tight mt-0.5" style={{ color: accentTextColor, opacity: 0.8 }}>
+                        {favoriteBook.author}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className="space-y-1">
+                <p className="text-xs font-medium" style={{ color: headerTextColor }}>Currently Reading</p>
+                <div className="border rounded-lg px-2 py-1.5 flex items-center gap-2" style={{ backgroundColor: accentCardColor }}>
+                  {currentBook?.cover_url ? (
+                    <img
+                      src={currentBook.cover_url}
+                      alt={currentBook.title}
+                      className="w-12 h-18 object-cover rounded flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="w-12 h-18 bg-muted/20 rounded flex-shrink-0 border border-dashed" style={{ borderColor: accentTextColor + '40' }} />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium line-clamp-2 leading-tight" style={{ color: accentTextColor }}>
+                      {currentBook?.title || 'TBA'}
+                    </p>
+                    <p className="text-xs leading-tight mt-0.5" style={{ color: accentTextColor, opacity: 0.8 }}>
+                      {currentBook?.author || 'TBA'}
+                    </p>
+                    {currentBook && (
+                      <div className="mt-1">
+                        <Progress 
+                          value={(currentBook.current_page / currentBook.total_pages) * 100} 
+                          className="h-1.5 bg-foreground/20"
+                        />
+                        <p className="text-[10px] mt-0.5" style={{ color: accentTextColor, opacity: 0.7 }}>
+                          {currentBook.current_page}/{currentBook.total_pages} pages
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Section - Reading Goal (smaller) */}
+            <div className="w-64 flex-shrink-0">
               <Card className="border-2" style={{ borderColor: accentCardColor, backgroundColor: accentCardColor }}>
-                <CardContent className="p-4 space-y-3">
+                <CardContent className="p-3 space-y-2">
                   <HomeReadingGoals 
                     userId={uid}
                     completedBooksThisYear={bookStats.completedThisYear}
                     isOwnProfile={true}
                     accentColor={accentCardColor}
                     accentTextColor={accentTextColor}
+                    compact={true}
+                    progressBarColor={progressBarColor}
+                    inProgressCount={bookStats.inProgressBooks}
+                    totalBooksCount={bookStats.totalBooks}
                   />
-                  <div className="grid grid-cols-3 gap-3 mt-4">
+                  <div className="grid grid-cols-3 gap-2 mt-3 pt-2 border-t" style={{ borderColor: accentTextColor + '30' }}>
                     <Link to="/" className="text-center cursor-pointer hover:opacity-80 transition-opacity">
-                      <div className="text-2xl font-bold" style={{ color: accentTextColor }}>
+                      <div className="text-lg font-bold" style={{ color: accentTextColor }}>
                         {bookStats.inProgressBooks}
                       </div>
-                      <div className="text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
+                      <div className="text-[10px]" style={{ color: accentTextColor, opacity: 0.8 }}>
                         In Progress
                       </div>
                     </Link>
                     <Link to="/completed" className="text-center cursor-pointer hover:opacity-80 transition-opacity">
-                      <div className="text-2xl font-bold" style={{ color: accentTextColor }}>
+                      <div className="text-lg font-bold" style={{ color: accentTextColor }}>
                         {bookStats.completedBooks}
                       </div>
-                      <div className="text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
+                      <div className="text-[10px]" style={{ color: accentTextColor, opacity: 0.8 }}>
                         Completed
                       </div>
                     </Link>
                     <div className="text-center">
-                      <div className="text-2xl font-bold" style={{ color: accentTextColor }}>
+                      <div className="text-lg font-bold" style={{ color: accentTextColor }}>
                         {bookStats.totalBooks}
                       </div>
-                      <div className="text-xs" style={{ color: accentTextColor, opacity: 0.8 }}>
+                      <div className="text-[10px]" style={{ color: accentTextColor, opacity: 0.8 }}>
                         Total Books
                       </div>
                     </div>
@@ -1115,96 +1180,47 @@ export default function ProfileDisplay() {
                 </CardContent>
               </Card>
             </div>
+          </div>
 
-            {/* Top Five Books - Centered below */}
-            {topFiveBooks.length > 0 && (
-              <div className="w-full">
-                <div className="flex items-center justify-center gap-2 mb-3">
-                  <Link to="/profile/settings">
-                    <h3 className="text-sm font-medium cursor-pointer hover:underline" style={{ color: accentTextColor }}>
-                      Top Five
-                    </h3>
-                  </Link>
-                  <button
-                    onClick={() => setShowTopTenDialog(true)}
-                    className="text-xs px-2 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
-                    style={{ color: accentTextColor, borderColor: accentTextColor }}
-                  >
-                    view top ten
-                  </button>
-                </div>
-                <div className="flex justify-center gap-1.5">
-                  {topFiveBooks.slice(0, 5).map((book, index) => (
-                    <div key={book.id} className="flex-shrink-0 w-20">
-                      <div className="relative">
-                        <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold z-10" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>
-                          {index + 1}
-                        </div>
-                        {book.cover_url && (
-                          <img
-                            src={book.cover_url}
-                            alt={book.title}
-                            className="w-full aspect-[2/3] object-cover rounded-lg shadow-md"
-                          />
-                        )}
-                      </div>
-                      <p className="text-xs font-medium mt-2 line-clamp-2 leading-tight px-1.5 py-0.5 bg-black/60 rounded inline-block" style={{ color: "#FFFFFF" }}>{book.title}</p>
-                      <p className="text-xs mt-0.5 line-clamp-1 px-1.5 py-0.5 bg-black/60 rounded inline-block" style={{ color: "#FFFFFF" }}>{book.author}</p>
-                    </div>
-                  ))}
-                </div>
+          {/* Top Five Books - Below, centered */}
+          {topFiveBooks.length > 0 && (
+            <div className="mb-6 max-w-4xl mx-auto">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <Link to="/profile/settings">
+                  <h3 className="text-sm font-medium cursor-pointer hover:underline" style={{ color: accentTextColor }}>
+                    Top Five
+                  </h3>
+                </Link>
+                <button
+                  onClick={() => setShowTopTenDialog(true)}
+                  className="text-xs px-2 py-0.5 rounded-full border hover:bg-accent/50 transition-colors"
+                  style={{ color: accentTextColor, borderColor: accentTextColor }}
+                >
+                  view top ten
+                </button>
               </div>
-            )}
-
-            {/* Favorite + Currently Reading Row */}
-            <div className="flex gap-4 justify-center">
-              {favoriteBook && (
-                <div className="space-y-1 w-64">
-                  <p className="text-xs font-medium" style={{ color: headerTextColor }}>Favorite Book</p>
-                  <div className="border rounded-lg px-1 py-0.5 flex items-center gap-1" style={{ backgroundColor: accentCardColor }}>
-                    {favoriteBook.cover_url && (
-                      <img
-                        src={favoriteBook.cover_url}
-                        alt={favoriteBook.title}
-                        className="w-11 h-16 object-cover rounded flex-shrink-0"
-                      />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[11px] font-medium line-clamp-1 leading-tight" style={{ color: accentTextColor }}>
-                        {favoriteBook.title}
-                      </p>
-                      <p className="text-[10px] leading-tight" style={{ color: accentTextColor, opacity: 0.8 }}>
-                        {favoriteBook.author}
-                      </p>
+              <div className="flex justify-center gap-1.5">
+                {topFiveBooks.slice(0, 5).map((book, index) => (
+                  <div key={book.id} className="flex-shrink-0 w-20">
+                    <div className="relative">
+                      <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold z-10" style={{ backgroundColor: accentCardColor, color: accentTextColor }}>
+                        {index + 1}
+                      </div>
+                      {book.cover_url && (
+                        <img
+                          src={book.cover_url}
+                          alt={book.title}
+                          className="w-full aspect-[2/3] object-cover rounded-lg shadow-md"
+                        />
+                      )}
                     </div>
+                    <p className="text-xs font-medium mt-2 line-clamp-2 leading-tight px-1.5 py-0.5 bg-black/60 rounded inline-block" style={{ color: "#FFFFFF" }}>{book.title}</p>
+                    <p className="text-xs mt-0.5 line-clamp-1 px-1.5 py-0.5 bg-black/60 rounded inline-block" style={{ color: "#FFFFFF" }}>{book.author}</p>
                   </div>
-                </div>
-              )}
-              <div className="space-y-1 w-64">
-                <p className="text-xs font-medium" style={{ color: headerTextColor }}>Currently Reading</p>
-                <div className="border rounded-lg px-1 py-0.5 flex items-center gap-1" style={{ backgroundColor: accentCardColor }}>
-                  {currentBook?.cover_url ? (
-                    <img
-                      src={currentBook.cover_url}
-                      alt={currentBook.title}
-                      className="w-11 h-16 object-cover rounded flex-shrink-0"
-                    />
-                  ) : (
-                    <div className="w-11 h-16 bg-muted/20 rounded flex-shrink-0 border border-dashed" style={{ borderColor: accentTextColor + '40' }} />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-medium line-clamp-1 leading-tight" style={{ color: accentTextColor }}>
-                      {currentBook?.title || 'TBA'}
-                    </p>
-                    <p className="text-[10px] leading-tight" style={{ color: accentTextColor, opacity: 0.8 }}>
-                      {currentBook?.author || 'TBA'}
-                      {currentBook && ` • Page ${currentBook.current_page}/${currentBook.total_pages}`}
-                    </p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Desktop Layout - Three Column */}
@@ -1419,6 +1435,8 @@ export default function ProfileDisplay() {
                     isOwnProfile={true}
                     accentColor={accentCardColor}
                     accentTextColor={accentTextColor}
+                    inProgressCount={bookStats.inProgressBooks}
+                    totalBooksCount={bookStats.totalBooks}
                   />
                   <div className="grid grid-cols-3 gap-3 mt-4">
                     <Link to="/" className="text-center cursor-pointer hover:opacity-80 transition-opacity">
