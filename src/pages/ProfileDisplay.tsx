@@ -683,7 +683,7 @@ export default function ProfileDisplay() {
 
           {/* Top Five Books - Below Currently Reading & Favourite */}
           {topFiveBooks.length > 0 && (
-            <div className="max-w-lg mx-auto mb-3">
+            <div className="w-full flex flex-col items-center mb-3">
               <div className="flex items-center justify-center gap-1.5 mb-1">
                 <Link to="/profile/settings">
                   <p className="text-[10px] font-medium cursor-pointer hover:underline" style={{ color: accentTextColor }}>
@@ -1221,6 +1221,196 @@ export default function ProfileDisplay() {
               </div>
             </div>
           )}
+
+          {/* Tablet Accordion sections - Reviews, Activity, TBR */}
+          <Accordion type="multiple" className="w-full space-y-1.5 mt-4 max-w-4xl mx-auto">
+            {/* Recent Reviews */}
+            <AccordionItem value="reviews" className="border rounded-lg px-2.5" style={{ backgroundColor: accentCardColor }}>
+              <AccordionTrigger className="hover:no-underline py-2">
+                <div className="flex items-center gap-1.5">
+                  <Star className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-xs font-medium">Recent Reviews ({recentReviews.length})</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                {recentReviews.length === 0 ? (
+                  <div className="text-center py-4">
+                    <Star className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-xs text-muted-foreground">No reviews yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {recentReviews.map((review) => (
+                      <div key={review.id} className="border-b border-border pb-2 last:border-b-0">
+                        <div className="flex gap-2">
+                          {review.books.cover_url ? (
+                            <img 
+                              src={review.books.cover_url} 
+                              alt={review.books.title}
+                              className="w-8 h-11 object-contain rounded shadow-sm flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="w-8 h-11 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                              <BookOpen className="w-3 h-3 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-xs text-foreground truncate">{review.books.title}</h4>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <div className="flex">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star 
+                                    key={i} 
+                                    className={`w-2.5 h-2.5 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'}`}
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-[9px] text-muted-foreground">
+                                {new Date(review.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
+                              </span>
+                            </div>
+                            {review.review && (
+                              <p className="text-[10px] text-foreground mt-1 line-clamp-2">{review.review}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Reading Activity */}
+            <AccordionItem value="activity" className="border rounded-lg px-2.5" style={{ backgroundColor: accentCardColor }}>
+              <AccordionTrigger className="hover:no-underline py-2">
+                <div className="flex items-center gap-1.5">
+                  <BookOpen className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-xs font-medium">Reading Activity</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                {activityFeed.length === 0 ? (
+                  <div className="text-center py-4">
+                    <BookOpen className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-xs text-muted-foreground">No activity yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {activityFeed.map((item) =>
+                      item.kind === "progress" ? (
+                        <div key={`p-${item.id}`} className="border border-border rounded-lg p-2">
+                          <div className="text-[9px] text-muted-foreground mb-1">
+                            {new Date(item.created_at).toLocaleString()}
+                          </div>
+                          <div className="flex gap-1.5">
+                            {item.book_cover_url ? (
+                              <img 
+                                src={item.book_cover_url} 
+                                alt={item.book_title || "Book cover"}
+                                className="w-6 h-9 object-contain rounded shadow-sm flex-shrink-0"
+                              />
+                            ) : (
+                              <div className="w-6 h-9 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                                <BookOpen className="w-2.5 h-2.5 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-[10px] mb-0.5">Reading Progress</div>
+                              <div className="text-[9px] text-muted-foreground line-clamp-2">
+                                Page {item.to_page} of {item.book_title ?? "Untitled"}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div key={`r-${item.id}`} className="border border-border rounded-lg p-2">
+                          <div className="text-[9px] text-muted-foreground mb-1">
+                            {new Date(item.created_at).toLocaleString()}
+                          </div>
+                          <div className="flex gap-1.5">
+                            {item.book_cover_url ? (
+                              <img 
+                                src={item.book_cover_url} 
+                                alt={item.book_title || "Book cover"}
+                                className="w-6 h-9 object-contain rounded shadow-sm flex-shrink-0"
+                              />
+                            ) : (
+                              <div className="w-6 h-9 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                                <BookOpen className="w-2.5 h-2.5 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-[10px] mb-0.5">
+                                Reviewed: ⭐ {item.rating}/5
+                              </div>
+                              <div className="text-[9px] text-muted-foreground truncate">
+                                {item.book_title ?? "Untitled"}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* TBR List */}
+            <AccordionItem value="tbr" className="border rounded-lg px-2.5" style={{ backgroundColor: accentCardColor }}>
+              <AccordionTrigger className="hover:no-underline py-2">
+                <div className="flex items-center gap-1.5">
+                  <BookOpen className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-xs font-medium">To Be Read ({tbrBooks.length})</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                {tbrBooks.length === 0 ? (
+                  <div className="text-center py-4">
+                    <BookOpen className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-xs text-muted-foreground">Your TBR list is empty</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {tbrBooks.map((book) => (
+                      <div key={book.id} className="border border-border rounded-lg p-2">
+                        <div className="flex gap-1.5">
+                          {book.cover_url ? (
+                            <img 
+                              src={book.cover_url} 
+                              alt={book.title}
+                              className="w-8 h-11 object-contain rounded shadow-sm flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="w-8 h-11 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                              <BookOpen className="w-3 h-3 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1 mb-0.5">
+                              <h3 className="font-medium text-xs text-foreground truncate">{book.title}</h3>
+                              {book.priority > 0 && (
+                                <div className="flex">
+                                  {Array(book.priority).fill(0).map((_, i) => (
+                                    <Star key={i} className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400" />
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-[9px] text-muted-foreground truncate">by {book.author}</p>
+                            {book.total_pages && (
+                              <p className="text-[9px] text-muted-foreground">{book.total_pages} pages</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
 
         {/* Desktop Layout - Three Column */}
