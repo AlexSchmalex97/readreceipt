@@ -366,26 +366,42 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile 
     setIsSharing(true);
     try {
       const blob = await generateShareImage();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `reading-goal-${currentYear}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const file = new File([blob], `reading-goal-${currentYear}.png`, { type: 'image/png' });
       
-      toast({
-        title: "Image saved!",
-        description: "Share it on your favorite social media platform.",
-      });
+      // Try to use Web Share API with file download (saves to camera roll on mobile)
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file]
+        });
+        toast({
+          title: "Image ready!",
+          description: "Save it to your camera roll or share it.",
+        });
+      } else {
+        // Fallback: trigger download
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `reading-goal-${currentYear}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        toast({
+          title: "Image saved!",
+          description: "Share it on your favorite social media platform.",
+        });
+      }
     } catch (error: any) {
       console.error('Error saving image:', error);
-      toast({
-        title: "Couldn't save image",
-        description: error.message || "Please try again",
-        variant: "destructive",
-      });
+      if (error.name !== 'AbortError') {
+        toast({
+          title: "Couldn't save image",
+          description: error.message || "Please try again",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsSharing(false);
     }
