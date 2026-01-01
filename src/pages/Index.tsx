@@ -835,8 +835,15 @@ const Index = () => {
           </div>
         )}
 
-      <main className="container mx-auto px-2 sm:px-3 py-2 sm:py-4"
-        style={{ paddingTop: showPullIndicator ? `${pullDistance + 8}px` : undefined }}
+      <main 
+        className="container mx-auto px-2 sm:px-3 py-2 sm:py-4"
+        style={{ 
+          paddingTop: showPullIndicator 
+            ? `${pullDistance + 8}px` 
+            : isIOSPlatform 
+              ? 'calc(env(safe-area-inset-top, 0px) + 8px)' 
+              : undefined 
+        }}
       >
         {/* Header with Add Book button */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-4">

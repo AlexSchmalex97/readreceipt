@@ -478,8 +478,9 @@ export default function ProfileDisplay() {
         className="relative overflow-y-auto"
         style={{ 
           height: (isIOS || isReadReceiptApp) ? 'calc(100dvh - 4rem)' : 'auto',
+          minHeight: (isIOS || isReadReceiptApp) ? undefined : 'calc(100vh - 4rem)',
           paddingTop: (isIOS || isReadReceiptApp) ? 'calc(env(safe-area-inset-top, 0px) + 12px)' : undefined,
-          paddingBottom: (isIOS || isReadReceiptApp) ? 'calc(4rem + env(safe-area-inset-bottom, 0px) + 16px)' : undefined,
+          paddingBottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))',
         }}
       >
         {/* Pull-to-refresh indicator */}
