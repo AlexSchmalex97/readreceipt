@@ -19,6 +19,9 @@ import ProfileSettings from "./pages/ProfileSettings";
 import Settings from "./pages/Settings";
 import CompletedBooks from "./pages/CompletedBooks";
 import UserProfile from "./pages/UserProfile";
+import UserCompletedBooks from "./pages/UserCompletedBooks";
+import UserTBRBooks from "./pages/UserTBRBooks";
+import UserInProgressBooks from "./pages/UserInProgressBooks";
 import Contact from "./pages/Contact";
 import Integrations from "./pages/Integrations";
 import Auth from "./pages/Auth";
@@ -75,6 +78,9 @@ const App = () => {
             <Route path="/completed" element={<ProtectedRoute><IOSProtectedRoute><CompletedBooks /></IOSProtectedRoute></ProtectedRoute>} />
             <Route path="/integrations" element={<ProtectedRoute><IOSProtectedRoute><Integrations /></IOSProtectedRoute></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><IOSProtectedRoute><Notifications /></IOSProtectedRoute></ProtectedRoute>} />
+            <Route path="/user/:username/completed" element={<IOSProtectedRoute><UserCompletedBooks /></IOSProtectedRoute>} />
+            <Route path="/user/:username/tbr" element={<IOSProtectedRoute><UserTBRBooks /></IOSProtectedRoute>} />
+            <Route path="/user/:username/in-progress" element={<IOSProtectedRoute><UserInProgressBooks /></IOSProtectedRoute>} />
             <Route path="/:username" element={<IOSProtectedRoute><UserProfile /></IOSProtectedRoute>} />
             <Route path="*" element={<IOSProtectedRoute><NotFound /></IOSProtectedRoute>} />
           </Routes>

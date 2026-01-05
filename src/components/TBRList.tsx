@@ -10,6 +10,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { searchGoogleBooks, GoogleBookResult } from '@/lib/googleBooks';
 import { BookEditionSelector } from '@/components/BookEditionSelector';
 import { BookMoveMenu } from '@/components/BookMoveMenu';
+import { useFollowedUserBooks } from '@/hooks/useFollowedUserBooks';
+import { FollowedUsersBooksIndicator } from '@/components/FollowedUsersBooksIndicator';
 
 interface TBRBook {
   id: string;
@@ -55,6 +57,33 @@ export function TBRList({ userId, onMoveToReading, onMoveToCompleted, onMoveToDN
     priority: 0
   });
   const { toast } = useToast();
+  
+  // Followed users books hook
+  const { followedUserBooks, isLoading: isLoadingFollowed, searchFollowedUsersBooks, clearResults } = useFollowedUserBooks();
+
+  // Search followed users when book search query changes
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (bookSearchQuery.trim().length >= 2) {
+        searchFollowedUsersBooks(bookSearchQuery);
+      } else {
+        clearResults();
+      }
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [bookSearchQuery, searchFollowedUsersBooks, clearResults]);
+
+  // Also search when filtering existing TBR list
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchQuery.trim().length >= 2) {
+        searchFollowedUsersBooks(searchQuery);
+      } else {
+        clearResults();
+      }
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, searchFollowedUsersBooks, clearResults]);
 
   // Load TBR books
   useEffect(() => {
@@ -231,6 +260,7 @@ export function TBRList({ userId, onMoveToReading, onMoveToCompleted, onMoveToDN
     setSelectedGoogleBook(null);
     setShowManualForm(false);
     setNewBook({ title: '', author: '', total_pages: '', notes: '', priority: 0 });
+    clearResults();
     setShowAddDialog(false);
   };
 
@@ -368,6 +398,12 @@ export function TBRList({ userId, onMoveToReading, onMoveToCompleted, onMoveToDN
                   </div>
                 )}
 
+                {/* Followed Users Books Indicator */}
+                <FollowedUsersBooksIndicator 
+                  followedUserBooks={followedUserBooks} 
+                  isLoading={isLoadingFollowed} 
+                />
+
                 <div className="flex justify-center">
                   <Button 
                     variant="outline" 
@@ -477,6 +513,14 @@ export function TBRList({ userId, onMoveToReading, onMoveToCompleted, onMoveToDN
               {sortOrder === 'asc' ? '↑' : '↓'}
             </Button>
           </div>
+          
+          {/* Followed Users Books Indicator when searching */}
+          {searchQuery.trim().length >= 2 && (
+            <FollowedUsersBooksIndicator 
+              followedUserBooks={followedUserBooks} 
+              isLoading={isLoadingFollowed} 
+            />
+          )}
         </div>
       )}
 
