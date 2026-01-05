@@ -4,12 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
 import { FollowButton } from "@/components/FollowButton";
 import { UserColorProvider } from "@/components/UserColorProvider";
-import { ArrowLeft, BookOpen, Star, Calendar, Globe, Facebook, Twitter, Instagram, Linkedin, Youtube, ExternalLink, XCircle } from "lucide-react";
+import { ArrowLeft, BookOpen, Star, Calendar, Globe, Facebook, Twitter, Instagram, Linkedin, Youtube, ExternalLink, XCircle, Search } from "lucide-react";
 import { HomeReadingGoals } from "@/components/HomeReadingGoals";
 import { FollowersDialog } from "@/components/FollowersDialog";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { TopTenDialog } from "@/components/TopTenDialog";
+import { Input } from "@/components/ui/input";
 
 type ProgressItem = {
   kind: "progress";
@@ -106,6 +107,10 @@ export default function UserProfile() {
   const [recentReviews, setRecentReviews] = useState<any[]>([]);
   const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
   const [backgroundTint, setBackgroundTint] = useState<{ color: string; opacity: number } | null>(null);
+  
+  // Search states for book lists
+  const [tbrSearchQuery, setTbrSearchQuery] = useState('');
+  const [completedSearchQuery, setCompletedSearchQuery] = useState('');
 
   useEffect(() => {
     if (!username) return;
@@ -682,7 +687,7 @@ export default function UserProfile() {
 
             {/* Stats - Single Row */}
             <div className="grid grid-cols-3 gap-3 mb-3 max-w-md mx-auto">
-              <Link to="/">
+              <Link to={`/user/${profile.username}/in-progress`}>
                 <Card className="cursor-pointer hover:bg-accent/50 transition-colors" style={{ backgroundColor: accentCardColor }}>
                   <CardContent className="p-3 text-center">
                     <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
@@ -691,7 +696,7 @@ export default function UserProfile() {
                   </CardContent>
                 </Card>
               </Link>
-              <Link to="/completed">
+              <Link to={`/user/${profile.username}/completed`}>
                 <Card className="cursor-pointer hover:bg-accent/50 transition-colors" style={{ backgroundColor: accentCardColor }}>
                   <CardContent className="p-3 text-center">
                     <Star className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
@@ -700,13 +705,15 @@ export default function UserProfile() {
                   </CardContent>
                 </Card>
               </Link>
-              <Card style={{ backgroundColor: accentCardColor }}>
-                <CardContent className="p-3 text-center">
-                  <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                  <p className="text-2xl font-bold text-foreground">{bookStats.totalBooks}</p>
-                  <p className="text-xs text-muted-foreground">Total</p>
-                </CardContent>
-              </Card>
+              <Link to={`/user/${profile.username}/tbr`}>
+                <Card className="cursor-pointer hover:bg-accent/50 transition-colors" style={{ backgroundColor: accentCardColor }}>
+                  <CardContent className="p-3 text-center">
+                    <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                    <p className="text-2xl font-bold text-foreground">{tbrBooks.length}</p>
+                    <p className="text-xs text-muted-foreground">TBR</p>
+                  </CardContent>
+                </Card>
+              </Link>
             </div>
 
             {/* Reading Goal */}
@@ -859,6 +866,17 @@ export default function UserProfile() {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="pb-3">
+                  {tbrBooks.length > 3 && (
+                    <div className="relative mb-2">
+                      <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                      <Input
+                        value={tbrSearchQuery}
+                        onChange={(e) => setTbrSearchQuery(e.target.value)}
+                        placeholder="Search TBR..."
+                        className="pl-8 h-8 text-xs"
+                      />
+                    </div>
+                  )}
                   {tbrBooks.length === 0 ? (
                     <div className="text-center py-4">
                       <BookOpen className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
@@ -866,7 +884,13 @@ export default function UserProfile() {
                     </div>
                   ) : (
                     <div className="space-y-2 max-h-80 overflow-y-auto">
-                      {tbrBooks.map((book) => (
+                      {tbrBooks
+                        .filter(book => 
+                          !tbrSearchQuery.trim() ||
+                          book.title.toLowerCase().includes(tbrSearchQuery.toLowerCase()) ||
+                          book.author.toLowerCase().includes(tbrSearchQuery.toLowerCase())
+                        )
+                        .map((book) => (
                         <div key={book.id} className="border border-border rounded-lg p-2">
                           <div className="flex gap-1.5">
                             {book.cover_url ? (
@@ -900,6 +924,12 @@ export default function UserProfile() {
                           </div>
                         </div>
                       ))}
+                      {tbrSearchQuery.trim() && tbrBooks.filter(book => 
+                        book.title.toLowerCase().includes(tbrSearchQuery.toLowerCase()) ||
+                        book.author.toLowerCase().includes(tbrSearchQuery.toLowerCase())
+                      ).length === 0 && (
+                        <p className="text-center text-xs text-muted-foreground py-2">No books match your search</p>
+                      )}
                     </div>
                   )}
                 </AccordionContent>
@@ -1069,13 +1099,15 @@ export default function UserProfile() {
                       </CardContent>
                     </Card>
                   </Link>
-                  <Card>
-                    <CardContent className="p-3 text-center">
-                      <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                      <p className="text-2xl font-bold text-foreground">{bookStats.totalBooks}</p>
-                      <p className="text-[10px] text-muted-foreground">Total Books</p>
-                    </CardContent>
-                  </Card>
+                  <Link to={`/user/${profile.username}/tbr`}>
+                    <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
+                      <CardContent className="p-3 text-center">
+                        <BookOpen className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                        <p className="text-2xl font-bold text-foreground">{tbrBooks.length}</p>
+                        <p className="text-[10px] text-muted-foreground">TBR</p>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -1235,6 +1267,17 @@ export default function UserProfile() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 pt-0">
+                  {tbrBooks.length > 3 && (
+                    <div className="relative mb-2">
+                      <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                      <Input
+                        value={tbrSearchQuery}
+                        onChange={(e) => setTbrSearchQuery(e.target.value)}
+                        placeholder="Search TBR..."
+                        className="pl-8 h-8 text-xs"
+                      />
+                    </div>
+                  )}
                   {tbrBooks.length === 0 ? (
                     <div className="text-center py-8">
                       <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -1242,7 +1285,13 @@ export default function UserProfile() {
                     </div>
                   ) : (
                     <div className="space-y-2.5 max-h-72 overflow-y-auto">
-                      {tbrBooks.map((book) => (
+                      {tbrBooks
+                        .filter(book => 
+                          !tbrSearchQuery.trim() ||
+                          book.title.toLowerCase().includes(tbrSearchQuery.toLowerCase()) ||
+                          book.author.toLowerCase().includes(tbrSearchQuery.toLowerCase())
+                        )
+                        .map((book) => (
                         <div key={book.id} className="border border-border rounded-lg p-2 hover:bg-accent/5 transition-colors">
                           <div className="flex gap-2">
                             {book.cover_url ? (
@@ -1282,6 +1331,12 @@ export default function UserProfile() {
                           </div>
                         </div>
                       ))}
+                      {tbrSearchQuery.trim() && tbrBooks.filter(book => 
+                        book.title.toLowerCase().includes(tbrSearchQuery.toLowerCase()) ||
+                        book.author.toLowerCase().includes(tbrSearchQuery.toLowerCase())
+                      ).length === 0 && (
+                        <p className="text-center text-xs text-muted-foreground py-2">No books match your search</p>
+                      )}
                     </div>
                   )}
                 </CardContent>

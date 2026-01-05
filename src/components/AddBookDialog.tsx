@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,8 @@ import { Plus, Search, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
 import { searchGoogleBooks, GoogleBookResult } from "@/lib/googleBooks";
+import { useFollowedUserBooks } from "@/hooks/useFollowedUserBooks";
+import { FollowedUsersBooksIndicator } from "@/components/FollowedUsersBooksIndicator";
 
 interface Book {
   id: string;
@@ -33,6 +35,19 @@ export const AddBookDialog = ({ onAddBook }: AddBookDialogProps) => {
   const [totalPages, setTotalPages] = useState("");
   const [showManualForm, setShowManualForm] = useState(false);
   const { toast } = useToast();
+  const { followedUserBooks, isLoading: isLoadingFollowed, searchFollowedUsersBooks, clearResults } = useFollowedUserBooks();
+
+  // Search followed users when search query changes
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchQuery.trim().length >= 2) {
+        searchFollowedUsersBooks(searchQuery);
+      } else {
+        clearResults();
+      }
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, searchFollowedUsersBooks, clearResults]);
 
   const searchBooks = async () => {
     if (!searchQuery.trim()) return;
@@ -110,6 +125,7 @@ export const AddBookDialog = ({ onAddBook }: AddBookDialogProps) => {
     setAuthor("");
     setTotalPages("");
     setShowManualForm(false);
+    clearResults();
     setOpen(false);
   };
 
@@ -151,6 +167,12 @@ export const AddBookDialog = ({ onAddBook }: AddBookDialogProps) => {
                     {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                   </Button>
                 </div>
+                
+                {/* Followed Users Books Indicator */}
+                <FollowedUsersBooksIndicator 
+                  followedUserBooks={followedUserBooks} 
+                  isLoading={isLoadingFollowed} 
+                />
               </div>
 
               {/* Search Results */}
