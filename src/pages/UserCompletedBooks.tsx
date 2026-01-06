@@ -3,10 +3,11 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
 import { UserColorProvider } from "@/components/UserColorProvider";
-import { ArrowLeft, BookOpen, Star, Search } from "lucide-react";
+import { ArrowLeft, BookOpen, Star, Search, ArrowUpDown } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface CompletedBook {
   id: string;
@@ -34,6 +35,7 @@ export default function UserCompletedBooks() {
   const [completedBooks, setCompletedBooks] = useState<CompletedBook[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'recent-desc' | 'recent-asc' | 'author' | 'title'>('recent-desc');
 
   useEffect(() => {
     if (!username) return;
@@ -99,11 +101,26 @@ export default function UserCompletedBooks() {
     })();
   }, [username]);
 
-  const filteredBooks = completedBooks.filter(book =>
-    !searchQuery.trim() ||
-    book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    book.author.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredBooks = completedBooks
+    .filter(book =>
+      !searchQuery.trim() ||
+      book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      book.author.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'recent-desc':
+          return (b.finished_at ? new Date(b.finished_at).getTime() : 0) - (a.finished_at ? new Date(a.finished_at).getTime() : 0);
+        case 'recent-asc':
+          return (a.finished_at ? new Date(a.finished_at).getTime() : 0) - (b.finished_at ? new Date(b.finished_at).getTime() : 0);
+        case 'author':
+          return a.author.localeCompare(b.author);
+        case 'title':
+          return a.title.localeCompare(b.title);
+        default:
+          return 0;
+      }
+    });
 
   // Extract colors from palette
   const colorPalette = profile?.color_palette || { name: 'default' };
@@ -161,15 +178,29 @@ export default function UserCompletedBooks() {
             </div>
           </div>
 
-          {/* Search Bar */}
-          <div className="relative mb-6">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search completed books..."
-              className="pl-10"
-            />
+          {/* Search and Sort */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search completed books..."
+                className="pl-10"
+              />
+            </div>
+            <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <ArrowUpDown className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recent-desc">Newest First</SelectItem>
+                <SelectItem value="recent-asc">Oldest First</SelectItem>
+                <SelectItem value="author">Author Name</SelectItem>
+                <SelectItem value="title">Title</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Results count */}
