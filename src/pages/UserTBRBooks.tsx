@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
+import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
 import { UserColorProvider } from "@/components/UserColorProvider";
@@ -7,6 +7,7 @@ import { ArrowLeft, BookOpen, Star, Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { AddToMyListButton } from "@/components/AddToMyListButton";
 
 interface TBRBook {
   id: string;
@@ -29,11 +30,31 @@ interface UserProfile {
 
 export default function UserTBRBooks() {
   const { username } = useParams<{ username: string }>();
+  const [searchParams] = useSearchParams();
+  const highlightBook = searchParams.get('book');
   const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [tbrBooks, setTbrBooks] = useState<TBRBook[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [myUserId, setMyUserId] = useState<string | null>(null);
+  const highlightRef = useRef<HTMLDivElement>(null);
+
+  // Get current user ID
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setMyUserId(data.session?.user?.id || null);
+    });
+  }, []);
+
+  // Scroll to highlighted book
+  useEffect(() => {
+    if (highlightBook && highlightRef.current && !loading) {
+      setTimeout(() => {
+        highlightRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }, [highlightBook, loading]);
 
   useEffect(() => {
     if (!username) return;
@@ -166,55 +187,73 @@ export default function UserTBRBooks() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredBooks.map((book) => (
-                <Card key={book.id} style={{ backgroundColor: accentCardColor }}>
-                  <CardContent className="p-4">
-                    <div className="flex gap-3">
-                      {book.cover_url ? (
-                        <img 
-                          src={book.cover_url} 
-                          alt={book.title}
-                          className="w-16 h-24 object-contain rounded shadow-sm flex-shrink-0"
-                        />
-                      ) : (
-                        <div className="w-16 h-24 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
-                          <BookOpen className="w-6 h-6 text-muted-foreground" />
-                        </div>
-                      )}
-                      
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <h3 className="font-medium text-sm text-foreground line-clamp-2">{book.title}</h3>
-                          {book.priority > 0 && (
-                            <div className="flex shrink-0">
-                              {Array(book.priority).fill(0).map((_, i) => (
-                                <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                              ))}
+              {filteredBooks.map((book) => {
+                const isHighlighted = highlightBook && book.title.toLowerCase().includes(highlightBook.toLowerCase());
+                return (
+                  <Card 
+                    key={book.id} 
+                    ref={isHighlighted ? highlightRef : undefined}
+                    style={{ backgroundColor: accentCardColor }}
+                    className={isHighlighted ? 'ring-2 ring-primary ring-offset-2' : ''}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex gap-3">
+                        {book.cover_url ? (
+                          <img 
+                            src={book.cover_url} 
+                            alt={book.title}
+                            className="w-16 h-24 object-contain rounded shadow-sm flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-16 h-24 bg-muted rounded flex items-center justify-center shadow-sm flex-shrink-0">
+                            <BookOpen className="w-6 h-6 text-muted-foreground" />
+                          </div>
+                        )}
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start gap-1.5 mb-1">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-1.5">
+                                <h3 className="font-medium text-sm text-foreground line-clamp-2">{book.title}</h3>
+                                {book.priority > 0 && (
+                                  <div className="flex shrink-0">
+                                    {Array(book.priority).fill(0).map((_, i) => (
+                                      <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
                             </div>
+                            {myUserId && myUserId !== profile?.id && (
+                              <AddToMyListButton 
+                                book={book} 
+                                variant="icon"
+                              />
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-2">by {book.author}</p>
+                          
+                          {book.total_pages && (
+                            <p className="text-xs text-muted-foreground mb-1">{book.total_pages} pages</p>
                           )}
+                          
+                          {book.notes && (
+                            <p className="text-xs text-muted-foreground line-clamp-2 mb-1">{book.notes}</p>
+                          )}
+                          
+                          <p className="text-xs text-muted-foreground">
+                            Added {new Date(book.created_at).toLocaleDateString('en-US', { 
+                              month: 'short', 
+                              day: 'numeric', 
+                              year: 'numeric' 
+                            })}
+                          </p>
                         </div>
-                        <p className="text-xs text-muted-foreground mb-2">by {book.author}</p>
-                        
-                        {book.total_pages && (
-                          <p className="text-xs text-muted-foreground mb-1">{book.total_pages} pages</p>
-                        )}
-                        
-                        {book.notes && (
-                          <p className="text-xs text-muted-foreground line-clamp-2 mb-1">{book.notes}</p>
-                        )}
-                        
-                        <p className="text-xs text-muted-foreground">
-                          Added {new Date(book.created_at).toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric', 
-                            year: 'numeric' 
-                          })}
-                        </p>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </main>
