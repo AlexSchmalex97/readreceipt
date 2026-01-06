@@ -86,10 +86,28 @@ export function FollowedUsersBooksIndicator({ followedUserBooks, isLoading }: Fo
           const firstBook = books[0];
           const statuses = [...new Set(books.map(b => b.status))];
           
+          // Build link to the appropriate list with book highlighted
+          const getListUrl = (status: FollowedUserBook['status']) => {
+            const bookParam = encodeURIComponent(firstBook.bookTitle);
+            switch (status) {
+              case 'completed':
+                return `/${firstBook.username}/completed?book=${bookParam}`;
+              case 'in_progress':
+                return `/${firstBook.username}/in-progress?book=${bookParam}`;
+              case 'tbr':
+                return `/${firstBook.username}/tbr?book=${bookParam}`;
+              default:
+                return `/${firstBook.username}`;
+            }
+          };
+          
+          // Use the first status for the main link
+          const primaryStatus = statuses[0];
+          
           return (
             <Link 
               key={userId} 
-              to={`/${firstBook.username}`}
+              to={getListUrl(primaryStatus)}
               className="flex items-center gap-2 p-1.5 rounded hover:bg-accent/50 transition-colors"
             >
               <Avatar className="w-5 h-5">

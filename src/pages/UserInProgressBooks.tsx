@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
+import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
 import { UserColorProvider } from "@/components/UserColorProvider";
@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { AddToMyListButton } from "@/components/AddToMyListButton";
 
 interface InProgressBook {
   id: string;
@@ -29,11 +30,31 @@ interface UserProfile {
 
 export default function UserInProgressBooks() {
   const { username } = useParams<{ username: string }>();
+  const [searchParams] = useSearchParams();
+  const highlightBook = searchParams.get('book');
   const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [inProgressBooks, setInProgressBooks] = useState<InProgressBook[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [myUserId, setMyUserId] = useState<string | null>(null);
+  const highlightRef = useRef<HTMLDivElement>(null);
+
+  // Get current user ID
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setMyUserId(data.session?.user?.id || null);
+    });
+  }, []);
+
+  // Scroll to highlighted book
+  useEffect(() => {
+    if (highlightBook && highlightRef.current && !loading) {
+      setTimeout(() => {
+        highlightRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }, [highlightBook, loading]);
 
   useEffect(() => {
     if (!username) return;
@@ -175,9 +196,15 @@ export default function UserInProgressBooks() {
                 const progress = book.total_pages > 0 
                   ? Math.round((book.current_page / book.total_pages) * 100) 
                   : 0;
+                const isHighlighted = highlightBook && book.title.toLowerCase().includes(highlightBook.toLowerCase());
                 
                 return (
-                  <Card key={book.id} style={{ backgroundColor: accentCardColor }}>
+                  <Card 
+                    key={book.id} 
+                    ref={isHighlighted ? highlightRef : undefined}
+                    style={{ backgroundColor: accentCardColor }}
+                    className={isHighlighted ? 'ring-2 ring-primary ring-offset-2' : ''}
+                  >
                     <CardContent className="p-4">
                       <div className="flex gap-3">
                         {book.cover_url ? (
@@ -193,7 +220,15 @@ export default function UserInProgressBooks() {
                         )}
                         
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-sm text-foreground line-clamp-2 mb-1">{book.title}</h3>
+                          <div className="flex items-start justify-between gap-1 mb-1">
+                            <h3 className="font-medium text-sm text-foreground line-clamp-2">{book.title}</h3>
+                            {myUserId && myUserId !== profile?.id && (
+                              <AddToMyListButton 
+                                book={book} 
+                                variant="icon"
+                              />
+                            )}
+                          </div>
                           <p className="text-xs text-muted-foreground mb-2">by {book.author}</p>
                           
                           <div className="space-y-1">
