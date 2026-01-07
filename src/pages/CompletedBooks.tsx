@@ -173,6 +173,31 @@ export default function CompletedBooks() {
         });
       }
 
+      // Backfill books.finished_at (and status) from private reading_entries so
+      // public profile pages can sort/display correctly.
+      const syncUpdates = (books ?? [])
+        .map((b: any) => {
+          const latest = latestFinishedByBookId[b.id];
+          if (!latest) return null;
+          const needsDate = (b.finished_at ?? null) !== latest;
+          const needsStatus = (b.status ?? null) !== 'completed';
+          if (!needsDate && !needsStatus) return null;
+          return { id: b.id, finished_at: latest };
+        })
+        .filter(Boolean) as Array<{ id: string; finished_at: string }>;
+
+      if (syncUpdates.length > 0) {
+        // Fire-and-forget: don't block rendering if this takes a moment.
+        Promise.all(
+          syncUpdates.map((u) =>
+            supabase
+              .from('books')
+              .update({ finished_at: u.finished_at, status: 'completed' })
+              .eq('id', u.id)
+          )
+        ).catch((e) => console.warn('Failed syncing book finished_at from reading entries', e));
+      }
+
       const completed = (books ?? [])
         .filter((b: any) => (b.status === 'completed') || ((b.current_page ?? 0) >= (b.total_pages ?? Number.MAX_SAFE_INTEGER)))
         .map((book: any) => {

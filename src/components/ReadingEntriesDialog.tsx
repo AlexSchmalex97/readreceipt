@@ -110,6 +110,19 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
       return;
     }
 
+    // Keep books table in sync so other users can see accurate completion dates.
+    // (reading_entries are private via RLS, but books are viewable.)
+    if (form.finished_at) {
+      const { error: bookErr } = await supabase
+        .from('books')
+        .update({ finished_at: form.finished_at, status: 'completed' })
+        .eq('id', bookId);
+
+      if (bookErr) {
+        console.warn('Failed to sync book completion date', bookErr);
+      }
+    }
+
     toast({ title: editingId ? 'Entry updated' : 'Entry added', description: 'Reading dates saved' });
     resetForm();
     await loadEntries();
