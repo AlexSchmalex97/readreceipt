@@ -216,8 +216,8 @@ export default function UserCompletedBooks() {
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="recent-desc">Newest First</SelectItem>
-                <SelectItem value="recent-asc">Oldest First</SelectItem>
+                <SelectItem value="recent-desc">Most Recently Completed</SelectItem>
+                <SelectItem value="recent-asc">Earliest Completed</SelectItem>
                 <SelectItem value="author">Author Name</SelectItem>
                 <SelectItem value="title">Title</SelectItem>
               </SelectContent>

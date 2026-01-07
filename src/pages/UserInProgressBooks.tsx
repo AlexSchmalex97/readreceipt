@@ -26,6 +26,7 @@ interface UserProfile {
   display_name: string | null;
   avatar_url: string | null;
   color_palette: any;
+  top_five_books: any;
 }
 
 export default function UserInProgressBooks() {
@@ -61,10 +62,10 @@ export default function UserInProgressBooks() {
 
     (async () => {
       try {
-        // Fetch user profile
+        // Fetch user profile including top_five_books
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("id, username, display_name, avatar_url, color_palette")
+          .select("id, username, display_name, avatar_url, color_palette, top_five_books")
           .eq("username", username)
           .maybeSingle();
 
@@ -86,10 +87,16 @@ export default function UserInProgressBooks() {
           console.error("Error fetching books:", booksError);
         }
 
+        // Get the top five book IDs to exclude
+        const topFiveIds = Array.isArray(profileData.top_five_books) 
+          ? profileData.top_five_books 
+          : [];
+
         const inProgress = (books || []).filter(book => 
           book.current_page < book.total_pages && 
           book.status !== 'completed' && 
-          book.status !== 'dnf'
+          book.status !== 'dnf' &&
+          !topFiveIds.includes(book.id) // Exclude top five books
         );
 
         setInProgressBooks(inProgress);
