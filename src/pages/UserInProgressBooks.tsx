@@ -96,6 +96,7 @@ export default function UserInProgressBooks() {
           book.current_page < book.total_pages && 
           book.status !== 'completed' && 
           book.status !== 'dnf' &&
+          book.status !== 'top_five' &&
           !topFiveIds.includes(book.id) // Exclude top five books
         );
 
