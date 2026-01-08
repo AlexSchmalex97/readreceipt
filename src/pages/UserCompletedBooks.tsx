@@ -17,6 +17,8 @@ interface CompletedBook {
   cover_url: string | null;
   finished_at: string | null;
   total_pages: number;
+  created_at?: string | null;
+  updated_at?: string | null;
   rating?: number;
   review?: string | null;
 }
@@ -40,6 +42,8 @@ export default function UserCompletedBooks() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'recent-desc' | 'recent-asc' | 'author' | 'title'>('recent-desc');
   const [myUserId, setMyUserId] = useState<string | null>(null);
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
+  const [backgroundTint, setBackgroundTint] = useState<{ color: string; opacity: number } | null>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
 
   // Get current user ID
@@ -66,7 +70,7 @@ export default function UserCompletedBooks() {
         // Fetch user profile
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("id, username, display_name, avatar_url, color_palette")
+          .select("id, username, display_name, avatar_url, color_palette, background_type, active_background_id, background_image_url, background_tint")
           .eq("username", username)
           .maybeSingle();
 
@@ -77,12 +81,39 @@ export default function UserCompletedBooks() {
 
         setProfile(profileData);
 
+        // Load background settings so visitors see the user's background too
+        if ((profileData as any)?.background_type === 'image' && (profileData as any)?.active_background_id) {
+          const { data: bgData } = await supabase
+            .from("saved_backgrounds")
+            .select("image_url, tint_color, tint_opacity")
+            .eq("id", (profileData as any).active_background_id)
+            .maybeSingle();
+
+          if (bgData) {
+            setBackgroundImageUrl(bgData.image_url);
+            setBackgroundTint(bgData.tint_color && (bgData.tint_opacity as number) > 0
+              ? { color: bgData.tint_color, opacity: bgData.tint_opacity as number }
+              : null
+            );
+          } else {
+            setBackgroundImageUrl(null);
+            setBackgroundTint(null);
+          }
+        } else if ((profileData as any)?.background_image_url) {
+          setBackgroundImageUrl((profileData as any).background_image_url);
+          setBackgroundTint(((profileData as any).background_tint as any) ?? null);
+        } else {
+          setBackgroundImageUrl(null);
+          setBackgroundTint(null);
+        }
+
         // Fetch completed books
         const { data: books, error: booksError } = await supabase
           .from("books")
-          .select("id, title, author, cover_url, finished_at, total_pages, current_page, status")
+          .select("id, title, author, cover_url, finished_at, total_pages, current_page, status, created_at, updated_at")
           .eq("user_id", profileData.id)
-          .order("finished_at", { ascending: false });
+          .order("finished_at", { ascending: false })
+          .order("updated_at", { ascending: false });
 
         if (booksError) {
           console.error("Error fetching books:", booksError);
@@ -122,6 +153,13 @@ export default function UserCompletedBooks() {
     })();
   }, [username]);
 
+  const parseFinishedAt = (v?: string | null) => {
+    if (!v) return null;
+    // Treat Supabase date-only strings (YYYY-MM-DD) as local dates to avoid timezone shifts.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return new Date(v + "T00:00:00");
+    return new Date(v);
+  };
+
   const filteredBooks = completedBooks
     .filter(book =>
       !searchQuery.trim() ||
@@ -130,10 +168,22 @@ export default function UserCompletedBooks() {
     )
     .sort((a, b) => {
       switch (sortBy) {
-        case 'recent-desc':
-          return (b.finished_at ? new Date(b.finished_at).getTime() : 0) - (a.finished_at ? new Date(a.finished_at).getTime() : 0);
-        case 'recent-asc':
-          return (a.finished_at ? new Date(a.finished_at).getTime() : 0) - (b.finished_at ? new Date(b.finished_at).getTime() : 0);
+        case 'recent-desc': {
+          const ta = parseFinishedAt(a.finished_at)?.getTime() ?? 0;
+          const tb = parseFinishedAt(b.finished_at)?.getTime() ?? 0;
+          if (tb !== ta) return tb - ta;
+          const ua = a.updated_at ? new Date(a.updated_at).getTime() : (a.created_at ? new Date(a.created_at).getTime() : 0);
+          const ub = b.updated_at ? new Date(b.updated_at).getTime() : (b.created_at ? new Date(b.created_at).getTime() : 0);
+          return ub - ua;
+        }
+        case 'recent-asc': {
+          const ta = parseFinishedAt(a.finished_at)?.getTime() ?? 0;
+          const tb = parseFinishedAt(b.finished_at)?.getTime() ?? 0;
+          if (ta !== tb) return ta - tb;
+          const ua = a.updated_at ? new Date(a.updated_at).getTime() : (a.created_at ? new Date(a.created_at).getTime() : 0);
+          const ub = b.updated_at ? new Date(b.updated_at).getTime() : (b.created_at ? new Date(b.created_at).getTime() : 0);
+          return ua - ub;
+        }
         case 'author':
           return a.author.localeCompare(b.author);
         case 'title':
@@ -172,7 +222,7 @@ export default function UserCompletedBooks() {
   }
 
   return (
-    <UserColorProvider userColorPalette={colorPalette}>
+    <UserColorProvider userColorPalette={colorPalette} backgroundImageUrl={backgroundImageUrl} backgroundTint={backgroundTint}>
       <div className="min-h-screen bg-background">
         <Navigation />
         <main className="container mx-auto px-4 py-6 pb-24 lg:pb-8">
@@ -290,11 +340,12 @@ export default function UserCompletedBooks() {
                           
                           {book.finished_at && (
                             <p className="text-xs text-muted-foreground">
-                              Finished {new Date(book.finished_at).toLocaleDateString('en-US', { 
-                                month: 'short', 
-                                day: 'numeric', 
-                                year: 'numeric' 
-                              })}
+                              Finished {(() => {
+                                const d = parseFinishedAt(book.finished_at);
+                                return d
+                                  ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                                  : '';
+                              })()}
                             </p>
                           )}
                         </div>
