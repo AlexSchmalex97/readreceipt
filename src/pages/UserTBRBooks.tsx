@@ -26,6 +26,10 @@ interface UserProfile {
   display_name: string | null;
   avatar_url: string | null;
   color_palette: any;
+  background_type?: string | null;
+  active_background_id?: string | null;
+  background_image_url?: string | null;
+  background_tint?: any;
 }
 
 export default function UserTBRBooks() {
@@ -38,6 +42,8 @@ export default function UserTBRBooks() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [myUserId, setMyUserId] = useState<string | null>(null);
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
+  const [backgroundTint, setBackgroundTint] = useState<{ color: string; opacity: number } | null>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
 
   // Get current user ID
@@ -64,7 +70,7 @@ export default function UserTBRBooks() {
         // Fetch user profile
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("id, username, display_name, avatar_url, color_palette")
+          .select("id, username, display_name, avatar_url, color_palette, background_type, active_background_id, background_image_url, background_tint")
           .eq("username", username)
           .maybeSingle();
 
@@ -74,6 +80,32 @@ export default function UserTBRBooks() {
         }
 
         setProfile(profileData);
+
+        // Load background settings so visitors see the user's background too
+        if ((profileData as any)?.background_type === 'image' && (profileData as any)?.active_background_id) {
+          const { data: bgData } = await supabase
+            .from("saved_backgrounds")
+            .select("image_url, tint_color, tint_opacity")
+            .eq("id", (profileData as any).active_background_id)
+            .maybeSingle();
+
+          if (bgData) {
+            setBackgroundImageUrl(bgData.image_url);
+            setBackgroundTint(bgData.tint_color && (bgData.tint_opacity as number) > 0
+              ? { color: bgData.tint_color, opacity: bgData.tint_opacity as number }
+              : null
+            );
+          } else {
+            setBackgroundImageUrl(null);
+            setBackgroundTint(null);
+          }
+        } else if ((profileData as any)?.background_image_url) {
+          setBackgroundImageUrl((profileData as any).background_image_url);
+          setBackgroundTint(((profileData as any).background_tint as any) ?? null);
+        } else {
+          setBackgroundImageUrl(null);
+          setBackgroundTint(null);
+        }
 
         // Fetch TBR books
         const { data: books, error: booksError } = await supabase
@@ -131,7 +163,7 @@ export default function UserTBRBooks() {
   }
 
   return (
-    <UserColorProvider userColorPalette={colorPalette}>
+    <UserColorProvider userColorPalette={colorPalette} backgroundImageUrl={backgroundImageUrl} backgroundTint={backgroundTint}>
       <div className="min-h-screen bg-background">
         <Navigation />
         <main className="container mx-auto px-4 py-6 pb-24 lg:pb-8">
@@ -242,11 +274,12 @@ export default function UserTBRBooks() {
                           )}
                           
                           <p className="text-xs text-muted-foreground">
-                            Added {new Date(book.created_at).toLocaleDateString('en-US', { 
-                              month: 'short', 
-                              day: 'numeric', 
-                              year: 'numeric' 
-                            })}
+                            Added {(() => {
+                              const d = /^\d{4}-\d{2}-\d{2}$/.test(book.created_at)
+                                ? new Date(book.created_at + "T00:00:00")
+                                : new Date(book.created_at);
+                              return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                            })()}
                           </p>
                         </div>
                       </div>
