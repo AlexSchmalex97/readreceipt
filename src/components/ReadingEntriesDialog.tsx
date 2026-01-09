@@ -115,7 +115,11 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
     if (form.finished_at) {
       const { error: bookErr } = await supabase
         .from('books')
-        .update({ finished_at: form.finished_at, status: 'completed' })
+        .update({ 
+          finished_at: form.finished_at, 
+          status: 'completed',
+          completed_at: new Date().toISOString()
+        })
         .eq('id', bookId);
 
       if (bookErr) {

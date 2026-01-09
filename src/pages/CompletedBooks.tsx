@@ -19,6 +19,7 @@ type CompletedBook = {
   current_page: number;
   created_at: string;
   finished_at?: string | null;
+  completed_at?: string | null;
   // Computed from latest reading_entries.finished_at (falls back to book.finished_at)
   computed_finished_at?: string | null;
   status?: string | null;
@@ -136,8 +137,9 @@ export default function CompletedBooks() {
       // Get all books for user
       const { data: books, error: booksError } = await supabase
         .from("books")
-        .select(`id, title, author, total_pages, current_page, created_at, finished_at, status, user_id, cover_url`)
+        .select(`id, title, author, total_pages, current_page, created_at, finished_at, completed_at, status, user_id, cover_url`)
         .eq("user_id", userId)
+        .order("completed_at", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false });
 
       console.log("CompletedBooks - books query:", { books, booksError });
@@ -210,9 +212,15 @@ export default function CompletedBooks() {
           } as CompletedBook;
         })
         .sort((a, b) => {
+          // First sort by date (day-level)
           const dateA = new Date(a.computed_finished_at ?? a.finished_at ?? a.created_at);
           const dateB = new Date(b.computed_finished_at ?? b.finished_at ?? b.created_at);
-          return dateB.getTime() - dateA.getTime();
+          const dateDiff = dateB.getTime() - dateA.getTime();
+          if (dateDiff !== 0) return dateDiff;
+          // For same-day completions, use completed_at timestamp for precise ordering
+          const caTime = a.completed_at ? new Date(a.completed_at).getTime() : 0;
+          const cbTime = b.completed_at ? new Date(b.completed_at).getTime() : 0;
+          return cbTime - caTime;
         });
 
       setCompletedBooks(completed);

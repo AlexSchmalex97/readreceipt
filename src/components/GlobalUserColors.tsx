@@ -10,16 +10,24 @@ export default function GlobalUserColors({ children }: { children: React.ReactNo
   const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
   const [backgroundTint, setBackgroundTint] = useState<{ color: string; opacity: number } | null>(null);
   
-  // Check if we're viewing another user's profile (/:username route)
+  // Check if we're viewing another user's profile (/:username route or /:username/* routes)
   const isViewingUserProfile = useMemo(() => {
     const path = location.pathname;
-    // Exclude known routes, anything else with pattern /:username is a user profile
+    // Exclude known routes, anything else with pattern /:username or /:username/* is a user profile
     const knownRoutes = [
       '/', '/home', '/auth', '/contact', '/feed', '/people', '/reviews', 
       '/profile', '/settings', '/tbr', '/more', '/completed', '/integrations', '/notifications'
     ];
-    const isKnownRoute = knownRoutes.includes(path) || path.startsWith('/profile/');
-    return !isKnownRoute && path !== '/' && path.length > 1;
+    // Check if it's a known route
+    if (knownRoutes.includes(path) || path.startsWith('/profile/')) return false;
+    // Single segment paths like /:username
+    if (path !== '/' && path.length > 1 && !path.includes('/', 1)) return true;
+    // Multi-segment paths like /:username/completed, /:username/in-progress, /:username/tbr
+    const userSubRoutes = ['/completed', '/in-progress', '/tbr'];
+    for (const subRoute of userSubRoutes) {
+      if (path.endsWith(subRoute) && path.length > subRoute.length) return true;
+    }
+    return false;
   }, [location.pathname]);
 
   // Build a safe, complete palette with fallbacks to current CSS tokens
