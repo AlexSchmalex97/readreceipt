@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar as CalendarIcon, Plus, Pencil, Trash2 } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Pencil, Trash2, Clock } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format, parse } from "date-fns";
@@ -29,8 +30,8 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
   const [entries, setEntries] = useState<ReadingEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState<{ started_at: string; finished_at: string }>(
-    { started_at: '', finished_at: '' }
+  const [form, setForm] = useState<{ started_at: string; started_time: string; finished_at: string; finished_time: string }>(
+    { started_at: '', started_time: '', finished_at: '', finished_time: '' }
   );
   const dialogContentRef = useRef<HTMLDivElement>(null);
   const [startedPickerOpen, setStartedPickerOpen] = useState(false);
@@ -67,7 +68,7 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
 
   const resetForm = () => {
     setEditingId(null);
-    setForm({ started_at: '', finished_at: '' });
+    setForm({ started_at: '', started_time: '', finished_at: '', finished_time: '' });
   };
 
   const handleSave = async () => {
@@ -113,12 +114,20 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
     // Keep books table in sync so other users can see accurate completion dates.
     // (reading_entries are private via RLS, but books are viewable.)
     if (form.finished_at) {
+      // Build completed_at timestamp with optional time
+      let completedAtValue: string;
+      if (form.finished_time) {
+        completedAtValue = new Date(`${form.finished_at}T${form.finished_time}`).toISOString();
+      } else {
+        completedAtValue = new Date().toISOString();
+      }
+      
       const { error: bookErr } = await supabase
         .from('books')
         .update({ 
           finished_at: form.finished_at, 
           status: 'completed',
-          completed_at: new Date().toISOString()
+          completed_at: completedAtValue
         })
         .eq('id', bookId);
 
@@ -139,7 +148,9 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
     setEditingId(entry.id);
     setForm({
       started_at: entry.started_at ?? '',
+      started_time: '',
       finished_at: entry.finished_at ?? '',
+      finished_time: '',
     });
   };
 
@@ -279,6 +290,16 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
                     />
                   </PopoverContent>
                 </Popover>
+                <div className="flex items-center gap-2 mt-1">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="time"
+                    value={form.started_time}
+                    onChange={(e) => setForm((f) => ({ ...f, started_time: e.target.value }))}
+                    placeholder="Time (optional)"
+                    className="flex-1 text-sm"
+                  />
+                </div>
               </div>
               <div className="space-y-1">
                 <Label htmlFor="finished">Date Finished</Label>
@@ -323,6 +344,16 @@ export const ReadingEntriesDialog = ({ bookId, bookTitle, onChanged }: ReadingEn
                     />
                   </PopoverContent>
                 </Popover>
+                <div className="flex items-center gap-2 mt-1">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="time"
+                    value={form.finished_time}
+                    onChange={(e) => setForm((f) => ({ ...f, finished_time: e.target.value }))}
+                    placeholder="Time (optional)"
+                    className="flex-1 text-sm"
+                  />
+                </div>
               </div>
             </div>
             <div className="flex gap-2">

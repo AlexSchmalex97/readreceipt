@@ -26,12 +26,16 @@ interface BookDatesDialogProps {
 export const BookDatesDialog = ({ book, onUpdateDates }: BookDatesDialogProps) => {
   const [open, setOpen] = useState(false);
   const [startedAt, setStartedAt] = useState(book.started_at || "");
+  const [startedTime, setStartedTime] = useState("");
   const [finishedAt, setFinishedAt] = useState(book.finished_at || "");
+  const [finishedTime, setFinishedTime] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
     setStartedAt(book.started_at || "");
+    setStartedTime("");
     setFinishedAt(book.finished_at || "");
+    setFinishedTime("");
   }, [book]);
 
   const handleSave = () => {
@@ -104,6 +108,16 @@ export const BookDatesDialog = ({ book, onUpdateDates }: BookDatesDialogProps) =
               onChange={(e) => setStartedAt(e.target.value)}
               className="focus:ring-primary"
             />
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <Input
+                type="time"
+                value={startedTime}
+                onChange={(e) => setStartedTime(e.target.value)}
+                placeholder="Time (optional)"
+                className="flex-1 text-sm"
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -115,6 +129,16 @@ export const BookDatesDialog = ({ book, onUpdateDates }: BookDatesDialogProps) =
               onChange={(e) => setFinishedAt(e.target.value)}
               className="focus:ring-primary"
             />
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <Input
+                type="time"
+                value={finishedTime}
+                onChange={(e) => setFinishedTime(e.target.value)}
+                placeholder="Time (optional)"
+                className="flex-1 text-sm"
+              />
+            </div>
           </div>
 
           {readingTime && (
