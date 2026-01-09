@@ -16,6 +16,7 @@ interface CompletedBook {
   author: string;
   cover_url: string | null;
   finished_at: string | null;
+  completed_at?: string | null;
   total_pages: number;
   created_at?: string | null;
   updated_at?: string | null;
@@ -110,8 +111,9 @@ export default function UserCompletedBooks() {
         // Fetch completed books
         const { data: books, error: booksError } = await supabase
           .from("books")
-          .select("id, title, author, cover_url, finished_at, total_pages, current_page, status, created_at, updated_at")
+          .select("id, title, author, cover_url, finished_at, completed_at, total_pages, current_page, status, created_at, updated_at")
           .eq("user_id", profileData.id)
+          .order("completed_at", { ascending: false, nullsFirst: false })
           .order("finished_at", { ascending: false })
           .order("updated_at", { ascending: false });
 
@@ -169,9 +171,15 @@ export default function UserCompletedBooks() {
     .sort((a, b) => {
       switch (sortBy) {
         case 'recent-desc': {
+          // First compare by finished_at date (day-level)
           const ta = parseFinishedAt(a.finished_at)?.getTime() ?? 0;
           const tb = parseFinishedAt(b.finished_at)?.getTime() ?? 0;
           if (tb !== ta) return tb - ta;
+          // For same-day completions, use completed_at timestamp for precise ordering
+          const ca = a.completed_at ? new Date(a.completed_at).getTime() : 0;
+          const cb = b.completed_at ? new Date(b.completed_at).getTime() : 0;
+          if (cb !== ca) return cb - ca;
+          // Final fallback to updated_at/created_at
           const ua = a.updated_at ? new Date(a.updated_at).getTime() : (a.created_at ? new Date(a.created_at).getTime() : 0);
           const ub = b.updated_at ? new Date(b.updated_at).getTime() : (b.created_at ? new Date(b.created_at).getTime() : 0);
           return ub - ua;
@@ -180,6 +188,10 @@ export default function UserCompletedBooks() {
           const ta = parseFinishedAt(a.finished_at)?.getTime() ?? 0;
           const tb = parseFinishedAt(b.finished_at)?.getTime() ?? 0;
           if (ta !== tb) return ta - tb;
+          // For same-day completions, use completed_at timestamp for precise ordering
+          const ca = a.completed_at ? new Date(a.completed_at).getTime() : 0;
+          const cb = b.completed_at ? new Date(b.completed_at).getTime() : 0;
+          if (ca !== cb) return ca - cb;
           const ua = a.updated_at ? new Date(a.updated_at).getTime() : (a.created_at ? new Date(a.created_at).getTime() : 0);
           const ub = b.updated_at ? new Date(b.updated_at).getTime() : (b.created_at ? new Date(b.created_at).getTime() : 0);
           return ua - ub;

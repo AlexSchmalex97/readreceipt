@@ -542,7 +542,8 @@ const Index = () => {
           .update({ 
             status: 'completed',
             current_page: book.totalPages,
-            finished_at: new Date().toISOString()
+            finished_at: new Date().toISOString().split('T')[0],
+            completed_at: new Date().toISOString()
           })
           .eq("id", id);
 
@@ -604,7 +605,8 @@ const Index = () => {
           current_page: tbrBook.total_pages || 0,
           cover_url: tbrBook.cover_url,
           status: 'completed',
-          finished_at: new Date().toISOString(),
+          finished_at: new Date().toISOString().split('T')[0],
+          completed_at: new Date().toISOString(),
         });
 
       if (insertError) throw insertError;

@@ -91,8 +91,9 @@ const TBR = () => {
         total_pages: tbrBook.total_pages || 0,
         current_page: tbrBook.total_pages || 0,
         cover_url: tbrBook.cover_url,
-        status: "finished",
+        status: "completed",
         finished_at: new Date().toISOString().split('T')[0],
+        completed_at: new Date().toISOString(),
       });
 
       if (insertError) throw insertError;
