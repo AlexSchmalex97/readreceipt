@@ -17,6 +17,7 @@ interface Book {
   totalPages: number;
   currentPage: number;
   coverUrl?: string;
+  publishedYear?: number;
 }
 
 
@@ -101,11 +102,16 @@ export const AddBookDialog = ({ onAddBook }: AddBookDialogProps) => {
       return;
     }
 
+    const publishedYear = selectedBook?.publishedDate
+      ? parseInt(selectedBook.publishedDate.substring(0, 4), 10) || undefined
+      : undefined;
+
     onAddBook({
       title: title.trim(),
       author: author.trim(),
       totalPages: pages,
       coverUrl: selectedBook?.imageLinks?.thumbnail,
+      publishedYear,
     });
 
     // Reset form

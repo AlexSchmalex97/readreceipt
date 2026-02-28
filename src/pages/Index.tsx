@@ -32,6 +32,7 @@ interface Book {
   status?: 'in_progress' | 'completed' | 'dnf';
   dnf_type?: 'soft' | 'hard' | null;
   display_order?: number;
+  published_year?: number;
 }
 
 const Index = () => {
@@ -116,7 +117,7 @@ const Index = () => {
       if (userId) {
         const { data, error } = await supabase
           .from("books")
-          .select("id,title,author,total_pages,current_page,cover_url,started_at,finished_at,created_at,status,dnf_type,display_order")
+          .select("id,title,author,total_pages,current_page,cover_url,started_at,finished_at,created_at,status,dnf_type,display_order,published_year")
           .eq("user_id", userId)  // Only fetch current user's books
           .order("display_order", { ascending: true })
           .order("created_at", { ascending: true });
@@ -145,12 +146,12 @@ const Index = () => {
                 localStorage.removeItem("reading-tracker-books");
                 const { data: migrated } = await supabase
                   .from("books")
-                  .select("id,title,author,total_pages,current_page,cover_url,started_at,finished_at,created_at,status,dnf_type,display_order")
+                  .select("id,title,author,total_pages,current_page,cover_url,started_at,finished_at,created_at,status,dnf_type,display_order,published_year")
                   .eq("user_id", userId)  // Only fetch current user's books
                   .order("display_order", { ascending: true })
                   .order("created_at", { ascending: true });
                 setBooks(
-                  (migrated ?? []).map((r: any) => ({
+                   (migrated ?? []).map((r: any) => ({
                     id: r.id,
                     title: r.title,
                     author: r.author,
@@ -162,6 +163,7 @@ const Index = () => {
                     started_at: r.started_at,
                     finished_at: r.finished_at,
                     display_order: r.display_order ?? 0,
+                    published_year: r.published_year,
                   }))
                 );
                 setLoading(false);
@@ -183,6 +185,7 @@ const Index = () => {
               status: r.status,
               dnf_type: r.dnf_type,
               display_order: r.display_order ?? 0,
+              published_year: r.published_year,
             }))
           );
           console.log('Books with covers:', data?.map(r => ({ title: r.title, coverUrl: r.cover_url })));
@@ -320,6 +323,7 @@ const Index = () => {
             total_pages: bookData.totalPages,
             current_page: 0,
             cover_url: bookData.coverUrl || null,
+            published_year: (bookData as any).publishedYear || null,
           },
         ])
         .select();

@@ -22,6 +22,7 @@ interface Book {
   finished_at?: string;
   status?: 'in_progress' | 'completed' | 'dnf';
   dnf_type?: 'soft' | 'hard' | null;
+  published_year?: number;
 }
 
 interface BookCardProps {
@@ -193,7 +194,7 @@ export const BookCard = ({
               className="text-[10px] sm:text-base font-semibold leading-tight line-clamp-2"
               style={accentTextColor ? { color: accentTextColor } : {}}
             >
-              {book.title}
+              {book.title}{book.published_year ? ` (${book.published_year})` : ''}
             </CardTitle>
             <p 
               className="text-[9px] sm:text-xs mt-0 truncate opacity-80"

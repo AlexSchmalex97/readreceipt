@@ -172,6 +172,10 @@ export function TBRList({ userId, onMoveToReading, onMoveToCompleted, onMoveToDN
     }
 
     try {
+      const publishedYear = selectedGoogleBook?.publishedDate
+        ? parseInt(selectedGoogleBook.publishedDate.substring(0, 4), 10) || null
+        : null;
+
       const { data, error } = await supabase
         .from('tbr_books')
         .insert([{
@@ -182,6 +186,7 @@ export function TBRList({ userId, onMoveToReading, onMoveToCompleted, onMoveToDN
           notes: newBook.notes.trim() || null,
           priority: newBook.priority,
           cover_url: selectedGoogleBook?.imageLinks?.thumbnail || null,
+          published_year: publishedYear,
         }])
         .select()
         .single();
@@ -604,7 +609,7 @@ export function TBRList({ userId, onMoveToReading, onMoveToCompleted, onMoveToDN
                     {/* Book Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-foreground truncate">{book.title}</h3>
+                        <h3 className="font-medium text-foreground truncate">{book.title}{(book as any).published_year ? ` (${(book as any).published_year})` : ''}</h3>
                         {book.priority > 0 && (
                           <div className="flex">
                             {Array(book.priority).fill(0).map((_, i) => (

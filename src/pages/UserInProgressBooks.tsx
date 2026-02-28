@@ -111,7 +111,7 @@ export default function UserInProgressBooks() {
         // Fetch in-progress books
         const { data: books, error: booksError } = await supabase
           .from("books")
-          .select("id, title, author, cover_url, current_page, total_pages, started_at, status")
+          .select("id, title, author, cover_url, current_page, total_pages, started_at, status, published_year")
           .eq("user_id", profileData.id)
           .order("updated_at", { ascending: false });
 
@@ -261,7 +261,7 @@ export default function UserInProgressBooks() {
                         
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-1 mb-1">
-                            <h3 className="font-medium text-sm text-foreground line-clamp-2">{book.title}</h3>
+                            <h3 className="font-medium text-sm text-foreground line-clamp-2">{book.title}{(book as any).published_year ? ` (${(book as any).published_year})` : ''}</h3>
                             {myUserId && myUserId !== profile?.id && (
                               <AddToMyListButton 
                                 book={book} 

@@ -25,6 +25,7 @@ export type Database = {
           dnf_type: string | null
           finished_at: string | null
           id: string
+          published_year: number | null
           started_at: string | null
           status: string | null
           title: string
@@ -42,6 +43,7 @@ export type Database = {
           dnf_type?: string | null
           finished_at?: string | null
           id?: string
+          published_year?: number | null
           started_at?: string | null
           status?: string | null
           title: string
@@ -59,6 +61,7 @@ export type Database = {
           dnf_type?: string | null
           finished_at?: string | null
           id?: string
+          published_year?: number | null
           started_at?: string | null
           status?: string | null
           title?: string
@@ -442,6 +445,7 @@ export type Database = {
           id: string
           notes: string | null
           priority: number | null
+          published_year: number | null
           title: string
           total_pages: number | null
           updated_at: string
@@ -454,6 +458,7 @@ export type Database = {
           id?: string
           notes?: string | null
           priority?: number | null
+          published_year?: number | null
           title: string
           total_pages?: number | null
           updated_at?: string
@@ -466,6 +471,7 @@ export type Database = {
           id?: string
           notes?: string | null
           priority?: number | null
+          published_year?: number | null
           title?: string
           total_pages?: number | null
           updated_at?: string

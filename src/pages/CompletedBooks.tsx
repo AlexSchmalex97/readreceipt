@@ -138,7 +138,7 @@ export default function CompletedBooks() {
       // Get all books for user
       const { data: books, error: booksError } = await supabase
         .from("books")
-        .select(`id, title, author, total_pages, current_page, created_at, started_at, finished_at, completed_at, status, user_id, cover_url`)
+        .select(`id, title, author, total_pages, current_page, created_at, started_at, finished_at, completed_at, status, user_id, cover_url, published_year`)
         .eq("user_id", userId)
         .order("completed_at", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false });
@@ -330,7 +330,7 @@ export default function CompletedBooks() {
                   {/* Book Info */}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-lg mb-2 truncate" style={{ color: accentTextColor }}>
-                      {book.title}
+                      {book.title}{(book as any).published_year ? ` (${(book as any).published_year})` : ''}
                     </h3>
                     <p className="mb-2" style={{ color: accentTextColor, opacity: 0.85 }}>
                       by {book.author}
