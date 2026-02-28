@@ -110,7 +110,7 @@ export default function UserTBRBooks() {
         // Fetch TBR books
         const { data: books, error: booksError } = await supabase
           .from("tbr_books")
-          .select("id, title, author, cover_url, total_pages, notes, priority, created_at")
+          .select("id, title, author, cover_url, total_pages, notes, priority, created_at, published_year")
           .eq("user_id", profileData.id)
           .order("priority", { ascending: false })
           .order("created_at", { ascending: false });
@@ -246,7 +246,7 @@ export default function UserTBRBooks() {
                           <div className="flex items-start gap-1.5 mb-1">
                             <div className="flex-1">
                               <div className="flex items-center gap-1.5">
-                                <h3 className="font-medium text-sm text-foreground line-clamp-2">{book.title}</h3>
+                                <h3 className="font-medium text-sm text-foreground line-clamp-2">{book.title}{(book as any).published_year ? ` (${(book as any).published_year})` : ''}</h3>
                                 {book.priority > 0 && (
                                   <div className="flex shrink-0">
                                     {Array(book.priority).fill(0).map((_, i) => (

@@ -111,7 +111,7 @@ export default function UserCompletedBooks() {
         // Fetch completed books
         const { data: books, error: booksError } = await supabase
           .from("books")
-          .select("id, title, author, cover_url, finished_at, completed_at, total_pages, current_page, status, created_at, updated_at")
+          .select("id, title, author, cover_url, finished_at, completed_at, total_pages, current_page, status, created_at, updated_at, published_year")
           .eq("user_id", profileData.id)
           .order("completed_at", { ascending: false, nullsFirst: false })
           .order("finished_at", { ascending: false })
@@ -329,7 +329,7 @@ export default function UserCompletedBooks() {
                         
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-1 mb-1">
-                            <h3 className="font-medium text-sm text-foreground line-clamp-2">{book.title}</h3>
+                            <h3 className="font-medium text-sm text-foreground line-clamp-2">{book.title}{(book as any).published_year ? ` (${(book as any).published_year})` : ''}</h3>
                             {myUserId && myUserId !== profile?.id && (
                               <AddToMyListButton 
                                 book={book} 
