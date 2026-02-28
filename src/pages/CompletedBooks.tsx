@@ -18,9 +18,10 @@ type CompletedBook = {
   total_pages: number;
   current_page: number;
   created_at: string;
+  started_at?: string | null;
   finished_at?: string | null;
   completed_at?: string | null;
-  // Computed from latest reading_entries.finished_at (falls back to book.finished_at)
+  computed_started_at?: string | null;
   computed_finished_at?: string | null;
   status?: string | null;
   user_id: string;
@@ -157,20 +158,27 @@ export default function CompletedBooks() {
         reviewsData = reviews ?? [];
       }
 
-      // Get latest finished_at per book from reading_entries
+      // Get dates from reading_entries
       let latestFinishedByBookId: Record<string, string> = {};
+      let earliestStartedByBookId: Record<string, string> = {};
       if (bookIds.length > 0) {
         const { data: entries, error: entriesError } = await supabase
           .from("reading_entries")
-          .select("book_id, finished_at")
-          .in("book_id", bookIds)
-          .not("finished_at", "is", null);
+          .select("book_id, started_at, finished_at")
+          .in("book_id", bookIds);
         console.log("Reading entries query:", { entries, entriesError });
         (entries ?? []).forEach((e: any) => {
-          if (!e.finished_at) return;
-          const prev = latestFinishedByBookId[e.book_id];
-          if (!prev || new Date(e.finished_at) > new Date(prev)) {
-            latestFinishedByBookId[e.book_id] = e.finished_at;
+          if (e.finished_at) {
+            const prev = latestFinishedByBookId[e.book_id];
+            if (!prev || new Date(e.finished_at) > new Date(prev)) {
+              latestFinishedByBookId[e.book_id] = e.finished_at;
+            }
+          }
+          if (e.started_at) {
+            const prev = earliestStartedByBookId[e.book_id];
+            if (!prev || new Date(e.started_at) < new Date(prev)) {
+              earliestStartedByBookId[e.book_id] = e.started_at;
+            }
           }
         });
       }
@@ -189,7 +197,6 @@ export default function CompletedBooks() {
         .filter(Boolean) as Array<{ id: string; finished_at: string }>;
 
       if (syncUpdates.length > 0) {
-        // Fire-and-forget: don't block rendering if this takes a moment.
         Promise.all(
           syncUpdates.map((u) =>
             supabase
@@ -200,14 +207,32 @@ export default function CompletedBooks() {
         ).catch((e) => console.warn('Failed syncing book finished_at from reading entries', e));
       }
 
+      // Sync started_at from reading_entries to books
+      const startSyncUpdates = (books ?? [])
+        .filter((b: any) => {
+          const earliest = earliestStartedByBookId[b.id];
+          return earliest && (b.started_at ?? null) !== earliest;
+        })
+        .map((b: any) => ({ id: b.id, started_at: earliestStartedByBookId[b.id] }));
+
+      if (startSyncUpdates.length > 0) {
+        Promise.all(
+          startSyncUpdates.map((u) =>
+            supabase.from('books').update({ started_at: u.started_at }).eq('id', u.id)
+          )
+        ).catch((e) => console.warn('Failed syncing book started_at from reading entries', e));
+      }
+
       const completed = (books ?? [])
         .filter((b: any) => (b.status === 'completed') || ((b.current_page ?? 0) >= (b.total_pages ?? Number.MAX_SAFE_INTEGER)))
         .map((book: any) => {
           const review = reviewsData.find((r: any) => r.book_id === book.id);
           const computed_finished_at = latestFinishedByBookId[book.id] ?? book.finished_at ?? null;
+          const computed_started_at = earliestStartedByBookId[book.id] ?? book.started_at ?? null;
           return {
             ...book,
             review,
+            computed_started_at,
             computed_finished_at,
           } as CompletedBook;
         })
@@ -313,9 +338,9 @@ export default function CompletedBooks() {
                     <p className="text-sm mb-1" style={{ color: accentTextColor, opacity: 0.75 }}>
                       {book.total_pages} pages
                     </p>
-                    {(book as any).started_at && (
+                    {(book.computed_started_at || book.started_at) && (
                       <p className="text-sm" style={{ color: accentTextColor, opacity: 0.75 }}>
-                        Started {toLocalDateString((book as any).started_at)}
+                        Started {toLocalDateString(book.computed_started_at ?? book.started_at)}
                       </p>
                     )}
                     <p className="text-sm mb-4" style={{ color: accentTextColor, opacity: 0.75 }}>
