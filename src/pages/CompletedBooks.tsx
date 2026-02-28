@@ -137,7 +137,7 @@ export default function CompletedBooks() {
       // Get all books for user
       const { data: books, error: booksError } = await supabase
         .from("books")
-        .select(`id, title, author, total_pages, current_page, created_at, finished_at, completed_at, status, user_id, cover_url`)
+        .select(`id, title, author, total_pages, current_page, created_at, started_at, finished_at, completed_at, status, user_id, cover_url`)
         .eq("user_id", userId)
         .order("completed_at", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false });
@@ -310,8 +310,16 @@ export default function CompletedBooks() {
                     <p className="mb-2" style={{ color: accentTextColor, opacity: 0.85 }}>
                       by {book.author}
                     </p>
+                    <p className="text-sm mb-1" style={{ color: accentTextColor, opacity: 0.75 }}>
+                      {book.total_pages} pages
+                    </p>
+                    {(book as any).started_at && (
+                      <p className="text-sm" style={{ color: accentTextColor, opacity: 0.75 }}>
+                        Started {toLocalDateString((book as any).started_at)}
+                      </p>
+                    )}
                     <p className="text-sm mb-4" style={{ color: accentTextColor, opacity: 0.75 }}>
-                      {book.total_pages} pages • Completed {toLocalDateString(book.computed_finished_at ?? book.finished_at ?? book.created_at)}
+                      Completed {toLocalDateString(book.computed_finished_at ?? book.finished_at ?? book.created_at)}
                     </p>
                   </div>
                 </div>
