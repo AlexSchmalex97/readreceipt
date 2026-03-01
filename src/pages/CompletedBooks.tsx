@@ -26,6 +26,7 @@ type CompletedBook = {
   status?: string | null;
   user_id: string;
   cover_url?: string;
+  published_year?: number | null;
   review?: {
     id: string;
     rating: number;
@@ -397,6 +398,7 @@ export default function CompletedBooks() {
                      bookAuthor={book.author}
                      totalPages={book.total_pages}
                      currentCoverUrl={book.cover_url}
+                     publishedYear={book.published_year}
                      onUpdate={() => setReloadCounter((c) => c + 1)}
                      triggerVariant="button"
                    />

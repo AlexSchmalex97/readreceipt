@@ -213,6 +213,7 @@ export const BookCard = ({
             bookAuthor={book.author}
             totalPages={book.totalPages}
             currentCoverUrl={book.coverUrl}
+            publishedYear={book.published_year}
             onUpdate={() => onBookUpdated?.()}
           />
           <ReadingEntriesDialog

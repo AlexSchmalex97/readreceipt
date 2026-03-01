@@ -14,6 +14,7 @@ interface BookEditDialogProps {
   bookAuthor: string;
   totalPages: number;
   currentCoverUrl?: string;
+  publishedYear?: number | null;
   onUpdate: () => void;
   triggerClassName?: string;
   triggerVariant?: "icon" | "button";
@@ -25,6 +26,7 @@ export const BookEditDialog = ({
   bookAuthor,
   totalPages,
   currentCoverUrl,
+  publishedYear,
   onUpdate,
   triggerClassName,
   triggerVariant = "icon",
@@ -34,6 +36,7 @@ export const BookEditDialog = ({
   const [author, setAuthor] = useState(bookAuthor);
   const [newTotalPages, setNewTotalPages] = useState(totalPages.toString());
   const [coverUrl, setCoverUrl] = useState(currentCoverUrl);
+  const [newPublishedYear, setNewPublishedYear] = useState(publishedYear?.toString() || "");
   const [updating, setUpdating] = useState(false);
   const { toast } = useToast();
 
@@ -44,8 +47,9 @@ export const BookEditDialog = ({
       setAuthor(bookAuthor);
       setNewTotalPages(totalPages.toString());
       setCoverUrl(currentCoverUrl);
+      setNewPublishedYear(publishedYear?.toString() || "");
     }
-  }, [open, bookTitle, bookAuthor, totalPages, currentCoverUrl]);
+  }, [open, bookTitle, bookAuthor, totalPages, currentCoverUrl, publishedYear]);
 
   const handleSave = async () => {
     const pages = parseInt(newTotalPages, 10);
@@ -79,13 +83,24 @@ export const BookEditDialog = ({
 
     setUpdating(true);
     try {
+      const yearVal = newPublishedYear.trim() ? parseInt(newPublishedYear, 10) : null;
+      if (newPublishedYear.trim() && (isNaN(yearVal!) || yearVal! < 0 || yearVal! > new Date().getFullYear() + 1)) {
+        toast({
+          title: "Invalid year",
+          description: "Please enter a valid publication year",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from("books")
         .update({ 
           title: title.trim(),
           author: author.trim(),
           total_pages: pages,
-          cover_url: coverUrl
+          cover_url: coverUrl,
+          published_year: yearVal,
         })
         .eq("id", bookId);
 
@@ -204,6 +219,19 @@ export const BookEditDialog = ({
               onChange={(e) => setNewTotalPages(e.target.value)}
               min={1}
               placeholder="Enter total pages"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="published-year" className="text-sm font-medium">
+              Published Year
+            </Label>
+            <Input
+              id="published-year"
+              type="number"
+              value={newPublishedYear}
+              onChange={(e) => setNewPublishedYear(e.target.value)}
+              placeholder="e.g. 2024"
             />
           </div>
 
