@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Plus, Search, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
-import { searchGoogleBooks, GoogleBookResult } from "@/lib/googleBooks";
+import { searchGoogleBooks, GoogleBookResult, getOriginalPublishedYear } from "@/lib/googleBooks";
 import { useFollowedUserBooks } from "@/hooks/useFollowedUserBooks";
 import { FollowedUsersBooksIndicator } from "@/components/FollowedUsersBooksIndicator";
 
@@ -82,7 +82,7 @@ export const AddBookDialog = ({ onAddBook }: AddBookDialogProps) => {
     setTotalPages(book.pageCount?.toString() || "");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!title.trim() || !author.trim() || !totalPages) {
@@ -102,9 +102,7 @@ export const AddBookDialog = ({ onAddBook }: AddBookDialogProps) => {
       return;
     }
 
-    const publishedYear = selectedBook?.publishedDate
-      ? parseInt(selectedBook.publishedDate.substring(0, 4), 10) || undefined
-      : undefined;
+    const publishedYear = await getOriginalPublishedYear(title.trim(), author.trim());
 
     onAddBook({
       title: title.trim(),
