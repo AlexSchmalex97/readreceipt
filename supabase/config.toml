@@ -21,3 +21,6 @@ max_client_conn = 100
 
 [functions.lookup-email-by-username]
 verify_jwt = false
+
+[functions.backfill-published-year]
+verify_jwt = false
