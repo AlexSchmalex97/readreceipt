@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { searchGoogleBooks, GoogleBookResult } from '@/lib/googleBooks';
+import { searchGoogleBooks, GoogleBookResult, getOriginalPublishedYear } from '@/lib/googleBooks';
 import { BookEditionSelector } from '@/components/BookEditionSelector';
 import { BookMoveMenu } from '@/components/BookMoveMenu';
 import { useFollowedUserBooks } from '@/hooks/useFollowedUserBooks';
@@ -172,9 +172,10 @@ export function TBRList({ userId, onMoveToReading, onMoveToCompleted, onMoveToDN
     }
 
     try {
-      const publishedYear = selectedGoogleBook?.publishedDate
-        ? parseInt(selectedGoogleBook.publishedDate.substring(0, 4), 10) || null
-        : null;
+      const publishedYear = await getOriginalPublishedYear(
+        selectedGoogleBook?.title || newBook.title, 
+        selectedGoogleBook?.authors?.join(", ") || newBook.author
+      ) || null;
 
       const { data, error } = await supabase
         .from('tbr_books')
