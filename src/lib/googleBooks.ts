@@ -55,15 +55,24 @@ export const searchBooks = searchGoogleBooks;
  */
 export const getOriginalPublishedYear = async (title: string, author: string): Promise<number | undefined> => {
   try {
+    // Use intitle/inauthor qualifiers for more precise matching
+    const query = `intitle:${title}+inauthor:${author}`;
     const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(title + " " + author)}&maxResults=20`
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=40&orderBy=relevance`
     );
     if (!response.ok) return undefined;
     const data = await response.json();
     if (!data.items) return undefined;
 
+    // Normalize title for fuzzy matching
+    const normTitle = title.toLowerCase().replace(/[^a-z0-9]/g, '');
+
     let earliest: number | undefined;
     for (const item of data.items) {
+      // Only consider results that reasonably match the title
+      const volTitle = (item.volumeInfo?.title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (!volTitle.includes(normTitle) && !normTitle.includes(volTitle)) continue;
+
       const pd = item.volumeInfo?.publishedDate;
       if (pd) {
         const year = parseInt(pd.substring(0, 4), 10);
