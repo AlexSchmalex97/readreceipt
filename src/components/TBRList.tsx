@@ -610,7 +610,7 @@ export function TBRList({ userId, onMoveToReading, onMoveToCompleted, onMoveToDN
                     {/* Book Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-foreground truncate">{book.title}{(book as any).published_year ? ` (${(book as any).published_year})` : ''}</h3>
+                        <h3 className="font-medium text-foreground truncate">{book.title}</h3>
                         {book.priority > 0 && (
                           <div className="flex">
                             {Array(book.priority).fill(0).map((_, i) => (
@@ -620,6 +620,9 @@ export function TBRList({ userId, onMoveToReading, onMoveToCompleted, onMoveToDN
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">by {book.author}</p>
+                      {(book as any).published_year && (
+                        <p className="text-xs text-muted-foreground opacity-65">({(book as any).published_year})</p>
+                      )}
                       {book.total_pages && (
                         <p className="text-xs text-muted-foreground">{book.total_pages} pages</p>
                       )}

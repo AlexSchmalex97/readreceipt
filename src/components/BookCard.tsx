@@ -194,7 +194,7 @@ export const BookCard = ({
               className="text-[10px] sm:text-base font-semibold leading-tight line-clamp-2"
               style={accentTextColor ? { color: accentTextColor } : {}}
             >
-              {book.title}{book.published_year ? ` (${book.published_year})` : ''}
+              {book.title}
             </CardTitle>
             <p 
               className="text-[9px] sm:text-xs mt-0 truncate opacity-80"
@@ -202,6 +202,14 @@ export const BookCard = ({
             >
               {book.author}
             </p>
+            {book.published_year && (
+              <p 
+                className="text-[8px] sm:text-[10px] mt-0 truncate opacity-60"
+                style={accentTextColor ? { color: accentTextColor } : {}}
+              >
+                ({book.published_year})
+              </p>
+            )}
           </div>
         </div>
         
