@@ -331,11 +331,16 @@ export default function CompletedBooks() {
                   {/* Book Info */}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-lg mb-2 truncate" style={{ color: accentTextColor }}>
-                      {book.title}{(book as any).published_year ? ` (${(book as any).published_year})` : ''}
+                      {book.title}
                     </h3>
                     <p className="mb-2" style={{ color: accentTextColor, opacity: 0.85 }}>
                       by {book.author}
                     </p>
+                    {(book as any).published_year && (
+                      <p className="text-xs mb-1" style={{ color: accentTextColor, opacity: 0.65 }}>
+                        ({(book as any).published_year})
+                      </p>
+                    )}
                     <p className="text-sm mb-1" style={{ color: accentTextColor, opacity: 0.75 }}>
                       {book.total_pages} pages
                     </p>

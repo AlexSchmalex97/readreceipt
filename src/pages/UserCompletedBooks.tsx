@@ -329,7 +329,7 @@ export default function UserCompletedBooks() {
                         
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-1 mb-1">
-                            <h3 className="font-medium text-sm text-foreground line-clamp-2">{book.title}{(book as any).published_year ? ` (${(book as any).published_year})` : ''}</h3>
+                            <h3 className="font-medium text-sm text-foreground line-clamp-2">{book.title}</h3>
                             {myUserId && myUserId !== profile?.id && (
                               <AddToMyListButton 
                                 book={book} 
@@ -337,7 +337,10 @@ export default function UserCompletedBooks() {
                               />
                             )}
                           </div>
-                          <p className="text-xs text-muted-foreground mb-2">by {book.author}</p>
+                          <p className="text-xs text-muted-foreground mb-1">by {book.author}</p>
+                          {(book as any).published_year && (
+                            <p className="text-xs text-muted-foreground mb-2 opacity-65">({(book as any).published_year})</p>
+                          )}
                           
                           {book.rating && (
                             <div className="flex items-center gap-1 mb-2">

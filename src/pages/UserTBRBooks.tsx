@@ -246,7 +246,7 @@ export default function UserTBRBooks() {
                           <div className="flex items-start gap-1.5 mb-1">
                             <div className="flex-1">
                               <div className="flex items-center gap-1.5">
-                                <h3 className="font-medium text-sm text-foreground line-clamp-2">{book.title}{(book as any).published_year ? ` (${(book as any).published_year})` : ''}</h3>
+                                <h3 className="font-medium text-sm text-foreground line-clamp-2">{book.title}</h3>
                                 {book.priority > 0 && (
                                   <div className="flex shrink-0">
                                     {Array(book.priority).fill(0).map((_, i) => (
@@ -263,7 +263,10 @@ export default function UserTBRBooks() {
                               />
                             )}
                           </div>
-                          <p className="text-xs text-muted-foreground mb-2">by {book.author}</p>
+                          <p className="text-xs text-muted-foreground mb-1">by {book.author}</p>
+                          {(book as any).published_year && (
+                            <p className="text-xs text-muted-foreground mb-2 opacity-65">({(book as any).published_year})</p>
+                          )}
                           
                           {book.total_pages && (
                             <p className="text-xs text-muted-foreground mb-1">{book.total_pages} pages</p>
