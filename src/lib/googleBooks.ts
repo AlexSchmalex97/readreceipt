@@ -20,6 +20,9 @@ export const searchGoogleBooks = async (query: string): Promise<GoogleBookResult
     );
     
     if (!response.ok) {
+      if (response.status === 429) {
+        throw new Error('Google Books API rate limit exceeded. Please try again later.');
+      }
       throw new Error('Failed to search books');
     }
     
