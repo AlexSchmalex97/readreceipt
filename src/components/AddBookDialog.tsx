@@ -64,10 +64,12 @@ export const AddBookDialog = ({ onAddBook }: AddBookDialogProps) => {
           description: "Try a different search term",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Search failed",
-        description: "Please try again",
+        description: error?.message?.includes('rate limit') 
+          ? "Google Books API rate limit reached. Please try again later or add the book manually." 
+          : "Please try again",
         variant: "destructive",
       });
     } finally {
