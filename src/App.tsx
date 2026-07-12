@@ -28,6 +28,7 @@ import Auth from "./pages/Auth";
 import TBR from "./pages/TBR";
 import More from "./pages/More";
 import Notifications from "./pages/Notifications";
+import YearlyReadingGoalBooks from "./pages/YearlyReadingGoalBooks";
 import GlobalUserColors from "@/components/GlobalUserColors";
 
 const queryClient = new QueryClient();
@@ -78,6 +79,8 @@ const App = () => {
             <Route path="/completed" element={<ProtectedRoute><IOSProtectedRoute><CompletedBooks /></IOSProtectedRoute></ProtectedRoute>} />
             <Route path="/integrations" element={<ProtectedRoute><IOSProtectedRoute><Integrations /></IOSProtectedRoute></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><IOSProtectedRoute><Notifications /></IOSProtectedRoute></ProtectedRoute>} />
+            <Route path="/yearly-reading-goal" element={<ProtectedRoute><IOSProtectedRoute><YearlyReadingGoalBooks /></IOSProtectedRoute></ProtectedRoute>} />
+            <Route path="/user/:username/yearly-reading-goal" element={<IOSProtectedRoute><YearlyReadingGoalBooks /></IOSProtectedRoute>} />
             <Route path="/user/:username/completed" element={<IOSProtectedRoute><UserCompletedBooks /></IOSProtectedRoute>} />
             <Route path="/user/:username/tbr" element={<IOSProtectedRoute><UserTBRBooks /></IOSProtectedRoute>} />
             <Route path="/user/:username/in-progress" element={<IOSProtectedRoute><UserInProgressBooks /></IOSProtectedRoute>} />

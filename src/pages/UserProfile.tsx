@@ -718,7 +718,7 @@ export default function UserProfile() {
 
             {/* Reading Goal */}
             <div className="mb-3 max-w-md mx-auto">
-              <HomeReadingGoals userId={profile.id} completedBooksThisYear={completedBooksThisYear} isOwnProfile={false} accentColor={accentCardColor} />
+              <HomeReadingGoals userId={profile.id} completedBooksThisYear={completedBooksThisYear} isOwnProfile={false} accentColor={accentCardColor} username={profile.username} />
             </div>
 
             {/* Collapsible Activity Sections - Mobile/Tablet */}
@@ -1076,7 +1076,7 @@ export default function UserProfile() {
               <div className="w-80 flex-shrink-0">
                 {/* Reading Goals */}
                 <div className="mb-3">
-                  <HomeReadingGoals userId={profile.id} completedBooksThisYear={completedBooksThisYear} isOwnProfile={false} />
+                  <HomeReadingGoals userId={profile.id} completedBooksThisYear={completedBooksThisYear} isOwnProfile={false} username={profile.username} />
                 </div>
 
                 {/* Stats */}
