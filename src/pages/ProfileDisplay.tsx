@@ -274,14 +274,17 @@ export default function ProfileDisplay() {
         const entriesBookIds = new Set((entries || []).map(e => e.book_id));
         
         // Count books marked completed this year that don't have entries
-        const extra = books.filter(b => {
-          if (entriesBookIds.has((b as any).id)) return false;
+        const extra = books.filter((b: any) => {
+          if (entriesBookIds.has(b.id)) return false;
+          if (b.status === 'dnf' || b.status === 'top_five') return false;
+          const completedFlag = (b.status === 'completed') || ((b.current_page ?? 0) >= (b.total_pages ?? 0));
+          if (!completedFlag) return false;
           if (b.finished_at) {
             const fy = new Date(b.finished_at).getFullYear();
             return fy === currentYear;
           }
-          if (b.status === 'completed' && (b as any).created_at) {
-            const cy = new Date((b as any).created_at).getFullYear();
+          if (b.status === 'completed' && b.created_at) {
+            const cy = new Date(b.created_at).getFullYear();
             return cy === currentYear;
           }
           return false;
