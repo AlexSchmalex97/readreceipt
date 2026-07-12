@@ -50,7 +50,7 @@ function darkenHex(hex: string, percent: number): string {
   return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 }
 
-export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile = true, accentColor, accentTextColor, compact = false, progressBarColor: propProgressBarColor, inProgressCount = 0, totalBooksCount = 0 }: HomeReadingGoalsProps) => {
+export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile = true, accentColor, accentTextColor, compact = false, progressBarColor: propProgressBarColor, inProgressCount = 0, totalBooksCount = 0, username }: HomeReadingGoalsProps) => {
   const [goal, setGoal] = useState<ReadingGoal | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSharing, setIsSharing] = useState(false);
