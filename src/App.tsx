@@ -28,6 +28,7 @@ import Auth from "./pages/Auth";
 import TBR from "./pages/TBR";
 import More from "./pages/More";
 import Notifications from "./pages/Notifications";
+import YearlyReadingGoalBooks from "./pages/YearlyReadingGoalBooks";
 import GlobalUserColors from "@/components/GlobalUserColors";
 
 const queryClient = new QueryClient();
