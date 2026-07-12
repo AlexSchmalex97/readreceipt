@@ -241,7 +241,7 @@ export default function ProfileDisplay() {
       // Load book statistics
       const { data: books, error: booksError } = await supabase
         .from("books")
-        .select("current_page, total_pages, status, finished_at")
+        .select("id, current_page, total_pages, status, finished_at, created_at")
         .eq("user_id", user.id);
 
       if (!booksError && books) {
