@@ -30,6 +30,7 @@ interface HomeReadingGoalsProps {
   progressBarColor?: string;
   inProgressCount?: number;
   totalBooksCount?: number;
+  username?: string;
 }
 
 // Default medium brown color for progress bar
