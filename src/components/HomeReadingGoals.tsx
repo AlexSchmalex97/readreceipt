@@ -487,6 +487,14 @@ export const HomeReadingGoals = ({ userId, completedBooksThisYear, isOwnProfile 
           indicatorClassName="bg-none"
           indicatorStyle={{ backgroundColor: progressBarColor }}
         />
+        <Link
+          to={isOwnProfile ? "/yearly-reading-goal" : `/user/${username}/yearly-reading-goal`}
+          className="flex items-center justify-center gap-1 mt-1 text-[10px] font-medium rounded-md border px-2 py-1 hover:opacity-80 transition-opacity"
+          style={{ borderColor: accentTextColor, color: accentTextColor }}
+        >
+          <BookOpen className="h-2.5 w-2.5" />
+          View books by year
+        </Link>
         {isOwnProfile && (
           <div className="flex items-center justify-between gap-1 pt-1">
             <span className="text-[9px]" style={{ color: accentTextColor }}>
