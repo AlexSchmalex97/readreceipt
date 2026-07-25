@@ -20,7 +20,7 @@ interface Book {
 
 interface BookDatesDialogProps {
   book: Book;
-  onUpdateDates: (id: string, startedAt?: string, finishedAt?: string) => void;
+  onUpdateDates: (id: string, startedAt?: string, finishedAt?: string, finishedTime?: string) => void;
 }
 
 export const BookDatesDialog = ({ book, onUpdateDates }: BookDatesDialogProps) => {
