@@ -16,6 +16,7 @@ interface CompletedBookEntry {
   author: string;
   cover_url: string | null;
   finished_at: string | null;
+  completed_at?: string | null;
   total_pages: number;
   published_year?: number | null;
   rating?: number;
