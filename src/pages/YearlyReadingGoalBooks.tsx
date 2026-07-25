@@ -159,6 +159,7 @@ export default function YearlyReadingGoalBooks() {
             author: book.author,
             cover_url: book.cover_url,
             finished_at: e.finished_at,
+            completed_at: e.created_at ?? null,
             total_pages: book.total_pages,
             published_year: book.published_year,
             rating: reviewsMap[e.book_id]?.rating,
