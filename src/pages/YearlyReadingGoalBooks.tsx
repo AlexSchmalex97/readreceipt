@@ -16,6 +16,7 @@ interface CompletedBookEntry {
   author: string;
   cover_url: string | null;
   finished_at: string | null;
+  completed_at?: string | null;
   total_pages: number;
   published_year?: number | null;
   rating?: number;
@@ -119,7 +120,7 @@ export default function YearlyReadingGoalBooks() {
         // Fetch reading_entries (for re-reads)
         const { data: entriesData } = await supabase
           .from("reading_entries")
-          .select("id, book_id, finished_at, status")
+          .select("id, book_id, finished_at, status, created_at")
           .eq("user_id", profileData.id)
           .eq("status", "completed")
           .not("finished_at", "is", null);
@@ -158,6 +159,7 @@ export default function YearlyReadingGoalBooks() {
             author: book.author,
             cover_url: book.cover_url,
             finished_at: e.finished_at,
+            completed_at: e.created_at ?? null,
             total_pages: book.total_pages,
             published_year: book.published_year,
             rating: reviewsMap[e.book_id]?.rating,
@@ -187,6 +189,7 @@ export default function YearlyReadingGoalBooks() {
             author: b.author,
             cover_url: b.cover_url,
             finished_at: b.finished_at,
+            completed_at: b.completed_at ?? b.updated_at ?? null,
             total_pages: b.total_pages,
             published_year: b.published_year,
             rating: reviewsMap[b.id]?.rating,
@@ -194,14 +197,19 @@ export default function YearlyReadingGoalBooks() {
           });
         });
 
-        // Sort each year by finished_at desc
+        // Sort each year by finished_at desc, then by the precise completion
+        // timestamp so same-day completions keep the order they were marked in
         Object.keys(byYear).forEach(k => {
           byYear[Number(k)].sort((a, b) => {
             const ta = parseDate(a.finished_at)?.getTime() ?? 0;
             const tb = parseDate(b.finished_at)?.getTime() ?? 0;
-            return tb - ta;
+            if (tb !== ta) return tb - ta;
+            const ca = a.completed_at ? new Date(a.completed_at).getTime() : 0;
+            const cb = b.completed_at ? new Date(b.completed_at).getTime() : 0;
+            return cb - ca;
           });
         });
+
 
         const sortedYears = Object.keys(byYear).map(Number).sort((a, b) => a - b);
         setBooksByYear(byYear);

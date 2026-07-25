@@ -30,7 +30,7 @@ interface BookCardProps {
   onUpdateProgress: (id: string, currentPage: number) => void;
   onDeleteBook?: (id: string) => void;
   onCoverUpdate?: (id: string, newCoverUrl: string) => void;
-  onUpdateDates?: (id: string, startedAt?: string, finishedAt?: string) => void;
+  onUpdateDates?: (id: string, startedAt?: string, finishedAt?: string, finishedTime?: string) => void;
   onMoveToInProgress?: (id: string) => void;
   onMoveToCompleted?: (id: string) => void;
   onMoveToDNF?: (id: string) => void;
