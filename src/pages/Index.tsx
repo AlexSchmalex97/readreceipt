@@ -357,9 +357,23 @@ const Index = () => {
   const handleUpdateProgress = async (id: string, currentPage: number) => {
     if (userId) {
       const prev = books.find((b) => b.id === id)?.currentPage ?? 0;
+      const bookBefore = books.find((b) => b.id === id);
+      const justCompleted = !!bookBefore && currentPage >= bookBefore.totalPages && prev < bookBefore.totalPages;
+
+      const bookUpdate: Record<string, any> = { current_page: currentPage };
+      if (justCompleted) {
+        // Stamp the exact moment of completion so completed lists stay in the
+        // order books were actually finished (not the order they were added).
+        const now = new Date();
+        bookUpdate.status = 'completed';
+        bookUpdate.completed_at = now.toISOString();
+        if (!bookBefore?.finished_at) {
+          bookUpdate.finished_at = now.toISOString().split('T')[0];
+        }
+      }
 
       const [{ error: e1 }, { error: e2 }] = await Promise.all([
-        supabase.from("books").update({ current_page: currentPage }).eq("id", id),
+        supabase.from("books").update(bookUpdate).eq("id", id),
         supabase.from("reading_progress").insert([
           { user_id: userId, book_id: id, from_page: prev, to_page: currentPage },
         ]),
@@ -367,11 +381,22 @@ const Index = () => {
 
       if (!e1 && !e2) {
         setBooks((prevBooks) =>
-          prevBooks.map((b) => (b.id === id ? { ...b, currentPage } : b))
+          prevBooks.map((b) =>
+            b.id === id
+              ? {
+                  ...b,
+                  currentPage,
+                  ...(justCompleted
+                    ? {
+                        status: 'completed' as const,
+                        finished_at: b.finished_at ?? bookUpdate.finished_at,
+                      }
+                    : {}),
+                }
+              : b
+          )
         );
-        const book = books.find((b) => b.id === id);
-        // Fix completion logic: book is complete when current page >= total pages
-        if (book && currentPage >= book.totalPages && prev < book.totalPages) {
+        if (justCompleted) {
           setReviewFor({ bookId: id });
         }
       }
@@ -383,6 +408,7 @@ const Index = () => {
       }
     }
   };
+
 
   const handleUpdateDates = async (id: string, startedAt?: string, finishedAt?: string) => {
     if (userId) {
