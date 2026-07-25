@@ -54,7 +54,7 @@ export const BookDatesDialog = ({ book, onUpdateDates }: BookDatesDialogProps) =
       }
     }
 
-    onUpdateDates(book.id, startedAt || undefined, finishedAt || undefined);
+    onUpdateDates(book.id, startedAt || undefined, finishedAt || undefined, finishedTime || undefined);
     setOpen(false);
 
     toast({
