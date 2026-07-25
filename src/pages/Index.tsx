@@ -410,11 +410,19 @@ const Index = () => {
   };
 
 
-  const handleUpdateDates = async (id: string, startedAt?: string, finishedAt?: string) => {
+  const handleUpdateDates = async (id: string, startedAt?: string, finishedAt?: string, finishedTime?: string) => {
     if (userId) {
       const updateData: any = {};
       if (startedAt !== undefined) updateData.started_at = startedAt || null;
-      if (finishedAt !== undefined) updateData.finished_at = finishedAt || null;
+      if (finishedAt !== undefined) {
+        updateData.finished_at = finishedAt || null;
+        // An explicit finish date (and optional time) wins over the automatic
+        // "when you marked it complete" timestamp used for ordering.
+        updateData.completed_at = finishedAt
+          ? new Date(`${finishedAt}T${finishedTime && finishedTime.length >= 4 ? finishedTime : '12:00'}:00`).toISOString()
+          : null;
+      }
+
 
       const { error } = await supabase
         .from("books")
