@@ -120,7 +120,7 @@ export default function YearlyReadingGoalBooks() {
         // Fetch reading_entries (for re-reads)
         const { data: entriesData } = await supabase
           .from("reading_entries")
-          .select("id, book_id, finished_at, status")
+          .select("id, book_id, finished_at, status, created_at")
           .eq("user_id", profileData.id)
           .eq("status", "completed")
           .not("finished_at", "is", null);
