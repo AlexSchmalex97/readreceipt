@@ -189,6 +189,7 @@ export default function YearlyReadingGoalBooks() {
             author: b.author,
             cover_url: b.cover_url,
             finished_at: b.finished_at,
+            completed_at: b.completed_at ?? b.updated_at ?? null,
             total_pages: b.total_pages,
             published_year: b.published_year,
             rating: reviewsMap[b.id]?.rating,
@@ -196,14 +197,19 @@ export default function YearlyReadingGoalBooks() {
           });
         });
 
-        // Sort each year by finished_at desc
+        // Sort each year by finished_at desc, then by the precise completion
+        // timestamp so same-day completions keep the order they were marked in
         Object.keys(byYear).forEach(k => {
           byYear[Number(k)].sort((a, b) => {
             const ta = parseDate(a.finished_at)?.getTime() ?? 0;
             const tb = parseDate(b.finished_at)?.getTime() ?? 0;
-            return tb - ta;
+            if (tb !== ta) return tb - ta;
+            const ca = a.completed_at ? new Date(a.completed_at).getTime() : 0;
+            const cb = b.completed_at ? new Date(b.completed_at).getTime() : 0;
+            return cb - ca;
           });
         });
+
 
         const sortedYears = Object.keys(byYear).map(Number).sort((a, b) => a - b);
         setBooksByYear(byYear);
