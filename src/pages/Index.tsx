@@ -418,9 +418,11 @@ const Index = () => {
         updateData.finished_at = finishedAt || null;
         // An explicit finish date (and optional time) wins over the automatic
         // "when you marked it complete" timestamp used for ordering.
+        const timePart = finishedTime && /^\d{2}:\d{2}$/.test(finishedTime) ? finishedTime : '12:00';
         updateData.completed_at = finishedAt
-          ? new Date(`${finishedAt}T${finishedTime && finishedTime.length >= 4 ? finishedTime : '12:00'}:00`).toISOString()
+          ? new Date(`${finishedAt}T${timePart}:00`).toISOString()
           : null;
+
       }
 
 
