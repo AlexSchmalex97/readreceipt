@@ -1,8 +1,8 @@
 // Server-only Notion sync engine. ReadReceipt (Supabase) is the source of truth;
-// Notion holds a mirror linked by notion_book_links.
+// Notion holds a mirror (Currently Reading, Completed, TBR) linked by notion_book_links.
 import { appUserReconnectRequired, callAsAppUser } from "./appUserConnector.ts";
 import { adminClient, getConnectionKeyForUser, markReconnectRequired } from "./appUserConnections.ts";
-import { countCompletedThisYear, percentFor, resolveNotionEdit } from "./notionSyncMath.ts";
+import { countCompletedThisYear, percentFor, resolveNotionEdit, shelfFor } from "./notionSyncMath.ts";
 
 export const GATEWAY_BASE_URL = "https://connector-gateway.lovable.dev";
 export const NOTION = "notion";
@@ -20,7 +20,11 @@ export const P = {
   cover: "Cover",
   synced: "Last Synced",
   id: "RR Book ID",
+  finished: "Finished",
+  notes: "Notes",
 };
+
+type Kind = "reading" | "completed" | "tbr";
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -71,146 +75,261 @@ export async function loadContext(userId: string) {
   return { db, key, settings };
 }
 
-const statusName = (s: string | null) =>
-  s === "completed" ? "Completed" : s === "dnf" ? "DNF" : "Reading";
+const BAR_FORMULA =
+  `repeat("█", round(min(max(prop("${P.percent}"), 0), 100) / 10)) + repeat("░", 10 - round(min(max(prop("${P.percent}"), 0), 100) / 10)) + " " + format(prop("${P.percent}")) + "%"`;
 
-function bookProps(b: any) {
-  const pct = percentFor(b.current_page ?? 0, b.total_pages ?? 0);
-  const props: Record<string, unknown> = {
-    [P.title]: { title: [{ text: { content: b.title ?? "Untitled" } }] },
-    [P.author]: { rich_text: [{ text: { content: b.author ?? "" } }] },
-    [P.page]: { number: b.current_page ?? 0 },
-    [P.percent]: { number: pct },
-    [P.total]: { number: b.total_pages ?? 0 },
-    [P.status]: { select: { name: statusName(b.status) } },
-    [P.synced]: { date: { start: new Date().toISOString() } },
-    [P.id]: { rich_text: [{ text: { content: b.id } }] },
-    [P.cover]: b.cover_url && /^https?:\/\//.test(b.cover_url)
-      ? { files: [{ name: "cover", type: "external", external: { url: b.cover_url } }] }
-      : { files: [] },
-  };
-  return { props, pct };
+const SCHEMAS: Record<Kind, { title: string; emoji: string; properties: Record<string, unknown> }> = {
+  reading: {
+    title: "ReadReceipt — Currently Reading",
+    emoji: "📖",
+    properties: {
+      [P.title]: { title: {} },
+      [P.author]: { rich_text: {} },
+      [P.page]: { number: { format: "number" } },
+      [P.percent]: { number: { format: "number" } },
+      [P.total]: { number: { format: "number" } },
+      [P.status]: { select: { options: [{ name: "Reading", color: "blue" }] } },
+      [P.cover]: { files: {} },
+      [P.synced]: { date: {} },
+      [P.id]: { rich_text: {} },
+    },
+  },
+  completed: {
+    title: "ReadReceipt — Completed",
+    emoji: "✅",
+    properties: {
+      [P.title]: { title: {} },
+      [P.author]: { rich_text: {} },
+      [P.total]: { number: { format: "number" } },
+      [P.finished]: { date: {} },
+      [P.cover]: { files: {} },
+      [P.synced]: { date: {} },
+      [P.id]: { rich_text: {} },
+    },
+  },
+  tbr: {
+    title: "ReadReceipt — TBR",
+    emoji: "📚",
+    properties: {
+      [P.title]: { title: {} },
+      [P.author]: { rich_text: {} },
+      [P.total]: { number: { format: "number" } },
+      [P.notes]: { rich_text: {} },
+      [P.cover]: { files: {} },
+      [P.synced]: { date: {} },
+      [P.id]: { rich_text: {} },
+    },
+  },
+};
+
+const COLS: Record<Kind, [string, string]> = {
+  reading: ["books_database_id", "books_data_source_id"],
+  completed: ["completed_database_id", "completed_data_source_id"],
+  tbr: ["tbr_database_id", "tbr_data_source_id"],
+};
+
+async function createDatabase(userId: string, key: string, parentPageId: string, kind: Kind) {
+  const s = SCHEMAS[kind];
+  const created = await notion(userId, key, "POST", "/v1/databases", {
+    parent: { type: "page_id", page_id: parentPageId },
+    title: [{ text: { content: s.title } }],
+    icon: { type: "emoji", emoji: s.emoji },
+    initial_data_source: { properties: s.properties },
+  });
+  const dataSourceId = created.data_sources?.[0]?.id;
+  if (!dataSourceId) throw new Error("Notion did not return a data source for the new database");
+  return { databaseId: created.id as string, dataSourceId: dataSourceId as string };
 }
 
-/** Create the Notion database + goal callout under the chosen parent page. */
+async function dbAlive(userId: string, key: string, id: string | null) {
+  if (!id) return false;
+  const d = await notion(userId, key, "GET", `/v1/databases/${id}`).catch(() => null);
+  return !!d && !d.in_trash && !d.archived;
+}
+
+/** Make sure all three lists exist under the dashboard page; create only what's missing. */
+async function ensureDatabases(userId: string, key: string, settings: any) {
+  const db = adminClient();
+  const patch: Record<string, string> = {};
+  for (const kind of ["reading", "completed", "tbr"] as Kind[]) {
+    const [dbCol, dsCol] = COLS[kind];
+    if (await dbAlive(userId, key, settings[dbCol])) continue;
+    const { databaseId, dataSourceId } = await createDatabase(userId, key, settings.parent_page_id, kind);
+    patch[dbCol] = databaseId;
+    patch[dsCol] = dataSourceId;
+    await db.from("notion_book_links").delete().eq("user_id", userId).eq("kind", kind);
+  }
+  if (Object.keys(patch).length) {
+    await db.from("notion_sync_settings").update(patch).eq("user_id", userId);
+    Object.assign(settings, patch);
+  }
+  if (settings.books_data_source_id) {
+    await notion(userId, key, "PATCH", `/v1/data_sources/${settings.books_data_source_id}`, {
+      properties: { "Progress Bar": { formula: { expression: BAR_FORMULA } } },
+    }).catch((e) => console.warn("progress bar column", (e as Error).message));
+  }
+}
+
+/** Set up (or reuse) the dashboard under the chosen parent page. */
 export async function setupDashboard(userId: string, parentPageId: string) {
   const { db, key, settings: existing } = await loadContext(userId);
   if (!key) throw new Error("Notion is not connected");
 
-  // Reuse an existing dashboard on the same page instead of creating a duplicate.
-  if (existing?.books_database_id && existing.parent_page_id &&
-    normId(existing.parent_page_id) === normId(parentPageId)) {
-    const db0 = await notion(userId, key, "GET", `/v1/databases/${existing.books_database_id}`).catch(() => null);
-    if (db0 && !db0.in_trash && !db0.archived) {
-      await db.from("notion_sync_settings").update({ enabled: true, last_error: null }).eq("user_id", userId);
-      await fullSync(userId);
-      return;
-    }
+  const samePage = existing?.parent_page_id && normId(existing.parent_page_id) === normId(parentPageId);
+  if (!samePage) {
+    await db.from("notion_book_links").delete().eq("user_id", userId);
+  }
+  const me = await notion(userId, key, "GET", "/v1/users/me");
+
+  let goalBlockId = samePage ? existing?.goal_block_id ?? null : null;
+  if (goalBlockId) {
+    const b = await notion(userId, key, "GET", `/v1/blocks/${goalBlockId}`).catch(() => null);
+    if (!b || b.in_trash || b.archived) goalBlockId = null;
+  }
+  if (!goalBlockId) {
+    const appended = await notion(userId, key, "PATCH", `/v1/blocks/${parentPageId}/children`, {
+      children: [{
+        object: "block",
+        type: "callout",
+        callout: { icon: { type: "emoji", emoji: "🎯" }, rich_text: [{ text: { content: "Reading goal — syncing…" } }] },
+      }],
+    });
+    goalBlockId = appended.results?.[0]?.id ?? null;
   }
 
-  const me = await notion(userId, key, "GET", "/v1/users/me");
-  const created = await notion(userId, key, "POST", "/v1/databases", {
-    parent: { type: "page_id", page_id: parentPageId },
-    title: [{ text: { content: "ReadReceipt — Currently Reading" } }],
-    icon: { type: "emoji", emoji: "📚" },
-    initial_data_source: {
-      properties: {
-        [P.title]: { title: {} },
-        [P.author]: { rich_text: {} },
-        [P.page]: { number: { format: "number" } },
-        [P.percent]: { number: { format: "number" } },
-        [P.total]: { number: { format: "number" } },
-        [P.status]: {
-          select: {
-            options: [
-              { name: "Reading", color: "blue" },
-              { name: "Completed", color: "green" },
-              { name: "DNF", color: "gray" },
-            ],
-          },
-        },
-        [P.cover]: { files: {} },
-        [P.synced]: { date: {} },
-        [P.id]: { rich_text: {} },
-      },
-    },
-  });
-  const dataSourceId = created.data_sources?.[0]?.id;
-  if (!dataSourceId) throw new Error("Notion did not return a data source for the new database");
-
-  const appended = await notion(userId, key, "PATCH", `/v1/blocks/${parentPageId}/children`, {
-    children: [{
-      object: "block",
-      type: "callout",
-      callout: { icon: { type: "emoji", emoji: "🎯" }, rich_text: [{ text: { content: "Reading goal — syncing…" } }] },
-    }],
-  });
-  const goalBlockId = appended.results?.[0]?.id ?? null;
-
-  // Reset any links from a previous dashboard
-  await db.from("notion_book_links").delete().eq("user_id", userId);
-  const { error } = await db.from("notion_sync_settings").upsert({
+  const base = samePage ? existing : {};
+  const row = {
+    ...base,
     user_id: userId,
     parent_page_id: parentPageId,
-    books_database_id: created.id,
-    books_data_source_id: dataSourceId,
     goal_block_id: goalBlockId,
     bot_id: me.id ?? null,
     enabled: true,
     last_error: null,
-  });
+    last_reconciled_at: null,
+  } as any;
+  if (!samePage) {
+    for (const [a, b] of Object.values(COLS)) { row[a] = null; row[b] = null; }
+  }
+  const { error } = await db.from("notion_sync_settings").upsert(row);
   if (error) throw error;
-
-  await fullSync(userId);
+  await ensureDatabases(userId, key, row);
 }
 
-/** Push one ReadReceipt book to Notion (create, update, or trash). */
-export async function pushBook(userId: string, key: string, settings: any, bookId: string) {
+const coverFile = (url: string | null) =>
+  url && /^https?:\/\//.test(url) ? { files: [{ name: "cover", type: "external", external: { url } }] } : { files: [] };
+const pageCover = (url: string | null) =>
+  url && /^https?:\/\//.test(url) ? { cover: { type: "external", external: { url } } } : {};
+const text = (s: string | null) => ({ rich_text: [{ text: { content: (s ?? "").slice(0, 1900) } }] });
+
+function readingProps(b: any) {
+  const pct = percentFor(b.current_page ?? 0, b.total_pages ?? 0);
+  return {
+    pct,
+    props: {
+      [P.title]: { title: [{ text: { content: b.title ?? "Untitled" } }] },
+      [P.author]: text(b.author),
+      [P.page]: { number: b.current_page ?? 0 },
+      [P.percent]: { number: pct },
+      [P.total]: { number: b.total_pages ?? 0 },
+      [P.status]: { select: { name: "Reading" } },
+      [P.synced]: { date: { start: new Date().toISOString() } },
+      [P.id]: text(b.id),
+      [P.cover]: coverFile(b.cover_url),
+    },
+  };
+}
+
+function completedProps(b: any) {
+  return {
+    [P.title]: { title: [{ text: { content: b.title ?? "Untitled" } }] },
+    [P.author]: text(b.author),
+    [P.total]: { number: b.total_pages ?? 0 },
+    [P.finished]: { date: b.finished_at ? { start: b.finished_at } : null },
+    [P.synced]: { date: { start: new Date().toISOString() } },
+    [P.id]: text(b.id),
+    [P.cover]: coverFile(b.cover_url),
+  };
+}
+
+function tbrProps(t: any) {
+  return {
+    [P.title]: { title: [{ text: { content: t.title ?? "Untitled" } }] },
+    [P.author]: text(t.author),
+    [P.total]: { number: t.total_pages ?? null },
+    [P.notes]: text(t.notes),
+    [P.synced]: { date: { start: new Date().toISOString() } },
+    [P.id]: text(t.id),
+    [P.cover]: coverFile(t.cover_url),
+  };
+}
+
+async function trashLink(userId: string, key: string, link: any) {
+  await notion(userId, key, "PATCH", `/v1/pages/${link.notion_page_id}`, { in_trash: true }).catch((e) =>
+    console.warn("trash failed", e.message)
+  );
+  await adminClient().from("notion_book_links").delete().eq("book_id", link.book_id);
+}
+
+async function upsertRow(
+  userId: string, key: string, settings: any, kind: Kind, id: string, link: any,
+  props: Record<string, unknown>, coverUrl: string | null, extra: Record<string, unknown> = {},
+) {
   const db = adminClient();
-  const { data: book } = await db.from("books")
-    .select("id,user_id,title,author,cover_url,total_pages,current_page,status")
-    .eq("id", bookId).maybeSingle();
-  const { data: link } = await db.from("notion_book_links").select("*").eq("book_id", bookId).maybeSingle();
-
-  const shouldShow = book && book.user_id === userId &&
-    ["in_progress", "completed", "dnf"].includes(book.status ?? "in_progress");
-
-  if (!shouldShow) {
-    if (link) {
-      await notion(userId, key, "PATCH", `/v1/pages/${link.notion_page_id}`, { in_trash: true }).catch((e) =>
-        console.warn("trash failed", e.message)
-      );
-      await db.from("notion_book_links").delete().eq("book_id", bookId);
-    }
-    return;
-  }
-  // Only create rows for active books; finished ones are kept but not added.
-  if (!link && book.status !== "in_progress") return;
-
-  const { props, pct } = bookProps(book);
-  const cover = book.cover_url && /^https?:\/\//.test(book.cover_url)
-    ? { type: "external", external: { url: book.cover_url } }
-    : undefined;
-
+  const dataSource = settings[COLS[kind][1]];
+  if (!dataSource) return;
   let pageId = link?.notion_page_id;
   if (pageId) {
-    await notion(userId, key, "PATCH", `/v1/pages/${pageId}`, { properties: props, ...(cover ? { cover } : {}) });
+    await notion(userId, key, "PATCH", `/v1/pages/${pageId}`, { properties: props, ...pageCover(coverUrl) });
   } else {
     const page = await notion(userId, key, "POST", "/v1/pages", {
-      parent: { type: "data_source_id", data_source_id: settings.books_data_source_id },
+      parent: { type: "data_source_id", data_source_id: dataSource },
       properties: props,
-      ...(cover ? { cover } : {}),
+      ...pageCover(coverUrl),
     });
     pageId = page.id;
   }
   await db.from("notion_book_links").upsert({
-    book_id: bookId,
-    user_id: userId,
-    notion_page_id: pageId,
-    last_pushed_page: book.current_page ?? 0,
-    last_pushed_percent: pct,
-    last_pushed_at: new Date().toISOString(),
+    book_id: id, user_id: userId, notion_page_id: pageId, kind,
+    last_pushed_at: new Date().toISOString(), ...extra,
   });
+}
+
+/** Push one ReadReceipt book to the right list (Currently Reading or Completed). */
+export async function pushBook(userId: string, key: string, settings: any, bookId: string) {
+  const db = adminClient();
+  const { data: book } = await db.from("books")
+    .select("id,user_id,title,author,cover_url,total_pages,current_page,status,finished_at")
+    .eq("id", bookId).maybeSingle();
+  const { data: link } = await db.from("notion_book_links").select("*").eq("book_id", bookId).maybeSingle();
+
+  const kind = book && book.user_id === userId ? shelfFor(book) : null;
+  if (link && link.kind !== kind) await trashLink(userId, key, link);
+  if (!kind) return;
+  const current = link && link.kind === kind ? link : null;
+
+  if (kind === "reading") {
+    const { props, pct } = readingProps(book);
+    await upsertRow(userId, key, settings, kind, bookId, current, props, book.cover_url, {
+      last_pushed_page: book.current_page ?? 0,
+      last_pushed_percent: pct,
+    });
+  } else {
+    await upsertRow(userId, key, settings, kind, bookId, current, completedProps(book), book.cover_url);
+  }
+}
+
+/** Push one TBR book (create, update, or trash). */
+export async function pushTbr(userId: string, key: string, settings: any, tbrId: string) {
+  const db = adminClient();
+  const { data: t } = await db.from("tbr_books").select("id,user_id,title,author,total_pages,notes,cover_url")
+    .eq("id", tbrId).maybeSingle();
+  const { data: link } = await db.from("notion_book_links").select("*").eq("book_id", tbrId).maybeSingle();
+  if (!t || t.user_id !== userId) {
+    if (link) await trashLink(userId, key, link);
+    return;
+  }
+  await upsertRow(userId, key, settings, "tbr", tbrId, link, tbrProps(t), t.cover_url);
 }
 
 export async function pushGoal(userId: string, key: string, settings: any) {
@@ -221,29 +340,28 @@ export async function pushGoal(userId: string, key: string, settings: any) {
     db.from("reading_entries").select("book_id,finished_at").eq("user_id", userId)
       .not("finished_at", "is", null).gte("finished_at", `${year}-01-01`).lte("finished_at", `${year}-12-31`),
     db.from("books").select("id,status,current_page,total_pages,finished_at,created_at").eq("user_id", userId),
-    db.from("reading_goals").select("goal_count").eq("user_id", userId).eq("year", year).maybeSingle(),
+    db.from("reading_goals").select("goal_count,manual_count").eq("user_id", userId).eq("year", year).maybeSingle(),
   ]);
-  const done = countCompletedThisYear(year, entries ?? [], books ?? []);
+  const done = countCompletedThisYear(year, entries ?? [], books ?? []) + (goal?.manual_count ?? 0);
   const target = goal?.goal_count ?? 0;
-  let text: string;
+  let content: string;
   if (target > 0) {
     const ratio = Math.min(1, done / target);
     const filled = Math.round(ratio * 20);
-    text = `${year} reading goal: ${done} / ${target} books (${Math.round(ratio * 100)}%)\n${"█".repeat(filled)}${"░".repeat(20 - filled)}`;
+    content = `${year} reading goal: ${done} / ${target} books (${Math.round(ratio * 100)}%)\n${"█".repeat(filled)}${"░".repeat(20 - filled)}`;
   } else {
-    text = `${year}: ${done} books completed`;
+    content = `${year}: ${done} books completed`;
   }
   await notion(userId, key, "PATCH", `/v1/blocks/${settings.goal_block_id}`, {
-    callout: { icon: { type: "emoji", emoji: "🎯" }, rich_text: [{ text: { content: text } }] },
+    callout: { icon: { type: "emoji", emoji: "🎯" }, rich_text: [{ text: { content } }] },
   });
 }
 
 const num = (p: any): number | null => (p && typeof p.number === "number" ? p.number : null);
 
-/**
- * Pull a Notion page edit into ReadReceipt. Returns true if ReadReceipt changed.
- */
+/** Pull a Currently Reading edit into ReadReceipt. Returns true if ReadReceipt changed. */
 export async function pullPage(userId: string, key: string, settings: any, link: any, page?: any) {
+  if ((link.kind ?? "reading") !== "reading") return false;
   const db = adminClient();
   page = page ?? await notion(userId, key, "GET", `/v1/pages/${link.notion_page_id}`);
   if (page.in_trash || page.archived) {
@@ -263,10 +381,8 @@ export async function pullPage(userId: string, key: string, settings: any, link:
     lastPushedPercent: link.last_pushed_percent === null ? null : Number(link.last_pushed_percent),
     totalPages: book.total_pages ?? 0,
   });
-
   if (decision.kind === "none") return false;
 
-  // Conflict: ReadReceipt changed after this Notion edit -> ReadReceipt wins.
   const notionEditedAt = new Date(page.last_edited_time).getTime();
   const rrUpdatedAt = book.updated_at ? new Date(book.updated_at).getTime() : 0;
   if (decision.kind === "invalid" || notionEditedAt < rrUpdatedAt) {
@@ -281,44 +397,67 @@ export async function pullPage(userId: string, key: string, settings: any, link:
   });
   if (error) throw error;
   await db.from("notion_book_links").update({ last_notion_edit_at: page.last_edited_time }).eq("book_id", link.book_id);
-  // Normalise both fields (pages + %) in Notion right away.
   await pushBook(userId, key, settings, link.book_id);
   await db.from("notion_sync_queue").delete().eq("user_id", userId).eq("target", link.book_id);
   return true;
 }
 
-const BAR_FORMULA =
-  `repeat("█", round(min(max(prop("${P.percent}"), 0), 100) / 10)) + repeat("░", 10 - round(min(max(prop("${P.percent}"), 0), 100) / 10)) + " " + format(prop("${P.percent}")) + "%"`;
+const BUDGET_MS = 110_000;
 
-/** Add the read-only progress bar column (idempotent; fine for older dashboards). */
-async function ensureSchema(userId: string, key: string, dataSourceId: string) {
-  await notion(userId, key, "PATCH", `/v1/data_sources/${dataSourceId}`, {
-    properties: { "Progress Bar": { formula: { expression: BAR_FORMULA } } },
-  }).catch((e) => console.warn("progress bar column", (e as Error).message));
-}
-
-/** Reconcile: pull Notion edits, push every active book, refresh goal. */
-export async function fullSync(userId: string) {
+/**
+ * Reconcile all three lists. Skips rows already up to date, and stops before the
+ * time limit; returns done=false when more work remains (the next run continues).
+ */
+export async function fullSync(userId: string): Promise<{ done: boolean; remaining: number }> {
+  const started = Date.now();
   const { db, key, settings } = await loadContext(userId);
-  if (!key || !settings?.enabled || !settings.books_data_source_id) return;
+  if (!key || !settings?.enabled || !settings.parent_page_id) return { done: true, remaining: 0 };
   try {
-    await ensureSchema(userId, key, settings.books_data_source_id);
-    const { data: links } = await db.from("notion_book_links").select("*").eq("user_id", userId);
-    for (const link of links ?? []) await pullPage(userId, key, settings, link);
+    await ensureDatabases(userId, key, settings);
 
-    const { data: active } = await db.from("books").select("id").eq("user_id", userId).eq("status", "in_progress");
-    const ids = new Set([...(active ?? []).map((b: any) => b.id), ...(links ?? []).map((l: any) => l.book_id)]);
-    for (const id of ids) {
-      await pushBook(userId, key, settings, id);
+    const { data: links } = await db.from("notion_book_links").select("*").eq("user_id", userId);
+    const linkById = new Map((links ?? []).map((l: any) => [l.book_id, l]));
+    for (const link of links ?? []) {
+      if (link.kind === "reading") await pullPage(userId, key, settings, link);
+    }
+
+    const [{ data: books }, { data: tbr }] = await Promise.all([
+      db.from("books").select("id,status,current_page,total_pages,updated_at").eq("user_id", userId),
+      db.from("tbr_books").select("id,updated_at").eq("user_id", userId),
+    ]);
+    const stale = (id: string, updatedAt: string | null, kind: Kind | null) => {
+      const l: any = linkById.get(id);
+      if (!kind) return !!l;
+      if (!l || l.kind !== kind || !l.last_pushed_at) return true;
+      return !!updatedAt && new Date(updatedAt) > new Date(l.last_pushed_at);
+    };
+    const work: { type: "book" | "tbr"; id: string }[] = [];
+    // Currently Reading first so the main list fills in quickly.
+    const sorted = [...(books ?? [])].sort((a: any, b: any) =>
+      (shelfFor(a) === "reading" ? 0 : 1) - (shelfFor(b) === "reading" ? 0 : 1)
+    );
+    for (const b of sorted) if (stale(b.id, b.updated_at, shelfFor(b))) work.push({ type: "book", id: b.id });
+    for (const t of tbr ?? []) if (stale(t.id, t.updated_at, "tbr")) work.push({ type: "tbr", id: t.id });
+    const known = new Set([...(books ?? []).map((b: any) => b.id), ...(tbr ?? []).map((t: any) => t.id)]);
+    for (const l of links ?? []) if (!known.has(l.book_id)) await trashLink(userId, key, l);
+
+    let i = 0;
+    for (; i < work.length; i++) {
+      if (Date.now() - started > BUDGET_MS) break;
+      const w = work[i];
+      if (w.type === "book") await pushBook(userId, key, settings, w.id);
+      else await pushTbr(userId, key, settings, w.id);
       await sleep(340);
     }
+    const remaining = work.length - i;
     await pushGoal(userId, key, settings);
-    await db.from("notion_sync_queue").delete().eq("user_id", userId);
+    if (remaining === 0) await db.from("notion_sync_queue").delete().eq("user_id", userId);
     await db.from("notion_sync_settings").update({
       last_synced_at: new Date().toISOString(),
-      last_reconciled_at: new Date().toISOString(),
+      ...(remaining === 0 ? { last_reconciled_at: new Date().toISOString() } : {}),
       last_error: null,
     }).eq("user_id", userId);
+    return { done: remaining === 0, remaining };
   } catch (e) {
     await db.from("notion_sync_settings").update({ last_error: String((e as Error).message).slice(0, 500) })
       .eq("user_id", userId);
@@ -326,7 +465,7 @@ export async function fullSync(userId: string) {
   }
 }
 
-/** Drain queued pushes (called by the worker cron). */
+/** Drain queued pushes (called by the worker). */
 export async function processQueue(limit = 50) {
   const db = adminClient();
   const { data: rows } = await db.from("notion_sync_queue").select("*").lt("attempts", 5)
@@ -343,6 +482,7 @@ export async function processQueue(limit = 50) {
     for (const item of items) {
       try {
         if (item.target === "goal") await pushGoal(userId, key, settings);
+        else if (item.target.startsWith("tbr:")) await pushTbr(userId, key, settings, item.target.slice(4));
         else await pushBook(userId, key, settings, item.target);
         await db.from("notion_sync_queue").delete().eq("user_id", userId).eq("target", item.target)
           .eq("enqueued_at", item.enqueued_at);
@@ -360,12 +500,12 @@ export async function processQueue(limit = 50) {
   }
 }
 
-/** Hourly backstop: reconcile users not reconciled in the last hour. */
+/** Backstop: reconcile users not fully reconciled recently. */
 export async function reconcileStale() {
   const db = adminClient();
   const cutoff = new Date(Date.now() - 55 * 60 * 1000).toISOString();
   const { data: users } = await db.from("notion_sync_settings").select("user_id")
-    .eq("enabled", true).or(`last_reconciled_at.is.null,last_reconciled_at.lt.${cutoff}`).limit(10);
+    .eq("enabled", true).or(`last_reconciled_at.is.null,last_reconciled_at.lt.${cutoff}`).limit(3);
   for (const u of users ?? []) {
     try {
       await fullSync(u.user_id);

@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
       const [{ data: conn }, { data: settings }, { count }] = await Promise.all([
         db.from("app_user_connections").select("reconnect_required").eq("user_id", user.id).eq("connector_id", NOTION)
           .maybeSingle(),
-        db.from("notion_sync_settings").select("enabled,parent_page_id,books_database_id,last_synced_at,last_error")
+        db.from("notion_sync_settings").select("enabled,parent_page_id,books_database_id,completed_database_id,tbr_database_id,last_synced_at,last_reconciled_at,last_error")
           .eq("user_id", user.id).maybeSingle(),
         db.from("notion_book_links").select("book_id", { count: "exact", head: true }).eq("user_id", user.id),
       ]);
@@ -55,6 +55,10 @@ Deno.serve(async (req) => {
         databaseUrl: settings?.books_database_id
           ? `https://www.notion.so/${settings.books_database_id.replace(/-/g, "")}`
           : null,
+        completedUrl: settings?.completed_database_id ? `https://www.notion.so/${settings.completed_database_id.replace(/-/g, "")}` : null,
+        tbrUrl: settings?.tbr_database_id ? `https://www.notion.so/${settings.tbr_database_id.replace(/-/g, "")}` : null,
+        pageUrl: settings?.parent_page_id ? `https://www.notion.so/${settings.parent_page_id.replace(/-/g, "")}` : null,
+        fullySynced: !!settings?.last_reconciled_at,
         lastSyncedAt: settings?.last_synced_at ?? null,
         lastError: settings?.last_error ?? null,
         linkedBooks: count ?? 0,
@@ -78,12 +82,11 @@ Deno.serve(async (req) => {
 
     if (body.action === "setup") {
       await setupDashboard(user.id, body.parent_page_id);
-      return json({ ok: true });
+      return json({ ok: true, ...(await fullSync(user.id)) });
     }
 
     if (body.action === "sync_now") {
-      await fullSync(user.id);
-      return json({ ok: true });
+      return json({ ok: true, ...(await fullSync(user.id)) });
     }
 
     if (body.action === "disable") {
