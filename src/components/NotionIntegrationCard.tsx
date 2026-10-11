@@ -15,7 +15,13 @@ type Status = {
   lastSyncedAt: string | null;
   lastError: string | null;
   linkedBooks: number;
+  completedUrl?: string | null;
+  tbrUrl?: string | null;
+  pageUrl?: string | null;
+  fullySynced?: boolean;
 };
+
+type SyncResult = { done?: boolean; remaining?: number };
 
 async function call<T = any>(body: Record<string, unknown>): Promise<T> {
   const { data, error } = await supabase.functions.invoke("notion-dashboard", { body });
@@ -56,6 +62,7 @@ export function NotionIntegrationCard({ embedded = false }: { embedded?: boolean
   const [status, setStatus] = useState<Status | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [progress, setProgress] = useState<string | null>(null);
   const [pages, setPages] = useState<{ id: string; title: string; icon: string | null }[] | null>(null);
 
   const refresh = useCallback(async () => {
@@ -99,8 +106,19 @@ export function NotionIntegrationCard({ embedded = false }: { embedded?: boolean
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status?.connected, status?.enabled, status?.reconnectRequired]);
 
+  // Large libraries sync in batches; keep going until everything is in Notion.
+  const syncUntilDone = async (first: SyncResult) => {
+    let r = first;
+    while (r && r.done === false) {
+      setProgress(`Adding books to Notion… about ${r.remaining} left`);
+      await refresh();
+      r = await call<SyncResult>({ action: "sync_now" });
+    }
+    setProgress(null);
+  };
+
   const setup = (id: string) => run("setup", async () => {
-    await call({ action: "setup", parent_page_id: id });
+    await syncUntilDone(await call<SyncResult>({ action: "setup", parent_page_id: id }));
     setPages(null);
     toast({ title: "Notion dashboard ready", description: "Look for “ReadReceipt — Currently Reading” on the page you chose." });
   });
@@ -150,17 +168,26 @@ export function NotionIntegrationCard({ embedded = false }: { embedded?: boolean
           <div className="space-y-3">
             <p className="text-sm">
               {status.lastError ? "⚠️ Sync is having trouble. " : "✅ Working. "}
-              Syncing {status.linkedBooks} book{status.linkedBooks === 1 ? "" : "s"}
+              {status.linkedBooks} book{status.linkedBooks === 1 ? "" : "s"} in Notion (Currently Reading, Completed, TBR)
               {status.lastSyncedAt ? ` · last synced ${fmt(status.lastSyncedAt)}` : " · first sync hasn't finished yet"}
             </p>
+            {progress && <p className="text-sm text-muted-foreground flex items-center"><Loader2 className="mr-2 h-4 w-4 animate-spin" />{progress}</p>}
+            {!progress && status.fullySynced === false && <p className="text-sm text-muted-foreground">Some books haven't been added yet. Click Sync now to finish.</p>}
             {status.lastError && <p className="text-sm text-destructive">Last problem: {status.lastError}</p>}
             <div className="flex flex-wrap gap-2">
-              {status.databaseUrl && (
+              {status.pageUrl && (
                 <Button variant="outline" asChild>
-                  <a href={status.databaseUrl} target="_blank" rel="noreferrer"><ExternalLink className="mr-2 h-4 w-4" />Open in Notion</a>
+                  <a href={status.pageUrl} target="_blank" rel="noreferrer"><ExternalLink className="mr-2 h-4 w-4" />Open dashboard</a>
                 </Button>
               )}
-              <Button variant="outline" onClick={() => run("sync", async () => { await call({ action: "sync_now" }); toast({ title: "Synced with Notion" }); })} disabled={!!busy}>
+              {status.databaseUrl && (
+                <Button variant="outline" asChild>
+                  <a href={status.databaseUrl} target="_blank" rel="noreferrer"><ExternalLink className="mr-2 h-4 w-4" />Currently Reading</a>
+                </Button>
+              )}
+              {status.completedUrl && <Button variant="outline" asChild><a href={status.completedUrl} target="_blank" rel="noreferrer"><ExternalLink className="mr-2 h-4 w-4" />Completed</a></Button>}
+              {status.tbrUrl && <Button variant="outline" asChild><a href={status.tbrUrl} target="_blank" rel="noreferrer"><ExternalLink className="mr-2 h-4 w-4" />TBR</a></Button>}
+              <Button variant="outline" onClick={() => run("sync", async () => { await syncUntilDone(await call<SyncResult>({ action: "sync_now" })); toast({ title: "Synced with Notion" }); })} disabled={!!busy}>
                 {busy === "sync" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}Sync now
               </Button>
               <Button variant="ghost" onClick={() => run("disable", () => call({ action: "disable" }))} disabled={!!busy}>Pause sync</Button>
