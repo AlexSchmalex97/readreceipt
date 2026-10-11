@@ -93,10 +93,16 @@ export function NotionIntegrationCard({ embedded = false }: { embedded?: boolean
     setPages(res.pages);
   });
 
+  // Once connected but no page chosen, list shared pages automatically.
+  useEffect(() => {
+    if (status?.connected && !status.reconnectRequired && !status.enabled && pages === null && !busy) search();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status?.connected, status?.enabled, status?.reconnectRequired]);
+
   const setup = (id: string) => run("setup", async () => {
     await call({ action: "setup", parent_page_id: id });
     setPages(null);
-    toast({ title: "Notion dashboard created", description: "Your reading dashboard is now in Notion." });
+    toast({ title: "Notion dashboard ready", description: "Look for “ReadReceipt — Currently Reading” on the page you chose." });
   });
 
   const body = (
@@ -111,7 +117,10 @@ export function NotionIntegrationCard({ embedded = false }: { embedded?: boolean
           </>
         ) : !status.enabled ? (
           <div className="space-y-3">
-            <p className="text-sm">Choose the Notion page for your reading dashboard:</p>
+            <p className="text-sm rounded-md border border-primary/40 bg-primary/5 p-2">
+              <strong>One more step:</strong> Notion is connected, but nothing has been added to Notion yet. Pick the page for your reading dashboard below and click <strong>Use this page</strong>.
+            </p>
+            {status.lastError && <p className="text-sm text-destructive">Last problem: {status.lastError}</p>}
             <div className="flex gap-2">
               <Input placeholder="Search your shared pages, e.g. Media Corner" value={query} onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && search()} />
@@ -140,8 +149,9 @@ export function NotionIntegrationCard({ embedded = false }: { embedded?: boolean
         ) : (
           <div className="space-y-3">
             <p className="text-sm">
+              {status.lastError ? "⚠️ Sync is having trouble. " : "✅ Working. "}
               Syncing {status.linkedBooks} book{status.linkedBooks === 1 ? "" : "s"}
-              {status.lastSyncedAt ? ` · last synced ${fmt(status.lastSyncedAt)}` : ""}
+              {status.lastSyncedAt ? ` · last synced ${fmt(status.lastSyncedAt)}` : " · first sync hasn't finished yet"}
             </p>
             {status.lastError && <p className="text-sm text-destructive">Last problem: {status.lastError}</p>}
             <div className="flex flex-wrap gap-2">

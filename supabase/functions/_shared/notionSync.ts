@@ -94,8 +94,19 @@ function bookProps(b: any) {
 
 /** Create the Notion database + goal callout under the chosen parent page. */
 export async function setupDashboard(userId: string, parentPageId: string) {
-  const { db, key } = await loadContext(userId);
+  const { db, key, settings: existing } = await loadContext(userId);
   if (!key) throw new Error("Notion is not connected");
+
+  // Reuse an existing dashboard on the same page instead of creating a duplicate.
+  if (existing?.books_database_id && existing.parent_page_id &&
+    normId(existing.parent_page_id) === normId(parentPageId)) {
+    const db0 = await notion(userId, key, "GET", `/v1/databases/${existing.books_database_id}`).catch(() => null);
+    if (db0 && !db0.in_trash && !db0.archived) {
+      await db.from("notion_sync_settings").update({ enabled: true, last_error: null }).eq("user_id", userId);
+      await fullSync(userId);
+      return;
+    }
+  }
 
   const me = await notion(userId, key, "GET", "/v1/users/me");
   const created = await notion(userId, key, "POST", "/v1/databases", {
