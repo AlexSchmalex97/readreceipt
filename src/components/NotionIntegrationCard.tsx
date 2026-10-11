@@ -51,7 +51,7 @@ const fmt = (iso: string) => {
   return d.toLocaleString("en-US", { timeZone: "America/New_York", month: "2-digit", day: "2-digit", year: "numeric", hour: "numeric", minute: "2-digit" });
 };
 
-export function NotionIntegrationCard() {
+export function NotionIntegrationCard({ embedded = false }: { embedded?: boolean }) {
   const { toast } = useToast();
   const [status, setStatus] = useState<Status | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -157,8 +157,39 @@ export function NotionIntegrationCard() {
               <Button variant="ghost" onClick={() => run("disconnect", () => call({ action: "disconnect" }))} disabled={!!busy}>Disconnect</Button>
             </div>
           </div>
-        )}
-      </CardContent>
+        )
+  );
+
+  const stateLabel = !status?.connected
+    ? "Not connected"
+    : status.reconnectRequired
+      ? "Needs reconnecting"
+      : status.enabled ? "Connected · syncing" : "Connected · choose a page";
+
+  if (embedded) {
+    return (
+      <div className="p-4 border rounded-lg space-y-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-semibold">N</div>
+          <div>
+            <p className="font-medium">Notion</p>
+            <p className="text-xs text-muted-foreground">{stateLabel}</p>
+          </div>
+        </div>
+        {body}
+      </div>
+    );
+  }
+
+  return (
+    <Card className="mb-6">
+      <CardHeader>
+        <CardTitle>Notion</CardTitle>
+        <CardDescription>
+          Show your current books, progress, and yearly goal in Notion. Edit Current Page or Progress % there and ReadReceipt updates too.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">{body}</CardContent>
     </Card>
   );
 }
