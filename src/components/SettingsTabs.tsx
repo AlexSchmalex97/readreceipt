@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { BookOpen, User, Settings as SettingsIcon, Palette, Camera, Link as LinkIcon, Upload, Download } from "lucide-react";
 import { useUserAccent } from "@/hooks/useUserAccent";
+import { NotionIntegrationCard } from "@/components/NotionIntegrationCard";
 
 interface Identity {
   id: string;
@@ -447,6 +448,9 @@ export function SettingsTabs(props: SettingsTabsProps) {
             </div>
           </CardContent>
         </StyledCard>
+
+        <NotionIntegrationCard />
+
 
       </TabsContent>
 
