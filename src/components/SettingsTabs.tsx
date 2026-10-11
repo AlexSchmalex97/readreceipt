@@ -446,10 +446,9 @@ export function SettingsTabs(props: SettingsTabsProps) {
                 </Button>
               )}
             </div>
+            <NotionIntegrationCard embedded />
           </CardContent>
         </StyledCard>
-
-        <NotionIntegrationCard />
 
 
       </TabsContent>
