@@ -730,6 +730,10 @@ export type Database = {
         }[]
       }
       get_zodiac_sign: { Args: { birth_date: string }; Returns: string }
+      start_reading_from_tbr: {
+        Args: { p_tbr_id: string; p_user_id: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

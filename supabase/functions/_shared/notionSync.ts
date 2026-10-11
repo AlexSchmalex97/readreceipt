@@ -24,7 +24,12 @@ export const P = {
   notes: "Notes",
   rating: "Rating",
   quick: "Quick Update",
+  shelf: "Shelf",
 };
+
+const SHELF_TBR = "Want to Read";
+const SHELF_READING = "Currently Reading";
+const shelfProp = { select: { options: [{ name: SHELF_TBR, color: "yellow" }, { name: SHELF_READING, color: "blue" }] } };
 
 const QUICK: Record<string, number> = { "+1 page": 1, "+5 pages": 5, "+10 pages": 10, "-1 page": -1 };
 const quickProp = { select: { options: Object.keys(QUICK).map((name) => ({ name, color: name.startsWith("-") ? "red" : "green" })) } };
@@ -179,6 +184,11 @@ export async function ensureDatabases(userId: string, key: string, settings: any
       properties: { [P.rating]: { rich_text: {} } },
     }).catch((e) => console.warn("rating column", (e as Error).message));
   }
+  if (settings.tbr_data_source_id) {
+    await notion(userId, key, "PATCH", `/v1/data_sources/${settings.tbr_data_source_id}`, {
+      properties: { [P.shelf]: shelfProp },
+    }).catch((e) => console.warn("shelf column", (e as Error).message));
+  }
 }
 
 /** Set up (or reuse) the dashboard under the chosen parent page. */
@@ -271,6 +281,7 @@ function tbrProps(t: any) {
     [P.author]: text(t.author),
     [P.total]: { number: t.total_pages ?? null },
     [P.notes]: text(t.notes),
+    [P.shelf]: { select: { name: SHELF_TBR } },
     [P.synced]: { date: { start: new Date().toISOString() } },
     [P.id]: text(t.id),
     [P.cover]: coverFile(t.cover_url),
@@ -421,6 +432,32 @@ export async function pullPage(userId: string, key: string, settings: any, link:
   await db.from("notion_book_links").update({ last_notion_edit_at: page.last_edited_time }).eq("book_id", link.book_id);
   await pushBook(userId, key, settings, link.book_id);
   await db.from("notion_sync_queue").delete().eq("user_id", userId).eq("target", link.book_id);
+  return true;
+}
+
+/**
+ * A TBR row in Notion was set to "Currently Reading" (or moved into the
+ * Currently Reading list): start reading it in ReadReceipt.
+ */
+export async function pullTbr(userId: string, key: string, settings: any, link: any) {
+  const db = adminClient();
+  const page = await notion(userId, key, "GET", `/v1/pages/${link.notion_page_id}`);
+  if (page.in_trash || page.archived) {
+    await db.from("notion_book_links").delete().eq("book_id", link.book_id);
+    return false;
+  }
+  const parentDs = page.parent?.data_source_id ? normId(page.parent.data_source_id) : null;
+  const movedIntoReading = !!parentDs && !!settings.books_data_source_id &&
+    parentDs === normId(settings.books_data_source_id);
+  const shelf = page.properties?.[P.shelf]?.select?.name;
+  if (!movedIntoReading && shelf !== SHELF_READING) return false;
+
+  const { data: newId, error } = await db.rpc("start_reading_from_tbr", { p_user_id: userId, p_tbr_id: link.book_id });
+  if (error) throw error;
+  // Replace the TBR row with a proper Currently Reading row (no duplicates).
+  await pushTbr(userId, key, settings, link.book_id);
+  if (newId) await pushBook(userId, key, settings, newId as string);
+  await db.from("notion_sync_queue").delete().eq("user_id", userId).in("target", [`tbr:${link.book_id}`, String(newId)]);
   return true;
 }
 

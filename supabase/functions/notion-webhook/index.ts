@@ -1,7 +1,7 @@
 // Receives Notion webhook events. Public endpoint; authenticity is proven by
 // the X-Notion-Signature HMAC (NOTION_WEBHOOK_VERIFICATION_TOKEN).
 import { adminClient, getConnectionKeyForUser } from "../_shared/appUserConnections.ts";
-import { NOTION, pullPage } from "../_shared/notionSync.ts";
+import { NOTION, pullPage, pullTbr } from "../_shared/notionSync.ts";
 
 async function validSignature(raw: string, header: string | null, token: string) {
   if (!header?.startsWith("sha256=")) return false;
@@ -32,7 +32,7 @@ async function handle(event: any) {
     await db.from("notion_book_links").delete().eq("book_id", link.book_id);
     return;
   }
-  if (event.type !== "page.properties_updated" && event.type !== "page.undeleted") return;
+  if (!["page.properties_updated", "page.undeleted", "page.moved"].includes(event.type)) return;
 
   const { data: settings } = await db.from("notion_sync_settings").select("*").eq("user_id", link.user_id).maybeSingle();
   if (!settings?.enabled) return;
@@ -42,7 +42,8 @@ async function handle(event: any) {
 
   const key = await getConnectionKeyForUser(link.user_id, NOTION);
   if (!key) return;
-  await pullPage(link.user_id, key, settings, link);
+  if (link.kind === "tbr") await pullTbr(link.user_id, key, settings, link);
+  else await pullPage(link.user_id, key, settings, link);
 }
 
 Deno.serve(async (req) => {
