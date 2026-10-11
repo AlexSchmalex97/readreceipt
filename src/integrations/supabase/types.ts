@@ -177,6 +177,7 @@ export type Database = {
         Row: {
           book_id: string
           created_at: string
+          kind: string
           last_notion_edit_at: string | null
           last_pushed_at: string | null
           last_pushed_page: number | null
@@ -188,6 +189,7 @@ export type Database = {
         Insert: {
           book_id: string
           created_at?: string
+          kind?: string
           last_notion_edit_at?: string | null
           last_pushed_at?: string | null
           last_pushed_page?: number | null
@@ -199,6 +201,7 @@ export type Database = {
         Update: {
           book_id?: string
           created_at?: string
+          kind?: string
           last_notion_edit_at?: string | null
           last_pushed_at?: string | null
           last_pushed_page?: number | null
@@ -238,6 +241,8 @@ export type Database = {
           books_data_source_id: string | null
           books_database_id: string | null
           bot_id: string | null
+          completed_data_source_id: string | null
+          completed_database_id: string | null
           created_at: string
           enabled: boolean
           goal_block_id: string | null
@@ -245,6 +250,8 @@ export type Database = {
           last_reconciled_at: string | null
           last_synced_at: string | null
           parent_page_id: string | null
+          tbr_data_source_id: string | null
+          tbr_database_id: string | null
           updated_at: string
           user_id: string
         }
@@ -252,6 +259,8 @@ export type Database = {
           books_data_source_id?: string | null
           books_database_id?: string | null
           bot_id?: string | null
+          completed_data_source_id?: string | null
+          completed_database_id?: string | null
           created_at?: string
           enabled?: boolean
           goal_block_id?: string | null
@@ -259,6 +268,8 @@ export type Database = {
           last_reconciled_at?: string | null
           last_synced_at?: string | null
           parent_page_id?: string | null
+          tbr_data_source_id?: string | null
+          tbr_database_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -266,6 +277,8 @@ export type Database = {
           books_data_source_id?: string | null
           books_database_id?: string | null
           bot_id?: string | null
+          completed_data_source_id?: string | null
+          completed_database_id?: string | null
           created_at?: string
           enabled?: boolean
           goal_block_id?: string | null
@@ -273,6 +286,8 @@ export type Database = {
           last_reconciled_at?: string | null
           last_synced_at?: string | null
           parent_page_id?: string | null
+          tbr_data_source_id?: string | null
+          tbr_database_id?: string | null
           updated_at?: string
           user_id?: string
         }
