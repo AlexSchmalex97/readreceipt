@@ -1,0 +1,2 @@
+REVOKE ALL ON public.app_user_connections, public.notion_sync_queue, public.notion_webhook_events, public.notion_webhook_tokens FROM anon, authenticated;
+REVOKE ALL ON public.notion_sync_settings, public.notion_book_links FROM anon;
