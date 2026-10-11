@@ -64,3 +64,11 @@ Deno.test("each progress style gives its own display formula, defaulting to clas
   if (!c.includes("█") || !s.includes("▰") || !r.includes("◑")) throw new Error();
   if (progressFormula(null, "Progress %") !== c || progressFormula("bogus", "Progress %") !== c) throw new Error();
 });
+
+import { goalBar } from "../_shared/notionSyncMath.ts";
+Deno.test("goal bar follows the chosen style (37 of 100 books)", () => {
+  if (goalBar("classic", 0.37) !== "█".repeat(7) + "░".repeat(13)) throw new Error("classic");
+  if (goalBar("segmented", 0.37) !== "▰▰▰▱▱▱▱▱▱▱") throw new Error("segmented");
+  if (goalBar("circular", 0.37) !== "◔ 37%") throw new Error("circular");
+  if (goalBar(null, 0.37) !== goalBar("classic", 0.37)) throw new Error("default");
+});

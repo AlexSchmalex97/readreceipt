@@ -10,6 +10,7 @@ import {
   NOTION,
   ReconnectRequired,
   ensureDatabases,
+  pushGoal,
   setupDashboard,
 } from "../_shared/notionSync.ts";
 
@@ -96,7 +97,10 @@ Deno.serve(async (req) => {
       // Display only: rewrites the Progress Bar formula; reading progress is untouched.
       const { data: settings } = await db.from("notion_sync_settings").update({ progress_style: body.style })
         .eq("user_id", user.id).select("*").maybeSingle();
-      if (settings?.parent_page_id) await ensureDatabases(user.id, key, settings);
+      if (settings?.parent_page_id) {
+        await pushGoal(user.id, key, settings);
+        await ensureDatabases(user.id, key, settings);
+      }
       return json({ ok: true });
     }
 

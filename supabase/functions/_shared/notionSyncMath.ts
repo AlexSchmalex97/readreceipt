@@ -101,3 +101,19 @@ export function progressFormula(style: string | null | undefined, percentProp: s
   }
   return `repeat("█", round(${pct} / 10)) + repeat("░", 10 - round(${pct} / 10)) + " " + ${label}`;
 }
+
+/** Text bar for the reading goal box on the Notion dashboard. Display only. */
+export function goalBar(style: string | null | undefined, ratio: number): string {
+  const r = Math.max(0, Math.min(1, ratio || 0));
+  if (style === "segmented") {
+    const n = Math.floor(r * 10);
+    return "▰".repeat(n) + "▱".repeat(10 - n);
+  }
+  if (style === "circular") {
+    const pct = Math.round(r * 100);
+    const icon = pct >= 100 ? "●" : pct >= 75 ? "◕" : pct >= 50 ? "◑" : pct >= 25 ? "◔" : "○";
+    return `${icon} ${pct}%`;
+  }
+  const n = Math.round(r * 20);
+  return "█".repeat(n) + "░".repeat(20 - n);
+}
