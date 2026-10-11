@@ -82,7 +82,7 @@ export async function loadContext(userId: string) {
 }
 
 export { progressFormula } from "./notionSyncMath.ts";
-import { progressFormula } from "./notionSyncMath.ts";
+import { goalBar, progressFormula } from "./notionSyncMath.ts";
 
 const SCHEMAS: Record<Kind, { title: string; emoji: string; properties: Record<string, unknown> }> = {
   reading: {
@@ -362,8 +362,7 @@ export async function pushGoal(userId: string, key: string, settings: any) {
   let content: string;
   if (target > 0) {
     const ratio = Math.min(1, done / target);
-    const filled = Math.round(ratio * 20);
-    content = `${year} reading goal: ${done} / ${target} books (${Math.round(ratio * 100)}%)\n${"█".repeat(filled)}${"░".repeat(20 - filled)}`;
+    content = `${year} reading goal: ${done} / ${target} books (${Math.round(ratio * 100)}%)\n${goalBar(settings.progress_style, ratio)}`;
   } else {
     content = `${year}: ${done} books completed`;
   }

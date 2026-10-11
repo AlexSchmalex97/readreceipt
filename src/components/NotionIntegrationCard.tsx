@@ -23,9 +23,9 @@ type Status = {
 };
 
 const STYLES = [
-  { id: "classic", name: "Classic Bar", preview: "██████░░░░ 60%" },
-  { id: "segmented", name: "Segmented Bar", preview: "▰▰▰▱▱  60%" },
-  { id: "circular", name: "Circular", preview: "◑ 60%" },
+  { id: "classic", name: "Classic Bar", preview: "████████████░░░░░░░░" },
+  { id: "segmented", name: "Segmented Bar", preview: "▰▰▰▰▰▰▱▱▱▱" },
+  { id: "circular", name: "Circular", preview: "◕ 60%" },
 ] as const;
 
 type SyncResult = { done?: boolean; remaining?: number };
@@ -181,7 +181,7 @@ export function NotionIntegrationCard({ embedded = false }: { embedded?: boolean
             <details className="rounded-md border p-3">
               <summary className="cursor-pointer text-sm font-medium">Customize Dashboard</summary>
               <div className="mt-3 space-y-3">
-                <p className="text-sm text-muted-foreground">Choose how the Progress Bar column looks in your Currently Reading list. This only changes the look, never your progress.</p>
+                <p className="text-sm text-muted-foreground">Choose how the reading goal bar at the top of your Notion dashboard looks (the Progress Bar column in Currently Reading matches it). This only changes the look, never your progress.</p>
                 <div className="grid gap-2 sm:grid-cols-3">
                   {STYLES.map((st) => {
                     const active = (status.progressStyle ?? "classic") === st.id;
