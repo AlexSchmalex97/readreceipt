@@ -1,0 +1,1 @@
+ALTER TABLE public.notion_sync_settings ADD COLUMN IF NOT EXISTS progress_style text NOT NULL DEFAULT 'classic';

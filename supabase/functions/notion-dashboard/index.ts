@@ -9,6 +9,7 @@ import {
   notion,
   NOTION,
   ReconnectRequired,
+  ensureDatabases,
   setupDashboard,
 } from "../_shared/notionSync.ts";
 
@@ -21,6 +22,7 @@ const Body = z.discriminatedUnion("action", [
   z.object({ action: z.literal("setup"), parent_page_id: z.string().min(10).max(64) }),
   z.object({ action: z.literal("sync_now") }),
   z.object({ action: z.literal("disable") }),
+  z.object({ action: z.literal("set_style"), style: z.enum(["classic", "segmented", "circular"]) }),
   z.object({ action: z.literal("disconnect") }),
 ]);
 
@@ -44,7 +46,7 @@ Deno.serve(async (req) => {
       const [{ data: conn }, { data: settings }, { count }] = await Promise.all([
         db.from("app_user_connections").select("reconnect_required").eq("user_id", user.id).eq("connector_id", NOTION)
           .maybeSingle(),
-        db.from("notion_sync_settings").select("enabled,parent_page_id,books_database_id,completed_database_id,tbr_database_id,last_synced_at,last_reconciled_at,last_error")
+        db.from("notion_sync_settings").select("enabled,parent_page_id,books_database_id,progress_style,completed_database_id,tbr_database_id,last_synced_at,last_reconciled_at,last_error")
           .eq("user_id", user.id).maybeSingle(),
         db.from("notion_book_links").select("book_id", { count: "exact", head: true }).eq("user_id", user.id),
       ]);
@@ -58,6 +60,7 @@ Deno.serve(async (req) => {
         completedUrl: settings?.completed_database_id ? `https://www.notion.so/${settings.completed_database_id.replace(/-/g, "")}` : null,
         tbrUrl: settings?.tbr_database_id ? `https://www.notion.so/${settings.tbr_database_id.replace(/-/g, "")}` : null,
         pageUrl: settings?.parent_page_id ? `https://www.notion.so/${settings.parent_page_id.replace(/-/g, "")}` : null,
+        progressStyle: settings?.progress_style ?? "classic",
         fullySynced: !!settings?.last_reconciled_at,
         lastSyncedAt: settings?.last_synced_at ?? null,
         lastError: settings?.last_error ?? null,
@@ -87,6 +90,14 @@ Deno.serve(async (req) => {
 
     if (body.action === "sync_now") {
       return json({ ok: true, ...(await fullSync(user.id)) });
+    }
+
+    if (body.action === "set_style") {
+      // Display only: rewrites the Progress Bar formula; reading progress is untouched.
+      const { data: settings } = await db.from("notion_sync_settings").update({ progress_style: body.style })
+        .eq("user_id", user.id).select("*").maybeSingle();
+      if (settings?.parent_page_id) await ensureDatabases(user.id, key, settings);
+      return json({ ok: true });
     }
 
     if (body.action === "disable") {
