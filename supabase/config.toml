@@ -27,3 +27,18 @@ verify_jwt = false
 
 [functions.search-books]
 verify_jwt = false
+
+[functions.notion-oauth-start]
+verify_jwt = false
+
+[functions.notion-oauth-complete]
+verify_jwt = false
+
+[functions.notion-dashboard]
+verify_jwt = false
+
+[functions.notion-webhook]
+verify_jwt = false
+
+[functions.notion-worker]
+verify_jwt = false
