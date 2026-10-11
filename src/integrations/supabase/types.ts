@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_user_connections: {
+        Row: {
+          connection_key_ciphertext: string
+          connector_id: string
+          created_at: string
+          id: string
+          reconnect_required: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          connection_key_ciphertext: string
+          connector_id: string
+          created_at?: string
+          id?: string
+          reconnect_required?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          connection_key_ciphertext?: string
+          connector_id?: string
+          created_at?: string
+          id?: string
+          reconnect_required?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       books: {
         Row: {
           author: string
@@ -140,6 +170,144 @@ export type Database = {
           target_id?: string
           target_type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      notion_book_links: {
+        Row: {
+          book_id: string
+          created_at: string
+          last_notion_edit_at: string | null
+          last_pushed_at: string | null
+          last_pushed_page: number | null
+          last_pushed_percent: number | null
+          notion_page_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          last_notion_edit_at?: string | null
+          last_pushed_at?: string | null
+          last_pushed_page?: number | null
+          last_pushed_percent?: number | null
+          notion_page_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          last_notion_edit_at?: string | null
+          last_pushed_at?: string | null
+          last_pushed_page?: number | null
+          last_pushed_percent?: number | null
+          notion_page_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notion_sync_queue: {
+        Row: {
+          attempts: number
+          enqueued_at: string
+          op: string
+          target: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          enqueued_at?: string
+          op?: string
+          target: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          enqueued_at?: string
+          op?: string
+          target?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notion_sync_settings: {
+        Row: {
+          books_data_source_id: string | null
+          books_database_id: string | null
+          bot_id: string | null
+          created_at: string
+          enabled: boolean
+          goal_block_id: string | null
+          last_error: string | null
+          last_reconciled_at: string | null
+          last_synced_at: string | null
+          parent_page_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          books_data_source_id?: string | null
+          books_database_id?: string | null
+          bot_id?: string | null
+          created_at?: string
+          enabled?: boolean
+          goal_block_id?: string | null
+          last_error?: string | null
+          last_reconciled_at?: string | null
+          last_synced_at?: string | null
+          parent_page_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          books_data_source_id?: string | null
+          books_database_id?: string | null
+          bot_id?: string | null
+          created_at?: string
+          enabled?: boolean
+          goal_block_id?: string | null
+          last_error?: string | null
+          last_reconciled_at?: string | null
+          last_synced_at?: string | null
+          parent_page_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notion_webhook_events: {
+        Row: {
+          event_id: string
+          received_at: string
+        }
+        Insert: {
+          event_id: string
+          received_at?: string
+        }
+        Update: {
+          event_id?: string
+          received_at?: string
+        }
+        Relationships: []
+      }
+      notion_webhook_tokens: {
+        Row: {
+          id: string
+          received_at: string
+          token: string
+        }
+        Insert: {
+          id?: string
+          received_at?: string
+          token: string
+        }
+        Update: {
+          id?: string
+          received_at?: string
+          token?: string
         }
         Relationships: []
       }
@@ -499,6 +667,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_progress_from_notion: {
+        Args: { p_book_id: string; p_new_page: number; p_user_id: string }
+        Returns: number
+      }
       get_public_profiles: {
         Args: { limit_count?: number; search?: string }
         Returns: {
