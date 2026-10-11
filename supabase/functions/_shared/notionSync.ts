@@ -287,11 +287,22 @@ export async function pullPage(userId: string, key: string, settings: any, link:
   return true;
 }
 
+const BAR_FORMULA =
+  `repeat("█", round(min(max(prop("${P.percent}"), 0), 100) / 10)) + repeat("░", 10 - round(min(max(prop("${P.percent}"), 0), 100) / 10)) + " " + format(prop("${P.percent}")) + "%"`;
+
+/** Add the read-only progress bar column (idempotent; fine for older dashboards). */
+async function ensureSchema(userId: string, key: string, dataSourceId: string) {
+  await notion(userId, key, "PATCH", `/v1/data_sources/${dataSourceId}`, {
+    properties: { "Progress Bar": { formula: { expression: BAR_FORMULA } } },
+  }).catch((e) => console.warn("progress bar column", (e as Error).message));
+}
+
 /** Reconcile: pull Notion edits, push every active book, refresh goal. */
 export async function fullSync(userId: string) {
   const { db, key, settings } = await loadContext(userId);
   if (!key || !settings?.enabled || !settings.books_data_source_id) return;
   try {
+    await ensureSchema(userId, key, settings.books_data_source_id);
     const { data: links } = await db.from("notion_book_links").select("*").eq("user_id", userId);
     for (const link of links ?? []) await pullPage(userId, key, settings, link);
 
