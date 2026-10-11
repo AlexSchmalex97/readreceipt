@@ -1,5 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { countCompletedThisYear, percentFor, resolveNotionEdit } from "./notionSyncMath.ts";
+import { countCompletedThisYear, percentFor, resolveNotionEdit } from "../_shared/notionSyncMath.ts";
 
 const base = { lastPushedPage: 100, lastPushedPercent: 25, totalPages: 400 };
 
