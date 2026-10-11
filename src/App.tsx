@@ -30,6 +30,7 @@ import More from "./pages/More";
 import Notifications from "./pages/Notifications";
 import YearlyReadingGoalBooks from "./pages/YearlyReadingGoalBooks";
 import GlobalUserColors from "@/components/GlobalUserColors";
+import NotionOAuthReturn from "./pages/NotionOAuthReturn";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +68,7 @@ const App = () => {
             <Route path="/" element={<ProtectedRoute><IOSProtectedRoute><Index /></IOSProtectedRoute></ProtectedRoute>} />
             <Route path="/home" element={<ProtectedRoute><IOSProtectedRoute><Index /></IOSProtectedRoute></ProtectedRoute>} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/oauth/notion/return" element={<NotionOAuthReturn />} />
             <Route path="/contact" element={<IOSProtectedRoute><Contact /></IOSProtectedRoute>} />
             <Route path="/feed" element={<ProtectedRoute><IOSProtectedRoute><Feed /></IOSProtectedRoute></ProtectedRoute>} />
             <Route path="/people" element={<ProtectedRoute><IOSProtectedRoute><People /></IOSProtectedRoute></ProtectedRoute>} />

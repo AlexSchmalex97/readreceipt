@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { exportToGoodreadsCSV, downloadCSV } from "@/lib/csvExport";
 import { importGoodreadsCSV } from "@/lib/csvImport";
+import { NotionIntegrationCard } from "@/components/NotionIntegrationCard";
 
 const Integrations = () => {
   const [isExporting, setIsExporting] = useState(false);
@@ -123,6 +124,8 @@ const Integrations = () => {
             </p>
           </CardContent>
         </Card>
+
+        <NotionIntegrationCard />
 
         {/* StoryGraph */}
         <Card className="mb-6">
