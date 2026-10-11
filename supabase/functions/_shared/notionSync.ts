@@ -355,7 +355,16 @@ export async function pushTbr(userId: string, key: string, settings: any, tbrId:
     if (link) await trashLink(userId, key, link);
     return;
   }
-  await upsertRow(userId, key, settings, "tbr", tbrId, link, tbrProps(t), t.cover_url);
+  try {
+    await upsertRow(userId, key, settings, "tbr", tbrId, link, tbrProps(t), t.cover_url);
+  } catch (e) {
+    // The row no longer fits the TBR list: it was likely moved to Currently Reading in Notion.
+    if (link && /is not a property that exists/.test((e as Error).message)) {
+      await pullTbr(userId, key, settings, link);
+      return;
+    }
+    throw e;
+  }
 }
 
 export async function pushGoal(userId: string, key: string, settings: any) {
