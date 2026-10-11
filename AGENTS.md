@@ -1,0 +1,2 @@
+- Notion sync: Supabase `books` is the source of truth; Notion is a mirror linked only via `notion_book_links`, and all Notion calls go through server functions using per-user App User Connector keys — keeps one reading system and keeps credentials out of the browser.
+- Notion progress edits must go through `apply_progress_from_notion` — it reproduces the app's progress/completion logic so stats and history stay consistent.
