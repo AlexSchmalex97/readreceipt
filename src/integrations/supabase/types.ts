@@ -250,6 +250,7 @@ export type Database = {
           last_reconciled_at: string | null
           last_synced_at: string | null
           parent_page_id: string | null
+          progress_style: string
           tbr_data_source_id: string | null
           tbr_database_id: string | null
           updated_at: string
@@ -268,6 +269,7 @@ export type Database = {
           last_reconciled_at?: string | null
           last_synced_at?: string | null
           parent_page_id?: string | null
+          progress_style?: string
           tbr_data_source_id?: string | null
           tbr_database_id?: string | null
           updated_at?: string
@@ -286,6 +288,7 @@ export type Database = {
           last_reconciled_at?: string | null
           last_synced_at?: string | null
           parent_page_id?: string | null
+          progress_style?: string
           tbr_data_source_id?: string | null
           tbr_database_id?: string | null
           updated_at?: string
