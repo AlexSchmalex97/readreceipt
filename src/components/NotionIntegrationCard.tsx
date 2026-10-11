@@ -99,16 +99,8 @@ export function NotionIntegrationCard() {
     toast({ title: "Notion dashboard created", description: "Your reading dashboard is now in Notion." });
   });
 
-  return (
-    <Card className="mb-6">
-      <CardHeader>
-        <CardTitle>Notion</CardTitle>
-        <CardDescription>
-          Show your current books, progress, and yearly goal in Notion. Edit Current Page or Progress % there and ReadReceipt updates too.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {!status?.connected || status.reconnectRequired ? (
+  const body = (
+        !status?.connected || status.reconnectRequired ? (
           <>
             {status?.reconnectRequired && <p className="text-sm text-muted-foreground">Your Notion access needs to be renewed.</p>}
             <Button onClick={connect} disabled={!!busy}>
