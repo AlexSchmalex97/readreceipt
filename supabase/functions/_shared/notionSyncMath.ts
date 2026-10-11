@@ -81,3 +81,23 @@ export function shelfFor(b: { status: string | null; current_page: number | null
   if ((b.current_page ?? 0) < (b.total_pages ?? 0)) return "reading";
   return "completed";
 }
+
+export const PROGRESS_STYLES = ["classic", "segmented", "circular"] as const;
+export type ProgressStyle = typeof PROGRESS_STYLES[number];
+
+/**
+ * Notion formula for the read-only "Progress Bar" column. Display only: it reads
+ * Progress % and never changes reading progress.
+ */
+export function progressFormula(style: string | null | undefined, percentProp: string): string {
+  const pct = `min(max(prop("${percentProp}"), 0), 100)`;
+  const label = `format(round(${pct})) + "%"`;
+  if (style === "segmented") {
+    // 5 sections of 20%: ▰▰▰▱▱
+    return `repeat("▰", floor(${pct} / 20)) + repeat("▱", 5 - floor(${pct} / 20)) + "  " + ${label}`;
+  }
+  if (style === "circular") {
+    return `(if(${pct} >= 100, "●", if(${pct} >= 75, "◕", if(${pct} >= 50, "◑", if(${pct} >= 25, "◔", "○"))))) + " " + ${label}`;
+  }
+  return `repeat("█", round(${pct} / 10)) + repeat("░", 10 - round(${pct} / 10)) + " " + ${label}`;
+}

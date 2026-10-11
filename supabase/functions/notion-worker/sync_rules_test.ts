@@ -56,3 +56,11 @@ Deno.test("DNF and Top Five books are on no list", () => {
   if (shelfFor({ status: "dnf", current_page: 5, total_pages: 100 }) !== null) throw new Error();
   if (shelfFor({ status: "top_five", current_page: 100, total_pages: 100 }) !== null) throw new Error();
 });
+
+import { progressFormula } from "../_shared/notionSyncMath.ts";
+Deno.test("each progress style gives its own display formula, defaulting to classic", () => {
+  const c = progressFormula("classic", "Progress %"), s = progressFormula("segmented", "Progress %"),
+    r = progressFormula("circular", "Progress %");
+  if (!c.includes("█") || !s.includes("▰") || !r.includes("◑")) throw new Error();
+  if (progressFormula(null, "Progress %") !== c || progressFormula("bogus", "Progress %") !== c) throw new Error();
+});

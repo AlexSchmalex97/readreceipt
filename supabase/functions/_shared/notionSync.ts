@@ -81,8 +81,8 @@ export async function loadContext(userId: string) {
   return { db, key, settings };
 }
 
-const BAR_FORMULA =
-  `repeat("█", round(min(max(prop("${P.percent}"), 0), 100) / 10)) + repeat("░", 10 - round(min(max(prop("${P.percent}"), 0), 100) / 10)) + " " + format(prop("${P.percent}")) + "%"`;
+export { progressFormula } from "./notionSyncMath.ts";
+import { progressFormula } from "./notionSyncMath.ts";
 
 const SCHEMAS: Record<Kind, { title: string; emoji: string; properties: Record<string, unknown> }> = {
   reading: {
@@ -154,7 +154,7 @@ async function dbAlive(userId: string, key: string, id: string | null) {
 }
 
 /** Make sure all three lists exist under the dashboard page; create only what's missing. */
-async function ensureDatabases(userId: string, key: string, settings: any) {
+export async function ensureDatabases(userId: string, key: string, settings: any) {
   const db = adminClient();
   const patch: Record<string, string> = {};
   for (const kind of ["reading", "completed", "tbr"] as Kind[]) {
@@ -171,7 +171,7 @@ async function ensureDatabases(userId: string, key: string, settings: any) {
   }
   if (settings.books_data_source_id) {
     await notion(userId, key, "PATCH", `/v1/data_sources/${settings.books_data_source_id}`, {
-      properties: { "Progress Bar": { formula: { expression: BAR_FORMULA } }, [P.quick]: quickProp },
+      properties: { "Progress Bar": { formula: { expression: progressFormula(settings.progress_style, P.percent) } }, [P.quick]: quickProp },
     }).catch((e) => console.warn("progress bar column", (e as Error).message));
   }
   if (settings.completed_data_source_id) {
