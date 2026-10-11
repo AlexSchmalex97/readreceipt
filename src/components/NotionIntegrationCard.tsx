@@ -19,7 +19,14 @@ type Status = {
   tbrUrl?: string | null;
   pageUrl?: string | null;
   fullySynced?: boolean;
+  progressStyle?: "classic" | "segmented" | "circular";
 };
+
+const STYLES = [
+  { id: "classic", name: "Classic Bar", preview: "██████░░░░ 60%" },
+  { id: "segmented", name: "Segmented Bar", preview: "▰▰▰▱▱  60%" },
+  { id: "circular", name: "Circular", preview: "◑ 60%" },
+] as const;
 
 type SyncResult = { done?: boolean; remaining?: number };
 
@@ -171,6 +178,35 @@ export function NotionIntegrationCard({ embedded = false }: { embedded?: boolean
               {status.linkedBooks} book{status.linkedBooks === 1 ? "" : "s"} in Notion (Currently Reading, Completed, TBR)
               {status.lastSyncedAt ? ` · last synced ${fmt(status.lastSyncedAt)}` : " · first sync hasn't finished yet"}
             </p>
+            <details className="rounded-md border p-3">
+              <summary className="cursor-pointer text-sm font-medium">Customize Dashboard</summary>
+              <div className="mt-3 space-y-3">
+                <p className="text-sm text-muted-foreground">Choose how the Progress Bar column looks in your Currently Reading list. This only changes the look, never your progress.</p>
+                <div className="grid gap-2 sm:grid-cols-3">
+                  {STYLES.map((st) => {
+                    const active = (status.progressStyle ?? "classic") === st.id;
+                    return (
+                      <button key={st.id} type="button" disabled={!!busy}
+                        onClick={() => run("style", async () => { await call({ action: "set_style", style: st.id }); toast({ title: `${st.name} applied in Notion` }); })}
+                        className={`rounded-md border p-3 text-left transition ${active ? "border-primary ring-2 ring-primary/40" : "hover:border-primary/60"}`}>
+                        <p className="text-sm font-medium">{st.name}{active ? " ✓" : ""}</p>
+                        <p className="font-mono text-sm text-muted-foreground">{st.preview}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+                {busy === "style" && <p className="text-sm text-muted-foreground flex items-center"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Updating Notion…</p>}
+                <div className="text-sm text-muted-foreground space-y-1">
+                  <p><strong>Want Notion's own smooth bar or ring?</strong> Notion doesn't let apps set this, so it's a one-time step in Notion:</p>
+                  <ol className="list-decimal pl-5 space-y-1">
+                    <li>Open your Currently Reading list and click the <strong>Progress %</strong> column header.</li>
+                    <li>Choose <strong>Edit property</strong> → <strong>Show as</strong> → <strong>Bar</strong> or <strong>Ring</strong>.</li>
+                    <li>Set <strong>Divide by</strong> to <strong>100</strong> and pick a color.</li>
+                  </ol>
+                  <p>Progress % stays editable either way. In Gallery view, open <strong>Properties</strong> and turn on Progress Bar or Progress % to show it on each card.</p>
+                </div>
+              </div>
+            </details>
             {progress && <p className="text-sm text-muted-foreground flex items-center"><Loader2 className="mr-2 h-4 w-4 animate-spin" />{progress}</p>}
             {!progress && status.fullySynced === false && <p className="text-sm text-muted-foreground">Some books haven't been added yet. Click Sync now to finish.</p>}
             {status.lastError && <p className="text-sm text-destructive">Last problem: {status.lastError}</p>}
