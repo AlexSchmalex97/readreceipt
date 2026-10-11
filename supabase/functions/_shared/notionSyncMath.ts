@@ -69,3 +69,15 @@ export function countCompletedThisYear(
   }).length;
   return yearEntries.length + extra;
 }
+
+/**
+ * Which Notion list a ReadReceipt book belongs on. Mirrors the home page:
+ * Currently Reading = current page < total pages (not DNF / Top Five);
+ * Completed = reached the last page or marked completed (not DNF / Top Five).
+ */
+export function shelfFor(b: { status: string | null; current_page: number | null; total_pages: number | null }):
+  "reading" | "completed" | null {
+  if (b.status === "dnf" || b.status === "top_five") return null;
+  if ((b.current_page ?? 0) < (b.total_pages ?? 0)) return "reading";
+  return "completed";
+}

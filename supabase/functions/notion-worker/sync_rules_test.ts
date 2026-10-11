@@ -44,3 +44,15 @@ Deno.test("goal count dedupes books that have a reading entry", () => {
   );
   assertEquals(n, 2);
 });
+
+import { shelfFor } from "../_shared/notionSyncMath.ts";
+Deno.test("book mid-way is Currently Reading", () => {
+  if (shelfFor({ status: "in_progress", current_page: 10, total_pages: 100 }) !== "reading") throw new Error();
+});
+Deno.test("book marked in_progress but at last page is Completed, not Currently Reading", () => {
+  if (shelfFor({ status: "in_progress", current_page: 100, total_pages: 100 }) !== "completed") throw new Error();
+});
+Deno.test("DNF and Top Five books are on no list", () => {
+  if (shelfFor({ status: "dnf", current_page: 5, total_pages: 100 }) !== null) throw new Error();
+  if (shelfFor({ status: "top_five", current_page: 100, total_pages: 100 }) !== null) throw new Error();
+});
