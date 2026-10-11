@@ -22,7 +22,13 @@ export const P = {
   id: "RR Book ID",
   finished: "Finished",
   notes: "Notes",
+  rating: "Rating",
+  quick: "Quick Update",
 };
+
+const QUICK: Record<string, number> = { "+1 page": 1, "+5 pages": 5, "+10 pages": 10, "-1 page": -1 };
+const quickProp = { select: { options: Object.keys(QUICK).map((name) => ({ name, color: name.startsWith("-") ? "red" : "green" })) } };
+const stars = (n: number | null) => (n && n > 0 ? "★".repeat(Math.min(5, Math.round(n))) : null);
 
 type Kind = "reading" | "completed" | "tbr";
 
@@ -165,8 +171,13 @@ async function ensureDatabases(userId: string, key: string, settings: any) {
   }
   if (settings.books_data_source_id) {
     await notion(userId, key, "PATCH", `/v1/data_sources/${settings.books_data_source_id}`, {
-      properties: { "Progress Bar": { formula: { expression: BAR_FORMULA } } },
+      properties: { "Progress Bar": { formula: { expression: BAR_FORMULA } }, [P.quick]: quickProp },
     }).catch((e) => console.warn("progress bar column", (e as Error).message));
+  }
+  if (settings.completed_data_source_id) {
+    await notion(userId, key, "PATCH", `/v1/data_sources/${settings.completed_data_source_id}`, {
+      properties: { [P.rating]: { rich_text: {} } },
+    }).catch((e) => console.warn("rating column", (e as Error).message));
   }
 }
 
@@ -233,6 +244,7 @@ function readingProps(b: any) {
       [P.percent]: { number: pct },
       [P.total]: { number: b.total_pages ?? 0 },
       [P.status]: { select: { name: "Reading" } },
+      [P.quick]: { select: null },
       [P.synced]: { date: { start: new Date().toISOString() } },
       [P.id]: text(b.id),
       [P.cover]: coverFile(b.cover_url),
@@ -240,8 +252,9 @@ function readingProps(b: any) {
   };
 }
 
-function completedProps(b: any) {
+function completedProps(b: any, rating: number | null) {
   return {
+    [P.rating]: text(stars(rating)),
     [P.title]: { title: [{ text: { content: b.title ?? "Untitled" } }] },
     [P.author]: text(b.author),
     [P.total]: { number: b.total_pages ?? 0 },
@@ -315,7 +328,9 @@ export async function pushBook(userId: string, key: string, settings: any, bookI
       last_pushed_percent: pct,
     });
   } else {
-    await upsertRow(userId, key, settings, kind, bookId, current, completedProps(book), book.cover_url);
+    const { data: rev } = await db.from("reviews").select("rating").eq("user_id", userId).eq("book_id", bookId)
+      .order("created_at", { ascending: false }).limit(1).maybeSingle();
+    await upsertRow(userId, key, settings, kind, bookId, current, completedProps(book, rev?.rating ?? null), book.cover_url);
   }
 }
 
@@ -374,7 +389,11 @@ export async function pullPage(userId: string, key: string, settings: any, link:
     .eq("id", link.book_id).maybeSingle();
   if (!book || book.user_id !== userId) return false;
 
-  const decision = resolveNotionEdit({
+  const quick = page.properties?.[P.quick]?.select?.name as string | undefined;
+  const delta = quick ? QUICK[quick] : undefined;
+  let decision: { kind: "none" } | { kind: "invalid" } | { kind: "apply"; page: number } = delta !== undefined
+    ? { kind: "apply", page: Math.max(0, Math.min((book.current_page ?? 0) + delta, book.total_pages ?? 0)) }
+    : resolveNotionEdit({
     notionPage: num(page.properties?.[P.page]),
     notionPercent: num(page.properties?.[P.percent]),
     lastPushedPage: link.last_pushed_page,
@@ -382,10 +401,14 @@ export async function pullPage(userId: string, key: string, settings: any, link:
     totalPages: book.total_pages ?? 0,
   });
   if (decision.kind === "none") return false;
+  if (delta !== undefined && decision.kind === "apply" && decision.page === book.current_page) {
+    await pushBook(userId, key, settings, link.book_id); // clears the Quick Update choice
+    return false;
+  }
 
   const notionEditedAt = new Date(page.last_edited_time).getTime();
   const rrUpdatedAt = book.updated_at ? new Date(book.updated_at).getTime() : 0;
-  if (decision.kind === "invalid" || notionEditedAt < rrUpdatedAt) {
+  if (decision.kind === "invalid" || (delta === undefined && notionEditedAt < rrUpdatedAt)) {
     await pushBook(userId, key, settings, link.book_id);
     return false;
   }
