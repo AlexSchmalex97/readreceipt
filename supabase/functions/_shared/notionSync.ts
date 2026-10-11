@@ -338,10 +338,10 @@ export async function processQueue(limit = 50) {
   }
 }
 
-/** Reconcile users not reconciled in the last 15 minutes. */
+/** Hourly backstop: reconcile users not reconciled in the last hour. */
 export async function reconcileStale() {
   const db = adminClient();
-  const cutoff = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+  const cutoff = new Date(Date.now() - 55 * 60 * 1000).toISOString();
   const { data: users } = await db.from("notion_sync_settings").select("user_id")
     .eq("enabled", true).or(`last_reconciled_at.is.null,last_reconciled_at.lt.${cutoff}`).limit(10);
   for (const u of users ?? []) {
